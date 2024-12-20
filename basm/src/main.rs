@@ -78,8 +78,10 @@ fn main() -> io::Result<()> {
                     println!("Raw line: {}", line.green());
                 }
                 for token in tokens {
-                    if token.get_raw().to_lowercase() == "hlt" {
-                        hlt_seen = true;
+                    if let Token::Ident(_) = token {
+                        if token.get_raw().to_lowercase() == "hlt" {
+                            hlt_seen = true;
+                        }
                     }
                     if CONFIG.debug {
                         println!(
