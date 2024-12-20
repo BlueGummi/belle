@@ -399,7 +399,6 @@ impl CPU {
             6 => println!("{}", self.float_reg[0]),
             7 => println!("{}", self.float_reg[1]),
             8 => {
-                cls();
                 let starting_point = self.int_reg[0];
                 let end_point = self.int_reg[1];
                 let memory = &self.memory;
@@ -440,7 +439,7 @@ impl CPU {
                         }
                     }
                 }
-                println!("{toprint}");
+                print!("{toprint}");
             }
             9 => {
                 use crossterm::terminal;
@@ -464,7 +463,7 @@ impl CPU {
             21 => self.oflag = true,
             22 => self.oflag = false,
             23 => self.oflag = !self.oflag,
-
+            30 => cls(),
             31 => self.rflag = true,
             32 => self.rflag = false,
             33 => self.rflag = !self.rflag,
