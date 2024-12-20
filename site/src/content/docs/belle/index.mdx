@@ -121,7 +121,7 @@ Typically, a stack underflow can be more easily avoided and solved than an overf
 
 ### 4. Illegal instructions
 
-This a very rare error that likely will not ever be reached unless binary is being manually handwritten. As the ISA is very conservative and efficient with its bits (16 per instruction), it is very unlikely that an illegal instruction error will be encountered unless the binary is being manually handwritten.
+This a very rare error that likely will not ever be reached unless binary is being manually handwritten. As the ISA is very conservative and efficient with its bits (16 per instruction), it is very unlikely that an illegal instruction error will be encountered.
 
 Illegal instructions can happen in one edge case when the source for an instruction is of an invalid type (i.e. the determinant bits are in a combination where the value of the source cannot be determined for it is not a valid combination, thus rendering the instruction illegal). 
 
