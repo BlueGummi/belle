@@ -274,8 +274,9 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             subroutine_map.insert(subroutine_name.trim().to_string(), subroutine_counter);
             subroutine_counter -= 1;
         }
-
-        subroutine_counter += 1;
+        if !line_before_comment.trim().contains('=') {
+            subroutine_counter += 1;
+        }
     }
 
     Ok(())

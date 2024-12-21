@@ -66,7 +66,12 @@ fn main() -> io::Result<()> {
     let mut hlt_seen = false;
     for line in lines {
         let mut lexer = Lexer::new(&line, line_count);
-        if line.contains('=') {
+        let line_before_comment = if line.trim().contains(';') {
+            line.trim().split(';').next().unwrap_or(&line)
+        } else {
+            line.trim()
+        };
+        if line_before_comment.contains('=') {
             lexer.line_number += 1;
             line_count += 1;
             continue;
