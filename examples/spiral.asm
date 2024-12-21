@@ -1,5 +1,6 @@
     ; This program increments the number being printed to stdout, then detects an overflow, before decrementing it again
     ; It is indefinite
+    ; used for benchmarking
 .ssp $10
 .sbp $10
 .start $303

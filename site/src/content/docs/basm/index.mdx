@@ -58,9 +58,9 @@ The BELLE assembler is mostly **case-agnostic**, as when data is parsed, it eith
 All instructions will be formatted **instruction** destination, **source**.
 
 ```asm
-    mov %r0, #4 ; this is valid
-    mOv %R0, #4 ; this is also valid
-    MOV %r0, #4 ; this is valid too
+    mov r0, 4 ; this is valid
+    mOv R0, 4 ; this is also valid
+    MOV r0, 4 ; this is valid too
 ```
 
 Different operands, depending on the type of operand, will have a **different prefixed symbol**.
@@ -70,11 +70,24 @@ Different operands, depending on the type of operand, will have a **different pr
 | `;`    | Comment | A comment in the code. All following data on the line is ignored by the assembler | `; This is a comment` | 
 | `#` or ``   | Literal | A literal value to be used as the source for an operation | `4 ; Literal 4` |
 | 'r'  | Register | A register to be used as the source or destination for an operation | `r3 ; Register 3` | 
-| `$`    | Memory address | A memory address to be used as the source or destination for an operation | `$400 ; Memory address 400` |
+| `$` or `[` `]`   | Memory address | A memory address to be used as the source or destination for an operation | `$400 ; Memory address 400` |
 | `&r`   | Register pointer | A register that contains a memory address that can be accessed by treating the register as a pointer | `&r4 ; Treat the value in register 4 as a memory address and obtain the value at that memory address` | 
 | `&$` or `&` | Memory address pointer | A memory address whose value is treated as a pointer | `&$10 ; Treat the value in memory address 10 as a pointer and obtain the value at the memory address` | 
 | `@`  | Subroutine call | A symbol used to refer to the memory address of a subroutine later in the program | `@foo ; This is replaced with the memory address of the 'foo' subroutine at compile time` | 
 | `.` | CPU directive | A one-time directive given to the CPU when the memory is loaded. Expanded upon later | `.ssp $40 ; Set stack pointer to memory address 40` |
+
+## "Variables"
+
+`basm` allows the user to declare *global*, *constant* values for certain numbers.
+
+```asm
+magic_number = 42
+.start [300]
+    mov r0, #magic_number ; will evaluate to mov r0, 42
+```
+
+These must be prefixed for the assembler to recognize them.
+
 
 As with operands, symbols for registers are also case-agnostic. However, subroutine calls are **not**. Therefore, a subroutine called `banana` is **different** from a subroutine called `BaNaNa`.
 
