@@ -44,18 +44,10 @@ impl<'a> Lexer<'a> {
                         if next.is_digit(10) {
                             self.lex_register(c)?;
                         } else {
-                            return Err(UnknownCharacter(
-                                c.to_string(),
-                                self.line_number,
-                                Some(self.location),
-                            ));
+                            self.lex_identifier(c)?;
                         }
                     } else {
-                        return Err(UnknownCharacter(
-                            c.to_string(),
-                            self.line_number,
-                            Some(self.location),
-                        ));
+                        self.lex_identifier(c)?;
                     }
                 }
                 'a'..='z' | 'A'..='Z' => {
