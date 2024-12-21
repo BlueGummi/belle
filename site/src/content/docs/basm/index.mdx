@@ -95,7 +95,7 @@ As with operands, symbols for registers are also case-agnostic. However, subrout
 
 Subroutines are an abstraction at an assembly language level that allows the programmer to define certain locations in the code. Subroutines must be suffixed with a `:`, and they can contain any lower and uppercase levels, as well as underscores, and they can begin with underscores and have as many as the programmer desires.
 
-When a subroutine is called with either the `jz @subroutine` or `jge @subroutine` instructions, the subroutine will be replaced with the actual memory address of the subroutine in the code.
+When a subroutine is called with either the `jz @subroutine` or `jmp @subroutine` instructions, the subroutine will be replaced with the actual memory address of the subroutine in the code.
 
 When a subroutine is jumped to, the memory address for the current location is pushed onto the call stack, and when a `ret` instruction is received to return from a subroutine, the value on the top of the stack is popped off and into the program counter.
 
