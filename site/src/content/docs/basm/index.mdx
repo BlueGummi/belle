@@ -69,7 +69,7 @@ Different operands, depending on the type of operand, will have a **different pr
 | :----- | :------ | :------ | :------|
 | `;`    | Comment | A comment in the code. All following data on the line is ignored by the assembler | `; This is a comment` | 
 | `#` or ``   | Literal | A literal value to be used as the source for an operation | `4 ; Literal 4` |
-| 'r'  | Register | A register to be used as the source or destination for an operation | `r3 ; Register 3` | 
+| `r`  | Register | A register to be used as the source or destination for an operation | `r3 ; Register 3` | 
 | `$` or `[` `]`   | Memory address | A memory address to be used as the source or destination for an operation | `$400 ; Memory address 400` |
 | `&r`   | Register pointer | A register that contains a memory address that can be accessed by treating the register as a pointer | `&r4 ; Treat the value in register 4 as a memory address and obtain the value at that memory address` | 
 | `&$` or `&` | Memory address pointer | A memory address whose value is treated as a pointer | `&$10 ; Treat the value in memory address 10 as a pointer and obtain the value at the memory address` | 
