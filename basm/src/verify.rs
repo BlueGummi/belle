@@ -203,11 +203,11 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result
         ));
     }
     match arg2 {
-        /*Some(tok) if tok.is_literal() => {
-            if tok.get_num() > 127 || tok.get_num() < -127 {
+        Some(tok) if tok.is_literal() => {
+            if tok.get_num() & 127 > 127 {
                 return Err(LITFAIL.to_string());
             }
-        }*/
+        }
         Some(tok) if tok.is_memory_address_pointer() => {
             if tok.get_num() > 127 {
                 return Err(MMAFAIL.to_string());

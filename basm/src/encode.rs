@@ -6,6 +6,9 @@ use std::sync::Mutex;
 pub static SUBROUTINE_MAP: Lazy<Mutex<HashMap<String, u32>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
+pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, i32>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
+
 pub static MEMORY_COUNTER: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
 static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(0));
 
@@ -273,6 +276,41 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
         }
 
         subroutine_counter += 1;
+    }
+
+    Ok(())
+}
+pub fn process_variables(lines: &[String]) -> Result<(), String> {
+    let mut variable_map = VARIABLE_MAP
+        .lock()
+        .map_err(|_| "Failed to lock VARIABLE_MAP")?;
+
+    for line in lines {
+        let trimmed_line = line.trim();
+
+        if trimmed_line.is_empty() || trimmed_line.starts_with(';') {
+            continue;
+        }
+
+        let line_before_comment = if trimmed_line.contains(';') {
+            trimmed_line.split(';').next().unwrap_or(trimmed_line)
+        } else {
+            trimmed_line
+        };
+
+        if let Some(eq_index) = line_before_comment.find('=') {
+            let variable_name = line_before_comment[..eq_index].trim();
+            let variable_value = line_before_comment[eq_index + 1..].trim();
+
+            if let Ok(value) = variable_value.parse::<i32>() {
+                variable_map.insert(variable_name.to_string(), value);
+            } else {
+                return Err(format!(
+                    "Invalid variable assignment: {}",
+                    line_before_comment
+                ));
+            }
+        }
     }
 
     Ok(())

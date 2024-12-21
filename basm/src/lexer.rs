@@ -2,10 +2,10 @@ use crate::Error::*;
 use crate::*;
 
 pub struct Lexer<'a> {
-    location: u32,
-    line_number: u32,
-    tokens: Vec<Token>,
-    chars: std::iter::Peekable<std::str::Chars<'a>>,
+    pub location: u32,
+    pub line_number: u32,
+    pub tokens: Vec<Token>,
+    pub chars: std::iter::Peekable<std::str::Chars<'a>>,
 }
 
 impl<'a> Lexer<'a> {
@@ -38,13 +38,25 @@ impl<'a> Lexer<'a> {
                     self.location += 1;
                     self.lex_pointer(c)?;
                 }
-                '%' => {
-                    self.location += 1;
-                    self.lex_register(c)?;
-                }
                 '@' => self.lex_subroutine_call(),
                 'r' | 'R' => {
-                    self.lex_register(c)?;
+                    if let Some(next) = self.chars.peek() {
+                        if next.is_digit(10) {
+                            self.lex_register(c)?;
+                        } else {
+                            return Err(UnknownCharacter(
+                                c.to_string(),
+                                self.line_number,
+                                Some(self.location),
+                            ));
+                        }
+                    } else {
+                        return Err(UnknownCharacter(
+                            c.to_string(),
+                            self.line_number,
+                            Some(self.location),
+                        ));
+                    }
                 }
                 'a'..='z' | 'A'..='Z' => {
                     self.lex_identifier(c)?;
@@ -68,6 +80,9 @@ impl<'a> Lexer<'a> {
                 '[' => {
                     self.location += 1;
                     self.lex_memory_address(c)?;
+                }
+                '=' => {
+                    self.tokens.push(Token::EqualSign);
                 }
                 _ => {
                     return Err(UnknownCharacter(
@@ -196,30 +211,23 @@ impl<'a> Lexer<'a> {
     }
 
     fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
-        if !pointer.contains('$') {
-            if let Ok(mem) = pointer.trim()[1..].parse::<i16>() {
+        let pointer_trimmed = pointer.trim();
+        if !pointer_trimmed.contains('$') {
+            if let Ok(mem) = pointer_trimmed[1..].parse::<i16>() {
                 self.tokens.push(Token::MemPointer(mem));
             } else {
-                return Err(InvalidSyntax(
-                    "invalid memory number",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                return self.handle_invalid_character(pointer_trimmed);
             }
             return Ok(());
         }
-        if pointer.len() > 2 {
-            if let Ok(mem) = pointer.trim()[2..].parse::<i16>() {
+        if pointer_trimmed.len() > 2 {
+            if let Ok(mem) = pointer_trimmed[2..].parse::<i16>() {
                 self.tokens.push(Token::MemPointer(mem));
             } else {
-                return Err(InvalidSyntax(
-                    "invalid memory number",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                return self.handle_invalid_character(pointer_trimmed);
             }
         } else {
-            return Err(InvalidSyntax(
+            return Err(Error::InvalidSyntax(
                 "memory must have a number",
                 self.line_number,
                 Some(self.location),
@@ -318,32 +326,24 @@ impl<'a> Lexer<'a> {
         }
 
         while let Some(&next) = self.chars.peek() {
-            if next.is_ascii_digit() {
+            if next.is_ascii_digit() || next.is_alphanumeric() {
                 number.push(self.chars.next().unwrap());
             } else {
                 break;
             }
         }
-
         let num_value = if !number.contains('#') {
-            if let Ok(value) = number[0..].parse::<i16>() {
+            if let Ok(value) = number.parse::<i16>() {
                 value
             } else {
-                return Err(InvalidSyntax(
-                    "value must be a numeric literal",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                return self.handle_invalid_character(&number);
             }
         } else if let Ok(value) = number[1..].parse::<i16>() {
             value
         } else {
-            return Err(InvalidSyntax(
-                "value after # must be a numeric literal",
-                self.line_number,
-                Some(self.location),
-            ));
+            return self.handle_invalid_character(&number[1..]);
         };
+
         let stored_value = if num_value < 0 {
             let positive_value = num_value.unsigned_abs() as u8;
             (positive_value & 0x7F) | 0x80
@@ -353,13 +353,37 @@ impl<'a> Lexer<'a> {
         self.tokens.push(Token::Literal(i16::from(stored_value)));
         Ok(())
     }
+    fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
+        let variable = if input.starts_with('$') || input.starts_with('#') {
+            &input[1..]
+        } else if input.starts_with('[') {
+            &input[1..input.len() - 1]
+        } else {
+            &input
+        };
+        let map = VARIABLE_MAP.lock().unwrap();
+        if let Some(&replacement) = map.get(variable.trim()) {
+            if input.starts_with('$') || input.starts_with('[') {
+                self.tokens.push(Token::MemAddr(replacement as i16));
+            } else if input.starts_with('#') {
+                self.tokens.push(Token::Literal(replacement as i16));
+            }
+            Ok(())
+        } else {
+            Err(Error::InvalidSyntax(
+                "Invalid character or value",
+                self.line_number,
+                Some(self.location),
+            ))
+        }
+    }
 
     fn lex_memory_address(&mut self, c: char) -> Result<(), Error<'a>> {
         let mut addr = c.to_string();
 
         if addr == "[" {
             while let Some(&next) = self.chars.peek() {
-                if next.is_ascii_digit() {
+                if next.is_alphanumeric() {
                     addr.push(self.chars.next().unwrap());
                 } else if next == ']' {
                     addr.push(self.chars.next().unwrap());
@@ -374,18 +398,14 @@ impl<'a> Lexer<'a> {
             }
 
             if addr.len() < 3 || addr[1..addr.len() - 1].parse::<i16>().is_err() {
-                return Err(InvalidSyntax(
-                    "value inside brackets must be numeric",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                return self.handle_invalid_character(&addr);
             }
 
             let addr_val = addr[1..addr.len() - 1].parse::<i16>().unwrap();
             self.tokens.push(Token::MemAddr(addr_val));
         } else {
             while let Some(&next) = self.chars.peek() {
-                if next.is_ascii_digit() {
+                if next.is_alphanumeric() {
                     addr.push(self.chars.next().unwrap());
                 } else {
                     break;
@@ -393,11 +413,7 @@ impl<'a> Lexer<'a> {
             }
 
             if addr[1..].parse::<i16>().is_err() {
-                return Err(InvalidSyntax(
-                    "value after $ must be numeric",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                return self.handle_invalid_character(&addr);
             }
 
             let addr_val = addr[1..].parse::<i16>().unwrap();
@@ -424,8 +440,14 @@ impl<'a> Lexer<'a> {
 pub fn print_subroutine_map() {
     let map = SUBROUTINE_MAP.lock().unwrap();
     for (name, counter) in map.iter() {
-        if CONFIG.verbose | CONFIG.debug {
+        if CONFIG.verbose || CONFIG.debug {
             println!("Subroutine: {name}, Counter: {counter}");
+        }
+    }
+    let vmap = VARIABLE_MAP.lock().unwrap();
+    for (name, counter) in vmap.iter() {
+        if CONFIG.verbose || CONFIG.debug {
+            println!("Variable: {name}, Thing: {counter}");
         }
     }
 }

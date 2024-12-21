@@ -17,11 +17,33 @@ pub enum Token {
     Label(String),
     RegPointer(i16),
     MemPointer(i16),
+    EqualSign,
+}
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Token::Ident(s1), Token::Ident(s2)) => s1 == s2,
+            (Token::Register(r1), Token::Register(r2)) => r1 == r2,
+            (Token::Comma, Token::Comma) => true,
+            (Token::Literal(l1), Token::Literal(l2)) => l1 == l2,
+            (Token::NewLine, Token::NewLine) => true,
+            (Token::Eol, Token::Eol) => true,
+            (Token::SRCall(s1), Token::SRCall(s2)) => s1 == s2,
+            (Token::SR(s1), Token::SR(s2)) => s1 == s2,
+            (Token::MemAddr(m1), Token::MemAddr(m2)) => m1 == m2,
+            (Token::Label(l1), Token::Label(l2)) => l1 == l2,
+            (Token::RegPointer(rp1), Token::RegPointer(rp2)) => rp1 == rp2,
+            (Token::MemPointer(mp1), Token::MemPointer(mp2)) => mp1 == mp2,
+            (Token::EqualSign, Token::EqualSign) => true,
+            _ => false,
+        }
+    }
 }
 impl Token {
     #[must_use]
     pub fn get_raw(&self) -> String {
         match self {
+            Token::EqualSign => "equals".to_string(),
             Token::Ident(s) => s.to_string(),
             Token::Register(n) => n.to_string(),
             Token::Comma => "comma".to_string(),
@@ -54,6 +76,7 @@ impl fmt::Display for Token {
                 Token::Ident(s) => {
                     write!(f, "{} (\"{}\") Length: [{}]", "Ident".green(), s, s.len())
                 }
+                Token::EqualSign => write!(f, "{}", "Equal Sign".cyan()),
                 Token::Register(n) => write!(f, "{} ({})", "Register".red(), n),
                 Token::Comma => write!(f, "{}", "Comma".blue()),
                 Token::Literal(n) => write!(f, "{} ({})", "Number Literal".yellow(), n),

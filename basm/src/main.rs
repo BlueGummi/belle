@@ -51,12 +51,26 @@ fn main() -> io::Result<()> {
     let mut encoded_instructions = Vec::new();
     let mut line_count: u32 = 1;
     let mut write_to_file: bool = true;
-    let _ = process_start(&lines);
-    let _ = load_subroutines(&lines);
-
+    if let Err(e) = process_start(&lines) {
+        eprintln!("{e}");
+        write_to_file = false;
+    }
+    if let Err(e) = load_subroutines(&lines) {
+        eprintln!("{e}");
+        write_to_file = false;
+    }
+    if let Err(e) = process_variables(&lines) {
+        eprintln!("{e}");
+        write_to_file = false;
+    }
     let mut hlt_seen = false;
     for line in lines {
         let mut lexer = Lexer::new(&line, line_count);
+        if line.contains('=') {
+            lexer.line_number += 1;
+            line_count += 1;
+            continue;
+        }
         match lexer.lex() {
             Ok(tokens) => {
                 if tokens.is_empty() {
@@ -90,6 +104,9 @@ fn main() -> io::Result<()> {
                             token.to_string().blue().bold()
                         );
                     }
+                }
+                if tokens.contains(&Token::EqualSign) {
+                    continue;
                 }
                 if CONFIG.debug {
                     println!();
