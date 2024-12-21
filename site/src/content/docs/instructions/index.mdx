@@ -60,7 +60,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | ADD  | 2         | ADD two values | Adding values in a Fibonacci sequence | `add %r0, #3 ; add 3 to r0` |
+    | ADD  | 2         | ADD two values | Adding values in a Fibonacci sequence | `add r0,#3 ; add 3 to r0` |
 
     
     #### Binary encoding
@@ -106,15 +106,15 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     Compatible DEST types: Register pointer, memory address
 
-    Flags affected: Affected by overflow flag. Cannot change any flags.
+    Flags affected: Affected by overflow flag and zero flag. Cannot change any flags.
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | JO   | 1         | Jump if overflow flag is true | Leaving a loop when a register overflows | `jo $3 ; jump to address 3 if overflow flag is set` |
+    | JO   | 1         | Jump if overflow flag is true | Leaving a loop when a register overflows | `jo [3] ; jump to address 3 if overflow flag is set` |
 
 | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | JZ   | 1         | Jump if zero flag is true | Jumping somewhere after a `cmp` | `jz $42 ; jump to address 42 if zero flag is set` |
+    | JZ   | 1         | Jump if zero flag is true | Jumping somewhere after a `cmp` | `jz [42] ; jump to address 42 if zero flag is set` |
     
     #### Binary encoding
 
@@ -126,7 +126,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
    #### Binary encoding
 
-        Instruction: `jz $1`
+        Instruction: `jz [1]`
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
@@ -208,12 +208,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | DIV  | 2         | DIVide two values | Floating-point math | `div %r4, #3 ; divide value in r4 by 3` |
+    | DIV  | 2         | DIVide two values | Floating-point math | `div r4, 3 ; divide value in r4 by 3` |
 
     
     #### Binary encoding
 
-        Instruction: `div %r1, &$2`
+        Instruction: `div r1, &$2`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -239,10 +239,10 @@ Please refer to the [encoding](../encoding) document for more information about 
         ```asm
         jmp @somewhere
         somewhere:
-            pop %r4  ; save the return address
-            push %r3 ; do other things with the stack
+            pop r4  ; save the return address
+            push r3 ; do other things with the stack
             ...
-            push %r4 ; push the return address back on
+            push r4 ; push the return address back on
             ret ; the first line should be returned to
         ```
 
@@ -290,12 +290,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | LD  | 2 | Load from address to register  | Loading to registers | `ld %r0, $40 ; load value at address 40 into r0`  |
+    | LD  | 2 | Load from address to register  | Loading to registers | `ld r0, [40] ; load value at address 40 into r0`  |
 
     
     #### Binary encoding
 
-        Instruction: `ld %r5, $42`
+        Instruction: `ld r5, [42]`
 
         | Opcode   | LHS     | RHS       | 
         | :-----   | :------ | :-------- |
@@ -323,12 +323,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | ST | 2 | Store into an address | `<---` | `st $4, %r1 ; store r1 into addr 4` |
+    | ST | 2 | Store into an address | `<---` | `st [4], r1 ; store r1 into addr 4` |
 
     
     #### Binary encoding
 
-        Instruction: `st &r3, %r4`
+        Instruction: `st &r3, r4`
 
         | Opcode   | DTB     | LHS     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -364,7 +364,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | JMP   | 1         | Jump | Recursion | `jmp $31 ; jump to address 31` |
+    | JMP   | 1         | Jump | Recursion | `jmp [31] ; jump to address 31` |
 
     
     #### Binary encoding
@@ -411,12 +411,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | CMP  |  2        | Compare RHS and LHS | Exiting loops | `cmp %r3, #4 ; compare value in r3 to literal 4` |
+    | CMP  |  2        | Compare RHS and LHS | Exiting loops | `cmp r3, 4 ; compare value in r3 to literal 4` |
 
     
     #### Binary encoding
 
-        Instruction: `cmp %r4, #1`
+        Instruction: `cmp r4, 1`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -449,12 +449,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | MUL  |  2        | Multiply two values | Achieving large numbers in registers | `mul %r4, #3 ; multiply r4 by 3` |
+    | MUL  |  2        | Multiply two values | Achieving large numbers in registers | `mul r4, 3 ; multiply r4 by 3` |
 
     
     #### Binary encoding
 
-        Instruction: `mul %r2, #42`
+        Instruction: `mul r2, 42`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -483,12 +483,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | PUSH  | 1         | Push onto the stack | Pushing a return address | `push #4 ; push literal 4 onto stack` |
+    | PUSH  | 1         | Push onto the stack | Pushing a return address | `push 4 ; push literal 4 onto stack` |
 
     
     #### Binary encoding
 
-        Instruction: `push #55`
+        Instruction: `push 55`
 
         | Opcode   | Padding | DTBs     | RHS       | 
         | :-----   | :-----  |:------- | :-------- |
@@ -550,7 +550,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | INT  |  1        | Pseudo-instruction | Printing to stdout | `int #52 ; don't halt on overflow` |
+    | INT  |  1        | Pseudo-instruction | Printing to stdout | `int 52 ; don't halt on overflow` |
 
     
     #### Binary encoding
@@ -581,12 +581,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | MOV  | 2         | Copy a value | Any program ever | `mov %r0, #22 ; mov 22 into r0` |
+    | MOV  | 2         | Copy a value | Any program ever | `mov r0, 22 ; mov 22 into r0` |
 
     
     #### Binary encoding
 
-        Instruction: `mov %r4, &r3`
+        Instruction: `mov r4, &r3`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
