@@ -149,16 +149,14 @@ impl<'a> Lexer<'a> {
                 false
             }
             _ => {
-                return Err(ExpectedArgument(
-                    "expected 'r' or '$' after '&'",
-                    self.line_number,
-                    Some(self.location),
-                ));
+                self.location += 1;
+                pointer.push(self.chars.next().unwrap());
+                false
             }
         };
 
         while let Some(&next) = self.chars.peek() {
-            if next.is_ascii_digit() {
+            if next.is_alphanumeric() {
                 pointer.push(self.chars.next().unwrap());
             } else {
                 break;
@@ -346,7 +344,7 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
     fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
-        let variable = if input.starts_with('$') || input.starts_with('#') {
+        let variable = if input.starts_with('$') || input.starts_with('#') || input.starts_with('&') {
             &input[1..]
         } else if input.starts_with('[') {
             &input[1..input.len() - 1]
@@ -359,6 +357,8 @@ impl<'a> Lexer<'a> {
                 self.tokens.push(Token::MemAddr(replacement as i16));
             } else if input.starts_with('#') {
                 self.tokens.push(Token::Literal(replacement as i16));
+            } else if input.starts_with('&') {
+                self.tokens.push(Token::MemPointer(replacement as i16));
             }
             Ok(())
         } else {

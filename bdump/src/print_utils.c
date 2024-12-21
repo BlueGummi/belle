@@ -20,9 +20,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     switch (ins->type) {
         case 0: // register
             if (colors) {
-                printf("%s%%r%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+                printf("%sr%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
             } else {
-                printf("%%r%d\n", ins->source);
+                printf("r%d\n", ins->source);
             }
             break;
 
@@ -32,9 +32,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
             ins->source &= 0b01111111; // Clear the sign bit
 
             if (colors) {
-                printf("%s#%d%s\n", ANSI_YELLOW, sign ? -ins->source : ins->source, ANSI_RESET);
+                printf("%s%d%s\n", ANSI_YELLOW, sign ? -ins->source : ins->source, ANSI_RESET);
             } else {
-                printf("#%d\n", sign ? -ins->source : ins->source);
+                printf("%d\n", sign ? -ins->source : ins->source);
             }
         } 
         break;
