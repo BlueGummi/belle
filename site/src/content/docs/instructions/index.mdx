@@ -100,7 +100,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     Using a register as the destination can be beneficial, as `r4` and `r5` are unsigned 16 bit integers, being **able to address all memory addresses**. It is also possible to pass `r6` or `r7` - the floating point registers - to this instruction.
 
-    If the overflow flag is **not set**, the jump will **simply be skipped**, and the next instruction will be executed accordingly.
+    If the condition is **not met**, the jump will **simply be skipped**, and the next instruction will be executed accordingly.
 
     > Note: Any jump instruction can overflow the stack if it is full
 
