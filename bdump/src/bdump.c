@@ -79,7 +79,7 @@ Instruction parse_instruction(int instruction) {
         else if (((instruction >> 6) & 1) == 1)
             parsed_ins.type = 3;
     }
-
+    parsed_ins.full_ins = instruction;
     print_binary(instruction, 16);
     return parsed_ins;
 }
