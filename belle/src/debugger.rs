@@ -45,16 +45,15 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                     println!("r | run       - Run program");
                     println!("rs            - Reset emulator");
                     println!("cls           - Clear screen\n");
+
                     println!("Can be used whether or not the CPU has ran:");
                     println!("spc           - Set program counter to a given value");
                     println!("p | pmem      - Print value in memory");
                     println!("pk            - Set a new value for a location in memory");
                     println!("a             - Print all memory");
-                    println!("c | setclk    - Set clock");
                     println!("wb            - Print CPU's starting memory address\n");
 
                     println!("Used to step through the program:");
-                    println!("set           - Set the program counter to the starting value");
                     println!("e | exc       - Execute instruction");
                     println!("w             - View the state of the CPU\n");
 
@@ -92,10 +91,6 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                             println!("'set program counter' takes one argument.");
                             println!("'spc' sets the CPU's program counter to a given number\n");
                         }
-                        "c" | "clkset" => {
-                            println!("'clock set' sets the CPU clock to a given value");
-                            println!("If no value is set, the CPU clock is reset to 1\n");
-                        }
                         "p" | "pmem" => {
                             println!("'print memory' takes one argument.");
                             println!("'pmem' prints the value at the specified memory address.");
@@ -106,8 +101,8 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                             println!("'e' executes the instruction at the current memory address (program counter)\n");
                         }
                         "i" | "info" => {
-                            println!("'info' takes no arguments.");
-                            println!("'info' prints the current state of the CPU on the current clock cycle.\n");
+                            println!("'info' takes one argument");
+                            println!("'info' prints the current state of the CPU on the specified clock cycle.\n");
                         }
                         "cls" | "clear" => {
                             println!("'clear' takes no arguments and resets the cursor to the top left\nof the terminal\n");
@@ -120,10 +115,6 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                             println!("'all instructions' takes no arguments");
                             println!("'a' prints everything in memory as an instruction if it is a value\n");
                         }
-                        "set" => {
-                            println!("'set' takes no arguments");
-                            println!("'set' sets the program counter to the starting\nexecution address in memory\n");
-                        }
                         "w" => {
                             println!("'w' takes no arguments");
                             println!("'w' prints the state of the CPU as-is\n");
@@ -131,6 +122,7 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                         "pk" => {
                             println!("'pk' takes one argument");
                             println!("'pk' will print the value in memory and ask for a new value");
+                            println!("binary values, prefixed with 0b, are accepted");
                             println!("if an invalid value is entered or nothing is entered, it will not do anything\n");
                         }
                         "im" => {
@@ -142,6 +134,7 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                         }
                         "rs" => {
                             println!("'reset' takes no arguments");
+                            println!("'reset' resets all parts of the emulator");
                         }
                         _ => {
                             println!("Unknown command: '{arg}'");
@@ -159,6 +152,7 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                     );
                 } else if let Err(e) = dbgcpu.run() {
                     eprintln!("{e}");
+                    eprintln!("Consider resetting the CPU with 'rs'\n");
                 }
             }
             "spc" => 'spc: {
@@ -176,14 +170,6 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                     eprintln!("{} requires a numeric argument\n", "p | pmem".red());
                 }
             }
-            "c" | "clkset" => {
-                if !dbgcpu.has_ran {
-                    eprintln!("{}", "CPU has not run.\n".red());
-                    continue;
-                }
-                let n = arg.parse::<u32>().unwrap_or(1);
-                clock = n;
-            }
             "p" | "pmem" => {
                 if let Ok(n) = arg.parse::<usize>() {
                     if let Some(memvalue) = dbgcpu.memory[n] {
@@ -199,7 +185,19 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                     eprintln!("{} requires a numeric argument\n", "p | pmem".red());
                 }
             }
-            "i" | "info" => CPU::display_state(&clock),
+            "i" | "info" => {
+                if !dbgcpu.has_ran {
+                    eprintln!("{}", "CPU has not run.\n".red());
+                    continue;
+                }
+                match arg.parse::<u32>() {
+                    Ok(n) => {
+                        clock = n;
+                        CPU::display_state(&clock);
+                    }
+                    Err(_) => eprintln!("Error parsing second argument.\n"),
+                }
+            }
             "wb" => {
                 if dbgcpu.memory.iter().all(|&x| x.is_none()) {
                     eprintln!(
@@ -262,16 +260,6 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                     }
                 }
             }
-            "set" => 'set: {
-                if dbgcpu.memory.iter().all(|&x| x.is_none()) {
-                    eprintln!(
-                        "{}",
-                        "CPU memory is empty.\nTry to load the program first.\n".red()
-                    );
-                    break 'set;
-                }
-                dbgcpu.pc = dbgcpu.starts_at;
-            }
             "w" => {
                 println!("  Signed Integer Registers : {:?}", dbgcpu.int_reg);
                 println!("  Uint registers           : {:?}", dbgcpu.uint_reg);
@@ -284,6 +272,7 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                 println!("  Remainder flag           : {}", dbgcpu.rflag);
                 println!("  Stack pointer            : {}", dbgcpu.sp);
                 println!("  Base pointer             : {}", dbgcpu.bp);
+                println!("  Instruction pointer      : {}", dbgcpu.ip);
                 println!(
                     "  Disassembled Instruction : {}",
                     dbgcpu.parse_instruction()
@@ -358,6 +347,9 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                 } else {
                     eprintln!("{} requires a numeric argument\n", "im".red());
                 }
+            }
+            "rs" => {
+                dbgcpu = CPU::new();
             }
             _ => unknown_command(&command),
         }

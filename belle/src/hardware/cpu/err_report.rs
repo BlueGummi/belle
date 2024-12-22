@@ -4,6 +4,7 @@ impl CPU {
     pub fn report_invalid_register(&mut self) -> UnrecoverableError {
         self.running = false;
         UnrecoverableError::InvalidRegister(
+            self.ir,
             self.pc,
             Some("The register number is too large.".to_string()),
         )
@@ -18,7 +19,11 @@ impl CPU {
 
     pub fn report_divide_by_zero(&mut self) -> UnrecoverableError {
         self.running = false;
-        UnrecoverableError::DivideByZero(self.pc, Some("Attempted to divide by zero.".to_string()))
+        UnrecoverableError::DivideByZero(
+            self.ir,
+            self.pc,
+            Some("Attempted to divide by zero.".to_string()),
+        )
     }
     pub fn check_overflow(
         &mut self,
@@ -64,6 +69,6 @@ impl CPU {
     pub fn handle_segmentation_fault(&mut self, message: &str) -> UnrecoverableError {
         self.running = false;
         self.err = true;
-        UnrecoverableError::SegmentationFault(self.pc, Some(message.to_string()))
+        UnrecoverableError::SegmentationFault(self.ir, self.pc, Some(message.to_string()))
     }
 }

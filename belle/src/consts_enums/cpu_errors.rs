@@ -4,12 +4,12 @@ use std::fmt;
 
 #[derive(Debug)]
 pub enum UnrecoverableError {
-    SegmentationFault(u16, Option<String>),
-    IllegalInstruction(u16, Option<String>),
-    DivideByZero(u16, Option<String>),
-    InvalidRegister(u16, Option<String>),
-    StackOverflow(u16, Option<String>),
-    StackUnderflow(u16, Option<String>),
+    SegmentationFault(i16, u16, Option<String>),
+    IllegalInstruction(i16, u16, Option<String>),
+    DivideByZero(i16, u16, Option<String>),
+    InvalidRegister(i16, u16, Option<String>),
+    StackOverflow(i16, u16, Option<String>),
+    StackUnderflow(i16, u16, Option<String>),
 }
 
 #[derive(Debug)]
@@ -25,14 +25,20 @@ pub type Death = Result<(), UnrecoverableError>; // what am I supposed to call i
 impl std::error::Error for UnrecoverableError {}
 impl std::error::Error for RecoverableError {}
 impl UnrecoverableError {
-    fn details(&self) -> (&str, u16, &Option<String>) {
+    fn details(&self) -> (i16, &str, u16, &Option<String>) {
         match self {
-            UnrecoverableError::SegmentationFault(loc, msg) => ("Segmentation fault", *loc, msg),
-            UnrecoverableError::IllegalInstruction(loc, msg) => ("Illegal instruction", *loc, msg),
-            UnrecoverableError::DivideByZero(loc, msg) => ("Divide by zero", *loc, msg),
-            UnrecoverableError::InvalidRegister(loc, msg) => ("Invalid register", *loc, msg),
-            UnrecoverableError::StackOverflow(loc, msg) => ("Stack overflow", *loc, msg),
-            UnrecoverableError::StackUnderflow(loc, msg) => ("Stack underflow", *loc, msg),
+            UnrecoverableError::SegmentationFault(ir, loc, msg) => {
+                (*ir, "Segmentation fault", *loc, msg)
+            }
+            UnrecoverableError::IllegalInstruction(ir, loc, msg) => {
+                (*ir, "Illegal instruction", *loc, msg)
+            }
+            UnrecoverableError::DivideByZero(ir, loc, msg) => (*ir, "Divide by zero", *loc, msg),
+            UnrecoverableError::InvalidRegister(ir, loc, msg) => {
+                (*ir, "Invalid register", *loc, msg)
+            }
+            UnrecoverableError::StackOverflow(ir, loc, msg) => (*ir, "Stack overflow", *loc, msg),
+            UnrecoverableError::StackUnderflow(ir, loc, msg) => (*ir, "Stack underflow", *loc, msg),
         }
     }
 }
@@ -49,17 +55,25 @@ impl RecoverableError {
 
 impl fmt::Display for UnrecoverableError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (err_type, location, msg) = self.details();
+        let (ir, err_type, location, msg) = self.details();
         write!(f, "{} ", "UNRECOVERABLE ERROR:".red())?;
         write!(f, "{}", err_type.bold().red())?;
 
         if let Some(s) = msg {
             if CONFIG.debug || CONFIG.verbose {
-                write!(f, ": {}", s.magenta())?;
+                write!(f, "\n{}", s.yellow())?;
             }
         }
         if CONFIG.debug || CONFIG.verbose {
-            writeln!(f, " at memory address {}", location.to_string().green())?;
+            writeln!(f, "\nAt memory address {}", location.to_string().green())?;
+            let mut cpu = CPU::new();
+            cpu.ir = ir;
+            writeln!(
+                f,
+                "{} was {}",
+                "Instruction".blue(),
+                cpu.parse_instruction().to_string().cyan()
+            )?;
         }
         Ok(())
     }

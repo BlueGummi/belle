@@ -38,6 +38,7 @@ impl CPU {
         }
         if self.pc as u64 + 1 > u16::MAX as u64 {
             return Err(UnrecoverableError::IllegalInstruction(
+                self.ir,
                 self.pc,
                 Some("program counter is too large".to_string()),
             ));
@@ -78,6 +79,7 @@ impl CPU {
                 n if *n > 3 => {
                     self.err = true;
                     Err(UnrecoverableError::IllegalInstruction(
+                        self.ir,
                         self.pc,
                         Some("Illegal register".to_string()),
                     ))
@@ -85,6 +87,7 @@ impl CPU {
                 n if *n < 0 => {
                     self.err = true;
                     Err(UnrecoverableError::IllegalInstruction(
+                        self.ir,
                         self.pc,
                         Some("Illegal register".to_string()),
                     ))
@@ -103,6 +106,7 @@ impl CPU {
                 if tmp > MEMORY_SIZE {
                     self.err = true;
                     return Err(UnrecoverableError::IllegalInstruction(
+            self.ir,
                         self.pc,
                         Some("Segmentation fault whilst processing pointer.\nMemory address invalid (too large).".to_string()),
                     ));
@@ -124,6 +128,7 @@ impl CPU {
                         self.err = true;
                         self.running = false;
                         return Err(UnrecoverableError::IllegalInstruction(
+                            self.ir,
                             self.pc,
                             Some("Illegal register pointer".to_string()),
                         ));
@@ -132,6 +137,7 @@ impl CPU {
                         self.err = true;
                         self.running = false;
                         return Err(UnrecoverableError::IllegalInstruction(
+                            self.ir,
                             self.pc,
                             Some("Illegal register pointer".to_string()),
                         ));

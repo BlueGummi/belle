@@ -176,6 +176,7 @@ impl CPU {
                         println!("PC: {}", self.pc);
                     }
                     return Err(UnrecoverableError::SegmentationFault(
+                        self.ir,
                         self.pc,
                         Some("Segmentation fault while finding next instruction".to_string()),
                     ));

@@ -80,6 +80,7 @@ impl CPU {
                 self.err = true;
                 self.running = false;
                 return Err(UnrecoverableError::SegmentationFault(
+                    self.ir,
                     self.pc,
                     Some("segmentation fault while executing pop".to_string()),
                 ));
@@ -97,7 +98,7 @@ impl CPU {
             Ok(v) => {
                 if v == 0.0 || v as u16 == 0 {
                     self.report_divide_by_zero();
-                    return Err(UnrecoverableError::DivideByZero(self.pc, None));
+                    return Err(UnrecoverableError::DivideByZero(self.ir, self.pc, None));
                 }
                 v
             }
@@ -173,7 +174,7 @@ impl CPU {
                 }
             }
         } else {
-            return Err(UnrecoverableError::StackUnderflow(self.pc, None));
+            return Err(UnrecoverableError::StackUnderflow(self.ir, self.pc, None));
         }
         Ok(())
     }
@@ -213,6 +214,7 @@ impl CPU {
             let index = *n as usize;
             if index >= self.memory.len() {
                 return Err(UnrecoverableError::SegmentationFault(
+                    self.ir,
                     self.pc,
                     Some("segmentation fault whilst storing to an address. OOB".to_string()),
                 ));
@@ -225,7 +227,9 @@ impl CPU {
             };
 
             if addr >= self.memory.len() {
-                return Err(UnrecoverableError::IllegalInstruction(self.pc, None));
+                return Err(UnrecoverableError::IllegalInstruction(
+                    self.ir, self.pc, None,
+                ));
             }
             self.memory[addr] = Some(source);
         }
@@ -250,6 +254,7 @@ impl CPU {
         if let MemAddr(n) = arg {
             if { *n } - 1 < 0 {
                 return Err(UnrecoverableError::IllegalInstruction(
+                    self.ir,
                     self.pc,
                     Some("attempted to jump to an invalid address".to_string()),
                 ));
@@ -304,7 +309,7 @@ impl CPU {
                 }
                 n if n > 5 => {
                     self.report_invalid_register();
-                    return Err(UnrecoverableError::InvalidRegister(self.pc, None));
+                    return Err(UnrecoverableError::InvalidRegister(self.ir, self.pc, None));
                 }
                 _ => {
                     self.int_reg[*n as usize] =
@@ -339,6 +344,7 @@ impl CPU {
                 self.running = false;
                 self.err = true;
                 return Err(UnrecoverableError::StackOverflow(
+                    self.ir,
                     self.pc,
                     Some("Overflowed while pushing onto stack".to_string()),
                 ));
@@ -353,6 +359,7 @@ impl CPU {
                 self.running = false;
                 self.err = true;
                 return Err(UnrecoverableError::StackOverflow(
+                    self.ir,
                     self.pc,
                     Some("Overflowed while pushing onto stack".to_string()),
                 ));

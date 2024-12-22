@@ -75,15 +75,16 @@ Different operands, depending on the type of operand, will have a **different pr
 | `&$` or `&` | Memory address pointer | A memory address whose value is treated as a pointer | `&$10 ; Treat the value in memory address 10 as a pointer and obtain the value at the memory address` | 
 | `@`  | Subroutine call | A symbol used to refer to the memory address of a subroutine later in the program | `@foo ; This is replaced with the memory address of the 'foo' subroutine at compile time` | 
 | `.` | CPU directive | A one-time directive given to the CPU when the memory is loaded. Expanded upon later | `.ssp $40 ; Set stack pointer to memory address 40` |
+| `''` | ASCII code | Resolves to a numeric literal at compile-time | `'a'` | 
 
 ## "Variables"
 
 `basm` allows the user to declare *global*, *constant* values for certain numbers.
 
 ```asm
-magic_number = 42
+answer = 42
 .start [300]
-    mov r0, #magic_number ; will evaluate to mov r0, 42
+    mov r0, #answer ; will evaluate to mov r0, 42
 ```
 
 These must be prefixed for the assembler to recognize them.

@@ -8,11 +8,11 @@ tableOfContents:
 
 # Instruction listings
 
-The BELLE-ISA has **16 instructions**, which were mentioned in the above opcode table. Below is a **description**, **definition**, use case, and example of every instruction.
+The BELLE-ISA has **16 instructions**. Below is a **description**, **definition**, use case, and example of every instruction.
 
 Please refer to the [encoding](../encoding) document for more information about the **specifics on how certain arguments are encoded**, particularly the meaning of "*determinant bits*" and the different encodings that each instruction can use. This document **omits** such information for brevity's sake, as it is already quite long.
 
-> Note: The BELLE-ISA uses 16 bit long memory addresses. This is done for simplicity's sake, as using smaller, typically standard 8-bit memory addresses requires more and typically somewhat unnecessary effort on both the emulator and programmer's side.
+> Note: The BELLE-ISA uses 16 bit long memory addresses.
 
 > Rounding: For instructions that will round a number, the number will simply have its decimal points cut off. It will not be rounded to the nearest integer, it will simply have the decimal places removed. (e.g. 4.5 becomes 4)
 
@@ -60,12 +60,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | ADD  | 2         | ADD two values | Adding values in a Fibonacci sequence | `add r0,#3 ; add 3 to r0` |
+    | ADD  | 2         | ADD two values | Adding values in a Fibonacci sequence | `add r0, 3 ; add 3 to r0` |
 
     
     #### Binary encoding
 
-        Instruction: `add %r4, &r3`
+        Instruction: `add r4, &r3`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -90,9 +90,9 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     > **Note**: The value it pushes onto the stack may **overflow a memory address**, as memory address values are signed but the addresses themselves are not. Thus, if the program is **very large** or starts at a very high memory address, it may **not be feasible** to retrieve a jumped address as it may have overflowed. This is **unlikely** unless the assembly program is above **27,000 lines of source code**.
 
-    The overflow flag can be set **unconditionally** with `int #21`, **unset** with `int #22`, and **inverted** with `int #23`.
+    The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
 
-    The zero flag can be set **unconditionally** with `int #11`, **unset** with `int #12`, and **inverted** with `int #13`.
+    The zero flag can be set **unconditionally** with `int 11`, **unset** with `int 12`, and **inverted** with `int 13`.
 
     As subroutines and labels in assembly **resolve to memory addresses**, `JO` and `JZ` will always jump to a memory address if the jump location is a subroutine, granted the destination is small enough to fit within `11` bits.
 
@@ -172,7 +172,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     #### Binary encoding
 
-        Instruction: `pop %r2`
+        Instruction: `pop r2`
 
         | Opcode   | DEST    |
         | :-----   | :------ |
@@ -213,7 +213,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     #### Binary encoding
 
-        Instruction: `div r1, &$2`
+        Instruction: `div r1, &2`
 
         | Opcode   | LHS     | DTBs     | RHS       | 
         | :-----   | :------ | :------- | :-------- |
@@ -369,7 +369,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     
     #### Binary encoding
 
-        Instruction: `JMP $50`
+        Instruction: `jmp [50]`
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
@@ -567,9 +567,9 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     `MOV` can accept floating point values to move around if the source is a floating point register. Otherwise, it will only accept an integer.
 
-    The destination, or the LHS of `MOV` must always be a register. To change memory address values, please refer to [ST](#st).
+    The destination, or the LHS of `MOV` must always be a register. To change memory address values, please refer to [ST](#st---store-direct-and-indirect).
 
-    The source, or RHS of `MOV` cannot be a memory address. Refer to [LD](#ld) for loading from memory addresses.
+    The source, or RHS of `MOV` cannot be a memory address. Refer to [LD](#ld---load-direct) for loading from memory addresses.
 
     Unlike `LD`, however, `MOV` allows register indirects - otherwise known as register pointers - to be passed as the RHS of the instruction. This allows for `MOV` to load from very large memory addresses that wouldn't fit into a simple `LD` instruction. Thus, `MOV` is also the *indirect load* instruction (in other architectures).
 
