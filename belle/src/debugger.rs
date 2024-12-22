@@ -229,6 +229,7 @@ pub fn run_bdb(executable_path: &str) -> io::Result<()> {
                 println!("  Zero flag                : {}", dbgcpu.zflag);
                 println!("  Overflow flag            : {}", dbgcpu.oflag);
                 println!("  Remainder flag           : {}", dbgcpu.rflag);
+                println!("  Sign flag                : {}", dbgcpu.sflag);
                 println!("  Stack pointer            : {}", dbgcpu.sp);
                 println!("  Base pointer             : {}", dbgcpu.bp);
                 println!("  Instruction pointer      : {}", dbgcpu.ip);

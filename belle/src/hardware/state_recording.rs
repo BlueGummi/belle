@@ -89,6 +89,7 @@ impl CPU {
             println!("  Zero flag                : {}", cpu.zflag);
             println!("  Overflow flag            : {}", cpu.oflag);
             println!("  Remainder flag           : {}", cpu.rflag);
+            println!("  Sign flag                : {}", cpu.sflag);
             println!("  Stack pointer            : {}", cpu.sp);
             println!("  Base pointer             : {}", cpu.bp);
             println!("  Instruction pointer      : {}", cpu.ip);

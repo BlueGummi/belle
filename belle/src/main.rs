@@ -62,8 +62,11 @@ fn main() -> io::Result<()> {
                             eprintln!("Failed to write to file: {}", e);
                         }
                     };
-
-                    write_to_file(&format!("  Signed Integer Registers : {:?}", cpu.int_reg));
+                    write_to_file("------ CRASH DUMP ------");
+                    write_to_file(&format!(
+                        "\n\n  Signed Integer Registers : {:?}",
+                        cpu.int_reg
+                    ));
                     write_to_file(&format!("  Uint registers           : {:?}", cpu.uint_reg));
                     write_to_file(&format!("  Float Registers          : {:?}", cpu.float_reg));
                     write_to_file(&format!("  Program Counter          : {}", cpu.pc));
@@ -72,6 +75,7 @@ fn main() -> io::Result<()> {
                     write_to_file(&format!("  Zero flag                : {}", cpu.zflag));
                     write_to_file(&format!("  Overflow flag            : {}", cpu.oflag));
                     write_to_file(&format!("  Remainder flag           : {}", cpu.rflag));
+                    write_to_file(&format!("  Sign flag                : {}", cpu.sflag));
                     write_to_file(&format!("  Stack pointer            : {}", cpu.sp));
                     write_to_file(&format!("  Base pointer             : {}", cpu.bp));
                     write_to_file(&format!("  Instruction pointer      : {}", cpu.ip));
@@ -80,10 +84,17 @@ fn main() -> io::Result<()> {
                         cpu.parse_instruction()
                     ));
 
-                    write_to_file(&"------ MEMORY ------".to_string());
+                    write_to_file("\n------ MEMORY ------\n");
                     for (index, value) in cpu.memory.iter().enumerate() {
                         if cpu.memory[index].is_some() {
-                            write_to_file(&format!("Address {index}: {:016b}", value.unwrap()));
+                            if index == cpu.ip as usize {
+                                write_to_file(&format!(
+                                    "Address {index}: {:016b} <---- CRASH OCCURRED HERE",
+                                    value.unwrap()
+                                ));
+                            } else {
+                                write_to_file(&format!("Address {index}: {:016b}", value.unwrap()));
+                            }
                         }
                     }
                     break;

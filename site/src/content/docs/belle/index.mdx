@@ -46,9 +46,10 @@ Different flags can be passed to make the emulator operate differently.
 | Quiet output   | `-q` or `--quiet`   | Boolean       | `false`       | `-q`       |
 | Verbose output | `-v` or `--verbose` | Boolean       | `false`       | `-v`       |
 | Run debugger   | `-d` or `--debug`   | Boolean       | `false`       | `-d`       |
-| Time delay     | `-t` or `--time-delay`    | Integer       | `0`       | `-t`       |
+| Time delay     | `-t` or `--time-delay`| Integer     | `0`           | `-t`       |
 | Display help   | `-h` or `--help`    | Boolean       | `false`       | `-h`       |
 | Pretty print   | `-p` or `--pretty`  | Boolean       | `false`       | `-p`       |
+| Write crash    | `-w` or `--crash`   | Boolean       | `false`       | `-w`       |
 
 # Usage
 
@@ -84,6 +85,8 @@ If the emulator is being run in debug mode, (i.e. with the `--debug` flag enable
 If a program creates an error at runtime, the CPU emulator will either halt or can continue operation, depending on the type of error. For example, a segmentation fault in the CPU is an unrecoverable error, which will result in the CPU simply crashing and returning an error code.
 
 Some errors, however, are recoverable. A register overflow and backwards stack are both recoverable errors that will not crash the emulator.
+
+Errors can be written to a file by passing the `-w` flag.
 
 ## Error emission reasons
 
