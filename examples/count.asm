@@ -1,9 +1,6 @@
     ; This program counts to the 16 bit unsigned integer limit 
     ; It is indefinite
-p = 10
-.start [40]
-.ssp [p]
-.sbp [p]
+#include "defaults.asm"
     jmp @add_loop
 add_loop:
     pop r4

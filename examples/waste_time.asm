@@ -1,6 +1,4 @@
-.ssp [50]
-.sbp [50]
-.start [100]
+#include "defaults.asm"
     mov r2, 'w'
     st [51], r2
     mov r2, 'a'

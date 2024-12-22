@@ -41,7 +41,7 @@ impl<'a> Lexer<'a> {
                 '@' => self.lex_subroutine_call(),
                 'r' | 'R' => {
                     if let Some(next) = self.chars.peek() {
-                        if next.is_digit(10) {
+                        if next.is_ascii_digit() {
                             self.lex_register(c)?;
                         } else {
                             self.lex_identifier(c)?;
@@ -344,12 +344,13 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
     fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
-        let variable = if input.starts_with('$') || input.starts_with('#') || input.starts_with('&') {
+        let variable = if input.starts_with('$') || input.starts_with('#') || input.starts_with('&')
+        {
             &input[1..]
         } else if input.starts_with('[') {
             &input[1..input.len() - 1]
         } else {
-            &input
+            input
         };
         let map = VARIABLE_MAP.lock().unwrap();
         if let Some(&replacement) = map.get(variable.trim()) {

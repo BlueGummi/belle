@@ -227,21 +227,39 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
             start_number = line_before_comment.split_whitespace().nth(1).and_then(|s| {
                 let stripped = s.strip_prefix('$').unwrap_or(s);
                 if stripped.starts_with('[') && stripped.ends_with(']') {
-                    stripped[1..stripped.len() - 1].parse::<i32>().ok()
+                    match stripped[1..stripped.len() - 1].parse::<i32>() {
+                        Ok(n) => Some(n),
+                        Err(_) => {
+                            let vmap = VARIABLE_MAP.lock().unwrap();
+                            if let Some(&replacement) = vmap.get(&stripped[1..stripped.len() - 1]) {
+                                Some(replacement)
+                            } else {
+                                None
+                            }
+                        }
+                    }
                 } else {
-                    stripped.parse::<i32>().ok()
+                    match stripped.parse::<i32>() {
+                        Ok(n) => Some(n),
+                        Err(_) => {
+                            let vmap = VARIABLE_MAP.lock().unwrap();
+                            if let Some(&replacement) = vmap.get(stripped.trim()) {
+                                Some(replacement)
+                            } else {
+                                None
+                            }
+                        }
+                    }
                 }
             });
         }
     }
-
     if let Some(num) = start_number {
         let mut start_location = START_LOCATION
             .lock()
             .map_err(|_| "Failed to lock START_LOCATION")?;
         *start_location = num;
     }
-
     Ok(())
 }
 
