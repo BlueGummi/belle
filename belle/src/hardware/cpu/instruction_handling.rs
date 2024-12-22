@@ -261,6 +261,13 @@ impl CPU {
             }
             self.pc = (*n as u16) - 1;
         } else if let RegPtr(n) = arg {
+            if self.get_value(&Argument::Register(*n))? - 1.0 < 0.0 {
+                return Err(UnrecoverableError::IllegalInstruction(
+                    self.ir,
+                    self.pc,
+                    Some("attempted to jump to an invalid address".to_string()),
+                ));
+            }
             self.pc = (self.get_value(&Argument::Register(*n))? as u16) - 1;
         }
         Ok(())
