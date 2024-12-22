@@ -20,20 +20,13 @@ export default defineConfig({
                     ],
                 },
                 {
-                    label: 'ISA reference',
+                    label: 'ISA and hardware',
                     items: [
                         { label: 'Overview', slug: 'overview'},
                         { label: 'Encoding', slug: 'encoding'},
                         { label: 'Instructions', slug: 'instructions'},
-                    ],
-                },
-                {
-                    label: 'Hardware',
-                    items: [
-                        { label: 'CPU specification', slug: 'cpu-core'},
-                        { label: 'Flags', slug: 'cpu-flags'},
-                        { label: 'Errors', slug: 'cpu-errors'},
-                        { label: 'Memory', slug: 'memory'},
+			{ label: 'CPU specification', slug: 'cpu-core'},
+			{ label: 'Memory', slug: 'memory'},
                     ],
                 },
             ],
