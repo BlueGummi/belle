@@ -36,6 +36,10 @@ pub struct Cli {
     /// Fuzzing mode
     #[clap(short = 'f', long, default_value_t = false)]
     pub fuzz: bool,
+
+    /// Write crash to file
+    #[clap(short = 'w', long, default_value_t = false)]
+    pub write: bool,
 }
 
 fn default_config() -> Cli {
@@ -47,6 +51,7 @@ fn default_config() -> Cli {
         time_delay: Some(0),
         pretty: false,
         fuzz: true,
+        write: true,
     }
 }
 
@@ -60,6 +65,7 @@ pub fn declare_config() -> Cli {
             time_delay: Some(cli.time_delay.unwrap_or(0)),
             pretty: cli.pretty,
             fuzz: cli.fuzz,
+            write: cli.write,
         },
         Err(_) => default_config(),
     }
