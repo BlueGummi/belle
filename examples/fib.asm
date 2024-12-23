@@ -1,5 +1,5 @@
     ; This program calculates the fibonacci sequence to the largest signed 16 bit integer value
-#include "defaults.asm"
+    #include "defaults.asm"
     mov r6, 0         ; first value of fibonacci
     mov r7, 1         ; second value of fibonacci
     push r6           ; r6 onto stack

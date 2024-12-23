@@ -1,5 +1,5 @@
     ; This program prints "Hello, world!" to stdout
-#include "defaults.asm"
+    #include "defaults.asm"
     mov r2, 'h'
     st $1, r2
     mov r2, 'e'
