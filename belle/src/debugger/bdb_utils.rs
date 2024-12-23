@@ -1,88 +1,8 @@
-use crate::CPU;
-use colored::Colorize;
-use std::fs::File;
-use std::io::{self, Read, Write};
-use std::vec::Vec;
-pub fn cls() {
-    print!("\x1B[2J\x1B[1;1H");
-}
-pub struct BDB {
-    dbgcpu: CPU,
-    clock: u32,
-    breakpoints: Vec<u16>,
-    exe: String,
-}
-
+use crate::*;
+use colored::*;
+use std::io::{self, Write};
 impl BDB {
-    pub fn new(executable_path: &str) -> io::Result<Self> {
-        let bin = bin_to_vec(executable_path)?;
-        let mut dbgcpu = CPU::new();
-        dbgcpu.load_binary(&bin);
-        Ok(Self {
-            dbgcpu,
-            clock: 0,
-            exe: executable_path.to_string(),
-            breakpoints: Vec::new(),
-        })
-    }
-
-    pub fn run(&mut self) -> io::Result<()> {
-        let prompt = "(bdb)> ".green();
-        println!("Welcome to the BELLE-debugger!");
-        println!("First time? Type 'h' or 'help'");
-
-        loop {
-            let _ = ctrlc::set_handler(move || {
-                println!("\nExiting...");
-                std::process::exit(0);
-            });
-            print!("\n{prompt}");
-            let mut input = String::new();
-            io::stdout().flush()?;
-
-            io::stdin().read_line(&mut input)?;
-            let command = input.trim();
-
-            if command.is_empty() {
-                continue;
-            }
-
-            let (cmd, arg) = Self::parse_command(command);
-            match cmd.to_lowercase().as_str() {
-                "q" | "quit" | ":q" => {
-                    println!("{}", "Exiting...\n".yellow());
-                    return Ok(());
-                }
-                "h" | "help" => Self::handle_help(arg),
-                "l" => self.dbgcpu.load_binary(&bin_to_vec(&self.exe)?),
-                "r" | "run" => self.handle_run(),
-                "spc" => self.handle_set_pc(arg),
-                "p" | "pmem" => self.handle_print_memory(arg),
-                "i" | "info" => self.handle_info(arg),
-                "wb" => self.handle_where_begins(),
-                "e" | "exc" => self.handle_execute(),
-                "a" => self.handle_print_all_memory(),
-                "w" => self.handle_print_cpu_state(),
-                "cls" | "clear" => self.cls(),
-                "pk" => self.handle_set_memory_value(arg),
-                "b" => self.handle_set_breakpoint(arg),
-                "br" => self.handle_remove_breakpoint(arg),
-                "ba" => {
-                    println!("Breakpoints cleared.");
-                    self.breakpoints.clear();
-                }
-                "rs" => self.reset_cpu(),
-                _ => Self::unknown_command(command),
-            }
-        }
-    }
-
-    fn parse_command(input: &str) -> (&str, &str) {
-        let mut parts = input.splitn(2, ' ');
-        (parts.next().unwrap(), parts.next().unwrap_or(""))
-    }
-
-    fn handle_set_breakpoint(&mut self, arg: &str) {
+    pub fn handle_set_breakpoint(&mut self, arg: &str) {
         if let Ok(n) = arg.trim().parse::<u16>() {
             self.breakpoints.push(n);
             println!("Breakpoint {n} added.");
@@ -90,16 +10,8 @@ impl BDB {
             eprintln!("'b' requires a numeric argument.");
         }
     }
-    fn handle_remove_breakpoint(&mut self, arg: &str) {
-        if let Ok(n) = arg.trim().parse::<u16>() {
-            self.breakpoints.retain(|&x| x != n);
-            println!("Breakpoint {n} removed.");
-        } else {
-            eprintln!("'br' requires a numeric argument.");
-        }
-    }
 
-    fn handle_help(arg: &str) {
+    pub fn handle_help(arg: &str) {
         if arg.is_empty() {
             let commands = vec![
                 ("q", "Exit BDB"),
@@ -157,7 +69,7 @@ impl BDB {
         }
     }
 
-    fn handle_run(&mut self) {
+    pub fn handle_run(&mut self) {
         if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
@@ -187,7 +99,7 @@ impl BDB {
         }
     }
 
-    fn handle_set_pc(&mut self, arg: &str) {
+    pub fn handle_set_pc(&mut self, arg: &str) {
         if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
@@ -200,7 +112,7 @@ impl BDB {
         }
     }
 
-    fn handle_print_memory(&mut self, arg: &str) {
+    pub fn handle_print_memory(&mut self, arg: &str) {
         if let Ok(n) = arg.parse::<usize>() {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
@@ -216,7 +128,7 @@ impl BDB {
         }
     }
 
-    fn handle_info(&mut self, arg: &str) {
+    pub fn handle_info(&mut self, arg: &str) {
         if !self.dbgcpu.has_ran {
             eprintln!("{}", "CPU has not run.".red());
             return;
@@ -230,7 +142,7 @@ impl BDB {
         }
     }
 
-    fn handle_where_begins(&self) {
+    pub fn handle_where_begins(&self) {
         if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
         } else {
@@ -241,7 +153,7 @@ impl BDB {
         }
     }
 
-    fn handle_execute(&mut self) {
+    pub fn handle_execute(&mut self) {
         self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             value
         } else {
@@ -258,7 +170,7 @@ impl BDB {
         self.print_cpu_state();
     }
 
-    fn handle_print_all_memory(&mut self) {
+    pub fn handle_print_all_memory(&mut self) {
         for (index, element) in self.dbgcpu.memory.iter().enumerate() {
             if let Some(value) = element {
                 self.dbgcpu.ir = *value;
@@ -267,11 +179,11 @@ impl BDB {
         }
     }
 
-    fn handle_print_cpu_state(&mut self) {
+    pub fn handle_print_cpu_state(&mut self) {
         self.print_cpu_state();
     }
 
-    fn print_cpu_state(&mut self) {
+    pub fn print_cpu_state(&mut self) {
         println!("  Signed Integer Registers : {:?}", self.dbgcpu.int_reg);
         println!("  Uint registers           : {:?}", self.dbgcpu.uint_reg);
         println!("  Float Registers          : {:?}", self.dbgcpu.float_reg);
@@ -299,7 +211,7 @@ impl BDB {
         }
     }
 
-    fn handle_set_memory_value(&mut self, arg: &str) {
+    pub fn handle_set_memory_value(&mut self, arg: &str) {
         if let Ok(n) = arg.parse::<usize>() {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
@@ -339,35 +251,12 @@ impl BDB {
             eprintln!("'pk' requires a numeric argument.");
         }
     }
-
-    fn cls(&self) {
-        print!("\x1B[2J\x1B[1;1H");
-    }
-
-    fn reset_cpu(&mut self) {
-        self.dbgcpu = CPU::new();
-        println!("CPU reset.");
-    }
-
-    fn unknown_command(command: &str) {
-        println!("Unknown command: '{command}'");
-        println!("Type 'h' or 'help' for a list of available commands.");
-    }
-}
-
-pub fn bin_to_vec(file_path: &str) -> io::Result<Vec<i16>> {
-    let mut file = File::open(file_path)?;
-    let mut buffer = Vec::new();
-    file.read_to_end(&mut buffer)?;
-
-    let mut result: Vec<i16> = Vec::new();
-
-    for chunk in buffer.chunks(2) {
-        if chunk.len() == 2 {
-            let value = i16::from_be_bytes([chunk[0], chunk[1]]);
-            result.push(value);
+    pub fn handle_remove_breakpoint(&mut self, arg: &str) {
+        if let Ok(n) = arg.trim().parse::<u16>() {
+            self.breakpoints.retain(|&x| x != n);
+            println!("Breakpoint {n} removed.");
+        } else {
+            eprintln!("'br' requires a numeric argument.");
         }
     }
-
-    Ok(result)
 }
