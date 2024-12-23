@@ -64,8 +64,6 @@ impl CPU {
         let total_size = std::mem::size_of_val(&state) * state.len() * 24;
 
         let clock = CLOCK.lock().unwrap();
-        
-        println!("{total_size}");
         while total_size > MAX_MEMORY_LIMIT {
             if CONFIG.debug || CONFIG.verbose {
                 println!("State records exceeds limit. Removing oldest state.");
