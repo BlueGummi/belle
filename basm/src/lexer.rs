@@ -66,6 +66,9 @@ impl<'a> Lexer<'a> {
                     self.location += 1;
                     self.lex_ascii()?;
                 }
+                '-' => {
+                    self.lex_literal(c)?;
+                }
                 '0'..='9' => {
                     self.lex_literal(c)?;
                 }
