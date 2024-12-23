@@ -81,6 +81,7 @@ print_help() {
     printf "  -q, --quiet        Suppress output\n"
     printf "  -n, --no-spin      Disable the spinner during builds\n"
     printf "  -h, --help         Display this help message\n"
+    printf "  -l, --loud	 Print build outputs\n"
     printf "\nTargets:\n"
     printf "  bdump, basm, belle, btils (default: all)\n"
     exit 0
@@ -98,7 +99,11 @@ default_build() {
         case "$target" in
             basm)
                 cd basm
-                cargo build --release --quiet &
+		if ! [ "$loud" ]; then
+                	cargo build --release --quiet &
+		else
+			cargo build --release &
+		fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE-asm..."
@@ -111,8 +116,13 @@ default_build() {
                 ;;
             bdump)
                 cd bdump
-                make clean --quiet
-                make --quiet &
+		if ! [ "$loud" ]; then
+                	make clean --quiet
+                	make --quiet &
+		else
+			make clean
+			make &
+		fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE-dump..."
@@ -125,7 +135,11 @@ default_build() {
                 ;;
             belle)
                 cd belle
-                cargo build --release --quiet &
+		if ! [ "$loud" ]; then
+                	cargo build --release --quiet &
+		else
+			cargo build --release &
+		fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE..."
@@ -175,6 +189,9 @@ for arg in "$@"; do
         bdump|basm|belle|btils)
             targets+=("$arg")
             ;;
+	--loud|-l)
+	    loud=true
+	    ;;
     esac
 done
 

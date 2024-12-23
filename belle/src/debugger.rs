@@ -66,6 +66,11 @@ impl BDB {
                 "cls" | "clear" => self.cls(),
                 "pk" => self.handle_set_memory_value(arg),
                 "b" => self.handle_set_breakpoint(arg),
+                "br" => self.handle_remove_breakpoint(arg),
+                "ba" => {
+                    println!("Breakpoints cleared.");
+                    self.breakpoints.clear();
+                }
                 "rs" => self.reset_cpu(),
                 _ => Self::unknown_command(command),
             }
@@ -83,6 +88,14 @@ impl BDB {
             println!("Breakpoint {n} added.");
         } else {
             eprintln!("'b' requires a numeric argument.");
+        }
+    }
+    fn handle_remove_breakpoint(&mut self, arg: &str) {
+        if let Ok(n) = arg.trim().parse::<u16>() {
+            self.breakpoints.retain(|&x| x != n);
+            println!("Breakpoint {n} removed.");
+        } else {
+            eprintln!("'br' requires a numeric argument.");
         }
     }
 
