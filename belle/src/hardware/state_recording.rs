@@ -10,7 +10,7 @@ pub static CPU_STATE: Lazy<Mutex<HashMap<u32, Arc<ModCPU>, RandomState>>> =
 
 pub static CLOCK: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
 
-const MAX_MEMORY_LIMIT: usize = 16 * 1024 * 1024;
+const MAX_MEMORY_LIMIT: usize = 128 * 1024 * 1024;
 
 pub struct ModCPU {
     pub int_reg: [i16; 4], // r0 thru r5
@@ -61,20 +61,17 @@ impl CPU {
     pub fn record_state(&self) {
         let mut state = CPU_STATE.lock().unwrap();
         
-        let mut total_size = std::mem::size_of_val(&state);
+        let total_size = std::mem::size_of_val(&state) * state.len() * 24;
 
         let clock = CLOCK.lock().unwrap();
         
-        for (key, value) in state.iter() {
-            total_size += std::mem::size_of_val(key) + std::mem::size_of_val(value);
-        }
         println!("{total_size}");
         while total_size > MAX_MEMORY_LIMIT {
             if CONFIG.debug || CONFIG.verbose {
                 println!("State records exceeds limit. Removing oldest state.");
             }
-            if let Some(key) = state.clone().keys().next() {
-                state.remove(key);
+            if let Some(key) = state.keys().next().cloned() {
+                state.remove(&key);
                 return;
             }
         }
