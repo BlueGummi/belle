@@ -39,7 +39,11 @@ fn main() -> io::Result<()> {
     }
     let bin = bin_to_vec(executable_path)?;
     if CONFIG.debug {
-        run_bdb(executable_path)?;
+        let mut bdb = BDB::new(executable_path)?;
+        if let Err(e) = bdb.run() {
+            eprintln!("{e}");
+            process::exit(1);
+        }
     }
     if CONFIG.verbose {
         println!("CPU Initialized");

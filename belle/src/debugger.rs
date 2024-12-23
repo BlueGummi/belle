@@ -1,4 +1,3 @@
-use crate::display_mem;
 use crate::CPU;
 use colored::Colorize;
 use std::fs::File;
@@ -7,361 +6,324 @@ use std::vec::Vec;
 pub fn cls() {
     print!("\x1B[2J\x1B[1;1H");
 }
-pub fn run_bdb(executable_path: &str) -> io::Result<()> {
-    let prompt = "(bdb)> ".green();
-    let mut dbgcpu = CPU::new();
-    let mut clock = 0;
-    println!("Welcome to the BELLE-debugger!");
-    println!("First time? Type 'h' or 'help'\n");
-    loop {
-        let _ = ctrlc::set_handler(move || {
-            println!("\nExiting...");
-            std::process::exit(0);
-        });
-        let bin = bin_to_vec(executable_path)?;
-        print!("{prompt}");
-        io::stdout().flush().unwrap();
-        let mut input = String::new();
-        io::stdin().read_line(&mut input)?;
-
-        let command = input.trim().to_string();
-        if command.is_empty() {
-            continue;
-        }
-        let mut parts = command.splitn(2, ' ');
-
-        let (cmd, arg) = (parts.next().unwrap(), parts.next().unwrap_or(""));
-        match cmd.to_lowercase().as_str() {
-            "q" | "quit" | ":q" => {
-                println!("{}", "Exiting...\n".yellow());
-                return Ok(());
-            }
-            "h" | "help" => {
-                if arg.is_empty() {
-                    println!("{}", "Available commands:".blue());
-                    println!("q | quit | :q - Exit BDB");
-                    println!("h | help      - Print help on BDB or a specific command");
-                    println!("l | load      - Load program");
-                    println!("r | run       - Run program");
-                    println!("rs            - Reset emulator");
-                    println!("cls           - Clear screen\n");
-
-                    println!("Can be used whether or not the CPU has ran:");
-                    println!("spc           - Set program counter to a given value");
-                    println!("p | pmem      - Print value in memory");
-                    println!("pk            - Set a new value for a location in memory");
-                    println!("a             - Print all memory");
-                    println!("wb            - Print CPU's starting memory address\n");
-
-                    println!("Used to step through the program:");
-                    println!("e | exc       - Execute instruction");
-                    println!("w             - View the state of the CPU\n");
-
-                    println!("Can only be used after the CPU has ran");
-                    println!("i | info      - Print CPU state at debugger's clock");
-                    println!("im            - Print a value in memory at the clock after the CPU has run\n");
-                } else {
-                    match arg.trim().to_lowercase().as_str() {
-                        "q" | "quit" | ":q" => {
-                            println!("'quit' takes no arguments.");
-                            println!("'quit' exits the BELLE-debugger with code 0.");
-                            println!(
-                                "The CPU will stop execution or will exit if 'quit' is called.\n"
-                            );
-                        }
-                        "h" | "help" => {
-                            println!("'help' takes zero or one argument.");
-                            println!("'help' prints out information on how to use commands.\n");
-                        }
-                        "l" | "load" => {
-                            println!("'load' takes no arguments.");
-                            println!("'load' loads the CPU's memory with the program, and does nothing afterwards.");
-                            println!("'load' can be used to verify that the program is loaded correctly.");
-                            println!(
-                                "'p' | 'pmem' can be used after 'load' to view the CPU's memory\n"
-                            );
-                        }
-                        "r" | "run" => {
-                            println!("'run' takes no arguments");
-                            println!(
-                                "'run' executes the CPU with the data stored in its memory.\n"
-                            );
-                        }
-                        "spc" => {
-                            println!("'set program counter' takes one argument.");
-                            println!("'spc' sets the CPU's program counter to a given number\n");
-                        }
-                        "p" | "pmem" => {
-                            println!("'print memory' takes one argument.");
-                            println!("'pmem' prints the value at the specified memory address.");
-                            println!("If nothing is there, it will say so.\n");
-                        }
-                        "e" | "exc" => {
-                            println!("'execute' takes no arguments");
-                            println!("'e' executes the instruction at the current memory address (program counter)\n");
-                        }
-                        "i" | "info" => {
-                            println!("'info' takes one argument");
-                            println!("'info' prints the current state of the CPU on the specified clock cycle.\n");
-                        }
-                        "cls" | "clear" => {
-                            println!("'clear' takes no arguments and resets the cursor to the top left\nof the terminal\n");
-                        }
-                        "wb" => {
-                            println!("'where begins' takes no arguments");
-                            println!("'wb' prints the starting memory address of the CPU\n");
-                        }
-                        "a" => {
-                            println!("'all instructions' takes no arguments");
-                            println!("'a' prints everything in memory as an instruction if it is a value\n");
-                        }
-                        "w" => {
-                            println!("'w' takes no arguments");
-                            println!("'w' prints the state of the CPU as-is\n");
-                        }
-                        "pk" => {
-                            println!("'pk' takes one argument");
-                            println!("'pk' will print the value in memory and ask for a new value");
-                            println!("binary values, prefixed with 0b, are accepted");
-                            println!("if an invalid value is entered or nothing is entered, it will not do anything\n");
-                        }
-                        "im" => {
-                            println!("'info memory' takes one argument");
-                            println!("'im' will print the value in memory at the clock cycle after the CPU has ran");
-                            println!(
-                                "if an invalid value or nothing is entered, nothing will happen\n"
-                            );
-                        }
-                        "rs" => {
-                            println!("'reset' takes no arguments");
-                            println!("'reset' resets all parts of the emulator");
-                        }
-                        _ => {
-                            println!("Unknown command: '{arg}'");
-                            println!("Type 'h' or 'help' for a list of available commands.\n");
-                        }
-                    }
-                }
-            }
-            "l" | "load" => dbgcpu.load_binary(&bin),
-            "r" | "run" => {
-                if dbgcpu.memory.iter().all(|&x| x.is_none()) {
-                    eprintln!(
-                        "{}",
-                        "CPU memory is empty.\nTry to load the program first.\n".red()
-                    );
-                } else if let Err(e) = dbgcpu.run() {
-                    eprintln!("{e}");
-                    eprintln!("Consider resetting the CPU with 'rs'\n");
-                }
-            }
-            "spc" => 'spc: {
-                if dbgcpu.memory.iter().all(|&x| x.is_none()) {
-                    eprintln!(
-                        "{}",
-                        "CPU memory is empty.\nTry to load the program first.\n".red()
-                    );
-                    break 'spc;
-                }
-                if let Ok(n) = arg.trim().parse::<u16>() {
-                    dbgcpu.pc = n;
-                    println!("Program counter set to {n}\n");
-                } else {
-                    eprintln!("{} requires a numeric argument\n", "p | pmem".red());
-                }
-            }
-            "p" | "pmem" => {
-                if let Ok(n) = arg.parse::<usize>() {
-                    if let Some(memvalue) = dbgcpu.memory[n] {
-                        println!("Value in memory is:\n{memvalue:016b}\n{memvalue}");
-                        let oldvalue = dbgcpu.ir;
-                        dbgcpu.ir = memvalue;
-                        println!("dumped instruction: {}", dbgcpu.parse_instruction());
-                        dbgcpu.ir = oldvalue;
-                    } else {
-                        println!("{}", "Nothing in memory here.\n".yellow());
-                    }
-                } else {
-                    eprintln!("{} requires a numeric argument\n", "p | pmem".red());
-                }
-            }
-            "i" | "info" => {
-                if !dbgcpu.has_ran {
-                    eprintln!("{}", "CPU has not run.\n".red());
-                    continue;
-                }
-                match arg.parse::<u32>() {
-                    Ok(n) => {
-                        clock = n;
-                        CPU::display_state(&clock);
-                    }
-                    Err(_) => eprintln!("Error parsing second argument.\n"),
-                }
-            }
-            "wb" => {
-                if dbgcpu.memory.iter().all(|&x| x.is_none()) {
-                    eprintln!(
-                        "{}",
-                        "CPU memory is empty.\nTry to load the program first.\n".red()
-                    );
-                } else {
-                    println!("Execution begins at memory address {}", dbgcpu.starts_at);
-                }
-            }
-            "e" | "exc" => 'exc: {
-                dbgcpu.ir = if let Some(value) = dbgcpu.memory[dbgcpu.pc as usize] {
-                    value
-                } else {
-                    eprintln!("Nothing at PC {}", dbgcpu.pc);
-                    break 'exc;
-                };
-                let parsed_ins = dbgcpu.parse_instruction();
-                if let Err(e) = dbgcpu.execute_instruction(&parsed_ins) {
-                    eprintln!("An error occurred: {e}");
-                }
-                dbgcpu.record_state();
-                println!("  Signed Integer Registers : {:?}", dbgcpu.int_reg);
-                println!("  Uint registers           : {:?}", dbgcpu.uint_reg);
-                println!("  Float Registers          : {:?}", dbgcpu.float_reg);
-                println!("  Program Counter          : {}", dbgcpu.pc);
-                println!("  Instruction Register     : {:016b}", dbgcpu.ir);
-                println!("  Running                  : {}", dbgcpu.running);
-                println!("  Zero flag                : {}", dbgcpu.zflag);
-                println!("  Overflow flag            : {}", dbgcpu.oflag);
-                println!("  Remainder flag           : {}", dbgcpu.rflag);
-                println!("  Sign flag                : {}", dbgcpu.sflag);
-                println!("  Stack pointer            : {}", dbgcpu.sp);
-                println!("  Base pointer             : {}", dbgcpu.bp);
-                println!("  Instruction pointer      : {}", dbgcpu.ip);
-                println!(
-                    "  Disassembled Instruction : {}",
-                    dbgcpu.parse_instruction()
-                );
-                let tmp = dbgcpu.ir;
-                if let Some(n) = dbgcpu.memory[dbgcpu.pc as usize] {
-                    dbgcpu.ir = n;
-                    println!(
-                        "  Next instruction         : {}\n",
-                        dbgcpu.parse_instruction()
-                    );
-                }
-                dbgcpu.ir = tmp;
-            }
-            "a" => {
-                for (index, element) in dbgcpu.memory.iter().enumerate() {
-                    if element.is_some() {
-                        let mut tmpcpu = CPU::new();
-                        tmpcpu.ir = element.unwrap();
-                        println!("Value at {} is {}", index, tmpcpu.parse_instruction());
-                    }
-                }
-                for (index, element) in dbgcpu.memory.iter().enumerate() {
-                    if element.is_some() {
-                        println!("Value at {} is {:016b}", index, element.unwrap());
-                    }
-                }
-            }
-            "w" => {
-                println!("  Signed Integer Registers : {:?}", dbgcpu.int_reg);
-                println!("  Uint registers           : {:?}", dbgcpu.uint_reg);
-                println!("  Float Registers          : {:?}", dbgcpu.float_reg);
-                println!("  Program Counter          : {}", dbgcpu.pc);
-                println!("  Instruction Register     : {:016b}", dbgcpu.ir);
-                println!("  Running                  : {}", dbgcpu.running);
-                println!("  Zero flag                : {}", dbgcpu.zflag);
-                println!("  Overflow flag            : {}", dbgcpu.oflag);
-                println!("  Remainder flag           : {}", dbgcpu.rflag);
-                println!("  Stack pointer            : {}", dbgcpu.sp);
-                println!("  Base pointer             : {}", dbgcpu.bp);
-                println!("  Instruction pointer      : {}", dbgcpu.ip);
-                println!(
-                    "  Disassembled Instruction : {}",
-                    dbgcpu.parse_instruction()
-                );
-                let tmp = dbgcpu.ir;
-                if let Some(n) = dbgcpu.memory[dbgcpu.pc as usize] {
-                    dbgcpu.ir = n;
-                    println!(
-                        "  Next instruction         : {}\n",
-                        dbgcpu.parse_instruction()
-                    );
-                }
-                dbgcpu.ir = tmp;
-            }
-            "cls" | "clear" => {
-                cls();
-            }
-            "pk" => 'pk: {
-                if let Ok(n) = arg.parse::<usize>() {
-                    if let Some(memvalue) = dbgcpu.memory[n] {
-                        println!("Value in memory is:\n{memvalue:016b}\n{memvalue}");
-                        let oldvalue = dbgcpu.ir;
-                        dbgcpu.ir = memvalue;
-                        println!("{}", dbgcpu.parse_instruction());
-                        dbgcpu.ir = oldvalue;
-                        let mut buffer = String::new();
-                        io::stdout().flush().unwrap();
-                        io::stdin().read_line(&mut buffer)?;
-                        if buffer.is_empty() {
-                            println!("Empty input\n");
-                            break 'pk;
-                        }
-                        if buffer.trim().starts_with("0b") {
-                            match i32::from_str_radix(&buffer.trim()[2..], 2) {
-                                Ok(val) => {
-                                    println!("Value in memory address {n} set to {val:016b}");
-                                    dbgcpu.memory[n] = Some(val as i16);
-                                    break 'pk;
-                                }
-                                Err(e) => println!("Input could not be parsed to binary\n{e}"),
-                            }
-                        }
-
-                        if let Ok(v) = buffer.trim().parse::<i16>() {
-                            println!("Value in memory address {n} set to {v}");
-                            dbgcpu.memory[n] = Some(v);
-                        } else {
-                            println!("Could not parse a valid integer from input\n");
-                        }
-                    } else {
-                        println!("{}", "Nothing in memory here.\n".yellow());
-                    }
-                } else {
-                    eprintln!("{} requires a numeric argument\n", "pk".red());
-                }
-            }
-            "im" => 'im: {
-                if let Ok(n) = arg.parse::<usize>() {
-                    let tmp = dbgcpu.ir;
-                    let mval = display_mem(&n, &clock);
-                    if mval.is_none() {
-                        eprintln!("Nothing in memory here\n");
-                        break 'im;
-                    }
-                    let uwrap_val = mval.unwrap() as i16;
-                    dbgcpu.ir = uwrap_val; // can't panic
-                    println!(
-                        "Value in address {n} is\n{uwrap_val}\n{uwrap_val:016b}\nDisassembles to: {}\n",
-                        dbgcpu.parse_instruction()
-                    );
-                    dbgcpu.ir = tmp;
-                } else {
-                    eprintln!("{} requires a numeric argument\n", "im".red());
-                }
-            }
-            "rs" => {
-                dbgcpu = CPU::new();
-            }
-            _ => unknown_command(&command),
-        }
-    }
+pub struct BDB {
+    dbgcpu: CPU,
+    clock: u32,
+    breakpoints: Vec<u16>,
 }
 
-fn unknown_command(command: &str) {
-    println!(
-        "Unknown command: {}\nType help or h to view available commands\n",
-        command.red()
-    );
+impl BDB {
+    pub fn new(executable_path: &str) -> io::Result<Self> {
+        let bin = bin_to_vec(executable_path)?;
+        let mut dbgcpu = CPU::new();
+        dbgcpu.load_binary(&bin);
+        Ok(Self {
+            dbgcpu,
+            clock: 0,
+            breakpoints: Vec::new(),
+        })
+    }
+
+    pub fn run(&mut self) -> io::Result<()> {
+        let prompt = "(bdb)> ".green();
+        println!("Welcome to the BELLE-debugger!");
+        println!("First time? Type 'h' or 'help'\n");
+
+        loop {
+            let _ = ctrlc::set_handler(move || {
+                println!("\nExiting...");
+                std::process::exit(0);
+            });
+
+            print!("{prompt}");
+            io::stdout().flush()?;
+
+            let mut input = String::new();
+            io::stdin().read_line(&mut input)?;
+            let command = input.trim();
+
+            if command.is_empty() {
+                continue;
+            }
+
+            let (cmd, arg) = Self::parse_command(command);
+            match cmd.to_lowercase().as_str() {
+                "q" | "quit" | ":q" => {
+                    println!("{}", "Exiting...\n".yellow());
+                    return Ok(());
+                }
+                "h" | "help" => Self::handle_help(arg),
+                "r" | "run" => self.handle_run(),
+                "spc" => self.handle_set_pc(arg),
+                "p" | "pmem" => self.handle_print_memory(arg),
+                "i" | "info" => self.handle_info(arg),
+                "wb" => self.handle_where_begins(),
+                "e" | "exc" => self.handle_execute(),
+                "a" => self.handle_print_all_memory(),
+                "w" => self.handle_print_cpu_state(),
+                "cls" | "clear" => self.cls(),
+                "pk" => self.handle_set_memory_value(arg),
+                "b" => self.handle_set_breakpoint(arg),
+                "rs" => self.reset_cpu(),
+                _ => Self::unknown_command(command),
+            }
+        }
+    }
+
+    fn parse_command(input: &str) -> (&str, &str) {
+        let mut parts = input.splitn(2, ' ');
+        (parts.next().unwrap(), parts.next().unwrap_or(""))
+    }
+
+    fn handle_set_breakpoint(&mut self, arg: &str) {
+        if let Ok(n) = arg.trim().parse::<u16>() {
+            self.breakpoints.push(n);
+            println!("Breakpoint {n} added.");
+        } else {
+            eprintln!("'b' requires a numeric argument.");
+        }
+    }
+
+    fn handle_help(arg: &str) {
+        if arg.is_empty() {
+            let commands = vec![
+                ("q", "Exit BDB"),
+                ("h", "Print help on BDB or a specific command"),
+                ("l", "Load program"),
+                ("r", "Run program"),
+                ("rs", "Reset emulator"),
+                ("cls", "Clear screen"),
+                ("spc", "Set program counter to a given value"),
+                ("p", "Print value in memory"),
+                ("pk", "Set a new value for a location in memory"),
+                ("a", "Print all memory"),
+                ("wb", "Print CPU's starting memory address"),
+                ("e", "Execute instruction"),
+                ("w", "View the state of the CPU"),
+                ("i", "Print CPU state at debugger's clock"),
+                ("b", "Set a breakpoint"),
+                ("br", "Remove a breakpoint"),
+                ("ba", "Remove all breakpoints"),
+                (
+                    "im",
+                    "Print a value in memory at the clock after the CPU has run",
+                ),
+            ];
+
+            println!("{}", "Available commands:".blue());
+            let max_length = commands.iter().map(|(cmd, _)| cmd.len()).max().unwrap_or(0);
+
+            for (cmd, desc) in commands {
+                let padding = " ".repeat(max_length - cmd.len() + 4);
+                println!("{}{} - {}", cmd.yellow(), padding, desc);
+            }
+        } else {
+            match arg.trim().to_lowercase().as_str() {
+                "q" => println!("'quit' takes no arguments. Exits the debugger."),
+                "h" => println!("'help' takes zero or one argument. Prints command information."),
+                "l" => println!("'load' takes no arguments. Loads the CPU's memory with the program."),
+                "r" => println!("'run' takes no arguments. Executes the CPU with the loaded data."),
+                "spc" => println!("'set program counter' takes one argument to set the CPU's program counter."),
+                "p" | "pmem" => println!("'print memory' takes one argument. Prints the value at the specified memory address."),
+                "e" => println!("'execute' takes no arguments. Executes the instruction at the current program counter."),
+                "i" => println!("'info' takes one argument. Prints the CPU state at the specified clock cycle."),
+                "cls" => println!("'clear' takes no arguments. Resets the cursor to the top left of the terminal."),
+                "wb" => println!("'where begins' takes no arguments. Prints the starting memory address of the CPU."),
+                "a" => println!("'all instructions' takes no arguments. Prints all memory as instructions."),
+                "w" => println!("'w' takes no arguments. Prints the current state of the CPU."),
+                "pk" => println!("'pk' takes one argument. Sets a new value for a memory location."),
+                "im" => println!("'info memory' takes one argument. Prints the value in memory after the CPU has run."),
+                "rs" => println!("'reset' takes no arguments. Resets all parts of the emulator."),
+                "b" => println!("'breakpoint' takes one argument. Sets a breakpoint at a specified memory address."),
+                "br" => println!("'breakpoint remove' takes one argument. Removes a specified breakpoint."),
+                "ba" => println!("'breakpoint remove all' takes no arguments. Removes all breakpoints."),
+                _ => println!("Unknown command: '{arg}'. Type 'h' or 'help' for a list of commands."),
+            }
+        }
+    }
+
+    fn handle_run(&mut self) {
+        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+            eprintln!("{}", "CPU memory is empty. Load the program first.".red());
+            return;
+        }
+        if self.breakpoints.is_empty() {
+            if let Err(e) = self.dbgcpu.run() {
+                eprintln!("{e}");
+                eprintln!("Consider resetting the CPU with 'rs'.");
+            }
+        } else {
+            // TODO: Implement breakpoint handling
+        }
+    }
+
+    fn handle_set_pc(&mut self, arg: &str) {
+        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+            eprintln!("{}", "CPU memory is empty. Load the program first.".red());
+            return;
+        }
+        if let Ok(n) = arg.trim().parse::<u16>() {
+            self.dbgcpu.pc = n;
+            println!("Program counter set to {n}.");
+        } else {
+            eprintln!("'spc' requires a numeric argument.");
+        }
+    }
+
+    fn handle_print_memory(&mut self, arg: &str) {
+        if let Ok(n) = arg.parse::<usize>() {
+            if let Some(memvalue) = self.dbgcpu.memory[n] {
+                println!("Value in memory: {memvalue:016b} ({memvalue})");
+                let oldvalue = self.dbgcpu.ir;
+                self.dbgcpu.ir = memvalue;
+                println!("Dumped instruction: {}", self.dbgcpu.parse_instruction());
+                self.dbgcpu.ir = oldvalue;
+            } else {
+                println!("{}", "Nothing in memory here.".yellow());
+            }
+        } else {
+            eprintln!("'p' requires a numeric argument.");
+        }
+    }
+
+    fn handle_info(&mut self, arg: &str) {
+        if !self.dbgcpu.has_ran {
+            eprintln!("{}", "CPU has not run.".red());
+            return;
+        }
+        match arg.parse::<u32>() {
+            Ok(n) => {
+                self.clock = n;
+                CPU::display_state(&self.clock);
+            }
+            Err(_) => eprintln!("Error parsing second argument."),
+        }
+    }
+
+    fn handle_where_begins(&self) {
+        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+            eprintln!("{}", "CPU memory is empty. Load the program first.".red());
+        } else {
+            println!(
+                "Execution begins at memory address {}",
+                self.dbgcpu.starts_at
+            );
+        }
+    }
+
+    fn handle_execute(&mut self) {
+        self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
+            value
+        } else {
+            eprintln!("Nothing at PC {}", self.dbgcpu.pc);
+            return;
+        };
+
+        let parsed_ins = self.dbgcpu.parse_instruction();
+        if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
+            eprintln!("An error occurred: {e}");
+        }
+
+        self.dbgcpu.record_state();
+        self.print_cpu_state();
+    }
+
+    fn handle_print_all_memory(&mut self) {
+        for (index, element) in self.dbgcpu.memory.iter().enumerate() {
+            if let Some(value) = element {
+                self.dbgcpu.ir = *value;
+                println!("Value at {} is {}", index, self.dbgcpu.parse_instruction());
+            }
+        }
+    }
+
+    fn handle_print_cpu_state(&mut self) {
+        self.print_cpu_state();
+    }
+
+    fn print_cpu_state(&mut self) {
+        println!("  Signed Integer Registers : {:?}", self.dbgcpu.int_reg);
+        println!("  Uint registers           : {:?}", self.dbgcpu.uint_reg);
+        println!("  Float Registers          : {:?}", self.dbgcpu.float_reg);
+        println!("  Program Counter          : {}", self.dbgcpu.pc);
+        println!("  Instruction Register     : {:016b}", self.dbgcpu.ir);
+        println!("  Running                  : {}", self.dbgcpu.running);
+        println!("  Zero flag                : {}", self.dbgcpu.zflag);
+        println!("  Overflow flag            : {}", self.dbgcpu.oflag);
+        println!("  Remainder flag           : {}", self.dbgcpu.rflag);
+        println!("  Sign flag                : {}", self.dbgcpu.sflag);
+        println!("  Stack pointer            : {}", self.dbgcpu.sp);
+        println!("  Base pointer             : {}", self.dbgcpu.bp);
+        println!("  Instruction pointer      : {}", self.dbgcpu.ip);
+        println!(
+            "  Disassembled Instruction : {}",
+            self.dbgcpu.parse_instruction()
+        );
+
+        if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
+            self.dbgcpu.ir = n;
+            println!(
+                "  Next instruction         : {}",
+                self.dbgcpu.parse_instruction()
+            );
+        }
+    }
+
+    fn handle_set_memory_value(&mut self, arg: &str) {
+        if let Ok(n) = arg.parse::<usize>() {
+            if let Some(memvalue) = self.dbgcpu.memory[n] {
+                println!("Value in memory: {memvalue:016b} ({memvalue})");
+                let oldvalue = self.dbgcpu.ir;
+                self.dbgcpu.ir = memvalue;
+                println!("{}", self.dbgcpu.parse_instruction());
+                self.dbgcpu.ir = oldvalue;
+
+                let mut buffer = String::new();
+                io::stdout().flush().unwrap();
+                if let Err(e) = io::stdin().read_line(&mut buffer) {
+                    println!("{e}");
+                }
+
+                if buffer.is_empty() {
+                    println!("Empty input");
+                    return;
+                }
+
+                if buffer.trim().starts_with("0b") {
+                    if let Ok(val) = i32::from_str_radix(&buffer.trim()[2..], 2) {
+                        println!("Value in memory address {n} set to {val:016b}");
+                        self.dbgcpu.memory[n] = Some(val as i16);
+                    } else {
+                        println!("Input could not be parsed to binary");
+                    }
+                } else if let Ok(v) = buffer.trim().parse::<i16>() {
+                    println!("Value in memory address {n} set to {v}");
+                    self.dbgcpu.memory[n] = Some(v);
+                } else {
+                    println!("Could not parse a valid integer from input.");
+                }
+            } else {
+                println!("{}", "Nothing in memory here.".yellow());
+            }
+        } else {
+            eprintln!("'pk' requires a numeric argument.");
+        }
+    }
+
+    fn cls(&self) {
+        print!("\x1B[2J\x1B[1;1H");
+    }
+
+    fn reset_cpu(&mut self) {
+        self.dbgcpu = CPU::new();
+        self.breakpoints.clear();
+        println!("CPU and breakpoints reset.");
+    }
+
+    fn unknown_command(command: &str) {
+        println!("Unknown command: '{command}'");
+        println!("Type 'h' or 'help' for a list of available commands.");
+    }
 }
 
 pub fn bin_to_vec(file_path: &str) -> io::Result<Vec<i16>> {
@@ -371,10 +333,8 @@ pub fn bin_to_vec(file_path: &str) -> io::Result<Vec<i16>> {
 
     let mut result: Vec<i16> = Vec::new();
 
-    // Iterate over the buffer in chunks of 2 bytes
     for chunk in buffer.chunks(2) {
         if chunk.len() == 2 {
-            // Only process full chunks of 2 bytes
             let value = i16::from_be_bytes([chunk[0], chunk[1]]);
             result.push(value);
         }
