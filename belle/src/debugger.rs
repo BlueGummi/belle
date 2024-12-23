@@ -10,6 +10,7 @@ pub struct BDB {
     dbgcpu: CPU,
     clock: u32,
     breakpoints: Vec<u16>,
+    exe: String,
 }
 
 impl BDB {
@@ -20,6 +21,7 @@ impl BDB {
         Ok(Self {
             dbgcpu,
             clock: 0,
+            exe: executable_path.to_string(),
             breakpoints: Vec::new(),
         })
     }
@@ -27,18 +29,17 @@ impl BDB {
     pub fn run(&mut self) -> io::Result<()> {
         let prompt = "(bdb)> ".green();
         println!("Welcome to the BELLE-debugger!");
-        println!("First time? Type 'h' or 'help'\n");
+        println!("First time? Type 'h' or 'help'");
 
         loop {
             let _ = ctrlc::set_handler(move || {
                 println!("\nExiting...");
                 std::process::exit(0);
             });
-
-            print!("{prompt}");
+            print!("\n{prompt}");
+            let mut input = String::new();
             io::stdout().flush()?;
 
-            let mut input = String::new();
             io::stdin().read_line(&mut input)?;
             let command = input.trim();
 
@@ -53,6 +54,7 @@ impl BDB {
                     return Ok(());
                 }
                 "h" | "help" => Self::handle_help(arg),
+                "l" => self.dbgcpu.load_binary(&bin_to_vec(&self.exe)?),
                 "r" | "run" => self.handle_run(),
                 "spc" => self.handle_set_pc(arg),
                 "p" | "pmem" => self.handle_print_memory(arg),
@@ -153,7 +155,22 @@ impl BDB {
                 eprintln!("Consider resetting the CPU with 'rs'.");
             }
         } else {
-            // TODO: Implement breakpoint handling
+            self.dbgcpu.has_ran = true;
+            while !self.breakpoints.contains(&self.dbgcpu.pc) {
+                self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
+                    value
+                } else {
+                    eprintln!("Nothing at PC {}", self.dbgcpu.pc);
+                    return;
+                };
+                let parsed_ins = self.dbgcpu.parse_instruction();
+                if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
+                    eprintln!("An error occurred: {e}");
+                }
+            }
+            if self.breakpoints.contains(&self.dbgcpu.pc) {
+                println!("Breakpoint {} reached.", self.dbgcpu.pc);
+            }
         }
     }
 
@@ -316,8 +333,7 @@ impl BDB {
 
     fn reset_cpu(&mut self) {
         self.dbgcpu = CPU::new();
-        self.breakpoints.clear();
-        println!("CPU and breakpoints reset.");
+        println!("CPU reset.");
     }
 
     fn unknown_command(command: &str) {
