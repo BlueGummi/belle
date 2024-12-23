@@ -34,5 +34,4 @@ time_waster:
     jmp @print
     jmp @time_waster
 print:
-    int 8
     ret

@@ -1,6 +1,5 @@
 use std::fmt;
 
-#[derive(Clone)]
 pub enum Argument {
     Register(i16),
     MemAddr(i16),
@@ -12,7 +11,6 @@ pub enum Argument {
     Nothing,
 }
 
-#[derive(Clone)]
 pub enum Instruction {
     HLT,
     ADD(Argument, Argument),
