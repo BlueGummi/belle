@@ -1,4 +1,4 @@
-name: Compact Disc 
+name: Compact Disc
 
 on:
   push:
@@ -29,14 +29,21 @@ jobs:
     - name: Set up Git for private repo access
       run: |
         git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com".insteadOf "https://github.com"
-    
+        
     - name: Clone private repo
       run: |
         git clone https://github.com/bluegummi/belle-demo.git
         cd belle-demo
         cp -r ../output/* ./
+        
+    - name: Configure Git for commit
+      run: |
         git config --global user.email "105593618+BlueGummi@users.noreply.github.com"
         git config --global user.name "BlueGummi"
+        
+    - name: Commit and push changes
+      run: |
         git add .
         git commit -m "Update built files"
         git push origin main
+
