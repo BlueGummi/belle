@@ -26,12 +26,12 @@ jobs:
         docker cp temp-container:/app ./output
         docker rm temp-container
 
-    - name: Clone private repo
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+    - name: Set up Git for private repo access
       run: |
-        eval `ssh-agent -s`
-        ssh-add - <<< '${{ secrets.PRIVATE_SSH_KEY }}'
+        git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com".insteadOf "https://github.com"
+    
+    - name: Clone private repo
+      run: |
         git clone https://github.com/bluegummi/belle-demo.git
         cd belle-demo
         cp -r ../output/* ./
