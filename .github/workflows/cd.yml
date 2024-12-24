@@ -30,7 +30,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
-        git clone https://bluegummi:${{ secrets.PAT_TOKEN }}@github.com/bluegummi/belle-demo.git
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.PRIVATE_SSH_KEY }}'
+        git clone https://github.com/bluegummi/belle-demo.git
         cd belle-demo
         cp -r ../output/* ./
         git config --global user.email "105593618+BlueGummi@users.noreply.github.com"
