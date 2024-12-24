@@ -43,6 +43,7 @@ jobs:
         
     - name: Commit and push changes
       run: |
+        cd belle-demo
         git add *
         git commit -m "Update built files"
         git push origin 
