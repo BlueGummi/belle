@@ -1,10 +1,16 @@
 ---
-title: 'BELLE - The complete program utility set for the Big Endian, Low Level Emulator'
+title: 'Main page'
 author: 'BlueGummi'
 tableOfContents:
     minHeadingLevel: 2
     maxHeadingLevel: 2
 ---
+
+import RunBelle from '../../components/editor.astro';
+
+### Demo
+<RunBelle />
+
 
 ## Quickstart
 
@@ -27,21 +33,6 @@ Or, for Windows
 ```pwsh
 .\build.ps1 -w && .\install.ps1 -c # This installs the binaries to ~/.local/bin on Windows
 ```
-
-## Example programs
-
-Run
-```
-cd examples && make
-```
-to assemble all the example programs.
-
-Then, use
-```
-ls
-```
-to view the binaries, and invoke `belle` to run each binary to see its function.
-
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #inputContainer {
+            position: relative;
+        }
+        #inputText {
+            width: 100%;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 1em;
+            line-height: 1.5;
+            border: 1px solid #ccc;
+            resize: vertical;
+            padding: 10px;
+        }
+        #runCodeButton {
+            position: absolute;
+            top: -5px;
+            right: 30px;
+        }
+        #outputText {
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="inputContainer">
+    <textarea id="inputText" rows="10" oninput="updateLineNumbers()">
+	mov r6, 0
+	mov r7, 1
+	push r6
+	push r7
+	jmp @fib_loop
+fib_loop:
+	pop r0
+	mov r5, 0
+	pop r7
+	pop r6
+	add r5, r7
+	add r5, r6
+	mov r6, r7
+	mov r7, r5
+	push r6
+	push r7
+	jo @finish
+	int 5
+	jmp @fib_loop
+finish:
+	hlt
+    </textarea>
+    <button id="runCodeButton">Run</button>
+</div>
+<pre id="outputText"></pre>
+
+<script>
+    document.getElementById('runCodeButton').addEventListener('click', async () => {
+        const inputText = document.getElementById('inputText').value;
+        const outputTextElement = document.getElementById('outputText');
+
+        outputTextElement.textContent = 'Loading...';
+
+        try {
+            const response = await fetch('https://belle-demo.vercel.app/api/runBelle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: inputText }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.details || 'No details provided');
+            }
+
+            const data = await response.json();
+
+            if (data && typeof data === 'object') {
+                const output = data.output || 'No output available';
+                outputTextElement.textContent = output;
+            } else {
+                outputTextElement.textContent = 'Unexpected response format';
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            outputTextElement.textContent = `Error: ${error.message}`;
+        }
+    });
+</script>
+
+</body>
+</html>
