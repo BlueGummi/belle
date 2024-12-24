@@ -43,7 +43,6 @@ impl CPU {
                 Some("program counter is too large".to_string()),
             ));
         }
-        self.pc += 1;
         Ok(())
     }
     pub fn set_register_value(

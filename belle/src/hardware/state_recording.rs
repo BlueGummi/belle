@@ -1,9 +1,9 @@
 use crate::*;
+use ahash::RandomState;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
-use ahash::RandomState;
 
 pub static CPU_STATE: Lazy<Mutex<HashMap<u32, Arc<ModCPU>, RandomState>>> =
     Lazy::new(|| Mutex::new(HashMap::default()));
@@ -60,7 +60,7 @@ impl ModCPU {
 impl CPU {
     pub fn record_state(&self) {
         let mut state = CPU_STATE.lock().unwrap();
-        
+
         let total_size = std::mem::size_of_val(&state) * state.len() * 24;
 
         let clock = CLOCK.lock().unwrap();

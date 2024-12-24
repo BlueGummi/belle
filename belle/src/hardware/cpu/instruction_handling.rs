@@ -47,10 +47,12 @@ impl CPU {
                 eprint!("{e}");
             }
         }
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_jo(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
         if !self.oflag {
+            self.pc += 1;
             return Ok(());
         }
         self.jmp(arg)?;
@@ -86,6 +88,7 @@ impl CPU {
                 ));
             }
         }
+        self.pc += 1;
         Ok(())
     }
 
@@ -156,12 +159,13 @@ impl CPU {
                 eprint!("{e}");
             }
         }
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_ret(&mut self) -> Result<(), UnrecoverableError> {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
-            self.pc = v as u16;
+            self.pc = v as u16 + 1;
             if self.sp > self.bp {
                 self.memory[self.sp as usize] = None;
                 if self.sp != self.bp {
@@ -201,6 +205,7 @@ impl CPU {
                 }
             }
         }
+        self.pc += 1;
         Ok(())
     }
 
@@ -234,6 +239,7 @@ impl CPU {
             self.memory[addr] = Some(source);
         }
 
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_jmp(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
@@ -243,6 +249,7 @@ impl CPU {
 
     pub fn handle_jz(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
         if !self.zflag {
+            self.pc += 1;
             return Ok(());
         }
         self.jmp(arg)?;
@@ -252,23 +259,23 @@ impl CPU {
     fn jmp(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
         self.handle_push(&Argument::Literal(self.pc.try_into().unwrap()))?;
         if let MemAddr(n) = arg {
-            if { *n } - 1 < 0 {
+            if *n < 0 {
                 return Err(UnrecoverableError::IllegalInstruction(
                     self.ir,
                     self.pc,
                     Some("attempted to jump to an invalid address".to_string()),
                 ));
             }
-            self.pc = (*n as u16) - 1;
+            self.pc = *n as u16;
         } else if let RegPtr(n) = arg {
-            if self.get_value(&Argument::Register(*n))? - 1.0 < 0.0 {
+            if self.get_value(&Argument::Register(*n))? < 0.0 {
                 return Err(UnrecoverableError::IllegalInstruction(
                     self.ir,
                     self.pc,
                     Some("attempted to jump to an invalid address".to_string()),
                 ));
             }
-            self.pc = (self.get_value(&Argument::Register(*n))? as u16) - 1;
+            self.pc = self.get_value(&Argument::Register(*n))? as u16;
         }
         Ok(())
     }
@@ -285,6 +292,7 @@ impl CPU {
             self.zflag = (result).abs() < f32::EPSILON;
             self.sflag = result < 0.0;
         }
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_mul(
@@ -329,6 +337,7 @@ impl CPU {
                 eprint!("{e}");
             }
         }
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_push(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
@@ -376,6 +385,7 @@ impl CPU {
             }
             self.memory[self.sp as usize] = Some(val as i16);
         }
+        self.pc += 1;
         Ok(())
     }
     pub fn handle_mov(
@@ -396,6 +406,7 @@ impl CPU {
                 }
             }
         }
+        self.pc += 1;
         Ok(())
     }
 
@@ -504,6 +515,7 @@ impl CPU {
                 )
             ),
         }
+        self.pc += 1;
         Ok(())
     }
 }

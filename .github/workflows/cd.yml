@@ -20,20 +20,22 @@ jobs:
     - name: Create output directory
       run: mkdir -p output
 
-    - name: Copy files from Docker container
+    - name: Copy files from Docker builds
       run: |
         docker create --name temp-container belle-image
         docker cp temp-container:/app ./output
         docker rm temp-container
 
-    - name: Set up Git for private repo access
+    - name: Set up Git
       run: |
         git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com".insteadOf "https://github.com"
         
-    - name: Clone private repo
+    - name: Clone and change BELLE-Demo
       run: |
         git clone https://github.com/bluegummi/belle-demo.git
         cd belle-demo
+        rm basm || true
+        rm belle || true
         cp -r ../output/app/* ./
         
     - name: Configure Git for commit
