@@ -1,4 +1,4 @@
-name: Compact Disc
+name: Compact Disc 
 
 on:
   push:
@@ -12,9 +12,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
 
     - name: Build Docker image
       run: |
@@ -33,14 +30,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
-        git clone https://github.com/bluegummi/belle-demo.git
+        git clone https://bluegummi:${{ secrets.PAT_TOKEN }}@github.com/bluegummi/belle-demo.git
         cd belle-demo
 
         cp -r ../output/* ./
 
-        # Commit and push changes
         git config --global user.email "105593618+BlueGummi@users.noreply.github.com"
-        git config --global user.name "Blue Gummi"
+        git config --global user.name "BlueGummi"
         git add .
         git commit -m "Update built files"
         git push origin main
