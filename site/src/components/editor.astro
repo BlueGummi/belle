@@ -31,6 +31,7 @@
             padding: 10px;
             font-size: 0.9em;
             margin-top: 10px;
+            white-space: pre-wrap; /* Preserve whitespace formatting */
         }
     </style>
 </head>
@@ -38,27 +39,30 @@
 
 <div id="inputContainer">
     <textarea id="inputText" rows="10" oninput="updateLineNumbers()">
-	mov r6, 0
-	mov r7, 1
-	push r6
-	push r7
-	jmp @fib_loop
+.ssp [10]
+.sbp [10]
+.start [20]
+        mov r6, 0
+        mov r7, 1
+        push r6
+        push r7
+        jmp @fib_loop
 fib_loop:
-	pop r0
-	mov r5, 0
-	pop r7
-	pop r6
-	add r5, r7
-	add r5, r6
-	mov r6, r7
-	mov r7, r5
-	push r6
-	push r7
-	jo @finish
-	int 5
-	jmp @fib_loop
+        pop r0
+        mov r5, 0
+        pop r7
+        pop r6
+        add r5, r7
+        add r5, r6
+        mov r6, r7
+        mov r7, r5
+        push r6
+        push r7
+        jo @finish
+        int 5
+        jmp @fib_loop
 finish:
-	hlt
+        hlt
     </textarea>
     <button id="runCodeButton">Run</button>
 </div>
@@ -72,14 +76,14 @@ finish:
         outputTextElement.textContent = 'Loading...';
 
         try {
-            const response = await fetch('https://belle-demo.vercel.app/api/runBelle', {
+	    const response = await fetch('https://belle-demo.vercel.app/api/runBelle', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ text: inputText }),
             });
-
+	    console.log(response);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.details || 'No details provided');
