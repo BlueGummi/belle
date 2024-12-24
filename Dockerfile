@@ -4,7 +4,7 @@ WORKDIR /usr/src/belle
 
 COPY . .
 
-RUN chmod +x build.sh && ./build.sh
+RUN chmod +x build.sh && ./build.sh -n
 
 FROM debian:bullseye-slim
 
