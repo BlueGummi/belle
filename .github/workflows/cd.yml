@@ -28,9 +28,9 @@ jobs:
 
     - name: Clone private repo
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.belle }}
       run: |
-        git clone https://bluegummi:${{ secrets.PAT_TOKEN }}@github.com/bluegummi/belle-demo.git
+        git clone https://bluegummi:${{ secrets.belle }}@github.com/bluegummi/belle-demo.git
         cd belle-demo
 
         cp -r ../output/* ./
