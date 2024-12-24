@@ -29,7 +29,7 @@ jobs:
     - name: Set up Git
       run: |
         git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com".insteadOf "https://github.com"
-        
+
     - name: Clone and change BELLE-Demo
       run: |
         git clone https://github.com/bluegummi/belle-demo.git
@@ -37,16 +37,21 @@ jobs:
         rm basm || true
         rm belle || true
         cp -r ../output/app/* ./
-        
+
+    - name: Retrieve last commit message from belle
+      id: get_commit_message
+      run: |
+        LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+        echo "LAST_COMMIT_MESSAGE=${LAST_COMMIT_MESSAGE}" >> $GITHUB_ENV
+
     - name: Configure Git for commit
       run: |
         git config --global user.email "105593618+BlueGummi@users.noreply.github.com"
         git config --global user.name "BlueGummi"
-        
+
     - name: Commit and push changes
       run: |
         cd belle-demo || true
         git add * || true
-        git commit -m "Update built files" || true
-        git push origin || true 
-
+        git commit -m "AUTOCOMMIT - ${{ env.LAST_COMMIT_MESSAGE }}" || true
+        git push origin || true

@@ -259,6 +259,11 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
             .lock()
             .map_err(|_| "Failed to lock START_LOCATION")?;
         *start_location = num;
+    } else {
+        let mut start_location = START_LOCATION
+            .lock()
+            .map_err(|_| "Failed to lock START_LOCATION")?;
+        *start_location = 100;
     }
     Ok(())
 }

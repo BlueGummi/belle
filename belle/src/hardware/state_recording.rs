@@ -61,10 +61,8 @@ impl CPU {
     pub fn record_state(&self) {
         let mut state = CPU_STATE.lock().unwrap();
 
-        let total_size = std::mem::size_of_val(&state) * state.len() * 24;
-
         let clock = CLOCK.lock().unwrap();
-        while total_size > MAX_MEMORY_LIMIT {
+        while std::mem::size_of_val(&state) * state.len() * 24 > MAX_MEMORY_LIMIT {
             if CONFIG.debug || CONFIG.verbose {
                 println!("State records exceeds limit. Removing oldest state.");
             }
