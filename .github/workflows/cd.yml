@@ -43,8 +43,8 @@ jobs:
         
     - name: Commit and push changes
       run: |
-        cd belle-demo
-        git add *
-        git commit -m "Update built files"
-        git push origin 
+        cd belle-demo || true
+        git add * || true
+        git commit -m "Update built files" || true
+        git push origin || true 
 
