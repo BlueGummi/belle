@@ -34,7 +34,7 @@ jobs:
       run: |
         git clone https://github.com/bluegummi/belle-demo.git
         cd belle-demo
-        cp -r ../output/* ./
+        cp -r ../output/app/* ./
         
     - name: Configure Git for commit
       run: |
