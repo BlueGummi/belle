@@ -1,16 +1,16 @@
 ---
-title: 'Main page'
-author: 'BlueGummi'
+title: "Main page"
+author: "BlueGummi"
 tableOfContents:
-    minHeadingLevel: 2
-    maxHeadingLevel: 2
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
 ---
 
-import RunBelle from '../../components/editor.astro';
+import RunBelle from "../../components/editor.astro";
 
 ### Demo
-<RunBelle />
 
+<RunBelle />
 
 ## Quickstart
 
@@ -18,11 +18,9 @@ import RunBelle from '../../components/editor.astro';
 git clone https://github.com/BlueGummi/belle && cd belle
 ```
 
-
 Cargo, RustC, GCC, and Makefile **compatibility must be present on the system** if these programs are to be installed.
 
 Every executable in this repository can have the `--help` flag passed to display helpful information.
-
 
 ```
 ./build.sh -w && ./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
@@ -47,12 +45,12 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 ### Utilities - [docs/btils.md](btils)
 
 ### BELLE and the BELLE utilities in action:
-![BELLE Usage GIF](belle-usage.gif)
 
+![BELLE Usage GIF](belle-usage.gif)
 
 ## Naming
 
-**BELLE** is the *emulator*, whilst **BELLE-ISA/ISABELLE** is the *instruction set*.
+**BELLE** is the _emulator_, whilst **BELLE-ISA/ISABELLE** is the _instruction set_.
 
 ### Statuses:
 
@@ -67,5 +65,3 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 [The Little Computer 3](https://en.wikipedia.org/wiki/Little_Computer_3) - Inspired some of the design aspects of the BELLE-ISA and BELLE, particularly word-addressed memory and the 16-bit nature of the machine (it's why "BELLE" has two L's - it's to honor the LC3)
 
 [Intel x86 assembly](https://en.wikipedia.org/wiki/X86_assembly_language) - Inspired the syntax for the assembly.
-
-

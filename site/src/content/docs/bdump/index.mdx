@@ -2,22 +2,21 @@
 title: The BELLE disassembler - bdump
 author: BlueGummi
 ---
+
 ## Quickstart
 
 If the build and install scripts have not been run, run `make` in the `bdump/` directory to build the disassembler. Then, the diassembler can be executed by calling it with `./bdump`, or can be moved to the PATH of the machine so it can be executed without the need to directly call the binary located in the source code directory.
 
-
 Different flags can be passed to make the disassembler **emit different output**, but none will affect how it assembles code.
 
-
-| Field          | CLI                 | Variable type | Default value | Example    |
-| :------------- | :------------------ | :------------ | :-----------: | :--------- |
-| Binary    | `file`          | String        | `""`          | `main` |
-| Output original binary  | `-b` or `--binary`  | Boolean        | `false`     | `-b`  |
-| Verbose output | `-v` or `--verbose` | Boolean       | `false`       | `-v`       |
-| Debug output   | `-d` or `--debug`   | Boolean       | `false`       | `-d`       |
-| Display colors   | `-c` or `--colors`    | Boolean       | `false`       | `-c`       |
-| Display help   | `-h` or `--help`    | Boolean       | `false`       | `-h`       |
+| Field                  | CLI                 | Variable type | Default value | Example |
+| :--------------------- | :------------------ | :------------ | :-----------: | :------ |
+| Binary                 | `file`              | String        |     `""`      | `main`  |
+| Output original binary | `-b` or `--binary`  | Boolean       |    `false`    | `-b`    |
+| Verbose output         | `-v` or `--verbose` | Boolean       |    `false`    | `-v`    |
+| Debug output           | `-d` or `--debug`   | Boolean       |    `false`    | `-d`    |
+| Display colors         | `-c` or `--colors`  | Boolean       |    `false`    | `-c`    |
+| Display help           | `-h` or `--help`    | Boolean       |    `false`    | `-h`    |
 
 ## Use cases
 

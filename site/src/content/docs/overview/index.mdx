@@ -9,7 +9,6 @@ author: BlueGummi
 2. [Opcodes](#opcodes)
 3. [Labels](#labels)
 
-
 # Introduction
 
 ## Overview
@@ -26,11 +25,11 @@ The opcodes are all fixed to **4 bits**, which reside in the **first 4** bits of
 
 There are **16** total instructions in the **BELLE-ISA**, however, each instruction **can take arguments of different types**. For example, the `mov` instruction can take a **literal value**, **pointer**, **memory address**, or **register** for the right-hand side of the instruction, and the conditional `jump` instructions can all take either a memory address or a register pointer.
 
-To accomplish this, *determinant* bits are used, which allow the CPU to *determine* what the next value is to be interpreted as.
+To accomplish this, _determinant_ bits are used, which allow the CPU to _determine_ what the next value is to be interpreted as.
 
 ## Directives and clock cycles
 
-Instructions in this ISA all take one clock cycle to execute, with the exception of "pseudo-instruction" CPU *directives*. "Pseudo-instructions", such as `.start` and `.ssp` are read once when the instructions are loaded into memory, and the appropriate parts of the CPU are adjusted.
+Instructions in this ISA all take one clock cycle to execute, with the exception of "pseudo-instruction" CPU _directives_. "Pseudo-instructions", such as `.start` and `.ssp` are read once when the instructions are loaded into memory, and the appropriate parts of the CPU are adjusted.
 
 For example, the `.start` directive controls the starting memory address of the program, and thus when it is read by the CPU, the program will begin at a different memory address.
 
@@ -40,8 +39,7 @@ Instructions are all loaded into memory prior to the CPU being run, and the fixe
 
 # Opcodes
 
-The following table contains each operation and its respective *opcode*, in binary format.
-
+The following table contains each operation and its respective _opcode_, in binary format.
 
 | Operation | Opcode |
 | :-------- | :----: |
@@ -61,4 +59,3 @@ The following table contains each operation and its respective *opcode*, in bina
 | `INT`     | `1101` |
 | `MOV`     | `1110` |
 | `NOP`     | `1111` |
-

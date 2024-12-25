@@ -1,24 +1,24 @@
 ---
-title: 'Instructions'
-author: 'BlueGummi'
+title: "Instructions"
+author: "BlueGummi"
 tableOfContents:
-    minHeadingLevel: 2
-    maxHeadingLevel: 2
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
 ---
 
 # Instruction listings
 
 The BELLE-ISA has **16 instructions**. Below is a **description**, **definition**, use case, and example of every instruction.
 
-Please refer to the [encoding](../encoding) document for more information about the **specifics on how certain arguments are encoded**, particularly the meaning of "*determinant bits*" and the different encodings that each instruction can use. This document **omits** such information for brevity's sake, as it is already quite long.
+Please refer to the [encoding](../encoding) document for more information about the **specifics on how certain arguments are encoded**, particularly the meaning of "_determinant bits_" and the different encodings that each instruction can use. This document **omits** such information for brevity's sake, as it is already quite long.
 
 > Note: The BELLE-ISA uses 16 bit long memory addresses.
 
 > Rounding: For instructions that will round a number, the number will simply have its decimal points cut off. It will not be rounded to the nearest integer, it will simply have the decimal places removed. (e.g. 4.5 becomes 4)
 
 ## HLT - Halt
-    
-    `HLT` will halt BELLE when it is encountered. The program will **stop** and gracefully exit, and **no other instructions will be executed**. 
+
+    `HLT` will halt BELLE when it is encountered. The program will **stop** and gracefully exit, and **no other instructions will be executed**.
 
     In binary, it is simply 16 consecutive zeros, thus making it possible to call a halt instruction by simply loading a zero into a memory address and performing a jump to the address.
 
@@ -34,11 +34,11 @@ Please refer to the [encoding](../encoding) document for more information about 
 
         Instruction: `hlt`
 
-        | Opcode   | Rest of instruction | 
+        | Opcode   | Rest of instruction |
         | :-----   | :------ |
         | `[0000]` | `[000000000000]` |
 
-    
+
     ##### Pseudocode representation
         ```go
         running := false
@@ -46,9 +46,9 @@ Please refer to the [encoding](../encoding) document for more information about 
 
 ## ADD - Addition
 
-    `ADD` will perform **arithmetic addition**, taking the second operand (right-hand side), and adding it to the first operand (left-hand side), storing the result in the **first operand**. `ADD` will always take 2 arguments, and can also perform **subtraction** if the value in RHS is **negative**. 
+    `ADD` will perform **arithmetic addition**, taking the second operand (right-hand side), and adding it to the first operand (left-hand side), storing the result in the **first operand**. `ADD` will always take 2 arguments, and can also perform **subtraction** if the value in RHS is **negative**.
 
-    `ADD` will perform **floating point arithmetic** as the 6th and 7th registers are floating-point, however the values will be cast to **integers** if the destination is an integer register. 
+    `ADD` will perform **floating point arithmetic** as the 6th and 7th registers are floating-point, however the values will be cast to **integers** if the destination is an integer register.
 
     `ADD` can only perform floating-point-to-floating-point addition if the two floating-point registers are passed as arguments. Literal values **cannot be floating point**.
 
@@ -57,20 +57,20 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible **RHS** argument types: Register, literal, register pointer, memory address pointer, can be signed and unsigned
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | ADD  | 2         | ADD two values | Adding values in a Fibonacci sequence | `add r0, 3 ; add 3 to r0` |
 
-    
+
     #### Binary encoding
 
         Instruction: `add r4, &r3`
 
-        | Opcode   | LHS     | DTBs     | RHS       | 
+        | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[0001]` | `[100]` | `[0010]` | `[00011]` |
-    
+
     #### Pseudocode representation
         ```go
         lhs := lhs + rhs
@@ -80,14 +80,14 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     ### JO - Jump if the overflow flag is set, JZ - Jump if the zero flag is set
 
-    `JO` and `JZ` perform **conditional jumps**, which set the CPU's program counter to the destination specified. 
+    `JO` and `JZ` perform **conditional jumps**, which set the CPU's program counter to the destination specified.
 
     `JO` will only jump if the overflow flag on the CPU is set. This flag becomes set if an **arithmetic operation** (e.g. `add`, `mul`) overflows the **destination** register.
 
     `JZ` will only jump if the zero flag is set. This flag becomes set if a *compare* instruction (`cmp`) has two operands that are of the same value.
 
-    When `JO` or `JZ` are performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted. 
-    
+    When `JO` or `JZ` are performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
+
     > **Note**: The value it pushes onto the stack may **overflow a memory address**, as memory address values are signed but the addresses themselves are not. Thus, if the program is **very large** or starts at a very high memory address, it may **not be feasible** to retrieve a jumped address as it may have overflowed. This is **unlikely** unless the assembly program is above **27,000 lines of source code**.
 
     The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
@@ -107,15 +107,15 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible DEST types: Register pointer, memory address
 
     Flags affected: Affected by overflow flag and zero flag. Cannot change any flags.
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | JO   | 1         | Jump if overflow flag is true | Leaving a loop when a register overflows | `jo [3] ; jump to address 3 if overflow flag is set` |
 
-| Name | Arguments | Description | Use case | Example |
-    | :--- | :-------- | :---------: | :------- | :------ |
-    | JZ   | 1         | Jump if zero flag is true | Jumping somewhere after a `cmp` | `jz [42] ; jump to address 42 if zero flag is set` |
-    
+| Name | Arguments |        Description        | Use case                        | Example                                            |
+| :--- | :-------- | :-----------------------: | :------------------------------ | :------------------------------------------------- |
+| JZ   | 1         | Jump if zero flag is true | Jumping somewhere after a `cmp` | `jz [42] ; jump to address 42 if zero flag is set` |
+
     #### Binary encoding
 
         Instruction: `jo &r3`
@@ -124,7 +124,7 @@ Please refer to the [encoding](../encoding) document for more information about 
         | :-----   | :------ | :--- |
         | `[0010]` | `[1]` | `[00000000011]` |
 
-   #### Binary encoding
+#### Binary encoding
 
         Instruction: `jz [1]`
 
@@ -144,10 +144,10 @@ Please refer to the [encoding](../encoding) document for more information about 
                 throw overflow_err
 
             memory[sp] := pc // push onto stack
-            
+
             if dtb = 1
                 pc := reg_val(dest)
-            else 
+            else
                 pc := memory[dest]
         else
             return
@@ -155,7 +155,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
 ## POP - Pop off the stack
 
-    `POP` reads the stack pointer, and then "`pop`s" the value contained at the stack pointer into **a destination**. The destination can only **be a register**, and `POP` will only ever take one argument. The value at the **top of the call stack** - which is referenced with the stack pointer - will be **cleared**, and the stack pointer will be adjusted depending on the direction the call stack is "going". 
+    `POP` reads the stack pointer, and then "`pop`s" the value contained at the stack pointer into **a destination**. The destination can only **be a register**, and `POP` will only ever take one argument. The value at the **top of the call stack** - which is referenced with the stack pointer - will be **cleared**, and the stack pointer will be adjusted depending on the direction the call stack is "going".
 
     If a `POP` instruction is called **whilst the stack pointer does not point to a value**, the CPU will report a *stack underflow* - a type of segmentation fault - where the call stack does not have enough data to satisfy a `POP` instruction.
 
@@ -164,12 +164,12 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible DEST argument types: Register
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | POP  | 1         | Take a value off the stack | Retrieving a memory address from a JMP | `pop %r4 ; pop a value off the stack into register 4` |
 
-    
+
     #### Binary encoding
 
         Instruction: `pop r2`
@@ -192,11 +192,11 @@ Please refer to the [encoding](../encoding) document for more information about 
             sp := sp + 1
         ```
 
-## DIV - Division 
+## DIV - Division
 
     `DIV` divides LHS by RHS, storing the result in LHS.
 
-    `DIV` will perform **arithmetic division** between the two arguments passed to it, and the result will be **cast to an integer** if the destination is not a register **capable of storing floating point values** (any register that is not register 6 or 7). 
+    `DIV` will perform **arithmetic division** between the two arguments passed to it, and the result will be **cast to an integer** if the destination is not a register **capable of storing floating point values** (any register that is not register 6 or 7).
 
     If `DIV` results in a value with a remainder, the `remainder flag` will be set.
 
@@ -205,26 +205,26 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible RHS argument types: Register, literal, register pointer, memory address pointer, can be signed and unsigned
 
     Flags affected: Remainder flag
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | DIV  | 2         | DIVide two values | Floating-point math | `div r4, 3 ; divide value in r4 by 3` |
 
-    
+
     #### Binary encoding
 
         Instruction: `div r1, &2`
 
-        | Opcode   | LHS     | DTBs     | RHS       | 
+        | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[0100]` | `[001]` | `[0100]` | `[00010]` |
 
     #### Pseudocode representation
         ```go
         lhs := lhs / rhs
-	
-	if remainder
-	    rflag := true
+
+    if remainder
+        rflag := true
         ```
 
 ## RET - Return
@@ -249,17 +249,17 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible argument types: None
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | RET | None | Return | Returning from a jump | `ret` |
 
-    
+
     #### Binary encoding
 
         Instruction: `ret`
 
-        | Opcode   | Rest of instruction | 
+        | Opcode   | Rest of instruction |
         | :-----   | :------ |
         | `[0101]` | `[000000000000]` |
 
@@ -267,7 +267,7 @@ Please refer to the [encoding](../encoding) document for more information about 
         ```go
         if memory[sp] = NULL
             throw underflow_err
-        
+
         pc := memory[sp]
         memory[sp] := NULL
 
@@ -278,26 +278,26 @@ Please refer to the [encoding](../encoding) document for more information about 
 
         ```
 
-## LD - Load direct 
+## LD - Load direct
 
     `LD` will read the **memory address** provided by the **RHS**, and retrieve the value at the memory address specified. Then, the value will be loaded into the register provided by the **LHS** of the instruction. If no value is found, a **segmentation fault** will occur, and the emulator will halt.
 
     Compatible LHS argument types: Register
 
-    Compatible RHS argument types: Memory address 
+    Compatible RHS argument types: Memory address
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | LD  | 2 | Load from address to register  | Loading to registers | `ld r0, [40] ; load value at address 40 into r0`  |
 
-    
+
     #### Binary encoding
 
         Instruction: `ld r5, [42]`
 
-        | Opcode   | LHS     | RHS       | 
+        | Opcode   | LHS     | RHS       |
         | :-----   | :------ | :-------- |
         | `[0110]` | `[101]` | `[000101010]` |
 
@@ -320,17 +320,17 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible RHS argument types: Register
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | ST | 2 | Store into an address | `<---` | `st [4], r1 ; store r1 into addr 4` |
 
-    
+
     #### Binary encoding
 
         Instruction: `st &r3, r4`
 
-        | Opcode   | DTB     | LHS     | RHS       | 
+        | Opcode   | DTB     | LHS     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[0111]` | `[1]` | `[011]` | `[00000100]` |
 
@@ -342,12 +342,13 @@ Please refer to the [encoding](../encoding) document for more information about 
     else
         memory[lhs] := reg_val(rhs)
     ```
+
 ## JMP - Unconditional jump
 
     `JMP` performs an **unconditional jump**, which sets the CPU's program counter to the destination specified.
 
-    When `JMP` is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JMP`, the return address must first be removed, or the stack and base pointers must be adjusted. 
-    
+    When `JMP` is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JMP`, the return address must first be removed, or the stack and base pointers must be adjusted.
+
     > **Note**: The value it pushes onto the stack may **overflow a memory address**, as memory address values are signed but the addresses themselves are not. Thus, if the program is **very large** or starts at a very high memory address, it may **not be feasible** to retrieve a jumped address as it may have overflowed. This is **unlikely** unless the assembly program is above **27,000 lines of source code**.
 
     As subroutines and labels in assembly **resolve to memory addresses**, `JMP` will always jump to a memory address if the jump location is a subroutine, granted the destination is small enough to fit within `11` bits.
@@ -360,13 +361,13 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     Compatible DEST types: Register pointer, memory address
 
-    Flags affected: None 
-    
+    Flags affected: None
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | JMP   | 1         | Jump | Recursion | `jmp [31] ; jump to address 31` |
 
-    
+
     #### Binary encoding
 
         Instruction: `jmp [50]`
@@ -386,10 +387,10 @@ Please refer to the [encoding](../encoding) document for more information about 
             throw overflow_err
 
         memory[sp] := pc // push onto stack
-            
+
         if dtb = 1
             pc := reg_val(dest)
-        else 
+        else
             pc := memory[dest]
         ```
 
@@ -401,24 +402,24 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     `CMP` will set the **sign flag** if the LHS is less than the RHS (if the result is negative), and it will be unset if the LHS is **greater than** the RHS.
 
-    `CMP` can be used along with `JZ` to perform a **conditional jump** out of a loop after recursion occurs enough times in a loop. 
+    `CMP` can be used along with `JZ` to perform a **conditional jump** out of a loop after recursion occurs enough times in a loop.
 
     Compatible LHS argument types: Register
 
     Compatible RHS argument types: Register, literal, register pointer, memory address pointer, can be signed and unsigned
 
     Flags affected: Zero flag, sign flag
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | CMP  |  2        | Compare RHS and LHS | Exiting loops | `cmp r3, 4 ; compare value in r3 to literal 4` |
 
-    
+
     #### Binary encoding
 
         Instruction: `cmp r4, 1`
 
-        | Opcode   | LHS     | DTBs     | RHS       | 
+        | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[1010]` | `[0100]` | `[1000]` | `[0001]` |
 
@@ -426,7 +427,7 @@ Please refer to the [encoding](../encoding) document for more information about 
     ```go
     if lhs = rhs
     	zflag := true
-    
+
     if lhs < rhs
         sflag := true
     ```
@@ -446,23 +447,23 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible RHS argument types: Register, literal, register pointer, memory address pointer, can be signed and unsigned
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | MUL  |  2        | Multiply two values | Achieving large numbers in registers | `mul r4, 3 ; multiply r4 by 3` |
 
-    
+
     #### Binary encoding
 
         Instruction: `mul r2, 42`
 
-        | Opcode   | LHS     | DTBs     | RHS       | 
+        | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[1011]` | `[010]` | `[1]` | `[00101010]` |
 
     #### Pseudocode representation
     ```go
-    lhs := lhs * rhs 
+    lhs := lhs * rhs
     ```
 
 ## PUSH - Push a value onto the stack
@@ -480,17 +481,17 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible SRC argument types: Register, literal
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | PUSH  | 1         | Push onto the stack | Pushing a return address | `push 4 ; push literal 4 onto stack` |
 
-    
+
     #### Binary encoding
 
         Instruction: `push 55`
 
-        | Opcode   | Padding | DTBs     | RHS       | 
+        | Opcode   | Padding | DTBs     | RHS       |
         | :-----   | :-----  |:------- | :-------- |
         | `[1100]` | `[000]` |`[1]` | `[00110111]` |
 
@@ -522,37 +523,38 @@ Please refer to the [encoding](../encoding) document for more information about 
     Below is a table for interrupt codes and their functions.
 
     | Code | Action                                                                                  |
+
 |:------|:----------------------------------------------------------------------------------------------------|
-| 0-7  | Print the value at the register specified by `code` to stdout as their numeric values |
-| 8    | Print values from memory indexed by `r0` to `r1` as characters |
-| 9    | Read a single byte from stdin and store it in `r0` |
-| 10   | Pause the CPU for 1 second |
-| 11   | Set the zero flag     |
-| 12   | Unset the zero flag   |
-| 13   | Invert the zero flag  |
-| 20   | Set the maximum clock cycles to the value in `r0` |
-| 21   | Set the overflow flag  |
-| 22   | Unset the overflow flag |
-| 23   | Invert the overflow flag |
-| 31   | Set the remainder flag |
-| 32   | Unset the remainder flag |
-| 33   | Invert the remainder flag |
-| 41   | Set the sign flag | 
-| 42   | Unset the sign flag |
-| 43   | Invert the sign flag |
-| 51   | Make the CPU halt on overflow      |                                                                    
-| 52   | Make the CPU not halt on overflow  |
-| 53   | Invert the CPU's halt on overflow property |
-| 60   | Set the stack pointer to the value in `r4` |
-| 61   | Set the base pointer to the value in `r4` |
+| 0-7 | Print the value at the register specified by `code` to stdout as their numeric values |
+| 8 | Print values from memory indexed by `r0` to `r1` as characters |
+| 9 | Read a single byte from stdin and store it in `r0` |
+| 10 | Pause the CPU for 1 second |
+| 11 | Set the zero flag |
+| 12 | Unset the zero flag |
+| 13 | Invert the zero flag |
+| 20 | Set the maximum clock cycles to the value in `r0` |
+| 21 | Set the overflow flag |
+| 22 | Unset the overflow flag |
+| 23 | Invert the overflow flag |
+| 31 | Set the remainder flag |
+| 32 | Unset the remainder flag |
+| 33 | Invert the remainder flag |
+| 41 | Set the sign flag |
+| 42 | Unset the sign flag |
+| 43 | Invert the sign flag |
+| 51 | Make the CPU halt on overflow |  
+| 52 | Make the CPU not halt on overflow |
+| 53 | Invert the CPU's halt on overflow property |
+| 60 | Set the stack pointer to the value in `r4` |
+| 61 | Set the base pointer to the value in `r4` |
 
     Flags affected: All
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | INT  |  1        | Pseudo-instruction | Printing to stdout | `int 52 ; don't halt on overflow` |
 
-    
+
     #### Binary encoding
 
         Instruction: `int #42`
@@ -578,20 +580,20 @@ Please refer to the [encoding](../encoding) document for more information about 
     Compatible **RHS** argument types: Register, literal, register pointer, memory address pointer, can be signed and unsigned
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | MOV  | 2         | Copy a value | Any program ever | `mov r0, 22 ; mov 22 into r0` |
 
-    
+
     #### Binary encoding
 
         Instruction: `mov r4, &r3`
 
-        | Opcode   | LHS     | DTBs     | RHS       | 
+        | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
         | `[1110]` | `[100]` | `[0010]` | `[00011]` |
-    
+
     #### Pseudocode representation
         ```go
         lhs := rhs // we'll ignore segfaults
@@ -604,24 +606,21 @@ Please refer to the [encoding](../encoding) document for more information about 
     In BELLE, the emulated `NOP` instruction calls a *real* `NOP` instruction via *inline assembly*.
 
     Flags affected: None
-    
+
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
     | NOP  | 0 | NO-OP | Timing alignments | `nop ; do nothing` |
 
-    
+
     #### Binary encoding
 
         Instruction: `nop`
 
-        | Opcode   | Rest of instruction | 
+        | Opcode   | Rest of instruction |
         | :-----   | :-----------------: |
         | `[1111]` | `[000000000000]`  |
-    
+
     #### Pseudocode representation
         ```go
         // 😛
         ```
-
-
-
