@@ -1,95 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        body {
-            font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
-            margin: 20px;
-        }
-        #inputContainer {
-            display: flex;
-            min-height: fit-content;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-top: 20px; /* Added top margin */
-        }
-        #lineNumbers {
-            padding: 10px;
-            border-right: 1px solid #ccc;
-            text-align: right;
-            user-select: none;
-            font-family: monospace;
-            font-size: 1em;
-            line-height: 1.5;
-            width: 40px;
-            height: auto;
-            overflow: auto;
-        }
-        #inputText {
-            flex: 1;
-            font-family: monospace;
-            font-size: 1em;
-            line-height: 1.5;
-            min-height: fit-content;
-            margin-top: -1.5px;
-            border: none;
-            padding: 10px;
-            overflow: auto;
-        }
-        #inputText:focus {
-            outline: none;
-        }
-        #runCodeButton {
-            position: absolute;
-            top: 270px;
-            right: 600px;
-        }
-        #outputText {
-            border: 1px solid #ccc;
-            padding: 10px;
-            font-size: 0.9em;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
-    </style>
-</head>
-<body>
-<div id="inputContainer">
-    <div id="lineNumbers"></div>
-    <div id="inputText" contenteditable="true" oninput="updateLineNumbers()" spellcheck="false">
-        .ssp [10]<br>
-        .sbp [10]<br>
-        .start [20]<br>
-                mov r6, 0<br>
-                mov r7, 1<br>
-                push r6<br>
-                push r7<br>
-                jmp @fib_loop<br>
-        fib_loop:<br>
-                pop r0<br>
-                mov r5, 0<br>
-                pop r7<br>
-                pop r6<br>
-                add r5, r7<br>
-                add r5, r6<br>
-                mov r6, r7<br>
-                mov r7, r5<br>
-                push r6<br>
-                push r7<br>
-                jo @finish<br>
-                int 5<br>
-                jmp @fib_loop<br>
-        finish:<br>
-                hlt<br>
-    </div>
-    <button id="runCodeButton">Run</button>
-</div>
-<pre id="outputText"></pre>
+      body {
+        font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
+        margin: 20px;
+      }
+      #inputContainer {
+        position: relative;
+        display: flex;
+        min-height: fit-content;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
 
-<script>
-    const loadingTexts = [
+      #runCodeButton {
+        position: absolute;
+        top: -5px;
+        right: 10px;
+      }
+
+      #lineNumbers {
+        padding: 10px;
+        border-right: 1px solid #ccc;
+        text-align: right;
+        user-select: none;
+        font-family: monospace;
+        font-size: 1em;
+        line-height: 1.5;
+        width: 40px;
+        height: auto;
+        overflow: auto;
+      }
+      #inputText {
+        flex: 1;
+        font-family: monospace;
+        font-size: 1em;
+        line-height: 1.5;
+        min-height: fit-content;
+        margin-top: -1.5px;
+        border: none;
+        padding: 10px;
+        overflow: auto;
+      }
+      #inputText:focus {
+        outline: none;
+      }
+      #outputText {
+        border: 1px solid #ccc;
+        padding: 10px;
+        font-size: 0.9em;
+        margin-top: 10px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="inputContainer">
+      <div id="lineNumbers"></div>
+      <div
+        id="inputText"
+        contenteditable="true"
+        oninput="updateLineNumbers()"
+        spellcheck="false"
+      >
+        .ssp [10]<br />
+        .sbp [10]<br />
+        .start [20]<br />
+        mov r6, 0<br />
+        mov r7, 1<br />
+        push r6<br />
+        push r7<br />
+        jmp @fib_loop<br />
+        fib_loop:<br />
+        pop r0<br />
+        mov r5, 0<br />
+        pop r7<br />
+        pop r6<br />
+        add r5, r7<br />
+        add r5, r6<br />
+        mov r6, r7<br />
+        mov r7, r5<br />
+        push r6<br />
+        push r7<br />
+        jo @finish<br />
+        int 5<br />
+        jmp @fib_loop<br />
+        finish:<br />
+        hlt<br />
+      </div>
+      <button id="runCodeButton">Run</button>
+    </div>
+    <pre id="outputText"></pre>
+
+    <script>
+      const loadingTexts = [
         "Loading...",
         "Running...",
         "Executing...",
@@ -98,62 +106,69 @@
         "Compiling LLVM...",
         "Overflowing stacks...",
         "Generating SIGILLs...",
-    ];
+      ];
 
-    function getRandomLoadingText() {
+      function getRandomLoadingText() {
         const randomIndex = Math.floor(Math.random() * loadingTexts.length);
         return loadingTexts[randomIndex];
-    }
+      }
 
-    function updateLineNumbers() {
-        const inputText = document.getElementById('inputText');
-        const lineNumbers = document.getElementById('lineNumbers');
-        const lines = inputText.innerText.split('\n').length;
-        lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
-    }
+      function updateLineNumbers() {
+        const inputText = document.getElementById("inputText");
+        const lineNumbers = document.getElementById("lineNumbers");
+        const lines = inputText.innerText.split("\n").length;
+        lineNumbers.innerHTML = Array.from(
+          { length: lines },
+          (_, i) => i + 1,
+        ).join("<br>");
+      }
 
-    document.getElementById('runCodeButton').addEventListener('click', async () => {
-        const inputText = document.getElementById('inputText').innerText;
-        const outputTextElement = document.getElementById('outputText');
+      document
+        .getElementById("runCodeButton")
+        .addEventListener("click", async () => {
+          const inputText = document.getElementById("inputText").innerText;
+          const outputTextElement = document.getElementById("outputText");
 
-        outputTextElement.textContent = getRandomLoadingText();
+          outputTextElement.textContent = getRandomLoadingText();
 
-        try {
-            const fetchPromise = fetch('https://belle-demo.vercel.app/api/runBelle', {
-                method: 'POST',
+          try {
+            const fetchPromise = fetch(
+              "https://belle-demo.vercel.app/api/runBelle",
+              {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ text: inputText }),
-            });
+              },
+            );
 
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 10000)
+              setTimeout(() => reject(new Error("Request timed out")), 10000),
             );
 
             const response = await Promise.race([fetchPromise, timeoutPromise]);
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.details || 'No details provided');
+              const errorData = await response.json();
+              throw new Error(errorData.details || "No details provided");
             }
 
             const data = await response.json();
 
-            if (data && typeof data === 'object') {
-                const output = data.output || 'No output available';
-                outputTextElement.textContent = output;
+            if (data && typeof data === "object") {
+              const output = data.output || "No output available";
+              outputTextElement.textContent = output;
             } else {
-                outputTextElement.textContent = 'Unexpected response format';
+              outputTextElement.textContent = "Unexpected response format";
             }
-
-        } catch (error) {
-            console.error('Fetch error:', error);
+          } catch (error) {
+            console.error("Fetch error:", error);
             outputTextElement.textContent = `Error: ${error.message}`;
-        }
-    });
+          }
+        });
 
-    updateLineNumbers();
-</script>
-</body>
+      updateLineNumbers();
+    </script>
+  </body>
 </html>
