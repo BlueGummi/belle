@@ -5,40 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: "Segoe UI", "Helvetica neue", "Arial", sans-serif;
+            font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
             margin: 20px;
         }
         #inputContainer {
-            position: relative;
+            display: flex;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            min-width: 40px;
         }
-        #inputText {
-            width: 100%;
-            margin-bottom: 10px;
+        #lineNumbers {
+            padding: 10px;
+            border-right: 1px solid #ccc;
+            text-align: right;
+            user-select: none;
             font-family: monospace;
             font-size: 1em;
             line-height: 1.5;
-            border: 1px solid #ccc;
-            resize: vertical;
+            width: 40px;
+            height: auto;
+            overflow: auto;
+        }
+        #inputText {
+            flex: 1;
+            font-family: monospace;
+            font-size: 1em;
+            line-height: 1.5;
+            border: none;
             padding: 10px;
+            margin-top: 0;
+            overflow: auto;
+            resize: none;
+        }
+        #inputText:focus {
+            outline: none;
         }
         #runCodeButton {
             position: absolute;
-            top: -5px;
-            right: 30px;
+            top: 17em;
+            right: 37em;
         }
         #outputText {
             border: 1px solid #ccc;
             padding: 10px;
             font-size: 0.9em;
             margin-top: 10px;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
-
 <div id="inputContainer">
-    <textarea id="inputText" rows="10" oninput="updateLineNumbers()">
+    <div id="lineNumbers"></div>
+    <textarea id="inputText" rows="10" oninput="updateLineNumbers(); this.scrollTop = this.scrollHeight;">
 .ssp [10]
 .sbp [10]
 .start [20]
@@ -62,7 +82,7 @@ fib_loop:
         int 5
         jmp @fib_loop
 finish:
-        hlt
+hlt
     </textarea>
     <button id="runCodeButton">Run</button>
 </div>
@@ -77,12 +97,19 @@ finish:
         "Handling OOMs...",
         "Compiling LLVM...",
         "Overflowing stacks...",
-        "Eating apples and grapes...",
+        "Generating SIGILLs...",
     ];
 
     function getRandomLoadingText() {
         const randomIndex = Math.floor(Math.random() * loadingTexts.length);
         return loadingTexts[randomIndex];
+    }
+
+    function updateLineNumbers() {
+        const inputText = document.getElementById('inputText');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const lines = inputText.value.split('\n').length;
+        lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
     }
 
     document.getElementById('runCodeButton').addEventListener('click', async () => {
@@ -100,7 +127,7 @@ finish:
                 body: JSON.stringify({ text: inputText }),
             });
 
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Request timed out')), 10000)
             );
 
@@ -125,6 +152,8 @@ finish:
             outputTextElement.textContent = `Error: ${error.message}`;
         }
     });
+
+    updateLineNumbers();
 </script>
 </body>
 </html>
