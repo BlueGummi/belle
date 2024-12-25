@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,15 +14,7 @@
         min-height: fit-content;
         border: 1px solid #ccc;
         border-radius: 5px;
-        margin-top: 20px;
       }
-
-      #runCodeButton {
-        position: absolute;
-        top: -5px;
-        right: 10px;
-      }
-
       #lineNumbers {
         padding: 10px;
         border-right: 1px solid #ccc;
@@ -33,26 +25,36 @@
         line-height: 1.5;
         width: 40px;
         height: auto;
-        overflow: auto;
+        overflow: hidden;
+        white-space: pre-wrap;
+      }
+      #inputTextWrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
       #inputText {
-        flex: 1;
         font-family: monospace;
         font-size: 1em;
         line-height: 1.5;
-        min-height: fit-content;
-        margin-top: -1.5px;
-        border: none;
         padding: 10px;
-        overflow: auto;
+        position: absolute;
+        top: 0;
+        left: 40px;
+        width: calc(100% - 40px);
+        border: none;
+        resize: none;
       }
-      #inputText:focus {
-        outline: none;
+
+      #runCodeButton {
+        position: absolute;
+        top: -12px;
+        right: 4px;
       }
       #outputText {
         border: 1px solid #ccc;
         padding: 10px;
-        font-size: 0.9em;
+        font-size: 1em;
         margin-top: 10px;
         white-space: pre-wrap;
       }
@@ -61,42 +63,67 @@
   <body>
     <div id="inputContainer">
       <div id="lineNumbers"></div>
-      <div
-        id="inputText"
-        contenteditable="true"
-        oninput="updateLineNumbers()"
-        spellcheck="false"
-      >
-        .ssp [10]<br />
-        .sbp [10]<br />
-        .start [20]<br />
-        mov r6, 0<br />
-        mov r7, 1<br />
-        push r6<br />
-        push r7<br />
-        jmp @fib_loop<br />
-        fib_loop:<br />
-        pop r0<br />
-        mov r5, 0<br />
-        pop r7<br />
-        pop r6<br />
-        add r5, r7<br />
-        add r5, r6<br />
-        mov r6, r7<br />
-        mov r7, r5<br />
-        push r6<br />
-        push r7<br />
-        jo @finish<br />
-        int 5<br />
-        jmp @fib_loop<br />
-        finish:<br />
-        hlt<br />
+      <div id="inputTextWrapper">
+        <textarea
+          id="inputText"
+          rows="1"
+          oninput="updateLineNumbers(); adjustHeight()"
+          spellcheck="false"
+        >
+.ssp [10]
+.sbp [10]
+.start [20]
+        mov r6, 0
+        mov r7, 1
+        push r6
+        push r7
+        jmp @fib_loop
+fib_loop:
+        pop r0
+        mov r5, 0
+        pop r7
+        pop r6
+        add r5, r7
+        add r5, r6
+        mov r6, r7
+        mov r7, r5
+        push r6
+        push r7
+        jo @finish
+        int 5
+        jmp @fib_loop
+finish:
+        hlt
+        </textarea>
       </div>
       <button id="runCodeButton">Run</button>
     </div>
     <pre id="outputText"></pre>
 
     <script>
+      function updateLineNumbers() {
+        const inputText = document.getElementById("inputText");
+        const lineNumbers = document.getElementById("lineNumbers");
+
+        const lines = inputText.value.split("\n").length;
+
+        lineNumbers.innerHTML = Array.from(
+          { length: lines },
+          (_, i) => i + 1,
+        ).join("<br>");
+      }
+
+      function adjustHeight() {
+        const inputText = document.getElementById("inputText");
+        inputText.style.height = "auto";
+        inputText.style.height = `${inputText.scrollHeight}px`;
+      }
+
+      window.addEventListener("load", () => {
+        updateLineNumbers();
+        adjustHeight();
+      });
+
       const loadingTexts = [
         "Loading...",
         "Running...",
@@ -105,7 +132,7 @@
         "Handling OOMs...",
         "Compiling LLVM...",
         "Overflowing stacks...",
-        "Generating SIGILLs...",
+        "Eating apples and grapes...",
       ];
 
       function getRandomLoadingText() {
@@ -113,20 +140,10 @@
         return loadingTexts[randomIndex];
       }
 
-      function updateLineNumbers() {
-        const inputText = document.getElementById("inputText");
-        const lineNumbers = document.getElementById("lineNumbers");
-        const lines = inputText.innerText.split("\n").length;
-        lineNumbers.innerHTML = Array.from(
-          { length: lines },
-          (_, i) => i + 1,
-        ).join("<br>");
-      }
-
       document
         .getElementById("runCodeButton")
         .addEventListener("click", async () => {
-          const inputText = document.getElementById("inputText").innerText;
+          const inputText = document.getElementById("inputText").value;
           const outputTextElement = document.getElementById("outputText");
 
           outputTextElement.textContent = getRandomLoadingText();
@@ -167,8 +184,6 @@
             outputTextElement.textContent = `Error: ${error.message}`;
           }
         });
-
-      updateLineNumbers();
     </script>
   </body>
 </html>
