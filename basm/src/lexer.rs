@@ -358,11 +358,17 @@ impl<'a> Lexer<'a> {
         let map = VARIABLE_MAP.lock().unwrap();
         if let Some(&replacement) = map.get(variable.trim()) {
             if input.starts_with('$') || input.starts_with('[') {
+
                 self.tokens.push(Token::MemAddr(replacement as i16));
+
             } else if input.starts_with('#') {
+
                 self.tokens.push(Token::Literal(replacement as i16));
+
             } else if input.starts_with('&') {
+
                 self.tokens.push(Token::MemPointer(replacement as i16));
+
             }
             Ok(())
         } else {
