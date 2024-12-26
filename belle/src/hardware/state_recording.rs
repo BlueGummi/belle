@@ -16,7 +16,7 @@ pub struct ModCPU {
     pub int_reg: [i16; 4], // r0 thru r5
     pub uint_reg: [u16; 2],
     pub float_reg: [f32; 2], // r6 and r7
-    pub memory: Vec<(u16, i16)>,
+    pub memory: Vec<(u16, u16)>,
     pub pc: u16, // program counter
     pub ir: i16,
     pub running: bool,
@@ -31,7 +31,7 @@ pub struct ModCPU {
 
 impl ModCPU {
     pub fn modcpu_from_cpu(origin: &CPU) -> ModCPU {
-        let memory: Vec<(u16, i16)> = origin
+        let memory: Vec<(u16, u16)> = origin
             .memory
             .iter()
             .enumerate()
@@ -100,7 +100,7 @@ impl CPU {
             println!("  Disassembled Instruction : {}", tmp.parse_instruction());
             if let Some((_, n)) = cpu.memory.iter().find(|&&(first, _)| first == cpu.pc) {
                 let mut tmp = CPU::new();
-                tmp.ir = *n;
+                tmp.ir = *n as i16;
                 println!("  Next instruction         : {}\n", tmp.parse_instruction());
             }
         } else {

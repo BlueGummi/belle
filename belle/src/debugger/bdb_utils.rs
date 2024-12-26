@@ -83,7 +83,7 @@ impl BDB {
             self.dbgcpu.has_ran = true;
             while !self.breakpoints.contains(&self.dbgcpu.pc) {
                 self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-                    value
+                    value as i16
                 } else {
                     eprintln!("Nothing at PC {}", self.dbgcpu.pc);
                     return;
@@ -117,7 +117,7 @@ impl BDB {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
-                self.dbgcpu.ir = memvalue;
+                self.dbgcpu.ir = memvalue as i16;
                 println!("Dumped instruction: {}", self.dbgcpu.parse_instruction());
                 self.dbgcpu.ir = oldvalue;
             } else {
@@ -155,7 +155,7 @@ impl BDB {
 
     pub fn handle_execute(&mut self) {
         self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-            value
+            value as i16
         } else {
             eprintln!("Nothing at PC {}", self.dbgcpu.pc);
             return;
@@ -173,7 +173,7 @@ impl BDB {
     pub fn handle_print_all_memory(&mut self) {
         for (index, element) in self.dbgcpu.memory.iter().enumerate() {
             if let Some(value) = element {
-                self.dbgcpu.ir = *value;
+                self.dbgcpu.ir = *value as i16;
                 println!("Value at {} is {}", index, self.dbgcpu.parse_instruction());
             }
         }
@@ -203,7 +203,7 @@ impl BDB {
         );
 
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-            self.dbgcpu.ir = n;
+            self.dbgcpu.ir = n as i16;
             println!(
                 "  Next instruction         : {}",
                 self.dbgcpu.parse_instruction()
@@ -216,7 +216,7 @@ impl BDB {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
-                self.dbgcpu.ir = memvalue;
+                self.dbgcpu.ir = memvalue as i16;
                 println!("{}", self.dbgcpu.parse_instruction());
                 self.dbgcpu.ir = oldvalue;
 
@@ -232,13 +232,13 @@ impl BDB {
                 }
 
                 if buffer.trim().starts_with("0b") {
-                    if let Ok(val) = i32::from_str_radix(&buffer.trim()[2..], 2) {
+                    if let Ok(val) = u32::from_str_radix(&buffer.trim()[2..], 2) {
                         println!("Value in memory address {n} set to {val:016b}");
-                        self.dbgcpu.memory[n] = Some(val as i16);
+                        self.dbgcpu.memory[n] = Some(val as u16);
                     } else {
                         println!("Input could not be parsed to binary");
                     }
-                } else if let Ok(v) = buffer.trim().parse::<i16>() {
+                } else if let Ok(v) = buffer.trim().parse::<u16>() {
                     println!("Value in memory address {n} set to {v}");
                     self.dbgcpu.memory[n] = Some(v);
                 } else {

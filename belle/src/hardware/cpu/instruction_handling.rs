@@ -37,7 +37,7 @@ impl CPU {
                     0
                 }
                 _ => {
-                    let result = self.int_reg[*n as usize].wrapping_add(value as i16);
+                    let result = self.int_reg[*n as usize].wrapping_add(value as u16 as i16);
                     self.int_reg[*n as usize] = result;
                     result as i64 + value as i64
                 }
@@ -149,7 +149,7 @@ impl CPU {
                     if f32::from(self.int_reg[*n as usize]) % divisor != 0.0 {
                         self.rflag = true;
                     }
-                    let result = self.int_reg[*n as usize] / divisor as i16;
+                    let result = self.int_reg[*n as usize] / divisor as u16 as i16;
                     self.int_reg[*n as usize] = result;
                     result as i64
                 }
@@ -165,7 +165,7 @@ impl CPU {
     pub fn handle_ret(&mut self) -> Result<(), UnrecoverableError> {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
-            self.pc = v as u16 + 1;
+            self.pc = v + 1;
             if self.sp > self.bp {
                 self.memory[self.sp as usize] = None;
                 if self.sp != self.bp {
@@ -199,9 +199,8 @@ impl CPU {
                 _ => {
                     if let Err(e) = self.check_overflow(source as i64, *n as u16) {
                         eprint!("{e}");
-                        return Ok(());
                     }
-                    self.int_reg[*n as usize] = source as i16;
+                    self.int_reg[*n as usize] = source as u16 as i16;
                 }
             }
         }
@@ -224,7 +223,7 @@ impl CPU {
                     Some("segmentation fault whilst storing to an address. OOB".to_string()),
                 ));
             }
-            self.memory[index] = Some(source);
+            self.memory[index] = Some(source as u16);
         } else if let RegPtr(n) = arg1 {
             let addr = match self.get_value(&Register(*n)) {
                 Ok(a) => a as usize,
@@ -236,7 +235,7 @@ impl CPU {
                     self.ir, self.pc, None,
                 ));
             }
-            self.memory[addr] = Some(source);
+            self.memory[addr] = Some(source as u16);
         }
 
         self.pc += 1;
@@ -328,7 +327,7 @@ impl CPU {
                 }
                 _ => {
                     self.int_reg[*n as usize] =
-                        self.int_reg[*n as usize].wrapping_mul(value as i16);
+                        self.int_reg[*n as usize].wrapping_mul(value as u16 as i16);
                     (self.int_reg[*n as usize] as i64).wrapping_mul(value as i64)
                 }
             };
@@ -366,7 +365,7 @@ impl CPU {
                 ));
             }
 
-            self.memory[self.sp as usize] = Some(val as i16);
+            self.memory[self.sp as usize] = Some(val as u16);
             if self.sp >= self.bp {
                 self.backward_stack = true;
             }
@@ -383,7 +382,7 @@ impl CPU {
             if self.sp != self.bp || self.memory[self.bp as usize].is_some() {
                 self.sp -= 1;
             }
-            self.memory[self.sp as usize] = Some(val as i16);
+            self.memory[self.sp as usize] = Some(val as u16);
         }
         self.pc += 1;
         Ok(())
@@ -427,7 +426,7 @@ impl CPU {
                 let starting_point = self.int_reg[0];
                 let end_point = self.int_reg[1];
                 let memory = &self.memory;
-                let mut toprint = String::from("");
+                let toprint = String::from("");
                 if end_point < 0
                     || end_point as usize >= memory.len()
                     || starting_point < 0
@@ -446,22 +445,7 @@ impl CPU {
                     }
 
                     if let Some(value) = memory[index as usize] {
-                        match u32::try_from(value) {
-                            Ok(v) => {
-                                if let Some(character) = char::from_u32(v) {
-                                    toprint = format!("{}{}", toprint, character);
-                                } else {
-                                    return Err(self.handle_segmentation_fault(
-                                        "Segmentation fault. Invalid Unicode value.",
-                                    ));
-                                }
-                            }
-                            Err(_) => {
-                                return Err(self.handle_segmentation_fault(
-                    "Segmentation fault. Conversion error from memory value to u32.",
-                ));
-                            }
-                        }
+                        print!("{}", value as u8 as char);
                     }
                 }
                 print!("{toprint}");

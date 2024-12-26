@@ -9,7 +9,7 @@ pub struct CPU {
     pub int_reg: [i16; 4], // r0 thru r5
     pub uint_reg: [u16; 2],
     pub float_reg: [f32; 2],                     // r6 and r7
-    pub memory: Box<[Option<i16>; MEMORY_SIZE]>, // Use Box to allocate the array on the heap
+    pub memory: Box<[Option<u16>; MEMORY_SIZE]>, // Use Box to allocate the array on the heap
     pub pc: u16,                                 // program counter
     pub ir: i16,
     pub starts_at: u16,
@@ -98,7 +98,7 @@ impl CPU {
                 }
                 continue;
             }
-            self.memory[counter + self.starts_at as usize] = Some(*element);
+            self.memory[counter + self.starts_at as usize] = Some(*element as u16);
             if CONFIG.verbose {
                 println!("Element {element:016b} loaded into memory");
             }
@@ -165,11 +165,10 @@ impl CPU {
             thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
             std::mem::drop(clock); // clock must go bye bye so it unlocks
 
-            // Check for segmentation fault
             match self.memory[self.pc as usize] {
                 Some(instruction) => {
                     self.ip = self.pc;
-                    self.ir = instruction;
+                    self.ir = instruction as i16;
                 }
                 None => {
                     if CONFIG.verbose {

@@ -88,8 +88,6 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     When `JO` or `JZ` are performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
 
-    > **Note**: The value it pushes onto the stack may **overflow a memory address**, as memory address values are signed but the addresses themselves are not. Thus, if the program is **very large** or starts at a very high memory address, it may **not be feasible** to retrieve a jumped address as it may have overflowed. This is **unlikely** unless the assembly program is above **27,000 lines of source code**.
-
     The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
 
     The zero flag can be set **unconditionally** with `int 11`, **unset** with `int 12`, and **inverted** with `int 13`.
