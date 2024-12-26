@@ -2,7 +2,7 @@
 
 [![Linux Build](https://github.com/BlueGummi/belle/actions/workflows/ci.yml/badge.svg)](https://github.com/BlueGummi/belle/actions/workflows/ci.yml) 
 [![Deploy Astro site to Pages](https://github.com/BlueGummi/belle/actions/workflows/publish.yml/badge.svg)](https://github.com/BlueGummi/belle/actions/workflows/publish.yml)
-[![Demo](https://github.com/BlueGummi/belle/actions/workflows/cd.yml/badge.svg)](https://github.com/BlueGummi/belle/actions/workflows/cd.yml)
+[![Demo](http://therealsujitk-vercel-badge.vercel.app/?app=belle-demo)
 
 All documentation is available on [the website for this project](https://bluegummi.github.io/belle) 
 
