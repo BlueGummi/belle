@@ -196,8 +196,8 @@ impl CPU {
             match *n {
                 4 => self.uint_reg[0] = source as u16,
                 5 => self.uint_reg[1] = source as u16,
-                6 => self.float_reg[0] = source,
-                7 => self.float_reg[1] = source,
+                6 => self.float_reg[0] = source as u16 as i16 as f32,
+                7 => self.float_reg[1] = source as u16 as i16 as f32,
                 n if n > 5 => return Err(self.report_invalid_register()),
                 _ => {
                     if let Err(e) = self.check_overflow(source as i64, *n as u16) {
