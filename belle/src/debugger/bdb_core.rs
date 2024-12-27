@@ -64,7 +64,7 @@ impl BDB {
                 "a" => self.handle_print_all_memory(),
                 "w" => self.handle_print_cpu_state(),
                 "cls" | "clear" => self.cls(),
-                "pk" => self.handle_set_memory_value(arg),
+                "pk" => self.handle_poke(arg),
                 "b" => self.handle_set_breakpoint(arg),
                 "br" => self.handle_remove_breakpoint(arg),
                 "ba" => {

@@ -174,7 +174,16 @@ impl BDB {
         for (index, element) in self.dbgcpu.memory.iter().enumerate() {
             if let Some(value) = element {
                 self.dbgcpu.ir = *value as i16;
-                println!("Value at {} is {}", index, self.dbgcpu.parse_instruction());
+                let displayed = format!(
+                    "Value at {} decodes to {}",
+                    index,
+                    self.dbgcpu.parse_instruction()
+                );
+                print!("{displayed}");
+                for _ in displayed.len()..38 {
+                    print!(" ");
+                }
+                println!(" - {:016b} ({})", value, value);
             }
         }
     }
@@ -211,7 +220,7 @@ impl BDB {
         }
     }
 
-    pub fn handle_set_memory_value(&mut self, arg: &str) {
+    pub fn handle_poke(&mut self, arg: &str) {
         if let Ok(n) = arg.parse::<usize>() {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
@@ -219,33 +228,33 @@ impl BDB {
                 self.dbgcpu.ir = memvalue as i16;
                 println!("{}", self.dbgcpu.parse_instruction());
                 self.dbgcpu.ir = oldvalue;
-
-                let mut buffer = String::new();
-                io::stdout().flush().unwrap();
-                if let Err(e) = io::stdin().read_line(&mut buffer) {
-                    println!("{e}");
-                }
-
-                if buffer.is_empty() {
-                    println!("Empty input");
-                    return;
-                }
-
-                if buffer.trim().starts_with("0b") {
-                    if let Ok(val) = u32::from_str_radix(&buffer.trim()[2..], 2) {
-                        println!("Value in memory address {n} set to {val:016b}");
-                        self.dbgcpu.memory[n] = Some(val as u16);
-                    } else {
-                        println!("Input could not be parsed to binary");
-                    }
-                } else if let Ok(v) = buffer.trim().parse::<u16>() {
-                    println!("Value in memory address {n} set to {v}");
-                    self.dbgcpu.memory[n] = Some(v);
-                } else {
-                    println!("Could not parse a valid integer from input.");
-                }
             } else {
-                println!("{}", "Nothing in memory here.".yellow());
+                println!("This memory address is empty.\n");
+            }
+            println!("Enter a new value");
+            let mut buffer = String::new();
+            io::stdout().flush().unwrap();
+            if let Err(e) = io::stdin().read_line(&mut buffer) {
+                println!("{e}");
+            }
+
+            if buffer.is_empty() {
+                println!("Empty input");
+                return;
+            }
+
+            if buffer.trim().starts_with("0b") {
+                if let Ok(val) = u32::from_str_radix(&buffer.trim()[2..], 2) {
+                    println!("Value in memory address {n} set to {val:016b}");
+                    self.dbgcpu.memory[n] = Some(val as u16);
+                } else {
+                    println!("Input could not be parsed to binary");
+                }
+            } else if let Ok(v) = buffer.trim().parse::<u16>() {
+                println!("Value in memory address {n} set to {v}");
+                self.dbgcpu.memory[n] = Some(v);
+            } else {
+                println!("Could not parse a valid integer from input.");
             }
         } else {
             eprintln!("'pk' requires a numeric argument.");
