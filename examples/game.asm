@@ -1,4 +1,8 @@
-    #include "defaults.asm"
+    p = 99
+    st = 100
+.ssp [p]
+.sbp [p]
+.start [st]
     mov r1, '-' ; hyphen ascii
     push 2
 begin:

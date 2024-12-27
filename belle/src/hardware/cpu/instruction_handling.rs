@@ -37,7 +37,7 @@ impl CPU {
                     0
                 }
                 _ => {
-                    let result = self.int_reg[*n as usize].wrapping_add(value as u16 as i16);
+                    let result = self.int_reg[*n as usize].wrapping_add(value as i16);
                     self.int_reg[*n as usize] = result;
                     result as i64 + value as i64
                 }

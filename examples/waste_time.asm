@@ -1,4 +1,3 @@
-    #include "defaults.asm"
     mov r2, 'w'
     st [51], r2
     mov r2, 'a'
