@@ -13,13 +13,13 @@ impl CPU {
         if let Register(n) = arg1 {
             let new_value = match *n {
                 4 => {
-                    let result = self.uint_reg[0].wrapping_add(value as u16);
-                    self.uint_reg[0] = result;
+                    let result = (self.uint_reg[0] as i16).wrapping_add(value as i16);
+                    self.uint_reg[0] = result as u16;
                     result as i64 + value as i64
                 }
                 5 => {
-                    let result = self.uint_reg[1].wrapping_add(value as u16);
-                    self.uint_reg[1] = result;
+                    let result = (self.uint_reg[1] as i16).wrapping_add(value as i16);
+                    self.uint_reg[1] = result as u16;
                     result as i64 + value as i64
                 }
                 6 => {
@@ -114,16 +114,16 @@ impl CPU {
                     if self.uint_reg[0] as f32 % divisor != 0.0 {
                         self.rflag = true;
                     }
-                    let result = self.uint_reg[0] / divisor as u16;
-                    self.uint_reg[0] = result;
+                    let result = self.uint_reg[0] as i32 / divisor as i32;
+                    self.uint_reg[0] = result as u16;
                     result as i64
                 }
                 5 => {
                     if self.uint_reg[1] as f32 % divisor != 0.0 {
                         self.rflag = true;
                     }
-                    let result = self.uint_reg[1] / divisor as u16;
-                    self.uint_reg[1] = result;
+                    let result = self.uint_reg[1] as i32 / divisor as i32;
+                    self.uint_reg[1] = result as u16;
                     result as i64
                 }
                 6 => {
@@ -149,7 +149,11 @@ impl CPU {
                     if f32::from(self.int_reg[*n as usize]) % divisor != 0.0 {
                         self.rflag = true;
                     }
-                    let result = self.int_reg[*n as usize] / divisor as u16 as i16;
+                    let result = if arg2.is_ptr() {
+                        self.int_reg[*n as usize] / divisor as u16 as i16
+                    } else {
+                        self.int_reg[*n as usize] / divisor as i16
+                    };
                     self.int_reg[*n as usize] = result;
                     result as i64
                 }
@@ -163,7 +167,7 @@ impl CPU {
         Ok(())
     }
     pub fn handle_ret(&mut self) -> Result<(), UnrecoverableError> {
-        let temp: i32 = self.sp.into();
+        let temp: i32 = self.sp as i32;
         if let Some(v) = self.memory[temp as usize] {
             self.pc = v + 1;
             if self.sp > self.bp {
@@ -426,7 +430,6 @@ impl CPU {
                 let starting_point = self.int_reg[0];
                 let end_point = self.int_reg[1];
                 let memory = &self.memory;
-                let toprint = String::from("");
                 if end_point < 0
                     || end_point as usize >= memory.len()
                     || starting_point < 0
@@ -448,7 +451,6 @@ impl CPU {
                         print!("{}", value as u8 as char);
                     }
                 }
-                print!("{toprint}");
             }
             9 => {
                 use crossterm::terminal;
