@@ -15,9 +15,7 @@ pub struct BDB {
 
 impl BDB {
     pub fn new(executable_path: &str) -> io::Result<Self> {
-        let bin = bin_to_vec(executable_path)?;
-        let mut dbgcpu = CPU::new();
-        dbgcpu.load_binary(&bin);
+        let dbgcpu = CPU::new();
         Ok(Self {
             dbgcpu,
             clock: 0,
@@ -54,7 +52,12 @@ impl BDB {
                     return Ok(());
                 }
                 "h" | "help" => Self::handle_help(arg),
-                "l" => self.dbgcpu.load_binary(&bin_to_vec(&self.exe)?),
+                "l" => {
+                    if let Err(e) = self.dbgcpu.load_binary(&bin_to_vec(&self.exe)?) {
+                        eprintln!("{e}");
+                        return Ok(());
+                    }
+                }
                 "r" | "run" => self.handle_run(),
                 "spc" => self.handle_set_pc(arg),
                 "p" | "pmem" => self.handle_print_memory(arg),

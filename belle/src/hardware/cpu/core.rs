@@ -65,7 +65,7 @@ impl CPU {
         }
     }
 
-    pub fn load_binary(&mut self, binary: &Vec<i16>) {
+    pub fn load_binary(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
         let mut counter = 0;
         let mut start_found = false;
 
@@ -98,6 +98,9 @@ impl CPU {
                 }
                 continue;
             }
+            if counter + self.starts_at as usize >= MEMORY_SIZE {
+                return Err(EmuError::MemoryOverflow());
+            }
             self.memory[counter + self.starts_at as usize] = Some(*element as u16);
             if CONFIG.verbose {
                 println!("Element {element:016b} loaded into memory");
@@ -107,6 +110,7 @@ impl CPU {
         }
         self.shift_memory();
         self.pc = self.starts_at;
+        Ok(())
     }
 
     fn shift_memory(&mut self) {

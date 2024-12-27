@@ -49,7 +49,10 @@ fn main() -> io::Result<()> {
         println!("CPU Initialized");
     }
     let mut cpu = CPU::new();
-    cpu.load_binary(&bin);
+    if let Err(e) = cpu.load_binary(&bin) {
+        eprintln!("{e}");
+        process::exit(1);
+    }
     if let Err(e) = cpu.run() {
         eprintln!("{e}");
         if CONFIG.write {
