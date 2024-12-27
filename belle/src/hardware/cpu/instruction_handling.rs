@@ -98,7 +98,7 @@ impl CPU {
     ) -> Result<(), UnrecoverableError> {
         let divisor = match self.get_value(arg2) {
             Ok(v) => {
-                if v == 0.0 || v as u16 == 0 {
+                if v == 0.0 || v as i32 == 0 {
                     self.report_divide_by_zero();
                     return Err(UnrecoverableError::DivideByZero(self.ir, self.pc, None));
                 }
