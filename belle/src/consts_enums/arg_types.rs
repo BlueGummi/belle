@@ -70,12 +70,6 @@ impl fmt::Display for Instruction {
 
 impl Argument {
     pub fn is_ptr(&self) -> bool {
-        if let Argument::MemPtr(_) = self {
-            true
-        } else if let Argument::RegPtr(_) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, Argument::RegPtr(_) | Argument::MemPtr(_))
     }
 }

@@ -13,33 +13,32 @@ impl CPU {
         if let Register(n) = arg1 {
             let new_value = match *n {
                 4 => {
-                    let result = (self.uint_reg[0] as i16).wrapping_add(value as i16);
-                    self.uint_reg[0] = result as u16;
-                    result as i64 + value as i64
+                    self.uint_reg[0] = (self.uint_reg[0] as i16).wrapping_add(value as i16) as u16;
+                    self.uint_reg[0] as i64 + value as i64
                 }
                 5 => {
-                    let result = (self.uint_reg[1] as i16).wrapping_add(value as i16);
-                    self.uint_reg[1] = result as u16;
-                    result as i64 + value as i64
+                    self.uint_reg[1] = (self.uint_reg[1] as i16).wrapping_add(value as i16) as u16;
+                    self.uint_reg[1] as i64 + value as i64
                 }
                 6 => {
-                    let result = self.float_reg[0] + value;
-                    self.float_reg[0] = result;
-                    (result as i64).wrapping_add(value as i64)
+                    self.float_reg[0] += value;
+                    (self.float_reg[0] as i64).wrapping_add(value as i64)
                 }
                 7 => {
-                    let result = self.float_reg[1] + value;
-                    self.float_reg[1] = result;
-                    (result as i64).wrapping_add(value as i64)
+                    self.float_reg[1] += value;
+                    (self.float_reg[1] as i64).wrapping_add(value as i64)
                 }
                 n if n > 5 => {
                     self.report_invalid_register();
                     0
                 }
                 _ => {
-                    let result = self.int_reg[*n as usize].wrapping_add(value as i16);
-                    self.int_reg[*n as usize] = result;
-                    result as i64 + value as i64
+                    self.int_reg[*n as usize] = if arg2.is_ptr() {
+                        self.int_reg[*n as usize].wrapping_add(value as u16 as i16)
+                    } else {
+                        self.int_reg[*n as usize].wrapping_add(value as i16)
+                    };
+                    self.int_reg[*n as usize] as i64 + value as i64
                 }
             };
 
@@ -330,8 +329,12 @@ impl CPU {
                     return Err(UnrecoverableError::InvalidRegister(self.ir, self.pc, None));
                 }
                 _ => {
-                    self.int_reg[*n as usize] =
-                        self.int_reg[*n as usize].wrapping_mul(value as u16 as i16);
+                    let result = if arg2.is_ptr() {
+                        self.int_reg[*n as usize].wrapping_mul(value as u16 as i16)
+                    } else {
+                        self.int_reg[*n as usize].wrapping_mul(value as i16)
+                    };
+                    self.int_reg[*n as usize] = result;
                     (self.int_reg[*n as usize] as i64).wrapping_mul(value as i64)
                 }
             };
@@ -405,7 +408,11 @@ impl CPU {
                 7 => self.float_reg[1] = value,
                 n if n > 5 => return Err(self.report_invalid_register()),
                 _ => {
-                    self.int_reg[*n as usize] = value as i16;
+                    self.int_reg[*n as usize] = if arg2.is_ptr() {
+                        value as u16 as i16
+                    } else {
+                        value as i16
+                    };
                 }
             }
         }
