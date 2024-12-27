@@ -235,7 +235,7 @@ impl CPU {
             };
 
             if addr >= self.memory.len() {
-                return Err(UnrecoverableError::IllegalInstruction(
+                return Err(UnrecoverableError::SegmentationFault(
                     self.ir, self.pc, None,
                 ));
             }
@@ -263,7 +263,7 @@ impl CPU {
         self.handle_push(&Argument::Literal(self.pc.try_into().unwrap()))?;
         if let MemAddr(n) = arg {
             if *n < 0 {
-                return Err(UnrecoverableError::IllegalInstruction(
+                return Err(UnrecoverableError::SegmentationFault(
                     self.ir,
                     self.pc,
                     Some("attempted to jump to an invalid address".to_string()),
@@ -272,7 +272,7 @@ impl CPU {
             self.pc = *n as u16;
         } else if let RegPtr(n) = arg {
             if self.get_value(&Argument::Register(*n))? < 0.0 {
-                return Err(UnrecoverableError::IllegalInstruction(
+                return Err(UnrecoverableError::SegmentationFault(
                     self.ir,
                     self.pc,
                     Some("attempted to jump to an invalid address".to_string()),
