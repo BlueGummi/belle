@@ -99,7 +99,7 @@ pub fn encode_instruction(
                 }
                 Ok(ST_OP) // 7
             }
-            "JMP" => {
+            "JMP" | "J" => {
                 ins_type = "one_arg";
                 if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
                     ins_type = "call";
@@ -108,7 +108,7 @@ pub fn encode_instruction(
                 }
                 Ok(JMP_OP)
             }
-            "JZ" => {
+            "JZ" | "JE" => {
                 ins_type = "one_arg";
                 if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
                     ins_type = "call";

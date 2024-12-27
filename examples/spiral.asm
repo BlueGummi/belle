@@ -16,7 +16,7 @@ loop:
     add r0, 1
     int 0
     cmp r0, r5
-    jz @sub_loop
+    je @sub_loop
     jmp @loop
 sub_loop:
     pop r4 ; pop off that return address

@@ -177,7 +177,7 @@ void print_output(Instruction *ins) {
             if (colors) {
                 printf("%s&r%d%s, %sr%d%s\n", ANSI_YELLOW,
                        ins->type << 1 | (ins->source & 0b10000000) >> 7, ANSI_RESET, ANSI_YELLOW,
-                       ins->source, ANSI_RESET);
+                       ins->source & 7, ANSI_RESET);
             } else {
                 printf("&r%d, r%d\n", ins->type << 1 | (ins->source & 0b10000000) >> 7, (ins->source & 0b111));
             }
