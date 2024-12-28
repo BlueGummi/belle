@@ -107,12 +107,18 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         } else {
             printf(".sbp $%d\n", ins->source);
         }
-    } else {
+    } else if (ins->full_ins == 0) {
         if (colors) {
             printf("%shlt%s\n", ANSI_YELLOW, ANSI_RESET);
         } else {
             printf("hlt\n");
         }
+    } else {
+	if (colors) {
+	    printf("%s%s%s (%s%d%s)\n", ANSI_BLUE, ins->full_ins, ANSI_RESET, ANSI_YELLOW, ins->full_ins, ANSI_RESET);
+	} else {
+	    printf("%s (%d)\n", ins->full_ins, ins->full_ins);
+	}
     }
 }
 
