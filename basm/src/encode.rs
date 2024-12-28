@@ -1,3 +1,4 @@
+use crate::Token::*;
 use crate::*;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -41,6 +42,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
                 "start" => 1,
                 "ssp" => 2,
                 "sbp" => 3,
+                "asciiz" | "byte" => 0,
                 _ => {
                     return Err(format!(
                         "Label not recognized after '.' at line {}",
@@ -61,7 +63,7 @@ pub fn encode_instruction(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: u32,
-) -> Result<Option<i16>, String> {
+) -> Result<Option<Vec<i16>>, String> {
     let mut ins_type = "default";
     let instruction_bin = match ins {
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
@@ -135,8 +137,13 @@ pub fn encode_instruction(
             ins_type = "subr";
             Ok(0)
         }
-        Token::Label(_) => {
-            ins_type = "label";
+        Token::Label(s) => {
+            match s.as_str() {
+                "asciiz" => ins_type = "ascii",
+                "byte" => ins_type = "byte",
+                _ => ins_type = "label",
+            }
+
             Ok(HLT_OP)
         }
         _ => Err(format!("Invalid instruction type at line {}", line_num)),
@@ -145,12 +152,14 @@ pub fn encode_instruction(
     match ins_type.trim().to_lowercase().as_str() {
         "one_arg" => {
             let arg_bin = argument_to_binary(arg1, line_num)?;
-            Ok(Some((instruction_bin << 12) | arg_bin))
+            Ok(Some(vec![(instruction_bin << 12) | arg_bin]))
         }
         "st" => {
             let arg1_bin = argument_to_binary(arg1, line_num)?;
             let arg2_bin = argument_to_binary(arg2, line_num)?;
-            Ok(Some((instruction_bin << 12) | (arg1_bin << 3) | arg2_bin))
+            Ok(Some(vec![
+                (instruction_bin << 12) | (arg1_bin << 3) | arg2_bin,
+            ]))
         }
         "sti" => {
             let raw = arg1
@@ -160,27 +169,34 @@ pub fn encode_instruction(
                 .trim()
                 .parse::<i16>()
                 .map_err(|_| format!("Failed to parse integer at line {}", line_num))?;
-            Ok(Some(
+            Ok(Some(vec![
                 (instruction_bin << 12)
                     | (1 << 11)
                     | (argument_to_binary(Some(&Token::Register(parsed_int)), line_num)? << 7)
                     | argument_to_binary(arg2, line_num)?,
-            ))
+            ]))
         }
         "label" => {
             let arg_bin = argument_to_binary(Some(ins), line_num)?;
-            Ok(Some(
+            Ok(Some(vec![
                 (instruction_bin << 12) | (arg_bin << 9) | argument_to_binary(arg1, line_num)?,
-            ))
+            ]))
         }
         "default" => {
             let arg1_bin = argument_to_binary(arg1, line_num)?;
             let arg2_bin = argument_to_binary(arg2, line_num)?;
-            Ok(Some((instruction_bin << 12) | (arg1_bin << 9) | arg2_bin))
+            if let Some(SRCall(_)) = arg2 {
+                return Ok(Some(vec![
+                    (instruction_bin << 12) | (arg1_bin << 9) | 1 << 8 | arg2_bin,
+                ]));
+            }
+            Ok(Some(vec![
+                (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
+            ]))
         }
         "call" => {
             let address = argument_to_binary(arg1, line_num)?;
-            Ok(Some((instruction_bin << 12) | address))
+            Ok(Some(vec![(instruction_bin << 12) | address]))
         }
         "jwr" => {
             let raw_str = arg1
@@ -190,15 +206,33 @@ pub fn encode_instruction(
                 .trim()
                 .parse::<i16>()
                 .map_err(|_| format!("Failed to parse integer for JWR at line {}", line_num))?;
-            Ok(Some(
+            Ok(Some(vec![
                 (instruction_bin << 12)
                     | 1 << 11
                     | argument_to_binary(Some(&Token::Register(parsed_int)), line_num)?,
-            ))
+            ]))
         }
         "sp" => {
-            Ok(Some((instruction_bin << 11) | arg1.unwrap().get_num())) // this was verified in verify.rs
-                                                                        // unwrapping is safe
+            Ok(Some(vec![
+                (instruction_bin << 11) | arg1.unwrap().get_num(),
+            ])) // this was verified in verify.rs
+                // unwrapping is safe
+        }
+        "ascii" => {
+            if arg1.is_none() {
+                return Err(format!("Asciiz argument is empty, line {}", line_num));
+            }
+            let mut collected: Vec<i16> = Vec::new();
+            for character in arg1.unwrap().get_raw().chars() {
+                collected.push(character as i16);
+            }
+            Ok(Some(collected))
+        }
+        "byte" => {
+            if arg1.is_none() {
+                return Err(format!("Byte argument is empty, line {}", line_num));
+            }
+            Ok(Some(vec![arg1.unwrap().get_num()]))
         }
         _ => Err(format!(
             "Instruction type not recognized at line {}",
@@ -279,7 +313,11 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
     for line in lines {
         let trimmed_line = line.trim();
 
-        if trimmed_line.is_empty() || trimmed_line.starts_with(';') || trimmed_line.starts_with('.')
+        if trimmed_line.is_empty()
+            || trimmed_line.starts_with(';')
+            || trimmed_line.starts_with(".ssp")
+            || trimmed_line.starts_with(".sbp")
+            || trimmed_line.starts_with(".start")
         {
             continue;
         }
@@ -295,7 +333,19 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
                 .trim()
                 .to_string();
             subroutine_map.insert(subroutine_name.trim().to_string(), subroutine_counter);
-            subroutine_counter -= 1;
+            continue;
+        }
+        if line_before_comment.starts_with(".asciiz") {
+            if let Some(start) = line_before_comment.find('\"') {
+                if let Some(end) = line_before_comment[start + 1..].find('\"') {
+                    subroutine_counter +=
+                        line_before_comment[start + 1..start + 1 + end].len() as u32 - 2;
+                }
+            }
+            continue;
+        }
+        if line_before_comment.starts_with(".byte") {
+            subroutine_counter += 1;
         }
         if !line_before_comment.trim().contains('=') {
             subroutine_counter += 1;

@@ -196,6 +196,7 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result
             || tok.is_literal()
             || tok.is_register_pointer()
             || tok.is_memory_address_pointer()
+            || tok.is_srcall()
     }) {
         return Err(format!(
             "MOV requires RHS to be a Register, literal, register pointer, or memory address pointer at line {}",

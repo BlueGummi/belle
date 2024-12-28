@@ -18,6 +18,7 @@ pub enum Token {
     RegPointer(i16),
     MemPointer(i16),
     EqualSign,
+    Asciiz(String),
 }
 impl PartialEq for Token {
     fn eq(&self, other: &Self) -> bool {
@@ -35,6 +36,7 @@ impl PartialEq for Token {
             (Token::RegPointer(rp1), Token::RegPointer(rp2)) => rp1 == rp2,
             (Token::MemPointer(mp1), Token::MemPointer(mp2)) => mp1 == mp2,
             (Token::EqualSign, Token::EqualSign) => true,
+            (Token::Asciiz(az1), Token::Asciiz(az2)) => az1 == az2,
             _ => false,
         }
     }
@@ -56,6 +58,7 @@ impl Token {
             Token::Label(s) => s.to_string(),
             Token::RegPointer(n) => n.to_string(),
             Token::MemPointer(n) => n.to_string(),
+            Token::Asciiz(s) => s.to_string(),
         }
     }
     pub fn get_num(&self) -> i16 {
@@ -88,6 +91,7 @@ impl fmt::Display for Token {
                 Token::Label(s) => write!(f, "{} ({})", "Label".bright_yellow(), s),
                 Token::RegPointer(n) => write!(f, "{} ({})", "Reg Pointer".bright_green(), n),
                 Token::MemPointer(n) => write!(f, "{} ({})", "Mem Pointer".bold().yellow(), n),
+                Token::Asciiz(s) => write!(f, "{} ({})", "Asciiz".bold().green(), s),
             }
         } else {
             Ok(())

@@ -121,14 +121,16 @@ fn main() -> io::Result<()> {
                         encode_instruction(ins, operand1, operand2, line_count);
 
                     match encoded_instruction {
-                        Ok(Some(encoded)) => {
+                        Ok(Some(vector)) => {
                             if let Err(err_msg) = verify(ins, operand1, operand2, line_count) {
                                 write_to_file = false;
                                 eprintln!("{}", err_msg);
                             } else {
-                                encoded_instructions.extend(&encoded.to_be_bytes());
-                                if CONFIG.verbose || CONFIG.debug {
-                                    println!("Instruction: {:016b}", encoded);
+                                for encoded in vector {
+                                    encoded_instructions.extend(&encoded.to_be_bytes());
+                                    if CONFIG.verbose || CONFIG.debug {
+                                        println!("Instruction: {:016b}", encoded);
+                                    }
                                 }
                             }
                         }

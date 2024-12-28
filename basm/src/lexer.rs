@@ -76,6 +76,10 @@ impl<'a> Lexer<'a> {
                     self.location += 1;
                     self.lex_memory_address(c)?;
                 }
+                '\"' => {
+                    self.location += 1;
+                    self.lex_asciiz(c)?;
+                }
                 '=' => {
                     self.tokens.push(Token::EqualSign);
                 }
@@ -374,6 +378,27 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn lex_asciiz(&mut self, c: char) -> Result<(), Error<'a>> {
+        let mut ascii_string = c.to_string();
+        if ascii_string == "\"" {
+            ascii_string = String::new();
+            while let Some(&next) = self.chars.peek() {
+                if next.is_ascii() && next != '\"' {
+                    ascii_string.push(self.chars.next().unwrap());
+                } else if next == '\"' {
+                    self.tokens.push(Token::Asciiz(ascii_string));
+                    break;
+                } else {
+                    return Err(InvalidSyntax(
+                        "expected a closing \"",
+                        self.line_number,
+                        Some(self.location),
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
     fn lex_memory_address(&mut self, c: char) -> Result<(), Error<'a>> {
         let mut addr = c.to_string();
 
