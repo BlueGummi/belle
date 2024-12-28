@@ -339,7 +339,7 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             if let Some(start) = line_before_comment.find('\"') {
                 if let Some(end) = line_before_comment[start + 1..].find('\"') {
                     subroutine_counter +=
-                        line_before_comment[start + 1..start + 1 + end].len() as u32 - 1;
+                        line_before_comment[start + 1..start + 1 + end].len() as u32;
                 }
             }
             continue;

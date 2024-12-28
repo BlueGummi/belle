@@ -1,6 +1,11 @@
 .ssp [40]  ; set stack pointer to addr 49
 .sbp [40]  ; set base pointer to addr 49
 .start [41] ; program starts at addr 50
+    jmp @start
+msg:
+    .asciiz "The golden ratio is: "
+msg_end:
+start:
     mov r6, 0 ; move 0 into register 6
     mov r4, 1 ; move 1 into register 7
     push r6
@@ -34,6 +39,3 @@ finish:
     int 8
     int 7
     hlt
-msg:
-    .asciiz "Golden ratio is: "
-msg_end:
