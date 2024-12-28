@@ -447,7 +447,7 @@ impl CPU {
                     ));
                 }
 
-                for index in starting_point..=end_point {
+                for index in starting_point..end_point {
                     if index < 0 || index as usize >= memory.len() {
                         return Err(self.handle_segmentation_fault(
                             "Segmentation fault. Memory index out of bounds on interrupt call 8.",
