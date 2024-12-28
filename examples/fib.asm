@@ -1,6 +1,6 @@
-.ssp [49]  ; set stack pointer to addr 49
-.sbp [49]  ; set base pointer to addr 49
-.start [50] ; program starts at addr 50
+.ssp [40]  ; set stack pointer to addr 49
+.sbp [40]  ; set base pointer to addr 49
+.start [41] ; program starts at addr 50
     mov r6, 0 ; move 0 into register 6
     mov r4, 1 ; move 1 into register 7
     push r6
@@ -29,5 +29,11 @@ finish:
     add r1, -1
     mov r6, &r1 ; get back second most recent value 
     div r7, r6 ; golden ratio
+    mov r0, @msg
+    mov r1, @msg_end
+    int 8
     int 7
     hlt
+msg:
+    .asciiz "Golden ratio is: "
+msg_end:
