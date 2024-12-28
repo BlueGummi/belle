@@ -42,7 +42,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
                 "start" => 1,
                 "ssp" => 2,
                 "sbp" => 3,
-                "asciiz" | "byte" => 0,
+                "asciiz" | "word" => 0,
                 _ => {
                     return Err(format!(
                         "Label not recognized after '.' at line {}",
@@ -140,7 +140,7 @@ pub fn encode_instruction(
         Token::Label(s) => {
             match s.as_str() {
                 "asciiz" => ins_type = "ascii",
-                "byte" => ins_type = "byte",
+                "word" => ins_type = "word",
                 _ => ins_type = "label",
             }
 
@@ -228,9 +228,9 @@ pub fn encode_instruction(
             }
             Ok(Some(collected))
         }
-        "byte" => {
+        "word" => {
             if arg1.is_none() {
-                return Err(format!("Byte argument is empty, line {}", line_num));
+                return Err(format!("Word argument is empty, line {}", line_num));
             }
             Ok(Some(vec![arg1.unwrap().get_num()]))
         }
@@ -344,7 +344,7 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             }
             continue;
         }
-        if line_before_comment.starts_with(".byte") {
+        if line_before_comment.starts_with(".word") {
             subroutine_counter += 1;
             continue;
         }

@@ -1,7 +1,7 @@
     jmp @start
 msg_begin:
     .asciiz "Wasted time."
-    .byte 10
+    .word 10
 msg_end:
 start:
     mov r0, @msg_begin
