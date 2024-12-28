@@ -1,7 +1,7 @@
 use crate::CPU;
+use crate::*;
 use colored::Colorize;
-use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::vec::Vec;
 pub fn cls() {
     print!("\x1B[2J\x1B[1;1H");
@@ -53,7 +53,7 @@ impl BDB {
                 }
                 "h" | "help" => Self::handle_help(arg),
                 "l" => {
-                    if let Err(e) = self.dbgcpu.load_binary(&bin_to_vec(&self.exe)?) {
+                    if let Err(e) = self.dbgcpu.load_rom(&create_rom(&self.exe)?) {
                         eprintln!("{e}");
                         return Ok(());
                     }
@@ -98,21 +98,4 @@ impl BDB {
         println!("Unknown command: '{command}'");
         println!("Type 'h' or 'help' for a list of available commands.");
     }
-}
-
-pub fn bin_to_vec(file_path: &str) -> io::Result<Vec<i16>> {
-    let mut file = File::open(file_path)?;
-    let mut buffer = Vec::new();
-    file.read_to_end(&mut buffer)?;
-
-    let mut result: Vec<i16> = Vec::new();
-
-    for chunk in buffer.chunks(2) {
-        if chunk.len() == 2 {
-            let value = i16::from_be_bytes([chunk[0], chunk[1]]);
-            result.push(value);
-        }
-    }
-
-    Ok(result)
 }

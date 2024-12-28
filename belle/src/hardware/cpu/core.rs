@@ -1,8 +1,18 @@
+use crate::Argument::*;
+use crate::Instruction::*;
 use crate::*;
 use std::thread;
 use std::time::Duration;
-use std::vec::Vec;
 pub const MEMORY_SIZE: usize = 65535;
+use std::arch::asm;
+
+macro_rules! trust_me {
+    ($input:expr) => {
+        unsafe {
+            asm!($input);
+        }
+    };
+}
 
 #[derive(Clone)]
 pub struct CPU {
@@ -65,89 +75,6 @@ impl CPU {
         }
     }
 
-    pub fn load_binary(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
-        let mut counter = 0;
-        let mut start_found = false;
-
-        for element in binary {
-            if (element >> 9) == 1 {
-                // start directive
-                if start_found {
-                    EmuError::Duplicate(".start directives".to_string()).err();
-                    self.do_not_run = true;
-                }
-                self.starts_at = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".start directive found.");
-                }
-                start_found = true;
-                if CONFIG.verbose {
-                    println!("program starts at {}", self.starts_at);
-                }
-                continue;
-            } else if (element >> 9) == 2 {
-                self.sp = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".ssp directive found");
-                }
-                continue;
-            } else if (element >> 9) == 3 {
-                self.bp = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".sbp directive found");
-                }
-                continue;
-            }
-            if counter + self.starts_at as usize >= MEMORY_SIZE {
-                return Err(EmuError::MemoryOverflow());
-            }
-            self.memory[counter + self.starts_at as usize] = Some(*element as u16);
-            if CONFIG.verbose {
-                println!("Element {element:016b} loaded into memory");
-            }
-
-            counter += 1;
-        }
-        self.shift_memory();
-        self.pc = self.starts_at;
-        Ok(())
-    }
-
-    fn shift_memory(&mut self) {
-        if let Some(first_val) = self.memory.iter().position(|&e| e.is_some()) {
-            if self.pc == first_val as u16 {
-                return;
-            }
-        }
-
-        if CONFIG.verbose {
-            println!("Shifting memory...");
-        }
-
-        let some_count = self.memory.iter().filter(|&&e| e.is_some()).count();
-
-        if some_count as u32 + u32::from(self.starts_at) > MEMORY_SIZE.try_into().unwrap() {
-            EmuError::MemoryOverflow().err();
-        }
-
-        let mut new_memory = Box::new([None; MEMORY_SIZE]);
-
-        let first_some_index = self.memory.iter().position(|&e| e.is_some()).unwrap_or(0);
-        for (i, value) in self.memory.iter().enumerate() {
-            if let Some(val) = value {
-                let new_index = (self.starts_at + (i - first_some_index) as u16) as usize;
-                new_memory[new_index] = Some(*val);
-            }
-        }
-
-        std::mem::swap(&mut self.memory, &mut new_memory);
-        self.pc = self.starts_at;
-
-        if CONFIG.verbose {
-            println!("Shift completed.");
-        }
-    }
-
     pub fn run(&mut self) -> Result<(), UnrecoverableError> {
         self.has_ran = true; // for debugger
         self.running = true;
@@ -185,7 +112,7 @@ impl CPU {
                     ));
                 }
             }
-            let parsed_ins = self.parse_instruction();
+            let parsed_ins = self.decode_instruction();
             if let Err(e) = self.execute_instruction(&parsed_ins) {
                 self.running = false;
                 return Err(e);
@@ -244,6 +171,62 @@ impl CPU {
             }
         }
 
+        Ok(())
+    }
+    pub fn execute_instruction(&mut self, ins: &Instruction) -> Result<(), UnrecoverableError> {
+        self.has_ran = true; // for debugger
+
+        match ins {
+            HLT => self.running = false,
+            ADD(arg1, arg2) => self.handle_add(arg1, arg2)?,
+            JO(arg) => self.handle_jo(arg)?,
+            POP(arg) => self.handle_pop(arg)?,
+            DIV(arg1, arg2) => self.handle_div(arg1, arg2)?,
+            RET => self.handle_ret()?,
+            LD(arg1, arg2) => self.handle_ld(arg1, arg2)?,
+            ST(arg1, arg2) => self.handle_st(arg1, arg2)?,
+            JMP(arg) => self.handle_jmp(arg)?,
+            JZ(arg) => self.handle_jz(arg)?,
+            CMP(arg1, arg2) => self.handle_cmp(arg1, arg2)?,
+            MUL(arg1, arg2) => self.handle_mul(arg1, arg2)?,
+            PUSH(arg) => self.handle_push(arg)?,
+            INT(arg) => self.handle_int(arg)?,
+            MOV(arg1, arg2) => self.handle_mov(arg1, arg2)?,
+            NOP => {
+                // SAFETY: NOP
+                trust_me!("nop");
+                self.pc += 1;
+            } // NOP
+        }
+        if self.pc as u64 + 1 > u16::MAX as u64 {
+            return Err(UnrecoverableError::IllegalInstruction(
+                self.ir,
+                self.pc,
+                Some("program counter is too large".to_string()),
+            ));
+        }
+        Ok(())
+    }
+    pub fn set_register_value(
+        &mut self,
+        arg: &Argument,
+        value: f32,
+    ) -> Result<(), UnrecoverableError> {
+        if let Register(n) = arg {
+            if let Err(e) = self.check_overflow(value as i64, *n as u16) {
+                eprint!("{e}");
+                return Ok(());
+            }
+            match *n {
+                4 => self.uint_reg[0] = value as u16,
+                5 => self.uint_reg[1] = value as u16,
+                6 => self.float_reg[0] = value,
+                7 => self.float_reg[1] = value,
+                n if n > 3 => return Err(self.generate_invalid_register()),
+                n if n < 0 => return Err(self.generate_invalid_register()),
+                _ => self.int_reg[*n as usize] = value as i16,
+            }
+        }
         Ok(())
     }
 }

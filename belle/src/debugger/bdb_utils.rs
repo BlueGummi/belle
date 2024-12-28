@@ -88,7 +88,7 @@ impl BDB {
                     eprintln!("Nothing at PC {}", self.dbgcpu.pc);
                     return;
                 };
-                let parsed_ins = self.dbgcpu.parse_instruction();
+                let parsed_ins = self.dbgcpu.decode_instruction();
                 if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
                     eprintln!("An error occurred: {e}");
                 }
@@ -118,7 +118,7 @@ impl BDB {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
                 self.dbgcpu.ir = memvalue as i16;
-                println!("Dumped instruction: {}", self.dbgcpu.parse_instruction());
+                println!("Dumped instruction: {}", self.dbgcpu.decode_instruction());
                 self.dbgcpu.ir = oldvalue;
             } else {
                 println!("{}", "Nothing in memory here.".yellow());
@@ -161,7 +161,7 @@ impl BDB {
             return;
         };
 
-        let parsed_ins = self.dbgcpu.parse_instruction();
+        let parsed_ins = self.dbgcpu.decode_instruction();
         if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
             eprintln!("An error occurred: {e}");
         }
@@ -177,7 +177,7 @@ impl BDB {
                 let displayed = format!(
                     "Value at {} decodes to {}",
                     index,
-                    self.dbgcpu.parse_instruction()
+                    self.dbgcpu.decode_instruction()
                 );
                 print!("{displayed}");
                 for _ in displayed.len()..38 {
@@ -208,14 +208,14 @@ impl BDB {
         println!("  Instruction pointer      : {}", self.dbgcpu.ip);
         println!(
             "  Disassembled Instruction : {}",
-            self.dbgcpu.parse_instruction()
+            self.dbgcpu.decode_instruction()
         );
 
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             self.dbgcpu.ir = n as i16;
             println!(
                 "  Next instruction         : {}",
-                self.dbgcpu.parse_instruction()
+                self.dbgcpu.decode_instruction()
             );
         }
     }
@@ -226,7 +226,7 @@ impl BDB {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
                 self.dbgcpu.ir = memvalue as i16;
-                println!("{}", self.dbgcpu.parse_instruction());
+                println!("{}", self.dbgcpu.decode_instruction());
                 self.dbgcpu.ir = oldvalue;
             } else {
                 println!("This memory address is empty.\n");

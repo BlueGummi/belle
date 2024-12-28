@@ -1,74 +1,7 @@
 use crate::Argument::*;
 use crate::Instruction::*;
 use crate::*;
-use std::arch::asm;
-
-macro_rules! trust_me {
-    ($input:expr) => {
-        unsafe {
-            asm!($input);
-        }
-    };
-}
-
 impl CPU {
-    pub fn execute_instruction(&mut self, ins: &Instruction) -> Result<(), UnrecoverableError> {
-        self.has_ran = true; // for debugger
-
-        match ins {
-            HLT => self.running = false,
-            ADD(arg1, arg2) => self.handle_add(arg1, arg2)?,
-            JO(arg) => self.handle_jo(arg)?,
-            POP(arg) => self.handle_pop(arg)?,
-            DIV(arg1, arg2) => self.handle_div(arg1, arg2)?,
-            RET => self.handle_ret()?,
-            LD(arg1, arg2) => self.handle_ld(arg1, arg2)?,
-            ST(arg1, arg2) => self.handle_st(arg1, arg2)?,
-            JMP(arg) => self.handle_jmp(arg)?,
-            JZ(arg) => self.handle_jz(arg)?,
-            CMP(arg1, arg2) => self.handle_cmp(arg1, arg2)?,
-            MUL(arg1, arg2) => self.handle_mul(arg1, arg2)?,
-            PUSH(arg) => self.handle_push(arg)?,
-            INT(arg) => self.handle_int(arg)?,
-            MOV(arg1, arg2) => self.handle_mov(arg1, arg2)?,
-            NOP => {
-                // SAFETY: NOP
-                trust_me!("nop");
-                self.pc += 1;
-            } // NOP
-        }
-        if self.pc as u64 + 1 > u16::MAX as u64 {
-            return Err(UnrecoverableError::IllegalInstruction(
-                self.ir,
-                self.pc,
-                Some("program counter is too large".to_string()),
-            ));
-        }
-        Ok(())
-    }
-    pub fn set_register_value(
-        &mut self,
-        arg: &Argument,
-        value: f32,
-    ) -> Result<(), UnrecoverableError> {
-        if let Register(n) = arg {
-            if let Err(e) = self.check_overflow(value as i64, *n as u16) {
-                eprint!("{e}");
-                return Ok(());
-            }
-            match *n {
-                4 => self.uint_reg[0] = value as u16,
-                5 => self.uint_reg[1] = value as u16,
-                6 => self.float_reg[0] = value,
-                7 => self.float_reg[1] = value,
-                n if n > 3 => return Err(self.report_invalid_register()),
-                n if n < 0 => return Err(self.report_invalid_register()),
-                _ => self.int_reg[*n as usize] = value as i16,
-            }
-        }
-        Ok(())
-    }
-
     pub fn get_value(&mut self, arg: &Argument) -> Result<f32, UnrecoverableError> {
         match arg {
             Register(n) => match n {
@@ -98,7 +31,7 @@ impl CPU {
             Literal(n) => Ok((*n) as f32),
             MemPtr(n) => {
                 if self.memory[*n as usize].is_none() {
-                    return Err(self.handle_segmentation_fault(
+                    return Err(self.generate_segfault(
                         "Segmentation fault while dereferencing pointer.\nThe pointer's location is empty.",
                     ));
                 }
@@ -112,7 +45,7 @@ impl CPU {
                     ));
                 }
                 if self.memory[tmp].is_none() {
-                    return Err(self.handle_segmentation_fault(
+                    return Err(self.generate_segfault(
                         "Segmentation fault while dereferencing pointer.\nThe address the pointer references is empty.",
                     ));
                 }
@@ -147,13 +80,12 @@ impl CPU {
                 let memloc = tmp as usize;
                 if memloc >= self.memory.len() || tmp < 0.0 {
                     self.running = false;
-                    return Err(self.handle_segmentation_fault(
-                        "Segmentation fault handling pointer.\nAddress OOB.",
-                    ));
+                    return Err(self
+                        .generate_segfault("Segmentation fault handling pointer.\nAddress OOB."));
                 }
                 if self.memory[memloc].is_none() {
                     self.running = false;
-                    return Err(self.handle_segmentation_fault(
+                    return Err(self.generate_segfault(
                         "Segmentation fault while dereferencing pointer.\nThe address the pointer references is empty.",
                     ));
                 }
@@ -162,7 +94,7 @@ impl CPU {
             MemAddr(n) => {
                 if self.memory[*n as usize].is_none() {
                     self.running = false;
-                    return Err(self.handle_segmentation_fault(
+                    return Err(self.generate_segfault(
                         "Segmentation fault while loading from memory.\nMemory address is empty.",
                     ));
                 }
@@ -172,7 +104,7 @@ impl CPU {
         }
     }
 
-    pub fn parse_instruction(&self) -> Instruction {
+    pub fn decode_instruction(&self) -> Instruction {
         let opcode = (self.ir >> 12) & 0b1111u16 as i16;
         let mut ins_type = if ((self.ir >> 8) & 1) == 1 {
             1

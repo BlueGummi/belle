@@ -72,7 +72,7 @@ impl fmt::Display for UnrecoverableError {
                 f,
                 "{} was {}",
                 "Instruction".blue(),
-                cpu.parse_instruction().to_string().cyan()
+                cpu.decode_instruction().to_string().cyan()
             )?;
         }
         Ok(())

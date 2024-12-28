@@ -1,7 +1,7 @@
 use crate::*;
 
 impl CPU {
-    pub fn report_invalid_register(&mut self) -> UnrecoverableError {
+    pub fn generate_invalid_register(&mut self) -> UnrecoverableError {
         self.running = false;
         UnrecoverableError::InvalidRegister(
             self.ir,
@@ -10,14 +10,14 @@ impl CPU {
         )
     }
 
-    pub fn report_unknown_flag(&self, instruction: &str) -> RecoverableError {
+    pub fn generate_unknown_flag(&self, instruction: &str) -> RecoverableError {
         RecoverableError::UnknownFlag(
             self.pc,
             Some(format!("Unknown flag in {instruction} instruction")),
         )
     }
 
-    pub fn report_divide_by_zero(&mut self) -> UnrecoverableError {
+    pub fn generate_divbyz(&mut self) -> UnrecoverableError {
         self.running = false;
         UnrecoverableError::DivideByZero(
             self.ir,
@@ -66,7 +66,7 @@ impl CPU {
         Ok(())
     }
 
-    pub fn handle_segmentation_fault(&mut self, message: &str) -> UnrecoverableError {
+    pub fn generate_segfault(&mut self, message: &str) -> UnrecoverableError {
         self.running = false;
         self.err = true;
         UnrecoverableError::SegmentationFault(self.ir, self.pc, Some(message.to_string()))

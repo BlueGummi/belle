@@ -97,11 +97,14 @@ impl CPU {
             println!("  Instruction pointer      : {}", cpu.ip);
             let mut tmp = CPU::new();
             tmp.ir = cpu.ir;
-            println!("  Disassembled Instruction : {}", tmp.parse_instruction());
+            println!("  Disassembled Instruction : {}", tmp.decode_instruction());
             if let Some((_, n)) = cpu.memory.iter().find(|&&(first, _)| first == cpu.pc) {
                 let mut tmp = CPU::new();
                 tmp.ir = *n as i16;
-                println!("  Next instruction         : {}\n", tmp.parse_instruction());
+                println!(
+                    "  Next instruction         : {}\n",
+                    tmp.decode_instruction()
+                );
             }
         } else {
             println!("No CPU state found for clock: {clock}");
