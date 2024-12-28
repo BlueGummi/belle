@@ -346,6 +346,7 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
         }
         if line_before_comment.starts_with(".byte") {
             subroutine_counter += 1;
+            continue;
         }
         if !line_before_comment.trim().contains('=') {
             subroutine_counter += 1;
