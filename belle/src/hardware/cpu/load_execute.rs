@@ -34,6 +34,7 @@ impl CPU {
             NOP => {
                 // SAFETY: NOP
                 trust_me!("nop");
+                self.pc += 1;
             } // NOP
         }
         if self.pc as u64 + 1 > u16::MAX as u64 {
