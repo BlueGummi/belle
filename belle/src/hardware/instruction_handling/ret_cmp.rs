@@ -26,7 +26,7 @@ impl CPU {
         if let Register(_) = arg1 {
             let value = self.get_value(arg1)?;
             let result = value - src;
-            self.zflag = (result).abs() < f32::EPSILON;
+            self.zflag = (result).abs() < f32::MIN_POSITIVE;
             self.sflag = result < 0.0;
         }
         self.pc += 1;
