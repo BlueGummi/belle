@@ -1,5 +1,4 @@
-use crate::config::CONFIG;
-use crate::*;
+use crate::{config::CONFIG, *};
 
 impl CPU {
     pub fn generate_invalid_register(&mut self) -> UnrecoverableError {

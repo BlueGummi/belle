@@ -1,6 +1,97 @@
-use crate::Argument::*;
-use crate::Instruction::*;
-use crate::*;
+use crate::{Argument::*, Instruction::*, *};
+use std::fmt;
+
+pub const HLT_OP: i16 = 0b0000; // we need this
+pub const ADD_OP: i16 = 0b0001; // we also need this
+pub const JO_OP: i16 = 0b0010; // maybe optional ?
+pub const POP_OP: i16 = 0b0011; // we need this
+pub const DIV_OP: i16 = 0b0100; // we need this
+pub const RET_OP: i16 = 0b0101; // we need this
+pub const LD_OP: i16 = 0b0110; // we need this
+pub const ST_OP: i16 = 0b0111; // we need this
+pub const JMP_OP: i16 = 0b1000; // maybe optional?
+pub const JZ_OP: i16 = 0b1001; // we need this
+pub const CMP_OP: i16 = 0b1010; // we need this
+pub const MUL_OP: i16 = 0b1011; // we need this
+pub const PUSH_OP: i16 = 0b1100; // we need this
+pub const INT_OP: i16 = 0b1101; // we need this
+pub const MOV_OP: i16 = 0b1110; // we need this
+pub const NOP_OP: i16 = 0b1111; // funny
+
+pub enum Argument {
+    Register(i16),
+    MemAddr(i16),
+    Literal(i16),
+    RegPtr(i16),
+    MemPtr(i16),
+    SR(i16),
+    Flag(i16),
+    Nothing,
+}
+
+pub enum Instruction {
+    HLT,
+    ADD(Argument, Argument),
+    JO(Argument),
+    POP(Argument),
+    DIV(Argument, Argument),
+    RET,
+    LD(Argument, Argument),
+    ST(Argument, Argument),
+    JMP(Argument),
+    JZ(Argument),
+    CMP(Argument, Argument),
+    MUL(Argument, Argument),
+    PUSH(Argument),
+    INT(Argument),
+    MOV(Argument, Argument),
+    NOP,
+}
+
+impl fmt::Display for Argument {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Argument::Register(val) => write!(f, "r{val}"),
+            Argument::MemAddr(val) => write!(f, "${val}"),
+            Argument::Literal(val) => write!(f, "{val}"),
+            Argument::RegPtr(val) => write!(f, "&r{val}"),
+            Argument::MemPtr(val) => write!(f, "&{val}"),
+            Argument::SR(val) => write!(f, "SR({val})"),
+            Argument::Flag(val) => write!(f, "Flag({val})"),
+            Argument::Nothing => write!(f, "Nothing"),
+        }
+    }
+}
+
+impl fmt::Display for Instruction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Instruction::HLT => write!(f, "HLT"),
+            Instruction::ADD(arg1, arg2) => write!(f, "ADD {arg1}, {arg2}"),
+            Instruction::JO(arg) => write!(f, "JO {arg}"),
+            Instruction::POP(arg) => write!(f, "POP {arg}"),
+            Instruction::DIV(arg1, arg2) => write!(f, "DIV {arg1}, {arg2}"),
+            Instruction::RET => write!(f, "RET"),
+            Instruction::LD(arg1, arg2) => write!(f, "LD {arg1}, {arg2}"),
+            Instruction::ST(arg1, arg2) => write!(f, "ST {arg1}, {arg2}"),
+            Instruction::JMP(arg) => write!(f, "JMP {arg}"),
+            Instruction::JZ(arg) => write!(f, "JZ {arg}"),
+            Instruction::CMP(arg1, arg2) => write!(f, "CMP {arg1}, {arg2}"),
+            Instruction::MUL(arg1, arg2) => write!(f, "MUL {arg1}, {arg2}"),
+            Instruction::PUSH(arg) => write!(f, "PUSH {arg}"),
+            Instruction::INT(arg) => write!(f, "INT {arg}"),
+            Instruction::MOV(arg1, arg2) => write!(f, "MOV {arg1}, {arg2}"),
+            Instruction::NOP => write!(f, "NOP"),
+        }
+    }
+}
+
+impl Argument {
+    pub fn is_ptr(&self) -> bool {
+        matches!(self, Argument::RegPtr(_) | Argument::MemPtr(_))
+    }
+}
+
 impl CPU {
     pub fn get_value(&mut self, arg: &Argument) -> Result<f32, UnrecoverableError> {
         match arg {

@@ -7,3 +7,4 @@ pub use instruction_handling::*;
 pub mod memory;
 pub use memory::*;
 pub mod decoder;
+pub use decoder::*;

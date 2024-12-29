@@ -1,5 +1,4 @@
-use crate::Argument::*;
-use crate::*;
+use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_st(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let source = self.get_value(arg2)? as i16;

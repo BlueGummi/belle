@@ -1,8 +1,9 @@
-use crate::CPU;
-use crate::*;
+use crate::{CPU, *};
 use colored::Colorize;
-use std::io::{self, Write};
-use std::vec::Vec;
+use std::{
+    io::{self, Write},
+    vec::Vec,
+};
 pub fn cls() {
     print!("\x1B[2J\x1B[1;1H");
 }

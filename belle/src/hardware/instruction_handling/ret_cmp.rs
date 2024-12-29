@@ -1,5 +1,4 @@
-use crate::Argument::*;
-use crate::*;
+use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_ret(&mut self) -> PossibleCrash {
         let temp: i32 = self.sp as i32;

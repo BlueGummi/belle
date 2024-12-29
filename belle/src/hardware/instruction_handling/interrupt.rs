@@ -1,5 +1,4 @@
-use crate::config::CONFIG;
-use crate::*;
+use crate::{config::CONFIG, *};
 use std::io::{self, Read, Write};
 
 impl CPU {

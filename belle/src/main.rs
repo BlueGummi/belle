@@ -6,8 +6,7 @@
  */
 use crate::config::CONFIG;
 use belle::*;
-use std::io;
-use std::process;
+use std::{io, process};
 
 fn main() -> io::Result<()> {
     cli_argument_check();

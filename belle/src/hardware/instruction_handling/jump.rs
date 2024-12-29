@@ -1,5 +1,4 @@
-use crate::Argument::*;
-use crate::*;
+use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_jo(&mut self, arg: &Argument) -> PossibleCrash {
         if !self.oflag {

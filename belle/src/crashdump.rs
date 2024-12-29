@@ -1,6 +1,8 @@
 use crate::*;
-use std::fs::{self, File};
-use std::io::Write;
+use std::{
+    fs::{self, File},
+    io::Write,
+};
 pub fn write_crash(cpu: &CPU) {
     let mut file_index = 0;
     let mut filename;

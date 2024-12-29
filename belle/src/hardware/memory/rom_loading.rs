@@ -1,5 +1,4 @@
-use crate::config::CONFIG;
-use crate::*;
+use crate::{config::CONFIG, *};
 impl CPU {
     pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
         let mut counter = 0;

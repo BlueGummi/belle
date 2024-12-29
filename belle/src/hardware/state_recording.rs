@@ -1,10 +1,10 @@
-use crate::config::CONFIG;
-use crate::*;
+use crate::{config::CONFIG, *};
 use ahash::RandomState;
 use once_cell::sync::Lazy;
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::Mutex;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 pub static CPU_STATE: Lazy<Mutex<HashMap<u32, Arc<ModCPU>, RandomState>>> =
     Lazy::new(|| Mutex::new(HashMap::default()));

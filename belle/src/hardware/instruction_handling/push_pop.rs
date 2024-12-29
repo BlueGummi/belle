@@ -1,5 +1,4 @@
-use crate::Argument::*;
-use crate::*;
+use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_push(&mut self, arg: &Argument) -> PossibleCrash {
         let mut val: f32 = 0.0;
