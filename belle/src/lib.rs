@@ -125,3 +125,17 @@ fn add_with_mptr() {
     test_instruction!(bcpu, add, "r0", "&$33");
     assert_eq!(bcpu.int_reg[0], 504);
 }
+
+#[test]
+fn add_with_negative_register() {
+    let mut bcpu = CPU::new();
+    
+    bcpu.int_reg[0] = -42;
+
+    bcpu.uint_reg[1] = 42;
+    
+    test_instruction!(bcpu, add, "r5", "r0");
+    assert_eq!(bcpu.uint_reg[1], 0);
+    test_instruction!(bcpu, add, "r5", "r0");
+    assert_eq!(bcpu.uint_reg[1], 65494);
+}
