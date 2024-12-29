@@ -51,33 +51,35 @@ impl CPU {
     }
 
     pub fn handle_pop(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
-        if let Register(_) = arg {
-            let temp: i32 = self.sp.into();
-            if let Some(v) = self.memory[temp as usize] {
+        let temp: i32 = self.sp.into();
+        if let Some(v) = self.memory[temp as usize] {
+            if let Register(_) = arg {
                 self.set_register_value(arg, v.into())?;
-                if self.sp > self.bp {
-                    if self.sp != self.bp {
-                        println!("{}", RecoverableError::BackwardStack(self.pc, None));
-                    }
-                    self.memory[self.sp as usize] = None;
-                    if self.sp != self.bp {
-                        self.sp -= 1;
-                    }
-                } else {
-                    self.memory[self.sp as usize] = None;
-                    if self.sp != self.bp {
-                        self.sp += 1;
-                    }
+            } else if let MemAddr(val) = arg {
+                self.memory[*val as usize] = Some(v);
+            }
+            if self.sp > self.bp {
+                if self.sp != self.bp {
+                    println!("{}", RecoverableError::BackwardStack(self.pc, None));
+                }
+                self.memory[self.sp as usize] = None;
+                if self.sp != self.bp {
+                    self.sp -= 1;
                 }
             } else {
-                self.err = true;
-                self.running = false;
-                return Err(UnrecoverableError::SegmentationFault(
-                    self.ir,
-                    self.pc,
-                    Some("segmentation fault while executing pop".to_string()),
-                ));
+                self.memory[self.sp as usize] = None;
+                if self.sp != self.bp {
+                    self.sp += 1;
+                }
             }
+        } else {
+            self.err = true;
+            self.running = false;
+            return Err(UnrecoverableError::SegmentationFault(
+                self.ir,
+                self.pc,
+                Some("segmentation fault while executing pop".to_string()),
+            ));
         }
         self.pc += 1;
         Ok(())

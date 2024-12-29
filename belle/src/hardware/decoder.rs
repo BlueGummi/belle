@@ -174,7 +174,13 @@ impl CPU {
                     JO(MemAddr(source))
                 }
             }
-            POP_OP => POP(Register(source)),
+            POP_OP => {
+                if self.ir & 2048 == 0 {
+                    POP(Register(source))
+                } else {
+                    POP(MemAddr(self.ir & 2047))
+                }
+            }
             DIV_OP => DIV(Register(destination), part),
             RET_OP => RET,
             LD_OP => {
@@ -206,7 +212,7 @@ impl CPU {
             }
             CMP_OP => CMP(Register(destination), part),
             MUL_OP => MUL(Register(destination), part),
-            PUSH_OP => PUSH(Register(source)),
+            PUSH_OP => PUSH(part),
             INT_OP => INT(Literal(source)),
             MOV_OP => MOV(Register(destination), part),
             NOP_OP => NOP,

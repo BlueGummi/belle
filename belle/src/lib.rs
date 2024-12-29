@@ -74,7 +74,7 @@ macro_rules! test_instruction {
     ($bcpu:expr, $op:ident, $arg1:expr) => {{
         test_instruction!($bcpu, $op, $arg1, "");
     }};
-    
+
     ($bcpu:expr, $op:ident) => {{
         test_instruction!($bcpu, $op, "", "");
     }};
@@ -97,11 +97,10 @@ fn add_with_register() {
     assert_eq!(bcpu.int_reg[0], 17);
 }
 
-
 #[test]
 fn add_with_rptr() {
     let mut bcpu = CPU::new();
-    
+
     bcpu.int_reg[0] = 21;
     bcpu.int_reg[2] = 33;
 
@@ -111,11 +110,10 @@ fn add_with_rptr() {
     assert_eq!(bcpu.int_reg[0], 63);
 }
 
-
 #[test]
 fn add_with_mptr() {
     let mut bcpu = CPU::new();
-    
+
     bcpu.int_reg[0] = 444;
 
     bcpu.memory[33] = Some(42);
@@ -129,11 +127,11 @@ fn add_with_mptr() {
 #[test]
 fn add_with_negative_register() {
     let mut bcpu = CPU::new();
-    
+
     bcpu.int_reg[0] = -42;
 
     bcpu.uint_reg[1] = 42;
-    
+
     test_instruction!(bcpu, add, "r5", "r0");
     assert_eq!(bcpu.uint_reg[1], 0);
     test_instruction!(bcpu, add, "r5", "r0");

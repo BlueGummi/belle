@@ -2,3 +2,104 @@
 title: "Binary Encoding"
 author: "BlueGummi"
 ---
+
+There are **6 different encodings** for instructions in the BELLE-ISA. **Store instructions, load instructions, move/add/divide/compare/multiply instructions, jump/push/pop instructions, interrupt instructions, and argumentless instructions**.
+
+These will be named *as follows*:
+- [Direct memory access encoding (LD/ST)](#direct-memory-address-encoding)
+- [Stack access encoding (J/PUSH/POP)](#stack-access-encoding)
+- [Generic encoding (MOV/ADD/DIV/CMP/MUL)](#generic-encoding)
+- [Interrupt encoding](#interrupt-encoding)
+- [Argumentless instruction encoding](#argumentless-encoding)
+
+The rest of this document will go into detail on how each type of instruction is encoded in binary, as well as the possible argument types each one can take (at a binary level).
+
+##### B will be used in the documentation to symbolize a bit that will vary based on the actual values passed to the instruction.
+
+## Determinant bits
+
+Determinant bits, abbreviated DTBs, are bits inside of instructions that allow the machine to *determine* what the next argument's type is. Some instructions only have one determinant bits, while others have two and three. Some instructions do not have any at all.
+
+Determinant bits are used to avoid having multiple opcodes for many different instructions that perform the same task with different arguments.
+
+## Direct memory access encoding
+
+Instructions: **LD/ST**
+
+Direct memory access encoding is used in both the **LD (load) and ST (store)** instructions, with each one using a different variant of the encoding. LD may only access direct memory addresses, whilst ST can accept register indirects as values to load from. Thus, the **encoding is different for both**.
+
+### LD
+
+The load instruction loads a value into a register directly from a memory address. 
+
+LD accepts memory addresses up to the 9 bit unsigned integer limit, or 511. Beyond address 511, `mov` must be used with a register pointer as a value to access memory indirectly. 
+
+LD has no determinant bits.
+
+In LD's only mode - a direct memory address load - the encoding is as follows
+
+| Opcode | Destination | Source |
+| :----- | :---------- | :----- |
+| `[0110]` | `[BBB]` | `[BBBBBBBBB]` |
+| Types: | Register | Memory direct |
+
+### ST
+
+The store instruction loads an **address or register indirect** with the **value inside of a register**. It does not accept immediate values, and uses one determinant bit to identify the LHS operand as either a memory address or register indirect.
+
+ST accepts memory addresses up to 255. Beyond this, a register indirect must be used.
+
+In **[Memory address direct <- Register]** mode, the encoding is as follows
+
+| Opcode | DTB |Destination | Source |
+| :----- | :-------------- |:---------- | :----- |
+| `[0111]` | `[0]` | `[BBBBBBBB]` | `[BBB]` |
+| Types: | | Memory direct | Register direct |
+
+
+In **[Register indirect <- Register]** mode, the encoding is as follows
+
+| Opcode | DTB |Destination | Source |
+| :----- | :-------------- |:---------- | :----- |
+| `[0111]` | `[1]` | `[00000BBB]` | `[BBB]` |
+| Types: | | Memory direct | Register direct |
+
+
+## Stack access encoding
+
+Instructions that use **stack access encoding** interact with the values on the **call stack** in some way. They can both add and remove values from the call stack, and the values can be both literals, memory addresses, or register values.
+
+Instructions: **JMP/JZ/JO/PUSH/POP**
+
+### JMP/Jump if condition
+
+The jump instructions are related to setting the machine's program counter, or PC. These instructions set the program counter to a new value, thus "jumping" to another memory address.
+
+The jump instructions all take either a direct memory address or register indirect.
+
+In **[Memory direct]** mode, the encoding is as follows
+
+| Opcode | DTB |Destination |
+| :----- | :-------------- |
+| `[BBBB]` | `[0]` | `[BBBBBBBBBBB]` |
+| Types: | | Memory direct |
+
+The jump instructions can access memory addresses up to 2047 in direct mode. Beyond this, a register indirect must be used.
+
+In **[Register indirect]** mode, the encoding is as follows
+
+| Opcode | DTB |Destination |
+| :----- | :-------------- |
+| `[BBBB]` | `[1]` | `[00000000BBB]` |
+| Types: | | Register indirect |
+
+
+### PUSH/POP
+
+The PUSH/POP instructions relate to adding a value onto the call stack, and removing a value off of the call stack, respectively. Each takes one argument.
+
+PUSH can take either a literal value or register, whilst POP can take a register or memory address.
+
+Both instructions have a single determinant bit.
+
+

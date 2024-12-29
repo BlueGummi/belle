@@ -1,5 +1,5 @@
-#include "consts.h"
 #include "bdump.h"
+#include "consts.h"
 #pragma once
 
 void print_operation(const char *op, int destination, bool colors) {
@@ -18,54 +18,49 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     }
 
     switch (ins->type) {
-        case 0: // register
-            if (colors) {
-                printf("%sr%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
-            } else {
-                printf("r%d\n", ins->source);
-            }
-            break;
-
-        case 1: // literal
-        {
-            bool sign = (ins->source >> 7) == 1;
-            ins->source &= 0b01111111; // Clear the sign bit
-
-            if (colors) {
-                printf("%s%d%s\n", ANSI_YELLOW, sign ? -ins->source : ins->source, ANSI_RESET);
-            } else {
-                printf("%d\n", sign ? -ins->source : ins->source);
-            }
-        } 
+    case 0: // register
+        if (colors) {
+            printf("%sr%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+        } else {
+            printf("r%d\n", ins->source);
+        }
         break;
 
-        case 2: // memory address
-        {
-            int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
+    case 1: // literal
+    {
+        bool sign = (ins->source >> 7) == 1;
+        ins->source &= 0b01111111; // Clear the sign bit
 
-            if (colors) {
-                printf("%s&%d%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
-            } else {
-                printf("&%d\n", memaddr);
-            }
-        } 
-        break;
+        if (colors) {
+            printf("%s%d%s\n", ANSI_YELLOW, sign ? -ins->source : ins->source, ANSI_RESET);
+        } else {
+            printf("%d\n", sign ? -ins->source : ins->source);
+        }
+    } break;
 
-        case 3: // register indirect
-        {
-            int reg = ((ins->source << 3) & 0b1111111) >> 3;
+    case 2: // memory address
+    {
+        int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
 
-            if (colors) {
-                printf("%s&r%d%s\n", ANSI_YELLOW, reg, ANSI_RESET);
-            } else {
-                printf("&r%d\n", reg);
-            }
-        } 
-        break;
+        if (colors) {
+            printf("%s&%d%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
+        } else {
+            printf("&%d\n", memaddr);
+        }
+    } break;
 
-        default:
-            fprintf(stderr, "Unknown instruction type\n");
-            exit(1);
+    case 3: // register indirect
+    {
+        int reg = ((ins->source << 3) & 0b1111111) >> 3;
+
+        if (colors) {
+            printf("%s&r%d%s\n", ANSI_YELLOW, reg, ANSI_RESET);
+        } else {
+            printf("&r%d\n", reg);
+        }
+    } break;
+
+    default: fprintf(stderr, "Unknown instruction type\n"); exit(1);
     }
 }
 
@@ -91,19 +86,22 @@ void print_jump_instruction(Instruction *ins, bool colors) {
 void print_hlt_instruction(Instruction *ins, bool colors) {
     if (ins->destination == 1) {
         if (colors) {
-            printf("%s.start%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.start%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source,
+                   ANSI_RESET);
         } else {
             printf(".start $%d\n", ins->source);
         }
     } else if (ins->destination == 2) {
         if (colors) {
-            printf("%s.ssp%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.ssp%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source,
+                   ANSI_RESET);
         } else {
             printf(".ssp $%d\n", ins->source);
         }
     } else if (ins->destination == 3) {
         if (colors) {
-            printf("%s.sbp%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.sbp%s%s $%d%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source,
+                   ANSI_RESET);
         } else {
             printf(".sbp $%d\n", ins->source);
         }
@@ -114,11 +112,12 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
             printf("hlt\n");
         }
     } else {
-	if (colors) {
-	    printf("%s%c%s (%s%d%s)\n", ANSI_BLUE, (char) ins->full_ins, ANSI_RESET, ANSI_YELLOW, ins->full_ins, ANSI_RESET);
-	} else {
-	    printf("%c (%d)\n", (char) ins->full_ins, ins->full_ins);
-	}
+        if (colors) {
+            printf("%s%c%s (%s%d%s)\n", ANSI_BLUE, (char) ins->full_ins, ANSI_RESET, ANSI_YELLOW,
+                   ins->full_ins, ANSI_RESET);
+        } else {
+            printf("%c (%d)\n", (char) ins->full_ins, ins->full_ins);
+        }
     }
 }
 
@@ -139,10 +138,9 @@ void print_output(Instruction *ins) {
         return;
     }
 
-    bool two_reg_args = 
-        (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || 
-         strcmp(op, "cmp") == 0 || strcmp(op, "mul") == 0 || 
-         strcmp(op, "mov") == 0);
+    bool two_reg_args =
+        (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||
+         strcmp(op, "mul") == 0 || strcmp(op, "mov") == 0);
 
     if (two_reg_args) {
         print_two_reg_args(ins, colors);
@@ -185,7 +183,8 @@ void print_output(Instruction *ins) {
                        ins->type << 1 | (ins->source & 0b10000000) >> 7, ANSI_RESET, ANSI_YELLOW,
                        ins->source & 7, ANSI_RESET);
             } else {
-                printf("&r%d, r%d\n", ins->type << 1 | (ins->source & 0b10000000) >> 7, (ins->source & 0b111));
+                printf("&r%d, r%d\n", ins->type << 1 | (ins->source & 0b10000000) >> 7,
+                       (ins->source & 0b111));
             }
             return;
         }
@@ -201,17 +200,26 @@ void print_output(Instruction *ins) {
             printf("$%d, r%d\n", ins->destination, ins->source);
         }
     } else if (strcmp(op, "push") == 0 || strcmp(op, "pop") == 0) {
-        if (ins->type == 0) {
+        if ((ins->type == 0 && strcmp(op, "push") == 0) || (strcmp(op, "pop") == 0 && (ins->full_ins & 2048) == 1)) {
             if (colors) {
-                printf("%sr%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+                printf("%sr%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
             } else {
                 printf("r%d\n", ins->source);
             }
         } else {
-            if (colors) {
-                printf("%s%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+            if (strcmp(op, "push") == 0) {
+                if (colors) {
+                    printf("%s%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
+                } else {
+                    printf("%d\n", ins->source);
+                }
             } else {
-                printf("%d\n", ins->source);
+                if (colors) {
+                    printf("%s$%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
+                } else {
+
+                    printf("$%d\n", ins->full_ins & 2047);
+                }
             }
         }
     }

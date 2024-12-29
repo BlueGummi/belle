@@ -79,7 +79,7 @@ fn check_instruction(
         "JZ" | "JO" | "JMP" => {
             only_one(arg1, arg2, raw_token, line_num).and_then(|_| jump_args(arg1, line_num))
         }
-        "PUSH" | "POP" | "SSP" | "SBP " => {
+        "PUSH" | "POP" => {
             only_one(arg1, arg2, raw_token, line_num).and_then(|_| push_args(arg1, line_num))
         }
         _ => Ok(()),
@@ -235,9 +235,9 @@ fn int_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
 }
 
 fn push_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
-    if !arg1.is_some_and(|tok| tok.is_register() || tok.is_literal()) {
+    if !arg1.is_some_and(|tok| tok.is_memory_address() || tok.is_register() || tok.is_literal()) {
         return Err(format!(
-            "PUSH requires SRC to be a Register or Literal at line {}",
+            "PUSH/POP requires SRC to be a Register or Literal or Memory address at line {}",
             line_num
         ));
     }

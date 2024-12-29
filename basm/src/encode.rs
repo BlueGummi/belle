@@ -88,6 +88,9 @@ pub fn encode_instruction(
             }
             "POP" => {
                 ins_type = "one_arg";
+                if let Some(&Token::MemAddr(_)) = arg1 {
+                    ins_type = "popmem";
+                }
                 Ok(POP_OP) // 3
             }
             "DIV" => Ok(DIV_OP),        // 4
@@ -153,6 +156,12 @@ pub fn encode_instruction(
         "one_arg" => {
             let arg_bin = argument_to_binary(arg1, line_num)?;
             Ok(Some(vec![(instruction_bin << 12) | arg_bin]))
+        }
+        "popmem" => {
+            let arg_bin = arg1
+                .ok_or_else(|| format!("Missing argument for POP at line {}", line_num))?
+                .get_num();
+            Ok(Some(vec![instruction_bin << 12 | 1 << 11 | arg_bin]))
         }
         "st" => {
             let arg1_bin = argument_to_binary(arg1, line_num)?;
