@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::*;
 use ahash::RandomState;
 use once_cell::sync::Lazy;

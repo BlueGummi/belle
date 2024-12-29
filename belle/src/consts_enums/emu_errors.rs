@@ -1,6 +1,8 @@
-use crate::CONFIG;
+use crate::config::CONFIG;
 use colored::Colorize;
+use std::error::Error;
 use std::fmt;
+#[derive(Debug)]
 pub enum EmuError {
     FileNotFound(),
     IsDirectory(),
@@ -9,6 +11,7 @@ pub enum EmuError {
     ReadFail(String),
     Impossible(String),
 }
+
 impl EmuError {
     pub fn err(&self) {
         if CONFIG.quiet {
@@ -92,5 +95,11 @@ impl fmt::Display for EmuError {
                 )
             }
         }
+    }
+}
+
+impl Error for EmuError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
     }
 }

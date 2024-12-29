@@ -1,7 +1,7 @@
 use crate::Argument::*;
 use crate::*;
 impl CPU {
-    pub fn handle_jo(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_jo(&mut self, arg: &Argument) -> PossibleCrash {
         if !self.oflag {
             self.pc += 1;
             return Ok(());
@@ -10,12 +10,12 @@ impl CPU {
         Ok(())
     }
 
-    pub fn handle_jmp(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_jmp(&mut self, arg: &Argument) -> PossibleCrash {
         self.jmp(arg)?;
         Ok(())
     }
 
-    pub fn handle_jz(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_jz(&mut self, arg: &Argument) -> PossibleCrash {
         if !self.zflag {
             self.pc += 1;
             return Ok(());
@@ -24,7 +24,7 @@ impl CPU {
         Ok(())
     }
 
-    fn jmp(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    fn jmp(&mut self, arg: &Argument) -> PossibleCrash {
         self.handle_push(&Argument::Literal(self.pc.try_into().unwrap()))?;
         if let MemAddr(n) = arg {
             if *n < 0 {

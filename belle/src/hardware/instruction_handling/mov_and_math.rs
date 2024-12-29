@@ -1,11 +1,7 @@
 use crate::Argument::*;
 use crate::*;
 impl CPU {
-    pub fn handle_add(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_add(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let value = self.get_value(arg2)?;
 
         if let Register(n) = arg1 {
@@ -47,11 +43,7 @@ impl CPU {
         self.pc += 1;
         Ok(())
     }
-    pub fn handle_div(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_div(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let divisor = match self.get_value(arg2) {
             Ok(v) => {
                 if v == 0.0 || v as i32 == 0 {
@@ -121,11 +113,7 @@ impl CPU {
         self.pc += 1;
         Ok(())
     }
-    pub fn handle_mul(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_mul(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let value = self.get_value(arg2)?;
 
         if let Register(n) = arg1 {
@@ -171,11 +159,7 @@ impl CPU {
         Ok(())
     }
 
-    pub fn handle_mov(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_mov(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let value = self.get_value(arg2)?;
         if let Register(n) = arg1 {
             match *n {

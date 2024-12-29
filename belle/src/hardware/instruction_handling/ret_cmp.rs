@@ -1,7 +1,7 @@
 use crate::Argument::*;
 use crate::*;
 impl CPU {
-    pub fn handle_ret(&mut self) -> Result<(), UnrecoverableError> {
+    pub fn handle_ret(&mut self) -> PossibleCrash {
         let temp: i32 = self.sp as i32;
         if let Some(v) = self.memory[temp as usize] {
             self.pc = v + 1;
@@ -22,11 +22,7 @@ impl CPU {
         Ok(())
     }
 
-    pub fn handle_cmp(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_cmp(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let src = self.get_value(arg2)?;
         if let Register(_) = arg1 {
             let value = self.get_value(arg1)?;

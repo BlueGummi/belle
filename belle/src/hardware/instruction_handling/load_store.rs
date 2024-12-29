@@ -1,11 +1,7 @@
 use crate::Argument::*;
 use crate::*;
 impl CPU {
-    pub fn handle_st(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_st(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let source = self.get_value(arg2)? as i16;
         if let MemAddr(n) = arg1 {
             let index = *n as usize;
@@ -34,11 +30,7 @@ impl CPU {
         self.pc += 1;
         Ok(())
     }
-    pub fn handle_ld(
-        &mut self,
-        arg1: &Argument,
-        arg2: &Argument,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn handle_ld(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let source = self.get_value(arg2)?;
         if let Register(n) = arg1 {
             match *n {

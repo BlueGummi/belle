@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::*;
 use colored::Colorize;
 use std::fmt;
@@ -19,8 +20,8 @@ pub enum RecoverableError {
     BackwardStack(u16, Option<String>),
 }
 
-pub type Oopsie = Result<(), RecoverableError>;
-pub type Death = Result<(), UnrecoverableError>; // what am I supposed to call it?
+pub type PossibleWarn = Result<(), RecoverableError>;
+pub type PossibleCrash = Result<(), UnrecoverableError>;
 
 impl std::error::Error for UnrecoverableError {}
 impl std::error::Error for RecoverableError {}

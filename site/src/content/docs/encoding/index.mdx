@@ -80,7 +80,7 @@ The jump instructions all take either a direct memory address or register indire
 In **[Memory direct]** mode, the encoding is as follows
 
 | Opcode | DTB |Destination |
-| :----- | :-------------- |
+| :----- | :---- | :-------------- |
 | `[BBBB]` | `[0]` | `[BBBBBBBBBBB]` |
 | Types: | | Memory direct |
 
@@ -89,7 +89,7 @@ The jump instructions can access memory addresses up to 2047 in direct mode. Bey
 In **[Register indirect]** mode, the encoding is as follows
 
 | Opcode | DTB |Destination |
-| :----- | :-------------- |
+| :----- | :---- | :-------------- |
 | `[BBBB]` | `[1]` | `[00000000BBB]` |
 | Types: | | Register indirect |
 

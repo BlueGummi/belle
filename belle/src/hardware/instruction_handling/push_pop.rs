@@ -1,7 +1,7 @@
 use crate::Argument::*;
 use crate::*;
 impl CPU {
-    pub fn handle_push(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_push(&mut self, arg: &Argument) -> PossibleCrash {
         let mut val: f32 = 0.0;
         if let Literal(l) = arg {
             val = (*l).into();
@@ -50,7 +50,7 @@ impl CPU {
         Ok(())
     }
 
-    pub fn handle_pop(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_pop(&mut self, arg: &Argument) -> PossibleCrash {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
             if let Register(_) = arg {

@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::*;
 
 impl CPU {
@@ -25,11 +26,7 @@ impl CPU {
             Some("Attempted to divide by zero.".to_string()),
         )
     }
-    pub fn check_overflow(
-        &mut self,
-        new_value: i64,
-        register: u16,
-    ) -> Result<(), RecoverableError> {
+    pub fn check_overflow(&mut self, new_value: i64, register: u16) -> PossibleWarn {
         let overflowed = match register {
             0..=3 => new_value > i64::from(i16::MAX) || new_value < i64::from(i16::MIN),
             4..=5 => new_value > i64::from(u16::MAX) || new_value < i64::from(u16::MIN),

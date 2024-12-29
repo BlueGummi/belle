@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::Argument::*;
 use crate::Instruction::*;
 use crate::*;
@@ -75,7 +76,8 @@ impl CPU {
         }
     }
 
-    pub fn run(&mut self) -> Result<(), UnrecoverableError> {
+    pub fn run(&mut self) -> PossibleCrash {
+        println!("{CONFIG:?}");
         self.has_ran = true; // for debugger
         self.running = true;
         if self.do_not_run {
@@ -93,7 +95,9 @@ impl CPU {
             }
             let mut clock = CLOCK.lock().unwrap(); // might panic
             *clock += 1;
-            thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
+            if CONFIG.time_delay != Some(0) {
+                thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
+            }
             std::mem::drop(clock); // clock must go bye bye so it unlocks
 
             match self.memory[self.pc as usize] {
@@ -173,7 +177,7 @@ impl CPU {
 
         Ok(())
     }
-    pub fn execute_instruction(&mut self, ins: &Instruction) -> Result<(), UnrecoverableError> {
+    pub fn execute_instruction(&mut self, ins: &Instruction) -> PossibleCrash {
         self.has_ran = true; // for debugger
 
         match ins {
@@ -207,11 +211,7 @@ impl CPU {
         }
         Ok(())
     }
-    pub fn set_register_value(
-        &mut self,
-        arg: &Argument,
-        value: f32,
-    ) -> Result<(), UnrecoverableError> {
+    pub fn set_register_value(&mut self, arg: &Argument, value: f32) -> PossibleCrash {
         if let Register(n) = arg {
             if let Err(e) = self.check_overflow(value as i64, *n as u16) {
                 eprint!("{e}");

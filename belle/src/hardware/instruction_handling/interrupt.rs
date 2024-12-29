@@ -1,8 +1,9 @@
+use crate::config::CONFIG;
 use crate::*;
 use std::io::{self, Read, Write};
 
 impl CPU {
-    pub fn handle_int(&mut self, arg: &Argument) -> Result<(), UnrecoverableError> {
+    pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
         if CONFIG.fuzz {
             return Ok(());
         }

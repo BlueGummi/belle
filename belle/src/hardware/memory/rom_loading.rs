@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::*;
 impl CPU {
     pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {

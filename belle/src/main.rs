@@ -4,6 +4,7 @@
  *
  * This code is licensed under the BSD 3-Clause License.
  */
+use crate::config::CONFIG;
 use belle::*;
 use std::io;
 use std::process;
