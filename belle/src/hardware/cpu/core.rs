@@ -77,7 +77,6 @@ impl CPU {
     }
 
     pub fn run(&mut self) -> PossibleCrash {
-        println!("{CONFIG:?}");
         self.has_ran = true; // for debugger
         self.running = true;
         if self.do_not_run {
