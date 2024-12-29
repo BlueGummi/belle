@@ -49,15 +49,15 @@ The store instruction loads an **address or register indirect** with the **value
 
 ST accepts memory addresses up to 255. Beyond this, a register indirect must be used.
 
-In **[Memory address direct <- Register]** mode, the encoding is as follows
+In **[Memory address direct `<--` Register]** mode, the encoding is as follows
 
-| Opcode | DTB |Destination | Source |
-| :----- | :-------------- |:---------- | :----- |
-| `[0111]` | `[0]` | `[BBBBBBBB]` | `[BBB]` |
-| Types: | | Memory direct | Register direct |
+| Opcode | DTB | Destination | Source |
+| :----- | :-- |:---------- | :----- |
+| `[0111]`| `[0]` | `[BBBBBBBB]` | `[BBB]` |
+| Types: |  | Memory direct | Register direct |
 
 
-In **[Register indirect <- Register]** mode, the encoding is as follows
+In **[Register indirect `<--` Register]** mode, the encoding is as follows
 
 | Opcode | DTB |Destination | Source |
 | :----- | :-------------- |:---------- | :----- |
