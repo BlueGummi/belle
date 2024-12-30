@@ -42,31 +42,16 @@ pub struct Cli {
     pub write: bool,
 }
 
-fn default_config() -> Cli {
-    Cli {
-        file: "".to_string(),
-        verbose: false,
-        debug: false,
-        quiet: false,
-        time_delay: Some(0),
-        pretty: false,
-        fuzz: true,
-        write: true,
-    }
-}
-
 pub fn declare_config() -> Cli {
-    match Cli::try_parse() {
-        Ok(cli) => Cli {
-            file: cli.file,
-            verbose: cli.verbose,
-            debug: cli.debug,
-            quiet: cli.quiet,
-            time_delay: Some(cli.time_delay.unwrap_or(0)),
-            pretty: cli.pretty,
-            fuzz: cli.fuzz,
-            write: cli.write,
-        },
-        Err(_) => default_config(),
+    let cli = Cli::parse();
+    Cli {
+        file: cli.file,
+        verbose: cli.verbose,
+        debug: cli.debug,
+        quiet: cli.quiet,
+        time_delay: Some(cli.time_delay.unwrap_or(0)),
+        pretty: cli.pretty,
+        fuzz: cli.fuzz,
+        write: cli.write,
     }
 }
