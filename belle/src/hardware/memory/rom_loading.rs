@@ -8,7 +8,7 @@ impl CPU {
             if (element >> 9) == 1 {
                 // start directive
                 if start_found {
-                    EmuError::Duplicate(".start directives".to_string()).err();
+                    eprintln!("{}", EmuError::Duplicate(".start directives".to_string()));
                     self.do_not_run = true;
                 }
                 self.starts_at = (element & 0b111111111) as u16;
@@ -62,7 +62,7 @@ impl CPU {
         let some_count = self.memory.iter().filter(|&&e| e.is_some()).count();
 
         if some_count as u32 + u32::from(self.starts_at) > MEMORY_SIZE.try_into().unwrap() {
-            EmuError::MemoryOverflow().err();
+            eprintln!("{}", EmuError::MemoryOverflow());
         }
 
         let mut new_memory = Box::new([None; MEMORY_SIZE]);

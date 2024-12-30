@@ -64,52 +64,25 @@ pub enum EmuError {
     Impossible(String),
 }
 
-impl EmuError {
-    pub fn err(&self) {
-        if CONFIG.quiet {
-            return;
-        }
-        eprint!("{} ", "Emulator Error:".red());
-        match self {
-            EmuError::FileNotFound() => {
-                eprintln!("File {} not found", CONFIG.file.to_string().green());
-            }
-            EmuError::MemoryOverflow() => {
-                eprintln!("{}", "Memory will overflow".red());
-            }
-            EmuError::Duplicate(s) => {
-                eprintln!("Duplicate: {}", s.red());
-            }
-            EmuError::ReadFail(s) => {
-                eprintln!(
-                    "{}: {}",
-                    "Failed to read from stdin and parse to i16".red(),
-                    s
-                );
-            }
-            EmuError::Impossible(s) => {
-                eprintln!("{}: {}", "Configuration combination not possible".red(), s);
-            }
-            EmuError::IsDirectory() => {
-                eprintln!("{} is a directory", CONFIG.file.to_string().green());
-            }
-        }
-        if let EmuError::ReadFail(_) = self {
-            println!("{}", "Retrying..".yellow());
-        }
-    }
-}
-
 impl fmt::Display for EmuError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             EmuError::FileNotFound() => {
-                write!(
-                    f,
-                    "{} File {} not found",
-                    "Emulator Error:".red(),
-                    CONFIG.file.to_string().green(),
-                )
+                if !CONFIG.file.to_string().trim().is_empty() {
+                    write!(
+                        f,
+                        "{} File {} not found",
+                        "Emulator Error:".red(),
+                        CONFIG.file.to_string().green(),
+                    )
+                } else {
+                    write!(
+                        f,
+                        "{} {}",
+                        "Emulator Error:".red(),
+                        "No ROM provided".bold()
+                    )
+                }
             }
             EmuError::MemoryOverflow() => {
                 write!(
