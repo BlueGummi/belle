@@ -102,4 +102,35 @@ PUSH can take either a literal value or register, whilst POP can take a register
 
 Both instructions have a single determinant bit.
 
+#### PUSH
+
+In **register direct** mode, the encoding is as follows
+| Opcode | Padding | DTB | Source | 
+| :----- | :------- |:-- | :---------- |
+| `[1100]`| `[000]` | `[0]` | `[00000BBB]` |
+| Type: | | | Register | 
+
+In **immediate value** mode, the encoding is as follows
+
+| Opcode | Padding | DTB | Source | 
+| :----- | :------- |:-- | :---------- |
+| `[1100]`| `[000]` | `[1]` | `[BBBBBBBB]` |
+| Type: | | | Immediate (signed) | 
+
+#### POP
+
+In **register direct** mode, the encoding is as follows
+
+| Opcode |  DTB | Source | 
+| :----- | :----- | :---------- |
+| `[0011]`| `[0]` | `[00000000BBB]` |
+| Type: | |  Register | 
+
+In **memory direct** mode, the encoding is as follows
+
+| Opcode |  DTB | Source | 
+| :----- | :----- | :---------- |
+| `[0011]`| `[1]` | `[BBBBBBBBBBB]` |
+| Type: | |  Memory address | 
+
 
