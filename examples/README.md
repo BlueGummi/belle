@@ -2,10 +2,14 @@
 
 ## Programs
 
-fib.asm - Fibonacci to the signed 16 bit integer limit
+fib.asm - Fibonacci to the unsigned 16 bit integer limit and golden ratio
 
-spiral.asm - Prints numbers from 0-i16MAX and then back down to 0 and back up again
+spiral.asm - Increments then decrements a register and prints out if it is increasing or decreasing, used for benchmarking
 
 hello.asm - "Hello, world!" program
 
-waste_time.asm - Repeated executes NOP instructions
+waste_time.asm - Repeatedly executes NOP instructions
+
+game.asm - Unfinished "game" that would take inputs from the user
+
+count.asm - Count to the unsigned 16 bit integer limit and print to stdout
