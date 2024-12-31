@@ -31,6 +31,7 @@ function Clean {
     Set-Location btils/bfmt
     cargo clean --quiet 
     Set-Location ..
+    Set-Location ..
     Print-Message "Cleaned up!" "green"
 }
 
@@ -39,17 +40,14 @@ function Spinner {
         [int]$processId,
         [string]$message
     )
-    if ($Nospin) {
-        return
-    }
     $delay = 0.1
-    $spin = '/-\|'
+    #$spin = '/-\|'
     Print-Message "$message" "blue"
     $i = 0
     
     while (Get-Process -Id $processId -ErrorAction SilentlyContinue) {
-        $temp = $spin[$i % $spin.Length]
-        Write-Host "`r$temp" -NoNewline
+        #$temp = $spin[$i % $spin.Length]
+        #Write-Host "`r$temp" -NoNewline
         Start-Sleep -Seconds $delay
         $i++
     }
