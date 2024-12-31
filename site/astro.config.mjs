@@ -28,7 +28,7 @@ export default defineConfig({
           { label: "Overview", slug: "overview" },
           { label: "Encoding", slug: "encoding" },
           { label: "Instructions", slug: "instructions" },
-          { label: "CPU specification", slug: "cpu-core" },
+          { label: "CPU specification", slug: "hardware" },
           { label: "Memory", slug: "memory" },
         ],
       },
