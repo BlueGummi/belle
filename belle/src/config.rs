@@ -1,3 +1,4 @@
+use clap::CommandFactory;
 use clap::Parser;
 use once_cell::sync::Lazy;
 
@@ -43,15 +44,8 @@ pub struct Cli {
 }
 
 pub fn declare_config() -> Cli {
-    let cli = Cli::parse();
-    Cli {
-        file: cli.file,
-        verbose: cli.verbose,
-        debug: cli.debug,
-        quiet: cli.quiet,
-        time_delay: Some(cli.time_delay.unwrap_or(0)),
-        pretty: cli.pretty,
-        fuzz: cli.fuzz,
-        write: cli.write,
-    }
+    Cli::try_parse().unwrap_or_else(|_| {
+        Cli::command().print_help().unwrap();
+        std::process::exit(0);
+    })
 }

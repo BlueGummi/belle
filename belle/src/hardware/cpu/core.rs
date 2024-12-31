@@ -188,7 +188,7 @@ impl CPU {
             }
             let mut clock = CLOCK.lock().unwrap(); // might panic
             *clock += 1;
-            if CONFIG.time_delay != Some(0) {
+            if CONFIG.time_delay != Some(0) && CONFIG.time_delay.is_some() {
                 thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
             }
             std::mem::drop(clock); // clock must go bye bye so it unlocks

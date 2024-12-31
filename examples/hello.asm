@@ -1,7 +1,7 @@
 ; this program prints "Hello, world!" to stdout
 jmp @hello_end
 hello_start:
-    .asciiz "Hello, world!"
+    .asciiz "doink"
     .word 10
 hello_end:
 mov r0, @hello_start

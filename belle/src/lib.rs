@@ -134,3 +134,13 @@ fn add_with_negative_register() {
     test_instruction!(bcpu, add, "r5", "r0");
     assert_eq!(bcpu.uint_reg[1], 65494);
 }
+
+#[test]
+fn hlt_test() {
+    let mut bcpu = CPU::new();
+
+    bcpu.running = true;
+
+    test_instruction!(bcpu, hlt);
+    assert_eq!(bcpu.running, false);
+}

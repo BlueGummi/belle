@@ -1,10 +1,13 @@
+use clap::CommandFactory;
 use clap::Parser;
 pub use once_cell::sync::Lazy;
+
 pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
+
 /// Command line arguments
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(name = "belle-asm")]
-#[command(version = "0.1.0")]
+#[command(version = "0.2.0")]
 #[command(author = "gummi")]
 #[command(about = "The assembler for BELLE", long_about = None)]
 pub struct Args {
@@ -27,22 +30,21 @@ pub struct Args {
     /// Display tips (may improve errors)
     #[clap(short = 't', long, default_value_t = true)]
     pub tips: bool,
-    // /// Cow
-    //#[clap(short = 'c', long, default_value_t = false)]
-    //pub cow: bool,
 }
 
-/// Parse command line arguments and return the configuration
-#[must_use]
 pub fn declare_config() -> Args {
-    let cli = Args::parse();
+    let cli = Args::try_parse().unwrap_or_else(|_| {
+        Args::command().print_help().unwrap();
+        std::process::exit(0);
+    });
+
     let output = cli.output.unwrap_or_else(|| "a.out".to_string());
+
     Args {
         file: cli.file,
         output: Some(output),
         verbose: cli.verbose,
         debug: cli.debug,
         tips: cli.tips,
-        // cow: cli.cow,
     }
 }
