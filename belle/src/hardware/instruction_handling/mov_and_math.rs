@@ -173,6 +173,9 @@ impl CPU {
                     };
                 }
             }
+            if let Err(e) = self.check_overflow(value as i64, *n as u16) {
+                eprint!("{e}");
+            }
         }
         self.pc += 1;
         Ok(())

@@ -45,6 +45,9 @@ jobs:
       - name: Build the BELLE-disassembler
         run: cd ./bdump && make
 
+      - name: Run tests
+        run: ./test.sh
+
       - name: Test build script
         run: ./build.sh -n
 

@@ -45,6 +45,9 @@ impl CPU {
                     self.int_reg[*n as usize] = source as u16 as i16;
                 }
             }
+            if let Err(e) = self.check_overflow(source as i64, *n as u16) {
+                eprint!("{e}");
+            }
         }
         self.pc += 1;
         Ok(())

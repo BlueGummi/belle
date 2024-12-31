@@ -17,6 +17,14 @@ fn add_with_immediate() {
 }
 
 #[test]
+fn add_with_immediate_overflow() {
+    let mut bcpu = CPU::new();
+    test_instruction!(bcpu, add, "r0", "32000");
+    test_instruction!(bcpu, add, "r0", "32000");
+    assert_eq!(bcpu.oflag, true);
+}
+
+#[test]
 fn add_with_register() {
     let mut bcpu = CPU::new();
     bcpu.int_reg[0] = 5;
@@ -71,6 +79,16 @@ fn add_with_mptr() {
 }
 
 #[test]
+#[should_panic]
+fn add_with_mptr_fail() {
+    let mut bcpu = CPU::new();
+
+    bcpu.memory[44] = Some(55);
+
+    test_instruction!(bcpu, add, "r0", "&$44");
+}
+
+#[test]
 fn add_with_negative_register() {
     let mut bcpu = CPU::new();
 
@@ -85,7 +103,7 @@ fn add_with_negative_register() {
 }
 
 #[test]
-fn hlt_test() {
+fn hlt() {
     let mut bcpu = CPU::new();
 
     bcpu.running = true;
@@ -95,7 +113,7 @@ fn hlt_test() {
 }
 
 #[test]
-fn jo_test_jump() {
+fn jo_jump() {
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, add, "r0", "4444");
@@ -103,10 +121,14 @@ fn jo_test_jump() {
     assert_eq!(bcpu.oflag, true);
     test_instruction!(bcpu, jo, "$300");
     assert_eq!(bcpu.pc, 300);
+
+    bcpu.uint_reg[0] = 444;
+    test_instruction!(bcpu, jo, "&r4");
+    assert_eq!(bcpu.pc, 444);
 }
 
 #[test]
-fn jo_test_no_jump() {
+fn jo_no_jump() {
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, jo, "$300");
@@ -114,7 +136,7 @@ fn jo_test_no_jump() {
 }
 
 #[test]
-fn jz_test_jump() {
+fn jz_jump() {
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, cmp, "r0", "r0");
@@ -122,10 +144,14 @@ fn jz_test_jump() {
 
     test_instruction!(bcpu, jz, "$300");
     assert_eq!(bcpu.pc, 300);
+   
+    bcpu.uint_reg[0] = 444;
+    test_instruction!(bcpu, jz, "&r4");
+    assert_eq!(bcpu.pc, 444);
 }
 
 #[test]
-fn jz_test_no_jump() {
+fn jz_no_jump() {
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, jz, "$120");
@@ -133,11 +159,23 @@ fn jz_test_no_jump() {
 }
 
 #[test]
-fn jmp_test_jump() {
+fn jmp_jump() {
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, jmp, "$320");
     assert_eq!(bcpu.pc, 320);
+    bcpu.uint_reg[0] = 444;
+    test_instruction!(bcpu, jmp, "&r4");
+    assert_eq!(bcpu.pc, 444);
+
+}
+
+#[test]
+#[should_panic]
+fn jmp_fail() {
+    let mut bcpu = CPU::new();
+    bcpu.float_reg[0] = f32::MAX - 5.0;
+    test_instruction!(bcpu, jmp, "&r6");
 }
 
 #[test]
