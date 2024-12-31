@@ -15,4 +15,3 @@ time_waster:
 print:
     int 8
     ret
-

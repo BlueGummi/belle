@@ -27,7 +27,6 @@ fib_loop:
     st &r1, r5
     add r1, 1
     jmp @fib_loop ; continue Fibonacci calculation
-
 finish:
     pop $123
     add r1, -2

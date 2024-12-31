@@ -1,0 +1,7 @@
+[package]
+name = "bfmt"
+version = "0.2.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.23", features = ["derive"] }

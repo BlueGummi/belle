@@ -151,10 +151,21 @@ default_build() {
                 cd ..
                 ;;
             btils)
-                cp ./btils/bfmt.py ./btils/bfmt
-                chmod +x ./btils/bfmt
-                cp -f ./btils/bfmt ./bin
-                rm ./btils/bfmt
+		cd btils/bfmt
+		if ! [ "$loud" ]; then
+                	cargo build --release --quiet &
+		else
+			cargo build --release &
+		fi
+                pid=$!
+                if [ -z "$no_spin" ]; then
+                    spinner $pid "Building BELLE-fmt..."
+                else
+                    echo "Building BELLE-fmt..."
+                    wait $pid
+                fi
+                cp -f target/release/bfmt ../../bin
+                cd ..
                 ;;
         esac
     done

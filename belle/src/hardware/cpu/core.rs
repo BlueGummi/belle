@@ -1,8 +1,7 @@
 use crate::{config::CONFIG, Argument::*, Instruction::*, *};
-use std::{fmt, thread, time::Duration};
 use colored::Colorize;
 use std::arch::asm;
-
+use std::{fmt, thread, time::Duration};
 
 pub const MEMORY_SIZE: usize = 65536;
 

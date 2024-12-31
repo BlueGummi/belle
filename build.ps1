@@ -28,6 +28,9 @@ function Clean {
     Set-Location belle
     cargo clean --quiet
     Set-Location ..
+    Set-Location btils/bfmt
+    cargo clean --quiet 
+    Set-Location ..
     Print-Message "Cleaned up!" "green"
 }
 
@@ -111,13 +114,13 @@ function Default-Build {
                 Set-Location ..
             }
             "bfmt" {
-                Copy-Item -Path "btils\bfmt.py" -Destination "bin" -Force
-                $bfmtPath = "bin\bfmt"
-                if (Test-Path $bfmtPath) {
-                    Remove-Item $bfmtPath -Force
+                Set-Location btils/bfmt
+                Start-Process -FilePath "cargo" -ArgumentList "build", "--release", "--quiet" -NoNewWindow -PassThru | ForEach-Object {
+                    $PPid = $_.Id
+                    Spinner $PPid "Building BELLE-fmt..."
+                    Copy-Item -Path "target\release\bfmt.exe" -Destination "../../bin" -Force
                 }
-                $batchContent = "@echo off`npython ""%~dp0bfmt"" %*"
-                Set-Content -Path "bin\bfmt.bat" -Value $batchContent
+                Set-Location ..
             }
         }
     }

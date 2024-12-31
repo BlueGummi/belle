@@ -35,7 +35,9 @@ impl CPU {
             }
             self.pc = *n as u16;
         } else if let RegPtr(n) = arg {
-            if self.get_value(&Argument::Register(*n))? < 0.0 || self.get_value(&Argument::Register(*n))? > MEMORY_SIZE as f32 {
+            if self.get_value(&Argument::Register(*n))? < 0.0
+                || self.get_value(&Argument::Register(*n))? > MEMORY_SIZE as f32
+            {
                 return Err(UnrecoverableError::SegmentationFault(
                     self.ir,
                     self.pc,

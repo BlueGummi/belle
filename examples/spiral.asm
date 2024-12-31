@@ -43,5 +43,3 @@ sub_print:
     mov r1, @start
     int 8
     jmp @sub_loop
-
-

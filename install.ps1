@@ -5,7 +5,7 @@ $DIR = "bin"
 $FILE1 = "basm.exe"
 $FILE2 = "bdump.exe"
 $FILE3 = "belle.exe"
-$FILE4 = "bfmt.py" 
+$FILE4 = "bfmt.exe" 
 
 function Print-Message {
     param (
@@ -31,7 +31,7 @@ function Install {
         New-Item -ItemType Directory -Path $localBinPath -Force | Out-Null
     }
 
-    $files = @($FILE1, $FILE2, $FILE3, $FILE4)  # Include bfmt in the list
+    $files = @($FILE1, $FILE2, $FILE3, $FILE4)
     foreach ($file in $files) {
         $sourcePath = Join-Path -Path $DIR -ChildPath $file
         if (Test-Path $sourcePath) {
