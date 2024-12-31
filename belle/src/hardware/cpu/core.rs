@@ -1,7 +1,10 @@
 use crate::{config::CONFIG, Argument::*, Instruction::*, *};
 use std::{fmt, thread, time::Duration};
-pub const MEMORY_SIZE: usize = 65535;
+use colored::Colorize;
 use std::arch::asm;
+
+
+pub const MEMORY_SIZE: usize = 65535;
 
 macro_rules! trust_me {
     ($input:expr) => {
@@ -10,7 +13,6 @@ macro_rules! trust_me {
         }
     };
 }
-use colored::Colorize;
 
 #[derive(Debug)]
 pub enum UnrecoverableError {
@@ -295,13 +297,6 @@ impl CPU {
                 trust_me!("nop");
                 self.pc += 1;
             } // NOP
-        }
-        if self.pc as u64 + 1 > u16::MAX as u64 {
-            return Err(UnrecoverableError::IllegalInstruction(
-                self.ir,
-                self.pc,
-                Some("program counter is too large".to_string()),
-            ));
         }
         Ok(())
     }

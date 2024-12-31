@@ -13,9 +13,7 @@ impl CPU {
             if self.sp != self.bp {
                 println!("{}", RecoverableError::BackwardStack(self.pc, None));
             }
-            if self.sp != self.bp || self.memory[self.bp as usize].is_some() {
-                self.sp += 1;
-            }
+            self.sp += 1;
             if self.sp as usize >= MEMORY_SIZE {
                 self.running = false;
                 self.err = true;
@@ -29,6 +27,8 @@ impl CPU {
             self.memory[self.sp as usize] = Some(val as u16);
             if self.sp >= self.bp {
                 self.backward_stack = true;
+            } else {
+                self.backward_stack = false;
             }
         } else {
             if self.sp == 0 {
@@ -40,9 +40,7 @@ impl CPU {
                     Some("Overflowed while pushing onto stack".to_string()),
                 ));
             }
-            if self.sp != self.bp || self.memory[self.bp as usize].is_some() {
-                self.sp -= 1;
-            }
+            self.sp -= 1;
             self.memory[self.sp as usize] = Some(val as u16);
         }
         self.pc += 1;

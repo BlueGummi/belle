@@ -56,7 +56,7 @@ pub fn declare_config() -> Cli {
             quiet: false,
             time_delay: None,
             pretty: false,
-            fuzz: false,
+            fuzz: true,
             write: false,
         }
     })
