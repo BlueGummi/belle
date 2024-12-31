@@ -32,6 +32,9 @@ pub fn cli_argument_check() {
         }
     }
     if File::open(Path::new(executable_path)).is_err() {
+        if executable_path.is_empty() {
+            process::exit(0);
+        }
         eprintln!("{}", EmuError::FileNotFound());
         process::exit(1);
     }

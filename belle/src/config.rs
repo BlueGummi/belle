@@ -46,7 +46,6 @@ pub struct Cli {
 pub fn declare_config() -> Cli {
     Cli::try_parse().unwrap_or_else(|_| {
         Cli::command().print_help().unwrap();
-        println!();
         Cli {
             file: "".to_string(),
             debug: false,
