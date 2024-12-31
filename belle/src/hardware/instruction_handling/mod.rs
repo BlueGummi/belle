@@ -94,10 +94,10 @@ fn add_with_register() {
 }
 
 #[test]
+#[should_panic]
 fn add_with_register_fail() {
     let mut bcpu = CPU::new();
     test_instruction!(bcpu, add, "r3434", "r3");
-    println!("{bcpu:?}");
 }
 
 #[test]

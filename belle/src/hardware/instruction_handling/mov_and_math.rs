@@ -22,8 +22,7 @@ impl CPU {
                     (self.float_reg[1] as i64).wrapping_add(value as i64)
                 }
                 n if n > 3 => {
-                    self.generate_invalid_register();
-                    0
+                    return Err(self.generate_invalid_register());
                 }
                 _ => {
                     self.int_reg[*n as usize] = if arg2.is_ptr() {
@@ -136,8 +135,7 @@ impl CPU {
                     temp as i64
                 }
                 n if n > 3 => {
-                    self.generate_invalid_register();
-                    return Err(UnrecoverableError::InvalidRegister(self.ir, self.pc, None));
+                    return Err(self.generate_invalid_register());
                 }
                 _ => {
                     let result = if arg2.is_ptr() {
