@@ -46,6 +46,16 @@ pub struct Cli {
 pub fn declare_config() -> Cli {
     Cli::try_parse().unwrap_or_else(|_| {
         Cli::command().print_help().unwrap();
-        std::process::exit(0);
+        println!();
+        Cli {
+            file: "".to_string(),
+            debug: false,
+            verbose: false,
+            quiet: false,
+            time_delay: None,
+            pretty: false,
+            fuzz: false,
+            write: false,
+        }
     })
 }
