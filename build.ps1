@@ -121,6 +121,7 @@ function Default-Build {
                     Copy-Item -Path "target\release\bfmt.exe" -Destination "../../bin" -Force
                 }
                 Set-Location ..
+		Set-Location ..
             }
         }
     }
