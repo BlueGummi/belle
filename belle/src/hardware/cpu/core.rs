@@ -4,7 +4,7 @@ use colored::Colorize;
 use std::arch::asm;
 
 
-pub const MEMORY_SIZE: usize = 65535;
+pub const MEMORY_SIZE: usize = 65536;
 
 macro_rules! trust_me {
     ($input:expr) => {
