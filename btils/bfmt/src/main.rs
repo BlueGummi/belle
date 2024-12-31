@@ -1,4 +1,4 @@
-use clap::{Arg, Command};
+use clap::{Arg, Command, ArgAction};
 use std::fs;
 use std::io::{self, BufRead, Write};
 
@@ -74,6 +74,7 @@ fn main() {
         .arg(
             Arg::new("tabs")
                 .short('t')
+                .action(ArgAction::SetTrue)
                 .long("tabs")
                 .help("Use tabs for indentation"),
         )
