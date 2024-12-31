@@ -1,0 +1,50 @@
+---
+title: CPU specification
+author: BlueGummi
+---
+
+## Overview
+
+The BELLE-ISA is a 16 bit ISA, with a CPU that contains **8 General Purpose Registers**, an **instruction register**, **instruction pointer**, **stack pointer**, and **base pointer**. The integer registers are all 16-bits wide, with 4 signed registers and 2 unsigned registers. There are also two floating point registers, which both are 32 bits wide. The BELLE-ISA also has CPU flags, to manage conditional branch and jump instructions.
+
+The BELLE-ISA has 5 addressing modes.
+
+- Immediate value
+- Register immediate
+- Register indirect (pointer)
+- Memory immediate
+- Memory indirect (pointer)
+
+All memory addresses and registers can be used in indirect addressing modes.
+
+There are no relative addressing modes
+
+## Registers
+
+The first four registers (0-3) are signed 16 bit integer registers. This means they can contain negative values, and can store any integer from -32,768 to 32,767.
+
+The next two registers (4-5) are unsigned 16 bit integer registers. This means they can contain only positive values, able to store any integer from 0-65,535.
+
+The last two registers (6-7) are the 32-bit floating point registers.
+
+The BELLE-ISA also has a stack pointer and base pointer, which determine the location of the call stack. These registers cannot be directly accessed with any instruction, but
+
+```
+int 60
+```
+
+Can be used to set the stack pointer to the value in register 4, and
+
+```
+int 61
+```
+
+Can be used to set the base pointer to the value in register 4.
+
+There is also an instruction register, that can be somewhat indirectly altered by using jump instructions, however it is not possible to write or read to or from the instruction register.
+
+## Program counter and Instruction pointer
+
+The program counter (PC) and instruction pointer (IP) are two vital parts of any CPU that allow the CPU to determine the location of the next instruction in memory. The program counter contains the memory address of the next instruction, whilst the instruction pointer holds the memory address of the current instruction being executed.
+
+After each clock cycle, the program counter and instruction pointer are both changed depending on the current instruction. If the current instruction was a `RET` or jump instruction, the program counter is altered to point to the location of the jump or return instruction.
