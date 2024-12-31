@@ -37,7 +37,7 @@ impl CPU {
                 5 => self.uint_reg[1] = source as u16,
                 6 => self.float_reg[0] = source as u16 as i16 as f32,
                 7 => self.float_reg[1] = source as u16 as i16 as f32,
-                n if n > 5 => return Err(self.generate_invalid_register()),
+                n if n > 3 => return Err(self.generate_invalid_register()),
                 _ => {
                     if let Err(e) = self.check_overflow(source as i64, *n as u16) {
                         eprint!("{e}");

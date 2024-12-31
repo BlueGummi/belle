@@ -21,7 +21,7 @@ impl CPU {
                     self.float_reg[1] += value;
                     (self.float_reg[1] as i64).wrapping_add(value as i64)
                 }
-                n if n > 5 => {
+                n if n > 3 => {
                     self.generate_invalid_register();
                     0
                 }
@@ -88,7 +88,7 @@ impl CPU {
                     self.float_reg[1] = result;
                     result as i64
                 }
-                n if n > 5 => {
+                n if n > 3 => {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
@@ -135,7 +135,7 @@ impl CPU {
                     self.float_reg[1] = temp;
                     temp as i64
                 }
-                n if n > 5 => {
+                n if n > 3 => {
                     self.generate_invalid_register();
                     return Err(UnrecoverableError::InvalidRegister(self.ir, self.pc, None));
                 }
@@ -166,7 +166,7 @@ impl CPU {
                 5 => self.uint_reg[1] = value as u16,
                 6 => self.float_reg[0] = value,
                 7 => self.float_reg[1] = value,
-                n if n > 5 => return Err(self.generate_invalid_register()),
+                n if n > 3 => return Err(self.generate_invalid_register()),
                 _ => {
                     self.int_reg[*n as usize] = if arg2.is_ptr() {
                         value as u16 as i16

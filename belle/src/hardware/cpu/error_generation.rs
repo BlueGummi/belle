@@ -3,7 +3,7 @@ use crate::{config::CONFIG, *};
 impl CPU {
     pub fn generate_invalid_register(&mut self) -> UnrecoverableError {
         self.running = false;
-        UnrecoverableError::InvalidRegister(
+        UnrecoverableError::IllegalInstruction(
             self.ir,
             self.pc,
             Some("The register number is too large.".to_string()),

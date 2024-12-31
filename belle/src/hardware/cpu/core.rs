@@ -110,6 +110,7 @@ impl fmt::Display for RecoverableError {
     }
 }
 
+#[derive(Debug)]
 pub struct CPU {
     pub int_reg: [i16; 4], // r0 thru r5
     pub uint_reg: [u16; 2],
