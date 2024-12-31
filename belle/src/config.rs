@@ -1,3 +1,4 @@
+#[allow(unused_imports)] // tests
 use clap::CommandFactory;
 use clap::Parser;
 use once_cell::sync::Lazy;
@@ -42,10 +43,12 @@ pub struct Cli {
     #[clap(short = 'w', long, default_value_t = false)]
     pub write: bool,
 }
-
 pub fn declare_config() -> Cli {
     Cli::try_parse().unwrap_or_else(|_| {
-        Cli::command().print_help().unwrap();
+        #[cfg(not(test))]
+        {
+            Cli::command().print_help().unwrap();
+        }
         Cli {
             file: "".to_string(),
             debug: false,
