@@ -36,7 +36,7 @@ function Install {
         $sourcePath = Join-Path -Path $DIR -ChildPath $file
         if (Test-Path $sourcePath) {
             Copy-Item -Path $sourcePath -Destination $localBinPath -Force
-            Print-Message "$file installed successfully." "green"
+            Print-Message "$file.Substring(0, $file.Length - 4) installed successfully." "green"
         } else {
             Print-Message "Warning: '$sourcePath' does not exist and cannot be copied." "yellow"
         }
