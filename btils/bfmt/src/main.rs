@@ -101,7 +101,4 @@ fn main() {
             eprintln!("Error processing {}: {}", filename, e);
         }
     }
-
-    // Exit with code 0 after processing
-    std::process::exit(0);
 }

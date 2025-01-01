@@ -253,3 +253,4 @@ fn push_success() {
 
     assert_eq!(bcpu.memory[19], Some(33));
 }
+
