@@ -257,7 +257,6 @@ fn push_success() {
 #[test]
 #[should_panic]
 fn cmp_fail() {
-
     let mut bcpu = CPU::new();
 
     bcpu.int_reg[2] = 333;
@@ -267,7 +266,6 @@ fn cmp_fail() {
 
 #[test]
 fn cmp_success() {
-
     let mut bcpu = CPU::new();
 
     bcpu.int_reg[2] = 33;
@@ -304,7 +302,6 @@ fn div_success() {
 #[test]
 #[should_panic]
 fn mul_fail() {
-
     let mut bcpu = CPU::new();
 
     test_instruction!(bcpu, mul, "r0", "&$33");
@@ -313,7 +310,6 @@ fn mul_fail() {
 #[test]
 #[should_panic]
 fn mul_fail_2() {
-
     let mut bcpu = CPU::new();
     bcpu.int_reg[1] = 23;
     test_instruction!(bcpu, mul, "r0", "&r1");

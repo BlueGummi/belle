@@ -77,9 +77,21 @@ impl CPU {
                         }
                         Err(e) => {
                             println!("{}", EmuError::ReadFail(e.to_string()));
+                            return Err(UnrecoverableError::ReadFail(
+                                self.ir,
+                                self.pc,
+                                Some(e.to_string()),
+                            ));
                         }
                     },
-                    Err(e) => println!("{}", EmuError::ReadFail(e.to_string())),
+                    Err(e) => {
+                        println!("{}", EmuError::ReadFail(e.to_string()));
+                        return Err(UnrecoverableError::ReadFail(
+                            self.ir,
+                            self.pc,
+                            Some(e.to_string()),
+                        ));
+                    }
                 }
             }
             41 => self.sflag = true,

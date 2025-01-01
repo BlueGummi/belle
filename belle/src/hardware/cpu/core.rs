@@ -21,6 +21,7 @@ pub enum UnrecoverableError {
     InvalidRegister(i16, u16, Option<String>),
     StackOverflow(i16, u16, Option<String>),
     StackUnderflow(i16, u16, Option<String>),
+    ReadFail(i16, u16, Option<String>),
 }
 
 #[derive(Debug)]
@@ -50,6 +51,7 @@ impl UnrecoverableError {
             }
             UnrecoverableError::StackOverflow(ir, loc, msg) => (*ir, "Stack overflow", *loc, msg),
             UnrecoverableError::StackUnderflow(ir, loc, msg) => (*ir, "Stack underflow", *loc, msg),
+            UnrecoverableError::ReadFail(ir, loc, msg) => (*ir, "Read fail", *loc, msg),
         }
     }
 }
