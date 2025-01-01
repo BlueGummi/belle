@@ -12,7 +12,9 @@ crossterm = "0.28.1"
 ahash = "0.8.11"
 
 [profile.release]
+lto = true
 debug = 0
 opt-level = 3
 codegen-units = 1
 strip = true
+
