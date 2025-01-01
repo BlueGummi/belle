@@ -254,3 +254,119 @@ fn push_success() {
     assert_eq!(bcpu.memory[19], Some(33));
 }
 
+#[test]
+#[should_panic]
+fn cmp_fail() {
+
+    let mut bcpu = CPU::new();
+
+    bcpu.int_reg[2] = 333;
+
+    test_instruction!(bcpu, cmp, "r0", "&r2");
+}
+
+#[test]
+fn cmp_success() {
+
+    let mut bcpu = CPU::new();
+
+    bcpu.int_reg[2] = 33;
+
+    bcpu.float_reg[0] = 33.0;
+
+    test_instruction!(bcpu, cmp, "r2", "r6");
+
+    assert_eq!(bcpu.zflag, true);
+
+    test_instruction!(bcpu, cmp, "r6", "r7");
+
+    assert_eq!(bcpu.zflag, false);
+}
+
+#[test]
+#[should_panic]
+fn div_fail() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, div, "r0", "0");
+}
+
+#[test]
+fn div_success() {
+    let mut bcpu = CPU::new();
+
+    bcpu.int_reg[0] = 9;
+    test_instruction!(bcpu, div, "r0", "3");
+
+    assert_eq!(bcpu.int_reg[0], 3);
+}
+
+#[test]
+#[should_panic]
+fn mul_fail() {
+
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, mul, "r0", "&$33");
+}
+
+#[test]
+#[should_panic]
+fn mul_fail_2() {
+
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[1] = 23;
+    test_instruction!(bcpu, mul, "r0", "&r1");
+}
+
+#[test]
+fn mul_success() {
+    let mut bcpu = CPU::new();
+
+    bcpu.int_reg[2] = 33;
+    bcpu.int_reg[1] = -3;
+    test_instruction!(bcpu, mul, "r2", "r1");
+
+    assert_eq!(bcpu.int_reg[2], -99);
+
+    test_instruction!(bcpu, mul, "r2", "2");
+
+    assert_eq!(bcpu.int_reg[2], -198);
+}
+
+#[test]
+#[should_panic]
+fn mov_fail() {
+    let mut bcpu = CPU::new();
+
+    bcpu.int_reg[1] = -32;
+
+    test_instruction!(bcpu, mov, "r0", "&r1");
+}
+
+#[test]
+#[should_panic]
+fn mov_fail_2() {
+    let mut bcpu = CPU::new();
+
+    bcpu.uint_reg[0] = 333;
+
+    test_instruction!(bcpu, mov, "r2", "&r4");
+}
+
+#[test]
+fn mov_success() {
+    let mut bcpu = CPU::new();
+
+    bcpu.uint_reg[0] = 33;
+
+    test_instruction!(bcpu, mov, "r0", "r4");
+
+    assert_eq!(bcpu.int_reg[0], 33);
+
+    bcpu.float_reg[0] = 6.9;
+
+    test_instruction!(bcpu, mov, "r1", "r6");
+
+    assert_eq!(bcpu.int_reg[1], 6);
+}
