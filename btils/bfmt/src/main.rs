@@ -1,4 +1,4 @@
-use clap::{Arg, Command, ArgAction};
+use clap::{Arg, ArgAction, Command};
 use std::fs;
 use std::io::{self, BufRead, Write};
 
@@ -52,16 +52,11 @@ fn process_file(filename: &str, max_indentation: usize, use_tabs: bool) -> io::R
 }
 
 fn main() {
-    let matches = Command::new("BELLE-asm formatter")
+    let mut command = Command::new("bfmt")
         .version("0.2.0")
         .author("BlueGummi")
         .about("Format code written for the BELLE-assembler")
-        .arg(
-            Arg::new("files")
-                .help("The files to format")
-                .required(true)
-                .num_args(1..),
-        )
+        .arg(Arg::new("files").help("The files to format").num_args(1..))
         .arg(
             Arg::new("max-indent")
                 .short('I')
@@ -74,11 +69,18 @@ fn main() {
         .arg(
             Arg::new("tabs")
                 .short('t')
+                .value_name("USE TABS")
                 .action(ArgAction::SetTrue)
                 .long("tabs")
                 .help("Use tabs for indentation"),
-        )
-        .get_matches();
+        );
+
+    let matches = command.clone().get_matches();
+
+    if matches.get_many::<String>("files").is_none() {
+        command.print_help().unwrap();
+        std::process::exit(0);
+    }
 
     let files: Vec<&str> = matches
         .get_many::<String>("files")
@@ -87,7 +89,6 @@ fn main() {
         .collect();
 
     let max_indentation: usize = *matches.get_one::<usize>("max-indent").unwrap();
-
     let use_tabs = matches.get_flag("tabs");
 
     if use_tabs && max_indentation != DEFAULT_MAX_INDENTATION {
@@ -100,4 +101,7 @@ fn main() {
             eprintln!("Error processing {}: {}", filename, e);
         }
     }
+
+    // Exit with code 0 after processing
+    std::process::exit(0);
 }

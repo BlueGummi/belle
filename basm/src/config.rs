@@ -6,7 +6,7 @@ pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
 
 /// Command line arguments
 #[derive(Parser, Debug)]
-#[command(name = "belle-asm")]
+#[command(name = "basm")]
 #[command(version = "0.2.0")]
 #[command(author = "gummi")]
 #[command(about = "The assembler for BELLE", long_about = None)]
@@ -35,7 +35,7 @@ pub struct Args {
 pub fn declare_config() -> Args {
     let cli = Args::try_parse().unwrap_or_else(|_| {
         Args::command().print_help().unwrap();
-        std::process::exit(0);
+        std::process::exit(0); // will be changed if i need testing
     });
 
     let output = cli.output.unwrap_or_else(|| "a.out".to_string());

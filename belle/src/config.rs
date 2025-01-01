@@ -48,7 +48,10 @@ pub fn declare_config() -> Cli {
         #[cfg(not(test))]
         {
             Cli::command().print_help().unwrap();
+            std::process::exit(0);
         }
+
+        #[allow(unreachable_code)]
         Cli {
             file: "".to_string(),
             debug: false,
