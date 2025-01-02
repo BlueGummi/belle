@@ -38,7 +38,12 @@ clean() {
     cd ..
     cd belle
     cargo clean --quiet
-    cd ..
+    cd fuzz
+    cargo clean --quiet
+    cd ../../
+    cd btils/bfmt
+    cargo clean --quiet
+    cd ../../
     print_message "Cleaned up!" green
 }
 

@@ -27,6 +27,9 @@ function Clean {
     Set-Location ..
     Set-Location belle
     cargo clean --quiet
+    Set-Location fuzz
+    cargo clean --quiet
+    Set-Location ..
     Set-Location ..
     Set-Location btils/bfmt
     cargo clean --quiet 
