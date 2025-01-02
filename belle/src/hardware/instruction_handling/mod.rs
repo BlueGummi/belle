@@ -401,3 +401,10 @@ fn ret_success() {
     assert_eq!(bcpu.pc, 124);
 }
 
+#[test]
+fn int_fail() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, int, "90");
+}
+

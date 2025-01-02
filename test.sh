@@ -26,10 +26,10 @@ print_message() {
 
 print_message "Running tests on BELLE..." blue
 cd belle
-cargo test --quiet
+cargo test
 cd ..
 print_message "Running test on BELLE-asm..." blue
 cd basm
-cargo test --quiet
+cargo test
 cd ..
 print_message "Tests complete!" green
