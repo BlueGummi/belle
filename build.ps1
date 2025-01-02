@@ -35,6 +35,9 @@ function Clean {
     cargo clean --quiet 
     Set-Location ..
     Set-Location ..
+    Set-Location site
+    Remove-Item -Path "node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "package-lock.json" -Force -ErrorAction SilentlyContinue
     Print-Message "Cleaned up!" "green"
 }
 

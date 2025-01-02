@@ -44,6 +44,10 @@ clean() {
     cd btils/bfmt
     cargo clean --quiet
     cd ../../
+    cd site
+    rm -rf node_modules
+    rm -f package-lock.json
+    cd ..
     print_message "Cleaned up!" green
 }
 
