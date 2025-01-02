@@ -365,4 +365,39 @@ fn mov_success() {
     test_instruction!(bcpu, mov, "r1", "r6");
 
     assert_eq!(bcpu.int_reg[1], 6);
+
+    test_instruction!(bcpu, mov, "r6", "123");
+
+    assert_eq!(bcpu.float_reg[0], 123.0);
 }
+
+#[test]
+#[should_panic]
+fn ret_fail() {
+    let mut bcpu = CPU::new();
+
+    bcpu.sp = 88;
+    bcpu.bp = 123;
+
+    test_instruction!(bcpu, ret);
+}
+
+#[test]
+fn ret_success() {
+
+    let mut bcpu = CPU::new();
+
+    // setup a "Fake call stack"
+    bcpu.sp = 88;
+    bcpu.bp = 89;
+    bcpu.memory[88] = Some(123);
+
+    test_instruction!(bcpu, ret);
+
+    assert_eq!(bcpu.sp, 89);
+
+    assert_eq!(bcpu.sp, 89);
+
+    assert_eq!(bcpu.pc, 124);
+}
+
