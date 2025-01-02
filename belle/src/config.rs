@@ -46,21 +46,38 @@ pub struct Cli {
 pub fn declare_config() -> Cli {
     Cli::try_parse().unwrap_or_else(|_| {
         #[cfg(not(test))]
+        #[cfg(not(fuzzing))]
         {
             Cli::command().print_help().unwrap();
             std::process::exit(0);
         }
 
         #[allow(unreachable_code)]
-        Cli {
-            file: "".to_string(),
-            debug: false,
-            verbose: false,
-            quiet: false,
-            time_delay: None,
-            pretty: false,
-            fuzz: false,
-            write: false,
+        #[cfg(not(fuzzing))]
+        {
+            Cli {
+                file: "".to_string(),
+                debug: false,
+                verbose: false,
+                quiet: false,
+                time_delay: None,
+                pretty: false,
+                fuzz: false,
+                write: false,
+            }
+        }
+        #[cfg(fuzzing)]
+        {
+            return Cli {
+                file: "".to_string(),
+                debug: false,
+                verbose: false,
+                quiet: false,
+                time_delay: None,
+                pretty: false,
+                fuzz: true,
+                write: false,
+            };
         }
     })
 }
