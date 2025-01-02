@@ -384,7 +384,6 @@ fn ret_fail() {
 
 #[test]
 fn ret_success() {
-
     let mut bcpu = CPU::new();
 
     // setup a "Fake call stack"
@@ -408,3 +407,70 @@ fn int_fail() {
     test_instruction!(bcpu, int, "90");
 }
 
+#[test]
+fn int_success() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, int, "11");
+    //assert_eq!(bcpu.zflag, true);
+
+    test_instruction!(bcpu, int, "12");
+    assert_eq!(bcpu.zflag, false);
+
+    test_instruction!(bcpu, int, "13");
+    assert_eq!(bcpu.zflag, true);
+
+    // overflow flag here
+
+    test_instruction!(bcpu, int, "21");
+    assert_eq!(bcpu.oflag, true);
+
+    test_instruction!(bcpu, int, "22");
+    assert_eq!(bcpu.oflag, false);
+
+    test_instruction!(bcpu, int, "23");
+    assert_eq!(bcpu.oflag, true);
+
+    // remainder flag
+
+    test_instruction!(bcpu, int, "31");
+    assert_eq!(bcpu.rflag, true);
+
+    test_instruction!(bcpu, int, "32");
+    assert_eq!(bcpu.rflag, false);
+
+    test_instruction!(bcpu, int, "33");
+    assert_eq!(bcpu.rflag, true);
+
+    // sign flag
+
+    test_instruction!(bcpu, int, "41");
+    assert_eq!(bcpu.sflag, true);
+
+    test_instruction!(bcpu, int, "42");
+    assert_eq!(bcpu.sflag, false);
+
+    test_instruction!(bcpu, int, "43");
+    assert_eq!(bcpu.sflag, true);
+
+    // HLT on overflow
+
+    test_instruction!(bcpu, int, "51");
+    assert_eq!(bcpu.hlt_on_overflow, true);
+
+    test_instruction!(bcpu, int, "52");
+    assert_eq!(bcpu.hlt_on_overflow, false);
+
+    test_instruction!(bcpu, int, "53");
+    assert_eq!(bcpu.hlt_on_overflow, true);
+
+    bcpu.uint_reg[0] = 555;
+    // SP
+    test_instruction!(bcpu, int, "60");
+    assert_eq!(bcpu.sp, 555);
+
+    bcpu.uint_reg[0] = 6154;
+    // BP
+    test_instruction!(bcpu, int, "61");
+    assert_eq!(bcpu.bp, 6154);
+}

@@ -25,11 +25,7 @@ impl CPU {
             }
 
             self.memory[self.sp as usize] = Some(val as u16);
-            if self.sp >= self.bp {
-                self.backward_stack = true;
-            } else {
-                self.backward_stack = false;
-            }
+            self.backward_stack = self.sp >= self.bp;
         } else {
             if self.sp == 0 {
                 self.running = false;

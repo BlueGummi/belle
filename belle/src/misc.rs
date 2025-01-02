@@ -11,9 +11,9 @@ use std::{
 #[macro_export]
 macro_rules! test_instruction {
     ($bcpu:expr, $op:ident, $arg1:expr, $arg2:expr) => {{
-        use crate::Argument::*;
-        use crate::Instruction::*;
-        use crate::*;
+        use $crate::Argument::*;
+        use $crate::Instruction::*;
+        use $crate::*;
 
         let bcpu = &mut $bcpu;
 
@@ -66,6 +66,7 @@ macro_rules! test_instruction {
         if let Err(e) = bcpu.execute_instruction(&ins) {
             panic!("{e}");
         }
+        println!("{ins}");
         bcpu
     }};
 
