@@ -193,23 +193,7 @@ impl BDB {
     }
 
     pub fn print_cpu_state(&mut self) {
-        println!("  Signed Integer Registers : {:?}", self.dbgcpu.int_reg);
-        println!("  Uint registers           : {:?}", self.dbgcpu.uint_reg);
-        println!("  Float Registers          : {:?}", self.dbgcpu.float_reg);
-        println!("  Program Counter          : {}", self.dbgcpu.pc);
-        println!("  Instruction Register     : {:016b}", self.dbgcpu.ir);
-        println!("  Running                  : {}", self.dbgcpu.running);
-        println!("  Zero flag                : {}", self.dbgcpu.zflag);
-        println!("  Overflow flag            : {}", self.dbgcpu.oflag);
-        println!("  Remainder flag           : {}", self.dbgcpu.rflag);
-        println!("  Sign flag                : {}", self.dbgcpu.sflag);
-        println!("  Stack pointer            : {}", self.dbgcpu.sp);
-        println!("  Base pointer             : {}", self.dbgcpu.bp);
-        println!("  Instruction pointer      : {}", self.dbgcpu.ip);
-        println!(
-            "  Disassembled Instruction : {}",
-            self.dbgcpu.decode_instruction()
-        );
+        println!("{}", self.dbgcpu);
 
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             self.dbgcpu.ir = n as i16;

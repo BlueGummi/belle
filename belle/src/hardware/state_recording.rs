@@ -1,8 +1,10 @@
 use crate::{config::CONFIG, *};
 use ahash::RandomState;
+use colored::*;
 use once_cell::sync::Lazy;
 use std::{
     collections::HashMap,
+    fmt,
     sync::{Arc, Mutex},
 };
 
@@ -57,7 +59,117 @@ impl ModCPU {
         }
     }
 }
+impl fmt::Display for ModCPU {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(
+            f,
+            " {}",
+            if self.running {
+                "RUNNING".green()
+            } else {
+                "HALTED".red()
+            }
+        )?;
 
+        let mut register_lines = Vec::new();
+
+        for (i, &val) in self.int_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "| {}: {:^6}",
+                format!("r{}", i).bold().blue(),
+                val.to_string().bold()
+            ));
+        }
+        for (i, &val) in self.uint_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "| {}: {:^6}",
+                format!("r{}", i + 4).bold().cyan(),
+                val.to_string().bold()
+            ));
+        }
+        for (i, &val) in self.float_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "| {}: {:^6.2}",
+                format!("r{}", i + 6).bold().magenta(),
+                val.to_string().bold()
+            ));
+        }
+        writeln!(f, " {} |", register_lines.join(" "))?;
+
+        write!(f, " | {}:", "pc".yellow())?;
+        write!(f, " {:^6} |", self.pc)?;
+        write!(f, " {}:", "ir".yellow())?;
+        write!(f, " {:016b}    |", self.ir)?;
+        write!(f, " {}:", "sp".yellow())?;
+        write!(f, " {:^6} |", self.sp)?;
+        write!(f, " {}:", "bp".yellow())?;
+        write!(f, " {:^6} |", self.bp)?;
+        write!(f, " {}:", "ip".yellow())?;
+        writeln!(f, " {:^6} |", self.ip)?;
+
+        write!(
+            f,
+            " | {}: {} ",
+            "zf".bright_green().bold(),
+            if self.zflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            }
+        )?;
+        write!(
+            f,
+            "| {}: {} ",
+            "of".bright_red().bold(),
+            if self.oflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            }
+        )?;
+        write!(
+            f,
+            "| {}: {} ",
+            "rf".bright_white().bold(),
+            if self.rflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            }
+        )?;
+        writeln!(
+            f,
+            "| {}: {} |",
+            "sf".bright_purple().bold(),
+            if self.sflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            }
+        )?;
+
+        writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
+        for (index, &(_, value)) in self.memory.iter().enumerate() {
+            let displayed = format!(
+                "Value at {} decodes to {}",
+                index.to_string().magenta(),
+                value.to_string().green()
+            );
+            write!(f, "{displayed}")?;
+            for _ in displayed.len()..38 {
+                write!(f, " ")?;
+            }
+            writeln!(
+                f,
+                " - {} ({})",
+                format!("{:016b}", value).bright_white(),
+                value.to_string().bright_green()
+            )?;
+        }
+
+        Ok(())
+    }
+}
 impl CPU {
     pub fn record_state(&self) {
         let mut state = CPU_STATE.lock().unwrap();
@@ -82,31 +194,7 @@ impl CPU {
         }
         let state = CPU_STATE.lock().unwrap();
         if let Some(cpu) = state.get(clock) {
-            println!("\nCPU State for clock cycle {clock}:");
-            println!("  Signed Integer Registers : {:?}", cpu.int_reg);
-            println!("  Uint registers           : {:?}", cpu.uint_reg);
-            println!("  Float Registers          : {:?}", cpu.float_reg);
-            println!("  Program Counter          : {}", cpu.pc);
-            println!("  Instruction Register     : {:016b}", cpu.ir);
-            println!("  Running                  : {}", cpu.running);
-            println!("  Zero flag                : {}", cpu.zflag);
-            println!("  Overflow flag            : {}", cpu.oflag);
-            println!("  Remainder flag           : {}", cpu.rflag);
-            println!("  Sign flag                : {}", cpu.sflag);
-            println!("  Stack pointer            : {}", cpu.sp);
-            println!("  Base pointer             : {}", cpu.bp);
-            println!("  Instruction pointer      : {}", cpu.ip);
-            let mut tmp = CPU::new();
-            tmp.ir = cpu.ir;
-            println!("  Disassembled Instruction : {}", tmp.decode_instruction());
-            if let Some((_, n)) = cpu.memory.iter().find(|&&(first, _)| first == cpu.pc) {
-                let mut tmp = CPU::new();
-                tmp.ir = *n as i16;
-                println!(
-                    "  Next instruction         : {}\n",
-                    tmp.decode_instruction()
-                );
-            }
+            println!("{cpu}");
         } else {
             println!("No CPU state found for clock: {clock}");
         }

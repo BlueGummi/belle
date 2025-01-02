@@ -23,22 +23,7 @@ pub fn write_crash(cpu: &CPU) {
                 "\n\n  Signed Integer Registers : {:?}",
                 cpu.int_reg
             ));
-            write_to_file(&format!("  Uint registers           : {:?}", cpu.uint_reg));
-            write_to_file(&format!("  Float Registers          : {:?}", cpu.float_reg));
-            write_to_file(&format!("  Program Counter          : {}", cpu.pc));
-            write_to_file(&format!("  Instruction Register     : {:016b}", cpu.ir));
-            write_to_file(&format!("  Running                  : {}", cpu.running));
-            write_to_file(&format!("  Zero flag                : {}", cpu.zflag));
-            write_to_file(&format!("  Overflow flag            : {}", cpu.oflag));
-            write_to_file(&format!("  Remainder flag           : {}", cpu.rflag));
-            write_to_file(&format!("  Sign flag                : {}", cpu.sflag));
-            write_to_file(&format!("  Stack pointer            : {}", cpu.sp));
-            write_to_file(&format!("  Base pointer             : {}", cpu.bp));
-            write_to_file(&format!("  Instruction pointer      : {}", cpu.ip));
-            write_to_file(&format!(
-                "  Disassembled Instruction : {}",
-                cpu.decode_instruction()
-            ));
+            write_to_file(cpu.to_string().as_str());
 
             write_to_file("\n------ MEMORY ------\n");
             for (index, value) in cpu.memory.iter().enumerate() {

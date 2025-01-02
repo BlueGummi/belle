@@ -66,7 +66,6 @@ macro_rules! test_instruction {
         if let Err(e) = bcpu.execute_instruction(&ins) {
             panic!("{e}");
         }
-        println!("{ins}");
         bcpu
     }};
 
@@ -78,6 +77,20 @@ macro_rules! test_instruction {
         test_instruction!($bcpu, $op, "", "");
     }};
 }
+
+#[macro_export]
+macro_rules! set_register {
+    ($bcpu:expr, $register:expr, $value:expr) => {{
+        use $crate::*;
+
+        let bcpu = &mut $bcpu;
+        if let Err(e) = bcpu.set_register_value(&Argument::Register($register), $value) {
+            panic!("{e}");
+        }
+        bcpu
+    }};
+}
+
 pub fn cli_argument_check() {
     if CONFIG.debug && CONFIG.verbose {
         eprintln!(
