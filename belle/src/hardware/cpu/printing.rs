@@ -236,13 +236,54 @@ impl fmt::Display for CPU {
                     } else {
                         0
                     };
-                    let complete = displayed.len() + numberlen + spacelen + escapelen;
+
+                    let pointer_ind = if self.sp as usize == index && self.bp as usize == index {
+                        "  <-- sp & bp"
+                    } else if self.sp as usize == index {
+                        "  <-- sp"
+                    } else if self.bp as usize == index {
+                        "  <-- bp"
+                    } else {
+                        ""
+                    };
+
+                    write!(f, "{}", pointer_ind.green())?;
+
+                    let complete =
+                        displayed.len() + numberlen + spacelen + escapelen + pointer_ind.len();
 
                     for _ in complete..100 {
                         write!(f, " ")?;
                     }
 
                     writeln!(f, "│")?;
+                } else if self.sp as usize == index && self.bp as usize == index {
+                    writeln!(
+                        f,
+                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        index.to_string().magenta(),
+                        "─".repeat(18),
+                        "Stack and base pointer",
+                        "─".repeat(22)
+                    )?;
+                } else if self.sp as usize == index {
+                    writeln!(
+                        f,
+                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        index.to_string().magenta(),
+                        "─".repeat(18),
+                        "────Stack pointer─────",
+                        "─".repeat(22)
+                    )?;
+                } else if self.bp as usize == index {
+                    writeln!(
+                        f,
+                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        index.to_string().magenta(),
+                        "─".repeat(18),
+                        "─────Base pointer─────",
+                        "─".repeat(17)
+                    )?;
                 }
             }
             writeln!(
