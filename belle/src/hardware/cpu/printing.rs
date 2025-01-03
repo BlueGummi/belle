@@ -238,11 +238,11 @@ impl fmt::Display for CPU {
                     };
 
                     let pointer_ind = if self.sp as usize == index && self.bp as usize == index {
-                        "  <-- sp & bp"
+                        "  <-- s. ptr & b. ptr"
                     } else if self.sp as usize == index {
-                        "  <-- sp"
+                        "  <-- s. ptr"
                     } else if self.bp as usize == index {
-                        "  <-- bp"
+                        "  <-- b. ptr"
                     } else {
                         ""
                     };
