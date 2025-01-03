@@ -10,12 +10,12 @@ impl fmt::Display for CPU {
         let line = "─".repeat(times);
         let midpart = format!("├{}┼{}┼{}┼{}┴{}┼{}┤\n", line, line, line, line, line, line);
         if !self.err {
-            writeln!(f, "{}", format!("┌{}┐", line))?;
+            writeln!(f, "{}", format!("╭{}╮", line))?;
         } else {
             writeln!(
                 f,
                 "{}",
-                format!("┌{}┬{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+                format!("╭{}┬{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
             )?;
         }
         let exit = if self.running && !self.err {
@@ -46,7 +46,7 @@ impl fmt::Display for CPU {
             writeln!(
                 f,
                 "{}",
-                format!("├{}┴{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+                format!("├{}┴{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
             )?;
         } else {
             writeln!(
@@ -142,13 +142,13 @@ impl fmt::Display for CPU {
                 "unset ".red()
             },
         )?;
-        let footer = format!("└{}┴{}┴{}┴{}┴{}┴{}┘", line, line, line, line, line, line);
+        let footer = format!("╰{}┴{}┴{}┴{}┴{}┴{}╯", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
         if CONFIG.debug || CONFIG.pretty || self.pmem {
             writeln!(
                 f,
                 "{}",
-                format!("┌{}─{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+                format!("╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
             )?;
             writeln!(
                 f,
@@ -287,7 +287,7 @@ impl fmt::Display for CPU {
                 f,
                 "{}",
                 format!(
-                    "└─────────┴────────{}─────{}─────{}─{}┘",
+                    "╰─────────┴────────{}─────{}─────{}─{}╯",
                     line, line, line, line
                 )
             )?;
