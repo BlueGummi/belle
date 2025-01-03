@@ -1,6 +1,6 @@
 use crate::{config::CONFIG, *};
-use std::io::{self, Read, Write};
 use colored::*;
+use std::io::{self, Read, Write};
 
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
@@ -48,18 +48,39 @@ impl CPU {
                 }
                 if CONFIG.verbose {
                     let lines: Vec<&str> = stringy.lines().collect();
-
                     let max_length =
-                        lines.iter().map(|line| line.len()).max().unwrap_or(0);
-
-                    println!("╭{}╮", "─".repeat(max_length + 2));
-
-                    println!("│ {} {}│", "CPU STDOUT".to_string().bold().cyan(), " ".repeat(max_length - 10));
-                    println!("├{}┤", "─".repeat(max_length+2));
+                        if lines.iter().map(|line| line.len()).max().unwrap_or(10) >= 10 {
+                            lines.iter().map(|line| line.len()).max().unwrap_or(10)
+                        } else {
+                            12
+                        };
+                    if max_length >= 10 {
+                        println!("╭{}╮", "─".repeat(max_length + 2));
+                    } else {
+                        println!("╭{}╮", "─".repeat(12));
+                    }
+                    if max_length >= 10 {
+                        println!(
+                            "│ {} {}│",
+                            "CPU STDOUT".to_string().bold().cyan(),
+                            " ".repeat(max_length - 10)
+                        );
+                    } else {
+                        println!("│ {} │", "CPU STDOUT".to_string().bold().cyan());
+                    }
+                    if max_length >= 10 {
+                        println!("├{}┤", "─".repeat(max_length + 2));
+                    } else {
+                        println!("├{}┤", "─".repeat(12));
+                    }
                     for line in lines {
                         println!("│ {}{} │", line, " ".repeat(max_length - line.len()));
                     }
-                    println!("╰{}╯", "─".repeat(max_length + 2));
+                    if max_length >= 10 {
+                        println!("╰{}╯\n", "─".repeat(max_length + 2));
+                    } else {
+                        println!("╰{}╯\n", "─".repeat(12));
+                    }
                 }
                 io::stdout().flush().expect("Failed to flush stdout");
             }
