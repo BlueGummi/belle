@@ -189,22 +189,22 @@ impl fmt::Display for CPU {
 
         let output = format!(
             "{} {}: {:^6} {} {}: {:016b}    {} {}: {:^6} {} {}: {:^6} {} {}: {:^6} {}",
-            "|".black().on_black(),
+            "|",
             "pc".truecolor(252, 244, 52),
             self.pc.to_string().bold(),
-            "|".black().on_black(),
+            "|",
             "ir".truecolor(252, 244, 52),
             self.ir,
-            "|".black().on_black(),
+            "|",
             "sp".truecolor(156, 89, 209),
             self.sp.to_string().bold(),
-            "|".black().on_black(),
+            "|",
             "bp".truecolor(156, 89, 209),
             self.bp.to_string().bold(),
-            "|".black().on_black(),
+            "|",
             "ip".truecolor(156, 89, 209),
             self.ip.to_string().bold(),
-            "|".black().on_black()
+            "|"
         );
         writeln!(f, " {}", output)?;
         write!(
