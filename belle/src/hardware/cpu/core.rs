@@ -132,7 +132,9 @@ impl CPU {
                 }
                 return Err(e);
             }
-
+            if !self.running {
+                break;
+            }
             if CONFIG.debug {
                 self.record_state();
             }
