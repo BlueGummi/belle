@@ -46,7 +46,15 @@ impl CPU {
     pub fn handle_pop(&mut self, arg: &Argument) -> PossibleCrash {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
-            if let Register(_) = arg {
+            if let Register(n) = arg {
+                match *n {
+                    4 => self.uint_reg[0] = v,
+                    5 => self.uint_reg[1] = v,
+                    6 => self.float_reg[0] = v as f32,
+                    7 => self.float_reg[1] = v as f32,
+                    n if n > 3 => return Err(self.generate_invalid_register()),
+                    _ => self.int_reg[*n as usize] = v as i16,
+                }
                 self.set_register_value(arg, v.into())?;
             } else if let MemAddr(val) = arg {
                 self.memory[*val as usize] = Some(v);

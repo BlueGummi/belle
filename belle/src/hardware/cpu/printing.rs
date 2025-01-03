@@ -260,28 +260,25 @@ impl fmt::Display for CPU {
                 } else if self.sp as usize == index && self.bp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        "│ {:^6}  │    ╺{}Stack and base pointer{}╸    │",
                         index.to_string().magenta(),
                         "─".repeat(18),
-                        "Stack and base pointer",
                         "─".repeat(17)
                     )?;
                 } else if self.sp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        "│ {:^6}  │    ╺{}────Stack pointer─────{}╸    │",
                         index.to_string().magenta(),
                         "─".repeat(18),
-                        "────Stack pointer─────",
                         "─".repeat(17)
                     )?;
                 } else if self.bp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}{}{}╸    │",
+                        "│ {:^6}  │    ╺{}─────Base pointer─────{}╸    │",
                         index.to_string().magenta(),
                         "─".repeat(18),
-                        "─────Base pointer─────",
                         "─".repeat(17)
                     )?;
                 }
