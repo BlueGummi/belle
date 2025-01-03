@@ -10,12 +10,50 @@ impl CPU {
         let code = self.get_value(arg)? as u16;
         match code {
             0_u16..=3_u16 => {
-                println!("{}", self.int_reg[code as usize]);
+                if CONFIG.verbose {
+                    println!("╭─────────╮");
+                    println!("│ {:^5}   │", self.int_reg[code as usize]);
+                    println!("╰─────────╯");
+                } else {
+                    println!("{}", self.int_reg[code as usize]);
+                }
             }
-            4 => println!("{}", self.uint_reg[0]),
-            5 => println!("{}", self.uint_reg[1]),
-            6 => println!("{}", self.float_reg[0]),
-            7 => println!("{}", self.float_reg[1]),
+            4 => {
+                if CONFIG.verbose {
+                    println!("╭─────────╮");
+                    println!("│ {:^5}   │", self.uint_reg[0]);
+                    println!("╰─────────╯");
+                } else {
+                    println!("{}", self.uint_reg[0]);
+                }
+            }
+            5 => {
+                if CONFIG.verbose {
+                    println!("╭─────────╮");
+                    println!("│ {:^5}   │", self.uint_reg[1]);
+                    println!("╰─────────╯");
+                } else {
+                    println!("{}", self.uint_reg[1]);
+                }
+            }
+            6 => {
+                if CONFIG.verbose {
+                    println!("╭─────────╮");
+                    println!("│ {:^5.5}   │", self.float_reg[0]);
+                    println!("╰─────────╯");
+                } else {
+                    println!("{}", self.float_reg[0]);
+                }
+            }
+            7 => {
+                if CONFIG.verbose {
+                    println!("╭─────────╮");
+                    println!("│ {:^5.5}   │", self.float_reg[1]);
+                    println!("╰─────────╯");
+                } else {
+                    println!("{}", self.float_reg[1]);
+                }
+            }
             8 => {
                 let starting_point = self.int_reg[0];
                 let end_point = self.int_reg[1];

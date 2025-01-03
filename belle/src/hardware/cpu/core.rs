@@ -110,9 +110,10 @@ impl CPU {
                         self.pc,
                         Some("Segmentation fault while finding next instruction".to_string()),
                     )
+                    .only_err()
                     .to_string();
                     self.pmem = true;
-                    if CONFIG.pretty {
+                    if CONFIG.pretty || CONFIG.verbose {
                         println!("{self}");
                     }
                     return Err(UnrecoverableError::SegmentationFault(
@@ -127,7 +128,7 @@ impl CPU {
                 self.errmsg = e.only_err().to_string();
                 self.running = false;
                 self.pmem = true;
-                if CONFIG.pretty {
+                if CONFIG.pretty || CONFIG.verbose {
                     println!("{self}");
                 }
                 return Err(e);
@@ -160,7 +161,9 @@ impl CPU {
 
         if !self.running {
             if CONFIG.verbose {
-                println!("Halting...");
+                println!("╭────────────╮");
+                println!("│ {} │", "Halting...".bold().white());
+                println!("╰────────────╯");
             }
             self.pmem = true;
             if CONFIG.pretty || CONFIG.verbose {
