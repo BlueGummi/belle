@@ -264,7 +264,7 @@ impl fmt::Display for CPU {
                         index.to_string().magenta(),
                         "─".repeat(18),
                         "Stack and base pointer",
-                        "─".repeat(22)
+                        "─".repeat(17)
                     )?;
                 } else if self.sp as usize == index {
                     writeln!(
@@ -273,7 +273,7 @@ impl fmt::Display for CPU {
                         index.to_string().magenta(),
                         "─".repeat(18),
                         "────Stack pointer─────",
-                        "─".repeat(22)
+                        "─".repeat(17)
                     )?;
                 } else if self.bp as usize == index {
                     writeln!(
