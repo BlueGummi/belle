@@ -238,6 +238,9 @@ impl fmt::Display for CPU {
                             };
                             write!(f, " [{}]", escape_code)?;
                             format!(" [{}]", escape_code).len()
+                        } else if *value == 127 {
+                            write!(f, " [DEL]")?;
+                            6
                         } else {
                             write!(f, " [{}]", *value as u8 as char)?;
                             format!(" [{}]", *value as u8 as char).len()
