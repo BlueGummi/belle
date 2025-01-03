@@ -38,6 +38,7 @@ pub struct CPU {
     pub do_not_run: bool,
     pub err: bool,
     pub errmsg: String,
+    pub pmem: bool,
 }
 
 impl Default for CPU {
@@ -73,6 +74,7 @@ impl CPU {
             do_not_run: false,
             err: false,
             errmsg: String::from(""),
+            pmem: false,
         }
     }
 
@@ -156,7 +158,8 @@ impl CPU {
             if CONFIG.verbose {
                 println!("Halting...");
             }
-            if CONFIG.pretty {
+            self.pmem = true;
+            if CONFIG.pretty || CONFIG.verbose {
                 println!("{self}");
             }
             let mut clock = CLOCK.lock().unwrap(); // might panic

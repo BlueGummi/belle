@@ -144,7 +144,7 @@ impl fmt::Display for CPU {
         )?;
         let footer = format!("└{}┴{}┴{}┴{}┴{}┴{}┘", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
-        if CONFIG.debug || CONFIG.pretty {
+        if CONFIG.debug || CONFIG.pretty || self.pmem {
             writeln!(
                 f,
                 "{}",
@@ -245,16 +245,16 @@ impl fmt::Display for CPU {
                     writeln!(f, "│")?;
                 }
             }
+            writeln!(
+                f,
+                "{}",
+                format!(
+                    "└─────────┴────────{}─────{}─────{}─{}┘",
+                    line, line, line, line
+                )
+            )?;
         }
 
-        writeln!(
-            f,
-            "{}",
-            format!(
-                "└─────────┴────────{}─────{}─────{}─{}┘",
-                line, line, line, line
-            )
-        )?;
         Ok(())
     }
 }
