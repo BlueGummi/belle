@@ -206,7 +206,7 @@ impl fmt::Display for CPU {
             self.ip.to_string().bold(),
             "|".black().on_black()
         );
-        writeln!(f, " {}", output.on_black())?;
+        writeln!(f, " {}", output)?;
         write!(
             f,
             " | {}: {} ",
