@@ -111,6 +111,7 @@ impl CPU {
                         Some("Segmentation fault while finding next instruction".to_string()),
                     )
                     .to_string();
+                    self.pmem = true;
                     if CONFIG.pretty {
                         println!("{self}");
                     }
@@ -125,6 +126,7 @@ impl CPU {
             if let Err(e) = self.execute_instruction(&parsed_ins) {
                 self.errmsg = e.only_err().to_string();
                 self.running = false;
+                self.pmem = true;
                 if CONFIG.pretty {
                     println!("{self}");
                 }
