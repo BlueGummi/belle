@@ -150,13 +150,9 @@ impl fmt::Display for ModCPU {
 
         writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
         for (index, &(_, value)) in self.memory.iter().enumerate() {
-            let displayed = format!(
-                "Value at {} decodes to {}",
-                index.to_string().magenta(),
-                value.to_string().green()
-            );
+            let displayed = format!("Value at {} ", index.to_string().magenta(),);
             write!(f, "{displayed}")?;
-            for _ in displayed.len()..38 {
+            for _ in displayed.len()..17 {
                 write!(f, " ")?;
             }
             writeln!(

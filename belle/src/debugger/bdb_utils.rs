@@ -180,7 +180,7 @@ impl BDB {
                     self.dbgcpu.decode_instruction()
                 );
                 print!("{displayed}");
-                for _ in displayed.len()..38 {
+                for _ in displayed.len()..17 {
                     print!(" ");
                 }
                 println!(" - {:016b} ({})", value, value);

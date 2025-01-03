@@ -147,49 +147,66 @@ impl Default for CPU {
 
 impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(
-            f,
-            " {}",
-            if self.running {
-                "RUNNING".green()
-            } else {
-                "HALTED".red()
-            }
-        )?;
+        if !CONFIG.pretty {
+            writeln!(
+                f,
+                " {}",
+                if self.running {
+                    "RUNNING".green()
+                } else {
+                    "HALTED".red()
+                }
+            )?;
+        } else {
+            writeln!(f, "\n\n")?;
+        }
+        write!(f, "{}:", " Instruction".bold())?;
+        writeln!(f, " {}", self.decode_instruction().to_string().bold())?;
         let mut register_lines = Vec::new();
 
         for (i, &val) in self.int_reg.iter().enumerate() {
             register_lines.push(format!(
                 "| {}: {:^6}",
-                format!("r{}", i).bold().blue(),
-                val.to_string().bold()
+                format!("r{}", i).bold().truecolor(91, 206, 250),
+                val.to_string().bold().truecolor(245, 169, 184)
             ));
         }
         for (i, &val) in self.uint_reg.iter().enumerate() {
             register_lines.push(format!(
                 "| {}: {:^6}",
-                format!("r{}", i + 4).bold().cyan(),
+                format!("r{}", i + 4).bold(),
                 val.to_string().bold()
             ));
         }
         for (i, &val) in self.float_reg.iter().enumerate() {
             register_lines.push(format!(
-                "| {}: {:^6.2}",
-                format!("r{}", i + 6).bold().magenta(),
-                val.to_string().bold()
+                "| {}: {:^6.6}",
+                format!("r{}", i + 6).bold().truecolor(245, 169, 184),
+                val.to_string().bold().truecolor(91, 206, 250)
             ));
         }
         writeln!(f, " {} |", register_lines.join(" "))?;
-        write!(f, " | {}:", "pc".yellow())?;
-        write!(f, " {:^6} |", self.pc)?;
-        write!(f, " {}:", "ir".yellow())?;
-        write!(f, " {:016b}    |", self.ir)?;
-        write!(f, " {}:", "sp".yellow())?;
-        write!(f, " {:^6} |", self.sp)?;
-        write!(f, " {}:", "bp".yellow())?;
-        write!(f, " {:^6} |", self.bp)?;
-        write!(f, " {}:", "ip".yellow())?;
-        writeln!(f, " {:^6} |", self.ip)?;
+
+        let output = format!(
+            "{} {}: {:^6} {} {}: {:016b}    {} {}: {:^6} {} {}: {:^6} {} {}: {:^6} {}",
+            "|".black().on_black(),
+            "pc".truecolor(252, 244, 52),
+            self.pc.to_string().bold(),
+            "|".black().on_black(),
+            "ir".truecolor(252, 244, 52),
+            self.ir,
+            "|".black().on_black(),
+            "sp".truecolor(156, 89, 209),
+            self.sp.to_string().bold(),
+            "|".black().on_black(),
+            "bp".truecolor(156, 89, 209),
+            self.bp.to_string().bold(),
+            "|".black().on_black(),
+            "ip".truecolor(156, 89, 209),
+            self.ip.to_string().bold(),
+            "|".black().on_black()
+        );
+        writeln!(f, " {}", output.on_black())?;
         write!(
             f,
             " | {}: {} ",
@@ -231,9 +248,7 @@ impl fmt::Display for CPU {
             }
         )?;
 
-        write!(f, "{}:", " Instruction".bold())?;
-        writeln!(f, " {}", self.decode_instruction().to_string().bold())?;
-        if CONFIG.debug {
+        if CONFIG.debug || CONFIG.pretty {
             writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
             for (index, element) in self.memory.iter().enumerate() {
                 if let Some(value) = element {
@@ -245,7 +260,7 @@ impl fmt::Display for CPU {
                         temp.decode_instruction().to_string().green()
                     );
                     write!(f, "{displayed}")?;
-                    for _ in displayed.len()..38 {
+                    for _ in displayed.len()..58 {
                         write!(f, " ")?;
                     }
                     writeln!(
@@ -336,13 +351,13 @@ impl CPU {
                 return Err(e);
             }
 
-            if CONFIG.debug || CONFIG.verbose {
+            if CONFIG.debug {
                 self.record_state();
             }
 
             let clock = CLOCK.lock().unwrap();
             if CONFIG.verbose {
-                cpu::CPU::display_state(&clock);
+                println!("{self}");
             }
 
             if self.oflag && self.hlt_on_overflow {
@@ -374,22 +389,34 @@ impl CPU {
             }
 
             if CONFIG.pretty {
-                for i in 0..=3 {
-                    println!(
-                        "Register {}: {}, {:016b}, {:04x}",
-                        i, self.int_reg[i], self.int_reg[i], self.int_reg[i]
-                    );
-                }
-                for i in 0..=1 {
-                    println!("Uint Register {}: {}", i, self.uint_reg[i]);
-                }
-                for i in 0..=1 {
-                    println!("Float Register {}: {}", i, self.float_reg[i]);
-                }
+                println!("{self}");
             }
         }
 
         Ok(())
+    }
+    pub fn pmem(&self) {
+        println!("{}", " MEMORY".bright_purple().bold());
+        for (index, element) in self.memory.iter().enumerate() {
+            if let Some(value) = element {
+                let mut temp = CPU::new();
+                temp.ir = *value as i16;
+                let displayed = format!(
+                    "Value at {} decodes to {}",
+                    index.to_string().magenta(),
+                    temp.decode_instruction().to_string().green()
+                );
+                print!("{displayed}");
+                for _ in displayed.len()..38 {
+                    print!(" ");
+                }
+                print!(
+                    " - {} ({})",
+                    format!("{:016b}", value).bright_white(),
+                    value.to_string().bright_green()
+                );
+            }
+        }
     }
     pub fn execute_instruction(&mut self, ins: &Instruction) -> PossibleCrash {
         self.has_ran = true; // for debugger
