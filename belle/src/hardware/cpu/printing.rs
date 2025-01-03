@@ -79,8 +79,8 @@ impl fmt::Display for CPU {
         for (i, &val) in self.uint_reg.iter().enumerate() {
             register_lines.push(format!(
                 "{}: {:^6} │",
-                format!("r{}", i + 4).bold().truecolor(245, 169, 184),
-                val.to_string().bold().truecolor(91, 206, 250)
+                format!("r{}", i + 4).bold().truecolor(91, 206, 250),
+                val.to_string().bold().truecolor(245, 169, 184)
             ));
         }
 
@@ -90,8 +90,8 @@ impl fmt::Display for CPU {
         for (i, &val) in self.float_reg.iter().enumerate() {
             register_lines.push(format!(
                 "{}: {:^6.6} │",
-                format!("r{}", i + 6).bold().truecolor(245, 169, 184),
-                val.to_string().bold().truecolor(91, 206, 250)
+                format!("r{}", i + 6).bold().truecolor(91, 206, 250),
+                val.to_string().bold().truecolor(245, 169, 184)
             ));
         }
 
@@ -145,18 +145,52 @@ impl fmt::Display for CPU {
         let footer = format!("└{}┴{}┴{}┴{}┴{}┴{}┘", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
         if CONFIG.debug || CONFIG.pretty {
-            writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
+            writeln!(
+                f,
+                "{}",
+                format!("┌{}─{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+            )?;
+            writeln!(
+                f,
+                "│ {}{}│",
+                "MEMORY".bright_purple().bold(),
+                " ".repeat(70)
+            )?;
+            writeln!(
+                f,
+                "{}",
+                format!(
+                    "├─────────┬────────{}─────{}─────{}─{}┤",
+                    line, line, line, line
+                )
+            )?;
+            writeln!(
+                f,
+                "│ {} │ {}   {}│",
+                "ADDRESS".bright_purple().bold(),
+                "VALUE".bright_cyan().bold(),
+                " ".repeat(58)
+            )?;
+            writeln!(
+                f,
+                "{}",
+                format!(
+                    "├─────────┼────────{}─────{}─────{}─{}┤",
+                    line, line, line, line
+                )
+            )?;
             for (index, element) in self.memory.iter().enumerate() {
                 if let Some(value) = element {
                     let mut temp = CPU::new();
                     temp.ir = *value as i16;
                     let displayed = format!(
-                        "Value at {} decodes to {}",
+                        "│ {:^6}  │ {}",
                         index.to_string().magenta(),
                         temp.decode_instruction().to_string().green()
                     );
                     write!(f, "{displayed}")?;
-                    for _ in displayed.len()..58 {
+                    let spacelen = 50 - displayed.len();
+                    for _ in displayed.len()..50 {
                         write!(f, " ")?;
                     }
                     write!(
@@ -172,7 +206,9 @@ impl fmt::Display for CPU {
                         write!(f, " ")?;
                     }
 
-                    if *value <= 127 {
+                    let spacelen = spacelen + (30 - numberlen);
+
+                    let escapelen = if *value <= 127 {
                         if *value < 32 {
                             let escape_code = match *value {
                                 0 => "\\0",
@@ -191,17 +227,34 @@ impl fmt::Display for CPU {
                                 13 => "\\r",
                                 _ => &format!("\\x{:02x}", *value),
                             };
-                            writeln!(f, " [{}]", escape_code)?;
+                            write!(f, " [{}]", escape_code)?;
+                            format!(" [{}]", escape_code).len()
                         } else {
-                            writeln!(f, " [{}]", *value as u8 as char)?;
+                            write!(f, " [{}]", *value as u8 as char)?;
+                            format!(" [{}]", *value as u8 as char).len()
                         }
                     } else {
-                        writeln!(f)?;
+                        0
+                    };
+                    let complete = displayed.len() + numberlen + spacelen + escapelen;
+
+                    for _ in complete..100 {
+                        write!(f, " ")?;
                     }
+
+                    writeln!(f, "│")?;
                 }
             }
         }
 
+        writeln!(
+            f,
+            "{}",
+            format!(
+                "└─────────┴────────{}─────{}─────{}─{}┘",
+                line, line, line, line
+            )
+        )?;
         Ok(())
     }
 }

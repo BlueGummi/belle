@@ -121,7 +121,7 @@ impl CPU {
             }
             let parsed_ins = self.decode_instruction();
             if let Err(e) = self.execute_instruction(&parsed_ins) {
-                self.errmsg = e.to_string();
+                self.errmsg = e.only_err().to_string();
                 self.running = false;
                 if CONFIG.pretty {
                     println!("{self}");

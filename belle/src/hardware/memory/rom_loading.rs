@@ -57,6 +57,5 @@ impl CPU {
 
         std::mem::swap(&mut self.memory, &mut new_memory);
         self.pc = self.starts_at;
-
     }
 }

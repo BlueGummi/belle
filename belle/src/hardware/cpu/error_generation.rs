@@ -26,6 +26,10 @@ pub type PossibleCrash = Result<(), UnrecoverableError>;
 impl std::error::Error for UnrecoverableError {}
 impl std::error::Error for RecoverableError {}
 impl UnrecoverableError {
+    pub fn only_err(&self) -> String {
+        let (_, err_type, _, _) = self.details();
+        format!("{} {}", "UNRECOVERABLE ERROR:".red(), err_type.bold().red())
+    }
     fn details(&self) -> (i16, &str, u16, &Option<String>) {
         match self {
             UnrecoverableError::SegmentationFault(ir, loc, msg) => {
