@@ -1,7 +1,7 @@
 use crate::{config::CONFIG, Argument::*, Instruction::*, *};
 use colored::Colorize;
 use std::arch::asm;
-use std::{fmt, thread, time::Duration};
+use std::{thread, time::Duration};
 
 pub const MEMORY_SIZE: usize = 65536;
 
@@ -11,106 +11,6 @@ macro_rules! trust_me {
             asm!($input);
         }
     };
-}
-
-#[derive(Debug)]
-pub enum UnrecoverableError {
-    SegmentationFault(i16, u16, Option<String>),
-    IllegalInstruction(i16, u16, Option<String>),
-    DivideByZero(i16, u16, Option<String>),
-    InvalidRegister(i16, u16, Option<String>),
-    StackOverflow(i16, u16, Option<String>),
-    StackUnderflow(i16, u16, Option<String>),
-    ReadFail(i16, u16, Option<String>),
-}
-
-#[derive(Debug)]
-pub enum RecoverableError {
-    UnknownFlag(u16, Option<String>),
-    Overflow(u16, Option<String>),
-    BackwardStack(u16, Option<String>),
-}
-
-pub type PossibleWarn = Result<(), RecoverableError>;
-pub type PossibleCrash = Result<(), UnrecoverableError>;
-
-impl std::error::Error for UnrecoverableError {}
-impl std::error::Error for RecoverableError {}
-impl UnrecoverableError {
-    fn details(&self) -> (i16, &str, u16, &Option<String>) {
-        match self {
-            UnrecoverableError::SegmentationFault(ir, loc, msg) => {
-                (*ir, "Segmentation fault", *loc, msg)
-            }
-            UnrecoverableError::IllegalInstruction(ir, loc, msg) => {
-                (*ir, "Illegal instruction", *loc, msg)
-            }
-            UnrecoverableError::DivideByZero(ir, loc, msg) => (*ir, "Divide by zero", *loc, msg),
-            UnrecoverableError::InvalidRegister(ir, loc, msg) => {
-                (*ir, "Invalid register", *loc, msg)
-            }
-            UnrecoverableError::StackOverflow(ir, loc, msg) => (*ir, "Stack overflow", *loc, msg),
-            UnrecoverableError::StackUnderflow(ir, loc, msg) => (*ir, "Stack underflow", *loc, msg),
-            UnrecoverableError::ReadFail(ir, loc, msg) => (*ir, "Read fail", *loc, msg),
-        }
-    }
-}
-
-impl RecoverableError {
-    fn details(&self) -> (&str, u16, &Option<String>) {
-        match self {
-            RecoverableError::UnknownFlag(loc, msg) => ("Unknown flag", *loc, msg),
-            RecoverableError::Overflow(loc, msg) => ("Overflow", *loc, msg),
-            RecoverableError::BackwardStack(loc, msg) => ("Backwards stack", *loc, msg),
-        }
-    }
-}
-
-impl fmt::Display for UnrecoverableError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (ir, err_type, location, msg) = self.details();
-        write!(f, "{} ", "UNRECOVERABLE ERROR:".red())?;
-        write!(f, "{}", err_type.bold().red())?;
-
-        if let Some(s) = msg {
-            if CONFIG.debug || CONFIG.verbose {
-                write!(f, "\n{}", s.yellow())?;
-            }
-        }
-        if CONFIG.debug || CONFIG.verbose {
-            writeln!(f, "\nAt memory address {}", location.to_string().green())?;
-            let mut cpu = CPU::new();
-            cpu.ir = ir;
-            writeln!(
-                f,
-                "{} was {}",
-                "Instruction".blue(),
-                cpu.decode_instruction().to_string().cyan()
-            )?;
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Display for RecoverableError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if !CONFIG.debug && !CONFIG.verbose {
-            return Ok(());
-        }
-        let (err_type, location, msg) = self.details();
-        write!(f, "{}: ", "RECOVERABLE ERROR:".yellow())?;
-        write!(f, "{}", err_type.yellow())?;
-
-        if let Some(s) = msg {
-            if CONFIG.debug || CONFIG.verbose {
-                write!(f, ": {}", s.magenta())?;
-            }
-        }
-        if CONFIG.debug || CONFIG.verbose {
-            writeln!(f, " at memory address {}", location.to_string().green())?;
-        }
-        Ok(())
-    }
 }
 
 #[derive(Debug)]
@@ -137,172 +37,12 @@ pub struct CPU {
     pub hit_max_clk: bool,
     pub do_not_run: bool,
     pub err: bool,
+    pub errmsg: String,
 }
 
 impl Default for CPU {
     fn default() -> CPU {
         CPU::new()
-    }
-}
-
-impl fmt::Display for CPU {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if !CONFIG.pretty {
-            writeln!(
-                f,
-                " {}",
-                if self.running {
-                    "RUNNING".green()
-                } else {
-                    "HALTED".red()
-                }
-            )?;
-        } else {
-            writeln!(f, "\n\n")?;
-        }
-        write!(f, "{}:", " Instruction".bold())?;
-        writeln!(f, " {}", self.decode_instruction().to_string().bold())?;
-        let mut register_lines = Vec::new();
-
-        for (i, &val) in self.int_reg.iter().enumerate() {
-            register_lines.push(format!(
-                "| {}: {:^6}",
-                format!("r{}", i).bold().truecolor(91, 206, 250),
-                val.to_string().bold().truecolor(245, 169, 184)
-            ));
-        }
-        for (i, &val) in self.uint_reg.iter().enumerate() {
-            register_lines.push(format!(
-                "| {}: {:^6}",
-                format!("r{}", i + 4).bold().truecolor(245, 169, 184),
-                val.to_string().bold().truecolor(91, 206, 250)
-            ));
-        }
-        writeln!(f, " {} |", register_lines.join(" "))?;
-        register_lines = Vec::new();
-        for (i, &val) in self.float_reg.iter().enumerate() {
-            register_lines.push(format!(
-                "| {}: {:^6.6}",
-                format!("r{}", i + 6).bold().truecolor(245, 169, 184),
-                val.to_string().bold().truecolor(91, 206, 250)
-            ));
-        }
-        write!(f, " {}", register_lines.join(" "))?;
-
-        let output = format!(
-            "| {}: {:^6} | {}: {:016b}    | {}: {:^6} |\n | {}: {:^6} | {}: {:^6}",
-            "pc".truecolor(252, 244, 52),
-            self.pc.to_string().bold(),
-            "ir".truecolor(252, 244, 52),
-            self.ir,
-            "sp".truecolor(156, 89, 209),
-            self.sp.to_string().bold(),
-            "bp".truecolor(156, 89, 209),
-            self.bp.to_string().bold(),
-            "ip".truecolor(156, 89, 209),
-            self.ip.to_string().bold(),
-        );
-        write!(f, " {}", output)?;
-        write!(
-            f,
-            " | {}: {} ",
-            "zf".bright_green().bold(),
-            if self.zflag {
-                " set  ".green()
-            } else {
-                "unset ".red()
-            }
-        )?;
-        write!(
-            f,
-            "| {}: {} ",
-            "of".bright_red().bold(),
-            if self.oflag {
-                " set  ".green()
-            } else {
-                "unset ".red()
-            }
-        )?;
-        write!(
-            f,
-            "| {}: {} ",
-            "rf".bright_white().bold(),
-            if self.rflag {
-                " set  ".green()
-            } else {
-                "unset ".red()
-            }
-        )?;
-        writeln!(
-            f,
-            "| {}: {} |",
-            "sf".bright_purple().bold(),
-            if self.sflag {
-                " set  ".green()
-            } else {
-                "unset ".red()
-            }
-        )?;
-
-        if CONFIG.debug || CONFIG.pretty {
-            writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
-            for (index, element) in self.memory.iter().enumerate() {
-                if let Some(value) = element {
-                    let mut temp = CPU::new();
-                    temp.ir = *value as i16;
-                    let displayed = format!(
-                        "Value at {} decodes to {}",
-                        index.to_string().magenta(),
-                        temp.decode_instruction().to_string().green()
-                    );
-                    write!(f, "{displayed}")?;
-                    for _ in displayed.len()..58 {
-                        write!(f, " ")?;
-                    }
-                    write!(
-                        f,
-                        " - {} ({})",
-                        format!("{:016b}", value).bright_white(),
-                        value.to_string().bright_green()
-                    )?;
-
-                    let numberlen = format!(" - {:016b} ({})", value, value).len();
-
-                    for _ in numberlen..30 {
-                        write!(f, " ")?;
-                    }
-
-                    if *value <= 127 {
-                        if *value < 32 {
-                            let escape_code = match *value {
-                                0 => "\\0",
-                                1 => "\\a",
-                                2 => "\\b",
-                                3 => "\\t",
-                                4 => "\\n",
-                                5 => "\\v",
-                                6 => "\\f",
-                                7 => "\\r",
-                                8 => "\\x08",
-                                9 => "\\x09",
-                                10 => "\\n",
-                                11 => "\\x0b",
-                                12 => "\\f",
-                                13 => "\\r",
-                                _ => &format!("\\x{:02x}", *value),
-                            };
-                            writeln!(f, " [{}]", escape_code)?;
-                        } else {
-                            writeln!(f, " [{}]", *value as u8 as char)?;
-                        }
-                    } else {
-                        writeln!(f)?;
-                    }
-                }
-            }
-        }
-
-        Ok(())
     }
 }
 
@@ -332,6 +72,7 @@ impl CPU {
             hit_max_clk: false,
             do_not_run: false,
             err: false,
+            errmsg: String::from(""),
         }
     }
 
@@ -340,9 +81,6 @@ impl CPU {
         self.running = true;
         if self.do_not_run {
             return Ok(());
-        }
-        if CONFIG.verbose {
-            println!("  Starts At MemAddr: {}", self.starts_at);
         }
         while self.running {
             if !CONFIG.debug {
@@ -364,8 +102,15 @@ impl CPU {
                     self.ir = instruction as i16;
                 }
                 None => {
-                    if CONFIG.verbose {
-                        println!("PC: {}", self.pc);
+                    self.err = true;
+                    self.errmsg = UnrecoverableError::SegmentationFault(
+                        self.ir,
+                        self.pc,
+                        Some("Segmentation fault while finding next instruction".to_string()),
+                    )
+                    .to_string();
+                    if CONFIG.pretty {
+                        println!("{self}");
                     }
                     return Err(UnrecoverableError::SegmentationFault(
                         self.ir,
@@ -376,7 +121,11 @@ impl CPU {
             }
             let parsed_ins = self.decode_instruction();
             if let Err(e) = self.execute_instruction(&parsed_ins) {
+                self.errmsg = e.to_string();
                 self.running = false;
+                if CONFIG.pretty {
+                    println!("{self}");
+                }
                 return Err(e);
             }
 
@@ -407,19 +156,13 @@ impl CPU {
             if CONFIG.verbose {
                 println!("Halting...");
             }
+            if CONFIG.pretty {
+                println!("{self}");
+            }
             let mut clock = CLOCK.lock().unwrap(); // might panic
             *clock += 1;
             std::mem::drop(clock);
             self.record_state();
-
-            let clock = CLOCK.lock().unwrap(); // might panic
-            if CONFIG.verbose {
-                cpu::CPU::display_state(&clock);
-            }
-
-            if CONFIG.pretty {
-                println!("{self}");
-            }
         }
 
         Ok(())

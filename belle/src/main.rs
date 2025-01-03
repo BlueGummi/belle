@@ -28,7 +28,9 @@ fn main() -> io::Result<()> {
         process::exit(1);
     }
     if let Err(e) = cpu.run() {
-        eprintln!("{e}");
+        if !CONFIG.pretty {
+            eprintln!("{e}");
+        }
         if CONFIG.write {
             write_crash(&cpu);
         }

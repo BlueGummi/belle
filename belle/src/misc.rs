@@ -90,7 +90,24 @@ macro_rules! set_register {
         bcpu
     }};
 }
+pub fn length_without_ansi(text: &str) -> usize {
+    let mut cleaned_text = String::new();
+    let mut inside_ansi = false;
 
+    for c in text.chars() {
+        if c == '\x1B' {
+            inside_ansi = true;
+        } else if inside_ansi {
+            if c == 'm' || c == 'K' {
+                inside_ansi = false;
+            }
+        } else {
+            cleaned_text.push(c);
+        }
+    }
+
+    cleaned_text.len()
+}
 pub fn cli_argument_check() {
     if CONFIG.debug && CONFIG.verbose {
         eprintln!(

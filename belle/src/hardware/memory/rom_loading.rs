@@ -1,4 +1,4 @@
-use crate::{config::CONFIG, *};
+use crate::*;
 impl CPU {
     pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
         let mut counter = 0;
@@ -12,34 +12,19 @@ impl CPU {
                     self.do_not_run = true;
                 }
                 self.starts_at = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".start directive found.");
-                }
                 start_found = true;
-                if CONFIG.verbose {
-                    println!("program starts at {}", self.starts_at);
-                }
                 continue;
             } else if (element >> 9) == 2 {
                 self.sp = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".ssp directive found");
-                }
                 continue;
             } else if (element >> 9) == 3 {
                 self.bp = (element & 0b111111111) as u16;
-                if CONFIG.verbose {
-                    println!(".sbp directive found");
-                }
                 continue;
             }
             if counter + self.starts_at as usize >= MEMORY_SIZE {
                 return Err(EmuError::MemoryOverflow());
             }
             self.memory[counter + self.starts_at as usize] = Some(*element as u16);
-            if CONFIG.verbose {
-                println!("Element {element:016b} loaded into memory");
-            }
 
             counter += 1;
         }
@@ -54,11 +39,6 @@ impl CPU {
                 return;
             }
         }
-
-        if CONFIG.verbose {
-            println!("Shifting memory...");
-        }
-
         let some_count = self.memory.iter().filter(|&&e| e.is_some()).count();
 
         if some_count as u32 + u32::from(self.starts_at) > MEMORY_SIZE.try_into().unwrap() {
@@ -78,8 +58,5 @@ impl CPU {
         std::mem::swap(&mut self.memory, &mut new_memory);
         self.pc = self.starts_at;
 
-        if CONFIG.verbose {
-            println!("Shift completed.");
-        }
     }
 }

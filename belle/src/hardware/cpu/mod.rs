@@ -1,9 +1,11 @@
 pub mod core;
 pub use core::*;
 pub mod error_generation;
+pub mod printing;
 
 #[allow(unused_imports)]
 use crate::set_register;
+pub use error_generation::*;
 #[test]
 fn set_register() {
     let mut bcpu = CPU::new();

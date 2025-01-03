@@ -68,7 +68,7 @@ impl CPU {
         } else {
             self.err = true;
             self.running = false;
-            return Err(UnrecoverableError::SegmentationFault(
+            return Err(UnrecoverableError::StackUnderflow(
                 self.ir,
                 self.pc,
                 Some("segmentation fault while executing pop".to_string()),

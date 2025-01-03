@@ -1,0 +1,207 @@
+use crate::config::CONFIG;
+use crate::CPU;
+use crate::*;
+use colored::*;
+use std::fmt;
+
+impl fmt::Display for CPU {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let times = 12;
+        let line = "─".repeat(times);
+        let midpart = format!("├{}┼{}┼{}┼{}┴{}┼{}┤\n", line, line, line, line, line, line);
+        if !self.err {
+            writeln!(f, "{}", format!("┌{}┐", line))?;
+        } else {
+            writeln!(
+                f,
+                "{}",
+                format!("┌{}┬{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+            )?;
+        }
+        let exit = if self.running && !self.err {
+            "RUNNING".green()
+        } else if self.err {
+            "CRASHED".bright_red()
+        } else {
+            "HALTED".red()
+        };
+        write!(f, "│ {}", exit,)?;
+        for _ in (exit.len() + 2)..13 {
+            write!(f, " ")?;
+        }
+        if !self.err {
+            writeln!(f, "│")?;
+        } else {
+            write!(f, "│ ")?;
+        }
+        if self.err {
+            write!(f, "{}", self.errmsg)?;
+            let length = length_without_ansi(&exit) + length_without_ansi(self.errmsg.trim());
+            for _ in length..70 {
+                write!(f, " ")?;
+            }
+            writeln!(f, "│")?;
+        }
+        if !self.err {
+            writeln!(
+                f,
+                "{}",
+                format!("├{}┴{}─{}─{}─{}─{}┐", line, line, line, line, line, line)
+            )?;
+        } else {
+            writeln!(
+                f,
+                "{}",
+                format!("├{}┴{}─{}─{}─{}─{}┤", line, line, line, line, line, line)
+            )?;
+        }
+        write!(f, "{}:", "│ Instruction".bold())?;
+        write!(f, " {}", self.decode_instruction().to_string().bold())?;
+        let inslen =
+            78 - "│ Instruction".len() - self.decode_instruction().to_string().trim().len();
+        writeln!(f, "{}│", " ".repeat(inslen))?;
+        let mut register_lines = Vec::new();
+
+        writeln!(
+            f,
+            "{}",
+            format!("├{}┬{}┬{}┬{}┬{}┬{}┤", line, line, line, line, line, line)
+        )?;
+
+        for (i, &val) in self.int_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "{}: {:^6} │",
+                format!("r{}", i).bold().truecolor(91, 206, 250),
+                val.to_string().bold().truecolor(245, 169, 184)
+            ));
+        }
+
+        for (i, &val) in self.uint_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "{}: {:^6} │",
+                format!("r{}", i + 4).bold().truecolor(245, 169, 184),
+                val.to_string().bold().truecolor(91, 206, 250)
+            ));
+        }
+
+        writeln!(f, "│ {}", register_lines.join(" "))?;
+        write!(f, "{midpart}")?;
+        register_lines.clear();
+        for (i, &val) in self.float_reg.iter().enumerate() {
+            register_lines.push(format!(
+                "{}: {:^6.6} │",
+                format!("r{}", i + 6).bold().truecolor(245, 169, 184),
+                val.to_string().bold().truecolor(91, 206, 250)
+            ));
+        }
+
+        write!(f, "│ {} ", register_lines.join(" "))?;
+
+        let midpart = format!("├{}┼{}┼{}┼{}┬{}┼{}┤\n", line, line, line, line, line, line);
+        let output = format!(
+            "{}: {:^6} │ {}: {:016b}    │ {}: {:^6} │\n{}│ {}: {:^6} │ {}: {:^6}",
+            "pc".truecolor(252, 244, 52),
+            self.pc.to_string().bold(),
+            "ir".truecolor(252, 244, 52),
+            self.ir,
+            "sp".truecolor(156, 89, 209),
+            self.sp.to_string().bold(),
+            midpart,
+            "bp".truecolor(156, 89, 209),
+            self.bp.to_string().bold(),
+            "ip".truecolor(156, 89, 209),
+            self.ip.to_string().bold(),
+        );
+
+        write!(f, "{} │", output)?;
+        writeln!(
+            f,
+            " {}: {} │ {}: {} │ {}: {} │ {}: {} │",
+            "zf".bright_green().bold(),
+            if self.zflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            },
+            "of".bright_red().bold(),
+            if self.oflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            },
+            "rf".bright_white().bold(),
+            if self.rflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            },
+            "sf".bright_purple().bold(),
+            if self.sflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            },
+        )?;
+        let footer = format!("└{}┴{}┴{}┴{}┴{}┴{}┘", line, line, line, line, line, line);
+        writeln!(f, "{}", footer)?;
+        if CONFIG.debug || CONFIG.pretty {
+            writeln!(f, "{}", " MEMORY".bright_purple().bold())?;
+            for (index, element) in self.memory.iter().enumerate() {
+                if let Some(value) = element {
+                    let mut temp = CPU::new();
+                    temp.ir = *value as i16;
+                    let displayed = format!(
+                        "Value at {} decodes to {}",
+                        index.to_string().magenta(),
+                        temp.decode_instruction().to_string().green()
+                    );
+                    write!(f, "{displayed}")?;
+                    for _ in displayed.len()..58 {
+                        write!(f, " ")?;
+                    }
+                    write!(
+                        f,
+                        " - {} ({})",
+                        format!("{:016b}", value).bright_white(),
+                        value.to_string().bright_green()
+                    )?;
+
+                    let numberlen = format!(" - {:016b} ({})", value, value).len();
+
+                    for _ in numberlen..30 {
+                        write!(f, " ")?;
+                    }
+
+                    if *value <= 127 {
+                        if *value < 32 {
+                            let escape_code = match *value {
+                                0 => "\\0",
+                                1 => "\\a",
+                                2 => "\\b",
+                                3 => "\\t",
+                                4 => "\\n",
+                                5 => "\\v",
+                                6 => "\\f",
+                                7 => "\\r",
+                                8 => "\\x08",
+                                9 => "\\x09",
+                                10 => "\\n",
+                                11 => "\\x0b",
+                                12 => "\\f",
+                                13 => "\\r",
+                                _ => &format!("\\x{:02x}", *value),
+                            };
+                            writeln!(f, " [{}]", escape_code)?;
+                        } else {
+                            writeln!(f, " [{}]", *value as u8 as char)?;
+                        }
+                    } else {
+                        writeln!(f)?;
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
