@@ -39,7 +39,7 @@ impl CPU {
             6 => {
                 if CONFIG.verbose {
                     println!("╭─────────╮");
-                    println!("│ {:^5.5}   │", self.float_reg[0]);
+                    println!("│ {:^5.5} │", self.float_reg[0]);
                     println!("╰─────────╯");
                 } else {
                     println!("{}", self.float_reg[0]);
@@ -48,7 +48,7 @@ impl CPU {
             7 => {
                 if CONFIG.verbose {
                     println!("╭─────────╮");
-                    println!("│ {:^5.5}   │", self.float_reg[1]);
+                    println!("│ {:^5.5} │", self.float_reg[1]);
                     println!("╰─────────╯");
                 } else {
                     println!("{}", self.float_reg[1]);
@@ -123,6 +123,12 @@ impl CPU {
                 io::stdout().flush().expect("Failed to flush stdout");
             }
             9 => {
+                if CONFIG.verbose {
+                    println!("╭─────────────────────────╮");
+                    println!("│ CPU STDIN               │");
+                    println!("│ Reading one character.. │");
+                    println!("╰─────────────────────────╯\n");
+                }
                 use crossterm::terminal;
                 terminal::enable_raw_mode().unwrap();
                 let mut buffer = [0; 1];
@@ -150,6 +156,12 @@ impl CPU {
             33 => self.rflag = !self.rflag,
             40 => {
                 let mut input = String::new();
+                if CONFIG.verbose {
+                    println!("╭─────────────────────────╮");
+                    println!("│ CPU STDIN               │");
+                    println!("│ Reading one integer..   │");
+                    println!("╰─────────────────────────╯\n");
+                }
                 match io::stdin().read_line(&mut input) {
                     Ok(_) => match input.trim().parse::<i16>() {
                         Ok(value) => {
