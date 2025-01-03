@@ -10,12 +10,12 @@ impl fmt::Display for CPU {
         let line = "─".repeat(times);
         let midpart = format!("├{}┼{}┼{}┼{}┴{}┼{}┤\n", line, line, line, line, line, line);
         if !self.err {
-            writeln!(f, "{}", format!("╭{}╮", line))?;
+            writeln!(f, "{}", format!("╭{}────────╮", line))?;
         } else {
             writeln!(
                 f,
                 "{}",
-                format!("╭{}┬{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
+                format!("╭{}─────────┬{}─{}─{}─{}────╮", line, line, line, line, line)
             )?;
         }
         let exit = if self.running && !self.err {
@@ -25,19 +25,19 @@ impl fmt::Display for CPU {
         } else {
             "HALTED".red()
         };
-        write!(f, "│ {}", exit,)?;
-        for _ in (exit.len() + 2)..13 {
+        write!(f, "│ {} {}", "CPU STATE:".green(), exit)?;
+        for _ in (exit.len() + 11)..19 {
             write!(f, " ")?;
         }
         if !self.err {
             writeln!(f, "│")?;
         } else {
-            write!(f, "│ ")?;
+            write!(f, " │ ")?;
         }
         if self.err {
             write!(f, "{}", self.errmsg)?;
             let length = length_without_ansi(&exit) + length_without_ansi(self.errmsg.trim());
-            for _ in length..70 {
+            for _ in length..61 {
                 write!(f, " ")?;
             }
             writeln!(f, "│")?;
@@ -46,13 +46,13 @@ impl fmt::Display for CPU {
             writeln!(
                 f,
                 "{}",
-                format!("├{}┴{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
+                format!("├{}────────┴{}─{}─{}─{}─────╮",  line, line, line, line, line)
             )?;
         } else {
             writeln!(
                 f,
                 "{}",
-                format!("├{}┴{}─{}─{}─{}─{}┤", line, line, line, line, line, line)
+                format!("├{}─────────┴{}─{}─{}─{}────┤", line, line, line, line, line)
             )?;
         }
         write!(f, "{}:", "│ Instruction".bold())?;
