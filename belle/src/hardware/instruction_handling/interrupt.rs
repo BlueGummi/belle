@@ -1,5 +1,6 @@
 use crate::{config::CONFIG, *};
 use std::io::{self, Read, Write};
+use colored::*;
 
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
@@ -19,6 +20,7 @@ impl CPU {
                 let starting_point = self.int_reg[0];
                 let end_point = self.int_reg[1];
                 let memory = &self.memory;
+                let mut stringy = String::new();
                 if end_point < 0
                     || end_point as usize >= memory.len()
                     || starting_point < 0
@@ -37,8 +39,27 @@ impl CPU {
                     }
 
                     if let Some(value) = memory[index as usize] {
-                        print!("{}", value as u8 as char);
+                        if CONFIG.verbose {
+                            stringy = format!("{}{}", stringy, value as u8 as char);
+                        } else {
+                            print!("{}", value as u8 as char);
+                        }
                     }
+                }
+                if CONFIG.verbose {
+                    let lines: Vec<&str> = stringy.lines().collect();
+
+                    let max_length =
+                        lines.iter().map(|line| line.len()).max().unwrap_or(0);
+
+                    println!("╭{}╮", "─".repeat(max_length + 2));
+
+                    println!("│ {} {}│", "CPU STDOUT".to_string().bold().cyan(), " ".repeat(max_length - 10));
+                    println!("├{}┤", "─".repeat(max_length+2));
+                    for line in lines {
+                        println!("│ {}{} │", line, " ".repeat(max_length - line.len()));
+                    }
+                    println!("╰{}╯", "─".repeat(max_length + 2));
                 }
                 io::stdout().flush().expect("Failed to flush stdout");
             }

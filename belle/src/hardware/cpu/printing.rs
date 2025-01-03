@@ -15,7 +15,10 @@ impl fmt::Display for CPU {
             writeln!(
                 f,
                 "{}",
-                format!("╭{}─────────┬{}─{}─{}─{}────╮", line, line, line, line, line)
+                format!(
+                    "╭{}─────────┬{}─{}─{}─{}────╮",
+                    line, line, line, line, line
+                )
             )?;
         }
         let exit = if self.running && !self.err {
@@ -46,13 +49,19 @@ impl fmt::Display for CPU {
             writeln!(
                 f,
                 "{}",
-                format!("├{}────────┴{}─{}─{}─{}─────╮",  line, line, line, line, line)
+                format!(
+                    "├{}────────┴{}─{}─{}─{}─────╮",
+                    line, line, line, line, line
+                )
             )?;
         } else {
             writeln!(
                 f,
                 "{}",
-                format!("├{}─────────┴{}─{}─{}─{}────┤", line, line, line, line, line)
+                format!(
+                    "├{}─────────┴{}─{}─{}─{}────┤",
+                    line, line, line, line, line
+                )
             )?;
         }
         write!(f, "{}:", "│ Instruction".bold())?;

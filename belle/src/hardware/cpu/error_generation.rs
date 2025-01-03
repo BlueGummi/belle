@@ -91,7 +91,7 @@ impl fmt::Display for RecoverableError {
             return Ok(());
         }
         let (err_type, location, msg) = self.details();
-        write!(f, "{}: ", "RECOVERABLE ERROR:".yellow())?;
+        write!(f, "{}: ", "RECOVERABLE ERROR".yellow())?;
         write!(f, "{}", err_type.yellow())?;
 
         if let Some(s) = msg {
