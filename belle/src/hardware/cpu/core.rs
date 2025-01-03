@@ -178,6 +178,8 @@ impl fmt::Display for CPU {
                 val.to_string().bold().truecolor(91, 206, 250)
             ));
         }
+        writeln!(f, " {} |", register_lines.join(" "))?;
+        register_lines = Vec::new();
         for (i, &val) in self.float_reg.iter().enumerate() {
             register_lines.push(format!(
                 "| {}: {:^6.6}",
@@ -185,28 +187,22 @@ impl fmt::Display for CPU {
                 val.to_string().bold().truecolor(91, 206, 250)
             ));
         }
-        writeln!(f, " {} |", register_lines.join(" "))?;
+        write!(f, " {}", register_lines.join(" "))?;
 
         let output = format!(
-            "{} {}: {:^6} {} {}: {:016b}    {} {}: {:^6} {} {}: {:^6} {} {}: {:^6} {}",
-            "|",
+            "| {}: {:^6} | {}: {:016b}    | {}: {:^6} |\n | {}: {:^6} | {}: {:^6}",
             "pc".truecolor(252, 244, 52),
             self.pc.to_string().bold(),
-            "|",
             "ir".truecolor(252, 244, 52),
             self.ir,
-            "|",
             "sp".truecolor(156, 89, 209),
             self.sp.to_string().bold(),
-            "|",
             "bp".truecolor(156, 89, 209),
             self.bp.to_string().bold(),
-            "|",
             "ip".truecolor(156, 89, 209),
             self.ip.to_string().bold(),
-            "|"
         );
-        writeln!(f, " {}", output)?;
+        write!(f, " {}", output)?;
         write!(
             f,
             " | {}: {} ",
