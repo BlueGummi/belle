@@ -263,12 +263,45 @@ impl fmt::Display for CPU {
                     for _ in displayed.len()..58 {
                         write!(f, " ")?;
                     }
-                    writeln!(
+                    write!(
                         f,
                         " - {} ({})",
                         format!("{:016b}", value).bright_white(),
                         value.to_string().bright_green()
                     )?;
+
+                    let numberlen = format!(" - {:016b} ({})", value, value).len();
+
+                    for _ in numberlen..30 {
+                        write!(f, " ")?;
+                    }
+
+                    if *value <= 127 {
+                        if *value < 32 {
+                            let escape_code = match *value {
+                                0 => "\\0",
+                                1 => "\\a",
+                                2 => "\\b",
+                                3 => "\\t",
+                                4 => "\\n",
+                                5 => "\\v",
+                                6 => "\\f",
+                                7 => "\\r",
+                                8 => "\\x08",
+                                9 => "\\x09",
+                                10 => "\\n",
+                                11 => "\\x0b",
+                                12 => "\\f",
+                                13 => "\\r",
+                                _ => &format!("\\x{:02x}", *value),
+                            };
+                            writeln!(f, " [{}]", escape_code)?;
+                        } else {
+                            writeln!(f, " [{}]", *value as u8 as char)?;
+                        }
+                    } else {
+                        writeln!(f)?;
+                    }
                 }
             }
         }
