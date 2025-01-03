@@ -174,8 +174,8 @@ impl fmt::Display for CPU {
         for (i, &val) in self.uint_reg.iter().enumerate() {
             register_lines.push(format!(
                 "| {}: {:^6}",
-                format!("r{}", i + 4).bold(),
-                val.to_string().bold()
+                format!("r{}", i + 4).bold().truecolor(245, 169, 184),
+                val.to_string().bold().truecolor(91, 206, 250)
             ));
         }
         for (i, &val) in self.float_reg.iter().enumerate() {
