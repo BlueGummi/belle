@@ -71,14 +71,24 @@ impl fmt::Display for UnrecoverableError {
             }
         }
         if CONFIG.debug || CONFIG.verbose {
-            writeln!(f, "\nAt memory address {}", location.to_string().green())?;
-            let mut cpu = CPU::new();
-            cpu.ir = ir;
+            let line = "─".repeat(12);
             writeln!(
                 f,
-                "{} was {}",
-                "Instruction".blue(),
-                cpu.decode_instruction().to_string().cyan()
+                "\n{}",
+                format!("╭{}──────────{}─{}────╮", line, line, line)
+            )?;
+            let mut cpu = CPU::new();
+            cpu.ir = ir;
+            write!(f, "│{}:", " Instruction".bold())?;
+            write!(f, " {}", cpu.decode_instruction().to_string().bold())?;
+            let inslen =
+                52 - "│ Instruction".len() - cpu.decode_instruction().to_string().trim().len() - " Address: ".len() - location.to_string().len();
+            write!(f, " {}: {}", "Address".blue().bold(), location.to_string().bold())?;
+            writeln!(f, "{}│", " ".repeat(inslen))?;
+            writeln!(
+                f,
+                "{}",
+                format!("╰{}──────────{}─{}────╯", line, line, line)
             )?;
         }
         Ok(())
