@@ -168,7 +168,7 @@ impl CPU {
                             self.int_reg[0] = value;
                         }
                         Err(e) => {
-                            println!("{}", EmuError::ReadFail(e.to_string()));
+                            // println!("{}", EmuError::ReadFail(e.to_string()));
                             return Err(UnrecoverableError::ReadFail(
                                 self.ir,
                                 self.pc,
@@ -177,7 +177,7 @@ impl CPU {
                         }
                     },
                     Err(e) => {
-                        println!("{}", EmuError::ReadFail(e.to_string()));
+                        // println!("{}", EmuError::ReadFail(e.to_string()));
                         return Err(UnrecoverableError::ReadFail(
                             self.ir,
                             self.pc,

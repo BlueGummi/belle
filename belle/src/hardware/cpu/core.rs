@@ -125,6 +125,7 @@ impl CPU {
             }
             let parsed_ins = self.decode_instruction();
             if let Err(e) = self.execute_instruction(&parsed_ins) {
+                self.err = true;
                 self.errmsg = e.only_err().to_string();
                 self.running = false;
                 self.pmem = true;
