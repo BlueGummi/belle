@@ -64,7 +64,7 @@ impl fmt::Display for CPU {
                 )
             )?;
         }
-        write!(f, "{}:", "│ Instruction".bold())?;
+        write!(f, "│{}:", " Instruction".bold())?;
         write!(f, " {}", self.decode_instruction().to_string().bold())?;
         let inslen =
             78 - "│ Instruction".len() - self.decode_instruction().to_string().trim().len();
