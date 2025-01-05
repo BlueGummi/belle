@@ -80,16 +80,16 @@ impl fmt::Display for CPU {
         for (i, &val) in self.int_reg.iter().enumerate() {
             register_lines.push(format!(
                 "{}: {:^6} │",
-                format!("r{}", i).bold().truecolor(91, 206, 250),
-                val.to_string().bold().truecolor(245, 169, 184)
+                format!("r{}", i).bold().green(),
+                val.to_string().bold().magenta()
             ));
         }
 
         for (i, &val) in self.uint_reg.iter().enumerate() {
             register_lines.push(format!(
                 "{}: {:^6} │",
-                format!("r{}", i + 4).bold().truecolor(91, 206, 250),
-                val.to_string().bold().truecolor(245, 169, 184)
+                format!("r{}", i + 4).bold().green(),
+                val.to_string().bold().magenta()
             ));
         }
 
@@ -99,8 +99,8 @@ impl fmt::Display for CPU {
         for (i, &val) in self.float_reg.iter().enumerate() {
             register_lines.push(format!(
                 "{}: {:^6.6} │",
-                format!("r{}", i + 6).bold().truecolor(91, 206, 250),
-                val.to_string().bold().truecolor(245, 169, 184)
+                format!("r{}", i + 6).bold().green(),
+                val.to_string().bold().magenta()
             ));
         }
 
