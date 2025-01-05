@@ -8,8 +8,8 @@ impl CPU {
             if (element >> 9) == 1 {
                 // start directive
                 if start_found {
-                    eprintln!("{}", EmuError::Duplicate(".start directives".to_string()));
                     self.do_not_run = true;
+                    return Err(EmuError::Duplicate(".start directives".to_string()));
                 }
                 self.starts_at = (element & 0b111111111) as u16;
                 start_found = true;
