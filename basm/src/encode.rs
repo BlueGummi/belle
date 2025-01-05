@@ -195,6 +195,12 @@ pub fn encode_instruction(
             let arg1_bin = argument_to_binary(arg1, line_num)?;
             let arg2_bin = argument_to_binary(arg2, line_num)?;
             if let Some(SRCall(_)) = arg2 {
+                if arg2_bin > 127 {
+                    return Err(format!(
+                        "Label memory address too large on instruction on line {}",
+                        line_num
+                    ));
+                }
                 return Ok(Some(vec![
                     (instruction_bin << 12) | (arg1_bin << 9) | 1 << 8 | arg2_bin,
                 ]));
@@ -205,6 +211,12 @@ pub fn encode_instruction(
         }
         "call" => {
             let address = argument_to_binary(arg1, line_num)?;
+            if address > 2047 {
+                return Err(format!(
+                    "Label memory address too large on instruction on line {}",
+                    line_num
+                ));
+            }
             Ok(Some(vec![(instruction_bin << 12) | address]))
         }
         "jwr" => {

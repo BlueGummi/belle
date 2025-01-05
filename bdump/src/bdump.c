@@ -4,7 +4,26 @@
  *
  * This code is licensed under the BSD 3-Clause License.
  */
+
 #include "bdump.h"
+
+typedef struct {
+    FILE *input;
+    uint8_t buffer[BUFFER_SIZE];
+    size_t bytes_read;
+} ThreadData;
+
+void *process_instructions(void *arg) {
+    ThreadData *data = (ThreadData *) arg;
+    for (size_t i = 0; i < data->bytes_read; i += 2) {
+        if (i + 1 < data->bytes_read) {
+            uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            Instruction ins = parse_instruction(instruction);
+            print_instruction(&ins);
+        }
+    }
+    return NULL;
+}
 
 int main(int argc, char *argv[]) {
     args = parse_arguments(argc, argv);
@@ -21,17 +40,43 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    uint8_t buffer[2]; 
-    while (fread(buffer, sizeof(uint8_t), 2, input) == 2) {
-        uint16_t instruction = (buffer[0] << 8) | buffer[1];
-        Instruction ins = parse_instruction(instruction);
-        print_instruction(&ins);
+    ThreadData thread_data[THREAD_COUNT];
+    size_t bytes_read;
+
+#ifdef _WIN32
+    HANDLE thread_handles[THREAD_COUNT];
+#else
+    pthread_t thread_handles[THREAD_COUNT];
+#endif
+
+    while ((bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
+        thread_data[0].bytes_read = bytes_read;
+        thread_data[0].input = input;
+
+#ifdef _WIN32
+        thread_handles[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) process_instructions,
+                                         &thread_data[0], 0, NULL);
+        if (thread_handles[0] == NULL) {
+            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
+            fclose(input);
+            return EXIT_FAILURE;
+        }
+
+        WaitForSingleObject(thread_handles[0], INFINITE);
+#else
+        if (pthread_create(&thread_handles[0], NULL, process_instructions, &thread_data[0]) != 0) {
+            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
+            fclose(input);
+            return EXIT_FAILURE;
+        }
+
+        pthread_join(thread_handles[0], NULL);
+#endif
     }
 
     fclose(input);
     return EXIT_SUCCESS;
 }
-
 char *match_opcode(Instruction *s) {
     char *opcode;
     switch (s->opcode) {
