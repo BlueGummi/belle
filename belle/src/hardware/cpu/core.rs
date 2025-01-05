@@ -134,6 +134,9 @@ impl CPU {
                 }
                 return Err(e);
             }
+            if CONFIG.verbose {
+                println!("{self}");
+            }
             if !self.running {
                 break;
             }
@@ -142,9 +145,6 @@ impl CPU {
             }
 
             let clock = CLOCK.lock().unwrap();
-            if CONFIG.verbose {
-                println!("{self}");
-            }
 
             if self.oflag && self.hlt_on_overflow {
                 self.running = false;
@@ -167,7 +167,7 @@ impl CPU {
                 println!("╰────────────╯");
             }
             self.pmem = true;
-            if CONFIG.pretty || CONFIG.verbose {
+            if CONFIG.pretty ^ CONFIG.verbose {
                 println!("{self}");
             }
             let mut clock = CLOCK.lock().unwrap(); // might panic

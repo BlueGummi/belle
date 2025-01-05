@@ -24,11 +24,13 @@ fn main() -> io::Result<()> {
 
     let mut cpu = CPU::new();
     if let Err(e) = cpu.load_rom(&rom) {
-        eprintln!("{e}");
+        if !CONFIG.quiet {
+            eprintln!("{e}");
+        }
         process::exit(1);
     }
     if let Err(e) = cpu.run() {
-        if !CONFIG.pretty {
+        if !CONFIG.pretty && !CONFIG.quiet {
             eprintln!("{e}");
         }
         if CONFIG.write {

@@ -15,7 +15,6 @@ ahash = "0.8.11"
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(fuzzing)'] }
 
 [profile.release]
-lto = true
 debug = 0
 opt-level = 3
 codegen-units = 1
