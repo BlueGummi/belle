@@ -57,7 +57,7 @@ impl fmt::Display for Error<'_> {
             error_message
         )?;
 
-        let input: &String = &CONFIG.file;
+        let input: &String = &CONFIG.source;
         let path = Path::new(input);
         for (current_line, line) in io::BufReader::new(File::open(path).unwrap())
             .lines()

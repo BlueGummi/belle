@@ -11,13 +11,13 @@ pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
 #[command(author = "gummi")]
 #[command(about = "The assembler for BELLE", long_about = None)]
 pub struct Args {
-    /// Output file for binary
+    /// Binary name
     #[clap(short = 'o', long)]
-    pub output: Option<String>,
+    pub binary: Option<String>,
 
-    /// Path to input
+    /// Source code
     #[clap(required = true)]
-    pub file: String,
+    pub source: String,
 
     /// Verbose output
     #[clap(short = 'v', long, default_value_t = false)]
@@ -38,11 +38,11 @@ pub fn declare_config() -> Args {
         std::process::exit(0); // will be changed if i need testing
     });
 
-    let output = cli.output.unwrap_or_else(|| "a.out".to_string());
+    let binary = cli.binary.unwrap_or_else(|| "a.out".to_string());
 
     Args {
-        file: cli.file,
-        output: Some(output),
+        source: cli.source,
+        binary: Some(binary),
         verbose: cli.verbose,
         debug: cli.debug,
         tips: cli.tips,

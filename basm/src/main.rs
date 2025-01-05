@@ -14,7 +14,7 @@ use std::io::{self, BufRead, Write};
 use std::path::Path;
 
 fn main() -> io::Result<()> {
-    let input: &String = &CONFIG.file;
+    let input: &String = &CONFIG.source;
     let file = Path::new(input);
 
     if input.is_empty() {
@@ -157,7 +157,7 @@ fn main() -> io::Result<()> {
         println!(
             "{}: No HLT instruction found in program {}",
             "Warning".yellow(),
-            CONFIG.file.bright_white()
+            CONFIG.source.bright_white()
         );
     }
 
@@ -165,7 +165,7 @@ fn main() -> io::Result<()> {
         print_subroutine_map();
     }
 
-    match &CONFIG.output {
+    match &CONFIG.binary {
         Some(output_file) if write_to_file => {
             write_encoded_instructions_to_file(output_file, &encoded_instructions)?;
         }
