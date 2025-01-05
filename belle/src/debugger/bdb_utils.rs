@@ -171,21 +171,7 @@ impl BDB {
     }
 
     pub fn handle_print_all_memory(&mut self) {
-        for (index, element) in self.dbgcpu.memory.iter().enumerate() {
-            if let Some(value) = element {
-                self.dbgcpu.ir = *value as i16;
-                let displayed = format!(
-                    "Value at {} decodes to {}",
-                    index,
-                    self.dbgcpu.decode_instruction()
-                );
-                print!("{displayed}");
-                for _ in displayed.len()..17 {
-                    print!(" ");
-                }
-                println!(" - {:016b} ({})", value, value);
-            }
-        }
+        self.dbgcpu.pmem();
     }
 
     pub fn handle_print_cpu_state(&mut self) {

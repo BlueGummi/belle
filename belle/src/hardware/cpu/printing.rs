@@ -308,3 +308,145 @@ impl fmt::Display for CPU {
         Ok(())
     }
 }
+
+impl CPU {
+    pub fn pmem(&mut self) {
+        let times = 12;
+        let line = "─".repeat(times);
+        println!(
+            "{}",
+            format!("╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
+        );
+        println!("│ {}{}│", "MEMORY".bright_purple().bold(), " ".repeat(70));
+        println!(
+            "{}",
+            format!(
+                "├─────────┬────────{}─────{}─────{}─{}┤",
+                line, line, line, line
+            )
+        );
+        println!(
+            "│ {} │ {}   {}│",
+            "ADDRESS".bright_purple().bold(),
+            "VALUE".bright_cyan().bold(),
+            " ".repeat(58)
+        );
+        println!(
+            "{}",
+            format!(
+                "├─────────┼────────{}─────{}─────{}─{}┤",
+                line, line, line, line
+            )
+        );
+        for (index, element) in self.memory.iter().enumerate() {
+            if let Some(value) = element {
+                let mut temp = CPU::new();
+                temp.ir = *value as i16;
+                let displayed = format!(
+                    "│ {:^6}  │ {}",
+                    index.to_string().magenta(),
+                    temp.decode_instruction().to_string().green()
+                );
+                print!("{displayed}");
+                let spacelen = 50 - displayed.len();
+                for _ in displayed.len()..50 {
+                    print!(" ");
+                }
+                print!(
+                    " - {} ({})",
+                    format!("{:016b}", value).bright_white(),
+                    value.to_string().bright_green()
+                );
+
+                let numberlen = format!(" - {:016b} ({})", value, value).len();
+
+                for _ in numberlen..30 {
+                    print!(" ");
+                }
+
+                let spacelen = spacelen + (30 - numberlen);
+
+                let escapelen = if *value <= 127 {
+                    if *value < 32 {
+                        let escape_code = match *value {
+                            0 => "\\0",
+                            1 => "\\a",
+                            2 => "\\b",
+                            3 => "\\t",
+                            4 => "\\n",
+                            5 => "\\v",
+                            6 => "\\f",
+                            7 => "\\r",
+                            8 => "\\x08",
+                            9 => "\\x09",
+                            10 => "\\n",
+                            11 => "\\x0b",
+                            12 => "\\f",
+                            13 => "\\r",
+                            _ => &format!("\\x{:02x}", *value),
+                        };
+                        print!(" [{}]", escape_code);
+                        format!(" [{}]", escape_code).len()
+                    } else if *value == 127 {
+                        print!(" [DEL]");
+                        6
+                    } else {
+                        print!(" [{}]", *value as u8 as char);
+                        format!(" [{}]", *value as u8 as char).len()
+                    }
+                } else {
+                    0
+                };
+
+                let pointer_ind = if self.sp as usize == index && self.bp as usize == index {
+                    "  <-- s. ptr & b. ptr"
+                } else if self.sp as usize == index {
+                    "  <-- s. ptr"
+                } else if self.bp as usize == index {
+                    "  <-- b. ptr"
+                } else {
+                    ""
+                };
+
+                print!("{}", pointer_ind.green());
+
+                let complete =
+                    displayed.len() + numberlen + spacelen + escapelen + pointer_ind.len();
+
+                for _ in complete..100 {
+                    print!(" ");
+                }
+
+                println!("│");
+            } else if self.sp as usize == index && self.bp as usize == index {
+                println!(
+                    "│ {:^6}  │    ╺{}Stack and base pointer{}╸    │",
+                    index.to_string().magenta(),
+                    "─".repeat(18),
+                    "─".repeat(17)
+                );
+            } else if self.sp as usize == index {
+                println!(
+                    "│ {:^6}  │    ╺{}────Stack pointer─────{}╸    │",
+                    index.to_string().magenta(),
+                    "─".repeat(18),
+                    "─".repeat(17)
+                );
+            } else if self.bp as usize == index {
+                println!(
+                    "│ {:^6}  │    ╺{}─────Base pointer─────{}╸    │",
+                    index.to_string().magenta(),
+                    "─".repeat(18),
+                    "─".repeat(17)
+                );
+            }
+        }
+        println!(
+            "{}",
+            format!(
+                "╰─────────┴────────{}─────{}─────{}─{}╯",
+                line, line, line, line
+            )
+        );
+    }
+}

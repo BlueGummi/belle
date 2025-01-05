@@ -178,29 +178,7 @@ impl CPU {
 
         Ok(())
     }
-    pub fn pmem(&self) {
-        println!("{}", " MEMORY".bright_purple().bold());
-        for (index, element) in self.memory.iter().enumerate() {
-            if let Some(value) = element {
-                let mut temp = CPU::new();
-                temp.ir = *value as i16;
-                let displayed = format!(
-                    "Value at {} decodes to {}",
-                    index.to_string().magenta(),
-                    temp.decode_instruction().to_string().green()
-                );
-                print!("{displayed}");
-                for _ in displayed.len()..38 {
-                    print!(" ");
-                }
-                print!(
-                    " - {} ({})",
-                    format!("{:016b}", value).bright_white(),
-                    value.to_string().bright_green()
-                );
-            }
-        }
-    }
+
     pub fn execute_instruction(&mut self, ins: &Instruction) -> PossibleCrash {
         self.has_ran = true; // for debugger
 
