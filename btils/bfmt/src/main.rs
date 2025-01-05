@@ -64,7 +64,7 @@ fn main() -> io::Result<()> {
         .version("0.2.0")
         .author("BlueGummi")
         .about("Format code written for the BELLE-assembler")
-        .arg(Arg::new("files").help("The files to format").num_args(1..))
+        .arg(Arg::new("FILES").help("The files to format").num_args(1..))
         .arg(
             Arg::new("max-indent")
                 .short('I')
