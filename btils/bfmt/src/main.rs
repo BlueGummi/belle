@@ -51,7 +51,7 @@ fn process_file(filename: &str, max_indentation: usize, use_tabs: bool) -> io::R
     Ok(())
 }
 
-fn main() {
+fn main() -> io::Result<()> {
     let mut command = Command::new("bfmt")
         .version("0.2.0")
         .author("BlueGummi")
@@ -93,12 +93,16 @@ fn main() {
 
     if use_tabs && max_indentation != DEFAULT_MAX_INDENTATION {
         eprintln!("Error: Cannot specify both max-indent and use tabs.");
-        return;
+        std::process::exit(1);
     }
 
     for filename in files {
         if let Err(e) = process_file(filename, max_indentation, use_tabs) {
+            let temp_filename = format!("{}.tmp", filename);
             eprintln!("Error processing {}: {}", filename, e);
+            fs::remove_file(&temp_filename)?;
+            break;
         }
     }
+    Ok(())
 }

@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    uint8_t buffer[2]; // Buffer to hold two bytes
+    uint8_t buffer[2]; 
     while (fread(buffer, sizeof(uint8_t), 2, input) == 2) {
         uint16_t instruction = (buffer[0] << 8) | buffer[1];
         Instruction ins = parse_instruction(instruction);
