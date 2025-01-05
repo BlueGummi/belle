@@ -11,23 +11,23 @@ pub static CONFIG: Lazy<Cli> = Lazy::new(declare_config);
 #[command(author = "gummi")]
 #[command(about = "BELLE - The Big Endian, Low Level Emulator", long_about = None)]
 pub struct Cli {
-    /// Path to input
+    /// Path to ROM
     #[clap(required = true)]
-    pub file: String,
+    pub rom: String,
 
     /// Verbose output
     #[clap(short = 'v', long, default_value_t = false)]
     pub verbose: bool,
 
-    /// Display debug messages
+    /// Enter debugger
     #[clap(short = 'd', long, default_value_t = false)]
     pub debug: bool,
 
-    /// Quiet (do not print errors)
+    /// Do not print errors
     #[clap(short = 'q', long, default_value_t = false)]
     pub quiet: bool,
 
-    /// Clock cycle delay (milliseconds)
+    /// Clock delay (milliseconds)
     #[clap(short = 't', long)]
     pub time_delay: Option<u32>,
 
@@ -56,7 +56,7 @@ pub fn declare_config() -> Cli {
         #[cfg(not(fuzzing))]
         {
             Cli {
-                file: "".to_string(),
+                rom: "".to_string(),
                 debug: false,
                 verbose: false,
                 quiet: false,
@@ -69,7 +69,7 @@ pub fn declare_config() -> Cli {
         #[cfg(fuzzing)]
         {
             return Cli {
-                file: "".to_string(),
+                rom: "".to_string(),
                 debug: false,
                 verbose: false,
                 quiet: false,

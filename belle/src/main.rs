@@ -11,9 +11,7 @@ use std::{io, process};
 fn main() -> io::Result<()> {
     cli_argument_check();
 
-    let executable_path = &CONFIG.file;
-
-    let rom = create_rom(executable_path)?;
+    let executable_path = &CONFIG.rom;
     if CONFIG.debug {
         let mut bdb = BDB::new(executable_path)?;
         if let Err(e) = bdb.run() {
@@ -21,7 +19,7 @@ fn main() -> io::Result<()> {
             process::exit(1);
         }
     }
-
+    let rom = create_rom(executable_path)?;
     let mut cpu = CPU::new();
     if let Err(e) = cpu.load_rom(&rom) {
         if !CONFIG.quiet {

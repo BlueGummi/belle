@@ -8,6 +8,7 @@ use std::{
     path::Path,
     process,
 };
+
 #[macro_export]
 macro_rules! test_instruction {
     ($bcpu:expr, $op:ident, $arg1:expr, $arg2:expr) => {{
@@ -123,7 +124,7 @@ pub fn cli_argument_check() {
         );
         process::exit(1);
     }
-    let executable_path = &CONFIG.file;
+    let executable_path = &CONFIG.rom;
     if let Ok(metadata) = fs::metadata(executable_path) {
         if metadata.is_dir() {
             eprintln!("{}", EmuError::IsDirectory());
@@ -170,12 +171,12 @@ impl fmt::Display for EmuError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             EmuError::FileNotFound() => {
-                if !CONFIG.file.to_string().trim().is_empty() {
+                if !CONFIG.rom.to_string().trim().is_empty() {
                     write!(
                         f,
                         "{} File {} not found",
                         "Emulator Error:".red(),
-                        CONFIG.file.to_string().green(),
+                        CONFIG.rom.to_string().green(),
                     )
                 } else {
                     write!(
@@ -218,7 +219,7 @@ impl fmt::Display for EmuError {
                     f,
                     "{} {} is a directory",
                     "Emulator Error:".red(),
-                    CONFIG.file.to_string().green(),
+                    CONFIG.rom.to_string().green(),
                 )
             }
         }
