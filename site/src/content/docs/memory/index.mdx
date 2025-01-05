@@ -2,3 +2,24 @@
 title: Memory
 author: BlueGummi
 ---
+
+The memory of the BELLE-ISA is **word addressed**, and features a call stack that is defined by the user.
+
+Similar to many Von Neumann machines, the program memory and data are all part of the same "memory" on the machine.
+
+When a program is loaded into memory, the `.start`, `.ssp`, and `.sbp` directives will be ignored. All other instructions will be loaded one after another, based on where the `.start` directive is located.
+
+The entire memory of the machine contains `65536` addresses, starting from 0 to `65536`.
+
+There is also a call stack in the memory.
+
+## Call stack
+
+The memory of the BELLE-ISA features a call stack, defined by a stack and base pointers, each of which point to an actual memory address that holds a value.
+
+The call stack is **bi-directional**, meaning it can expand from both low to high addresses and high to low, depending on the positions of the stack and base pointer relative to each other.
+
+The call stack by default will expand from a **high to low** memory address, and by default the stack and base pointers are set to 99.
+
+If both the base and stack pointer are the same, the call stack will expand downwards, unless the base and stack pointers were changed after the stack had went **upwards**. Then, the stack will expand upwards unless the stack pointer is explicitly less than the base pointer.
+
