@@ -6,20 +6,28 @@ const DEFAULT_MAX_INDENTATION: usize = 4;
 
 fn trim_and_format_line(line: &str, max_indentation: usize, use_tabs: bool) -> String {
     let leading_spaces = line.chars().take_while(|&c| c == ' ').count();
-    let trimmed_line = if leading_spaces > max_indentation {
+    let cut = if leading_spaces > max_indentation {
         &line[leading_spaces..]
     } else {
         line
     }
     .trim_start();
+    let cut = if cut.contains(';') {
+        cut.split(';').next().unwrap_or(cut)
+    } else {
+        cut
+    };
 
-    if trimmed_line.is_empty() {
+    if cut.is_empty() {
         return String::new();
     }
 
-    let last_colon = trimmed_line.rfind(':');
-    let should_not_trim =
-        trimmed_line.starts_with('.') || last_colon.is_some() || trimmed_line.starts_with(';');
+    let last_colon = cut.rfind(':');
+    let should_not_trim = if cut.starts_with('.') {
+        !(cut.starts_with(".asciiz") || cut.starts_with(".word"))
+    } else {
+        last_colon.is_some() || cut.starts_with(';')
+    };
 
     if should_not_trim {
         line.to_string()
@@ -29,7 +37,7 @@ fn trim_and_format_line(line: &str, max_indentation: usize, use_tabs: bool) -> S
         } else {
             &" ".repeat(max_indentation)
         };
-        format!("{}{}", indent, trimmed_line)
+        format!("{}{}", indent, cut)
     }
 }
 
