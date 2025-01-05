@@ -37,7 +37,7 @@ fn trim_and_format_line(line: &str, max_indentation: usize, use_tabs: bool) -> S
         } else {
             &" ".repeat(max_indentation)
         };
-        format!("{}{}", indent, cut)
+        format!("{}{}", indent, line)
     }
 }
 
