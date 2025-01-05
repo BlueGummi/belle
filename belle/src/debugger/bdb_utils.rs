@@ -167,7 +167,9 @@ impl BDB {
         }
 
         self.dbgcpu.record_state();
+        self.dbgcpu.pmem = false;
         self.print_cpu_state();
+        self.dbgcpu.pmem = true;
     }
 
     pub fn handle_print_all_memory(&mut self) {
@@ -184,7 +186,7 @@ impl BDB {
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             self.dbgcpu.ir = n as i16;
             println!(
-                "  Next instruction         : {}",
+                "Next instruction: {}",
                 self.dbgcpu.decode_instruction()
             );
         }
