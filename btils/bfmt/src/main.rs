@@ -85,13 +85,13 @@ fn main() -> io::Result<()> {
 
     let matches = command.clone().get_matches();
 
-    if matches.get_many::<String>("files").is_none() {
+    if matches.get_many::<String>("FILES").is_none() {
         command.print_help().unwrap();
         std::process::exit(0);
     }
 
     let files: Vec<&str> = matches
-        .get_many::<String>("files")
+        .get_many::<String>("FILES")
         .unwrap()
         .map(|s| s.as_str())
         .collect();
