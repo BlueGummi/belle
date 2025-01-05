@@ -7,4 +7,4 @@ hello_end:
 	mov r0, @hello_start
 	mov r1, @hello_end
 	int 8
-;	hlt
+	hlt
