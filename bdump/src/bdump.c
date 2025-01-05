@@ -7,12 +7,6 @@
 
 #include "bdump.h"
 
-typedef struct {
-    FILE *input;
-    uint8_t buffer[BUFFER_SIZE];
-    size_t bytes_read;
-} ThreadData;
-
 void *process_instructions(void *arg) {
     ThreadData *data = (ThreadData *) arg;
     for (size_t i = 0; i < data->bytes_read; i += 2) {

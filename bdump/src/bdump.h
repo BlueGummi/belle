@@ -22,6 +22,12 @@ typedef void *thread_ret_t;
 #define CHUNK_SIZE 1024
 
 typedef struct {
+    FILE *input;
+    uint8_t buffer[BUFFER_SIZE];
+    size_t bytes_read;
+} ThreadData;
+
+typedef struct {
     int opcode;
     int destination;
     int source;
