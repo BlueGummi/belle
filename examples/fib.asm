@@ -19,7 +19,7 @@ start:
     	mov r1, 0
     	jmp @fib_loop ; perform a jump into the loop
 fib_loop:
-    	pop [randomloc]
+    	pop [randomloc] ; go random
     	mov r5, 0 ; clear register 5
     	pop r4
     	pop r6 ; retrieve values
