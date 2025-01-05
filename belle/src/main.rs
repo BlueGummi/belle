@@ -11,7 +11,7 @@ use std::{io, process};
 fn main() -> io::Result<()> {
     cli_argument_check();
 
-    let executable_path = &CONFIG.rom;
+    let executable_path = &CONFIG.rom; 
     if CONFIG.debug {
         let mut bdb = BDB::new(executable_path)?;
         if let Err(e) = bdb.run() {
