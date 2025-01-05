@@ -153,7 +153,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
 ## POP - Pop off the stack
 
-    `POP` reads the stack pointer, and then "`pop`s" the value contained at the stack pointer into **a destination**. The destination can only **be a register**, and `POP` will only ever take one argument. The value at the **top of the call stack** - which is referenced with the stack pointer - will be **cleared**, and the stack pointer will be adjusted depending on the direction the call stack is "going".
+    `POP` reads the stack pointer, and then "`pop`s" the value contained at the stack pointer into **a destination**. `POP` will only ever take one argument. The value at the **top of the call stack** - which is referenced with the stack pointer - will be **cleared**, and the stack pointer will be adjusted depending on the direction the call stack is "going".
 
     If a `POP` instruction is called **whilst the stack pointer does not point to a value**, the CPU will report a *stack underflow* - a type of segmentation fault - where the call stack does not have enough data to satisfy a `POP` instruction.
 
