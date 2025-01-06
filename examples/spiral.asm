@@ -37,7 +37,7 @@ sub_print:
 	jmp @sub_loop
 print:
 	add r3, 1
-	cmp r3, 60 ; change this number to determine how many seconds the program takes to execute
+	cmp r3, 1 ; change this number to determine how many seconds the program takes to execute
 	jz @end
 	mov r2, 0
 	mov r7, 0
