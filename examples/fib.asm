@@ -38,6 +38,7 @@ fib_loop:
     	add r2, 1
     	jmp @fib_loop ; continue Fibonacci calculation
 finish:
+	pop r4
     	add r1, -2
     	mov r7, &r1 ; get back most recent value
     	add r1, -1

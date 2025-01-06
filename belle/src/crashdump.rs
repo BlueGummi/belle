@@ -45,11 +45,12 @@ pub fn write_crash(cpu: &CPU) {
                 if cpu.memory[index].is_some() {
                     if index == cpu.ip as usize {
                         write_to_file(&format!(
-                            "Address {index}: {:016b} <---- CRASH OCCURRED HERE",
-                            value.unwrap()
+                            "Address {index:^6}: {:016b}: {} <---- CRASH OCCURRED HERE",
+                            value.unwrap(),
+                            cpu.decode_instruction()
                         ));
                     } else {
-                        write_to_file(&format!("Address {index}: {:016b}", value.unwrap()));
+                        write_to_file(&format!("Address {index:^6}: {:016b}: {}", value.unwrap(), cpu.decode_instruction()));
                     }
                 }
             }
