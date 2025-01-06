@@ -16,7 +16,8 @@ pub struct BDB {
 
 impl BDB {
     pub fn new(executable_path: &str) -> io::Result<Self> {
-        let dbgcpu = CPU::new();
+        let mut dbgcpu = CPU::new();
+        dbgcpu.debugging = true;
         Ok(Self {
             dbgcpu,
             clock: 0,
@@ -92,6 +93,7 @@ impl BDB {
 
     fn reset_cpu(&mut self) {
         self.dbgcpu = CPU::new();
+        self.dbgcpu.debugging = true;
         println!("CPU reset.");
     }
 

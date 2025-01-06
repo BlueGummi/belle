@@ -25,6 +25,8 @@ impl fmt::Display for CPU {
             "RUNNING".green()
         } else if self.err {
             "CRASHED".bright_red()
+        } else if self.debugging {
+            "DEBUG".bright_purple()
         } else {
             "HALTED".red()
         };
@@ -249,15 +251,24 @@ impl fmt::Display for CPU {
                         0
                     };
 
-                    let pointer_ind = if self.sp as usize == index && self.bp as usize == index {
-                        "  <-- s. ptr & b. ptr"
+                    let mut pointer_ind = if self.sp as usize == index && self.bp as usize == index
+                    {
+                        "  <-- s. ptr & b. ptr".to_string()
                     } else if self.sp as usize == index {
-                        "  <-- s. ptr"
+                        "  <-- s. ptr".to_string()
                     } else if self.bp as usize == index {
-                        "  <-- b. ptr"
+                        "  <-- b. ptr".to_string()
                     } else {
-                        ""
+                        String::new()
                     };
+
+                    if self.pc as usize == index {
+                        if !pointer_ind.is_empty() {
+                            pointer_ind = format!("{} & pc", pointer_ind);
+                        } else {
+                            pointer_ind = "  <-- pc".to_string();
+                        }
+                    }
 
                     write!(f, "{}", pointer_ind.green())?;
 
@@ -398,15 +409,23 @@ impl CPU {
                     0
                 };
 
-                let pointer_ind = if self.sp as usize == index && self.bp as usize == index {
-                    "  <-- s. ptr & b. ptr"
+                let mut pointer_ind = if self.sp as usize == index && self.bp as usize == index {
+                    "  <-- s. ptr & b. ptr".to_string()
                 } else if self.sp as usize == index {
-                    "  <-- s. ptr"
+                    "  <-- s. ptr".to_string()
                 } else if self.bp as usize == index {
-                    "  <-- b. ptr"
+                    "  <-- b. ptr".to_string()
                 } else {
-                    ""
+                    String::new()
                 };
+
+                if self.pc as usize == index {
+                    if !pointer_ind.is_empty() {
+                        pointer_ind = format!("{} & pc", pointer_ind);
+                    } else {
+                        pointer_ind = "  <-- pc".to_string();
+                    }
+                }
 
                 print!("{}", pointer_ind.green());
 

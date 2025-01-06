@@ -37,6 +37,7 @@ pub struct CPU {
     pub hit_max_clk: bool,
     pub do_not_run: bool,
     pub err: bool,
+    pub debugging: bool,
     pub errmsg: String,
     pub pmem: bool,
 }
@@ -73,6 +74,7 @@ impl CPU {
             hit_max_clk: false,
             do_not_run: false,
             err: false,
+            debugging: false,
             errmsg: String::from(""),
             pmem: false,
         }

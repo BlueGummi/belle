@@ -76,6 +76,8 @@ impl BDB {
         }
         if self.breakpoints.is_empty() {
             if let Err(e) = self.dbgcpu.run() {
+                self.dbgcpu.err = true;
+                self.dbgcpu.errmsg = e.only_err();
                 eprintln!("{e}");
                 eprintln!("Consider resetting the CPU with 'rs'.");
             }
@@ -90,7 +92,7 @@ impl BDB {
                 };
                 let parsed_ins = self.dbgcpu.decode_instruction();
                 if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
-                    eprintln!("An error occurred: {e}");
+                    eprintln!("{e}");
                 }
             }
             if self.breakpoints.contains(&self.dbgcpu.pc) {
@@ -163,12 +165,14 @@ impl BDB {
 
         let parsed_ins = self.dbgcpu.decode_instruction();
         if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
-            eprintln!("An error occurred: {e}");
+            self.dbgcpu.err = true;
+            self.dbgcpu.errmsg = e.only_err();
+            eprintln!("{e}");
         }
 
         self.dbgcpu.record_state();
         self.dbgcpu.pmem = false;
-        self.print_cpu_state();
+        println!("{}", self.dbgcpu);
         self.dbgcpu.pmem = true;
     }
 
@@ -185,10 +189,7 @@ impl BDB {
 
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             self.dbgcpu.ir = n as i16;
-            println!(
-                "Next instruction: {}",
-                self.dbgcpu.decode_instruction()
-            );
+            println!("Next instruction: {}", self.dbgcpu.decode_instruction());
         }
     }
 

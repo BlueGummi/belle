@@ -50,7 +50,11 @@ pub fn write_crash(cpu: &CPU) {
                             cpu.decode_instruction()
                         ));
                     } else {
-                        write_to_file(&format!("Address {index:^6}: {:016b}: {}", value.unwrap(), cpu.decode_instruction()));
+                        write_to_file(&format!(
+                            "Address {index:^6}: {:016b}: {}",
+                            value.unwrap(),
+                            cpu.decode_instruction()
+                        ));
                     }
                 }
             }
