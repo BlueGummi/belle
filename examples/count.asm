@@ -1,5 +1,3 @@
-    ; This program counts to the 16 bit unsigned integer limit 
-    ; It is indefinite
     p = 20
     st = 100
 .ssp [p]
