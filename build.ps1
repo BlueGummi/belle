@@ -122,7 +122,7 @@ function Default-Build {
                 Start-Process -FilePath "make" -ArgumentList "--quiet" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE-fmt..."
-                    Copy-Item -Path "bfmt.exe" -Destination "../../bin" -Force
+                    Copy-Item -Path "bfmt.exe" -Destination "../bin" -Force
                 }
 		Set-Location ..
             }
