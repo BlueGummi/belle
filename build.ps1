@@ -1,11 +1,12 @@
 $Clean = $false
 $WithCleanup = $false
+
 function Print-Message {
     param (
         [string]$Message,
         [string]$Color
     )
-    
+
     switch ($Color) {
         "green" { Write-Host $Message -ForegroundColor Green }
         "red"   { Write-Host $Message -ForegroundColor Red }
@@ -34,11 +35,31 @@ function Clean {
     Set-Location ..
     Set-Location ..
     Set-Location btils
-    make clean --quiet 
+    make clean --quiet
     Set-Location ..
     Set-Location site
     Remove-Item -Path "node_modules" -Recurse -Force -ErrorAction SilentlyContinue
     Print-Message "Cleaned up!" "green"
+}
+
+function Check-Cargo {
+    if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+        Print-Message "Cargo is not installed. Would you like to install it? [y/N]" "yellow"
+        
+        $userInput = Read-Host -Prompt ""
+
+        if ($userInput -eq 'y' -or $userInput -eq 'Y') {
+            Print-Message "Installing Cargo..." "yellow"
+            Invoke-WebRequest -Uri https://win.rustup.rs -OutFile "rustup-init.exe"
+            Start-Process -FilePath ".\rustup-init.exe" -ArgumentList "-y" -NoNewWindow -Wait
+            Remove-Item -Path "rustup-init.exe" -Force
+            $env:Path += ";$HOME\.cargo\bin"
+            Print-Message "Cargo installed successfully!" "green"
+        } else {
+            Print-Message "Cargo installation skipped." "red"
+            exit
+        }
+    }
 }
 
 function Spinner {
@@ -47,13 +68,10 @@ function Spinner {
         [string]$message
     )
     $delay = 0.1
-    #$spin = '/-\|'
     Print-Message "$message" "blue"
     $i = 0
-    
+
     while (Get-Process -Id $processId -ErrorAction SilentlyContinue) {
-        #$temp = $spin[$i % $spin.Length]
-        #Write-Host "`r$temp" -NoNewline
         Start-Sleep -Seconds $delay
         $i++
     }
@@ -65,7 +83,7 @@ function Print-Help {
     param (
         [string]$ScriptName
     )
-    
+
     Write-Host "The build script for the BELLE programs and utilities`n"
     Write-Host "`e[4mUsage`e[0m: $ScriptName [OPTIONS] [TARGETS]"
     Write-Host "Options:"
@@ -82,12 +100,12 @@ function Default-Build {
     if (-not (Test-Path bin)) {
         New-Item -ItemType Directory -Path bin
     }
-    
+
     if ($Clean) {
         Clean
         exit
     }
-    
+
     foreach ($Target in $Targets) {
         switch ($Target) {
             "basm" {
@@ -124,7 +142,7 @@ function Default-Build {
                     Spinner $PPid "Building BELLE-fmt..."
                     Copy-Item -Path "bfmt.exe" -Destination "../bin" -Force
                 }
-		Set-Location ..
+                Set-Location ..
             }
         }
     }
@@ -136,6 +154,8 @@ function Default-Build {
     Print-Message "Build complete" "green"
     exit
 }
+
+Check-Cargo
 
 $Targets = @()
 
@@ -154,7 +174,7 @@ foreach ($Arg in $args) {
         "bdump"   { $Targets += "bdump" }
         "basm"    { $Targets += "basm" }
         "belle"   { $Targets += "belle" }
-	"bfmt"    { $Targets += "bfmt" }
+        "bfmt"    { $Targets += "bfmt" }
     }
 }
 

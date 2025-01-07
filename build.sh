@@ -3,6 +3,24 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
+check_cargo() {
+    if ! command -v cargo &> /dev/null; then
+        print_message "Cargo is not installed. Would you like to install it? [y/N]" yellow
+        
+        read -r user_input
+        
+        if [[ "$user_input" =~ ^[yY]$ ]]; then
+            print_message "Installing Cargo..." yellow
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source "$HOME/.cargo/env"
+            print_message "Cargo installed successfully!" green
+        else
+            print_message "Cargo installation skipped." red
+            exit
+        fi
+    fi
+}
+
 print_message() {
     local message="$1"
     local color="$2"
@@ -31,7 +49,7 @@ clear_line() {
 clean() {
     print_message "Cleaning up..." blue
     cd basm
-    cargo clean --quiet    
+    cargo clean --quiet
     cd ..
     cd bdump
     make clean --quiet
@@ -54,7 +72,7 @@ spinner() {
     if [ "$no_spin" ]; then
         return
     fi
-    
+
     local pid=$1
     local delay=0.1
     local spin='/-\|'
@@ -89,7 +107,7 @@ print_help() {
     printf "  -q, --quiet        Suppress output\n"
     printf "  -n, --no-spin      Disable the spinner during builds\n"
     printf "  -h, --help         Display this help message\n"
-    printf "  -l, --loud	 Print build outputs\n"
+    printf "  -l, --loud         Print build outputs\n"
     printf "\nTargets:\n"
     printf "  bdump, basm, belle, btils (default: all)\n"
     exit 0
@@ -107,11 +125,11 @@ default_build() {
         case "$target" in
             basm)
                 cd basm
-		if ! [ "$loud" ]; then
-                	cargo build --release --quiet &
-		else
-			cargo build --release &
-		fi
+                if ! [ "$loud" ]; then
+                        cargo build --release --quiet &
+                else
+                        cargo build --release &
+                fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE-asm..."
@@ -124,13 +142,13 @@ default_build() {
                 ;;
             bdump)
                 cd bdump
-		if ! [ "$loud" ]; then
-                	make clean --quiet
-                	make --quiet &
-		else
-			make clean
-			make &
-		fi
+                if ! [ "$loud" ]; then
+                        make clean --quiet
+                        make --quiet &
+                else
+                        make clean
+                        make &
+                fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE-dump..."
@@ -143,11 +161,11 @@ default_build() {
                 ;;
             belle)
                 cd belle
-		if ! [ "$loud" ]; then
-                	cargo build --release --quiet &
-		else
-			cargo build --release &
-		fi
+                if ! [ "$loud" ]; then
+                        cargo build --release --quiet &
+                else
+                        cargo build --release &
+                fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE..."
@@ -159,12 +177,12 @@ default_build() {
                 cd ..
                 ;;
             btils)
-		cd btils
-		if ! [ "$loud" ]; then
-                	make --quiet &
-		else
-			make &
-		fi
+                cd btils
+                if ! [ "$loud" ]; then
+                        make --quiet &
+                else
+                        make &
+                fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
                     spinner $pid "Building BELLE-fmt..."
@@ -185,6 +203,8 @@ default_build() {
     print_message "Build complete" green
     exit 0
 }
+
+check_cargo
 
 targets=()
 
@@ -208,9 +228,9 @@ for arg in "$@"; do
         bdump|basm|belle|btils)
             targets+=("$arg")
             ;;
-	--loud|-l)
-	    loud=true
-	    ;;
+        --loud|-l)
+            loud=true
+            ;;
     esac
 done
 
