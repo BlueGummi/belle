@@ -2,7 +2,7 @@ bdump/src/*.o
 bdump/bdump
 basm/target
 belle/target
-btils/bfmt/bfmt
+btils/bfmt
 bin
 belle/.cargo
 basm/.cargo

@@ -41,9 +41,9 @@ clean() {
     cd fuzz
     cargo clean --quiet
     cd ../../
-    cd btils/bfmt
+    cd btils
     make clean --quiet
-    cd ../../
+    cd ../
     cd site
     rm -rf node_modules
     cd ..
@@ -159,7 +159,7 @@ default_build() {
                 cd ..
                 ;;
             btils)
-		cd btils/bfmt
+		cd btils
 		if ! [ "$loud" ]; then
                 	make --quiet &
 		else
@@ -172,7 +172,7 @@ default_build() {
                     echo "Building BELLE-fmt..."
                     wait $pid
                 fi
-                cp -f bfmt ../../bin
+                cp -f bfmt ../bin
                 cd ..
                 ;;
         esac

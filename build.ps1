@@ -31,9 +31,8 @@ function Clean {
     cargo clean --quiet
     Set-Location ..
     Set-Location ..
-    Set-Location btils/bfmt
+    Set-Location btils
     make clean --quiet 
-    Set-Location ..
     Set-Location ..
     Set-Location site
     Remove-Item -Path "node_modules" -Recurse -Force -ErrorAction SilentlyContinue
@@ -117,13 +116,12 @@ function Default-Build {
                 Set-Location ..
             }
             "bfmt" {
-                Set-Location btils/bfmt
+                Set-Location btils
                 Start-Process -FilePath "make" -ArgumentList "--quiet" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE-fmt..."
                     Copy-Item -Path "bfmt.exe" -Destination "../../bin" -Force
                 }
-                Set-Location ..
 		Set-Location ..
             }
         }
