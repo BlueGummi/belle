@@ -46,18 +46,7 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
     free(lineclone);
 }
 
-void process_file(const char *filename, size_t max_indentation, int use_tabs) {
-    char temp_filename[256];
-    snprintf(temp_filename, sizeof(temp_filename), "%s.tmp", filename);
-    FILE *input_file = fopen(filename, "r");
-    FILE *output_file = fopen(temp_filename, "w");
-
-    if (!input_file || !output_file) {
-        perror("Error opening file");
-	remove(temp_filename);
-        exit(EXIT_FAILURE);
-    }
-
+void process_file(FILE *input_file, FILE *output_file, size_t max_indentation, int use_tabs) {
     char line[MAX_LINE_LENGTH];
     while (fgets(line, sizeof(line), input_file)) {
         char formatted_line[MAX_LINE_LENGTH] = {0};
@@ -66,21 +55,9 @@ void process_file(const char *filename, size_t max_indentation, int use_tabs) {
             fprintf(output_file, "%s", formatted_line);
         }
     }
-
-    fclose(input_file);
-    fclose(output_file);
-    if (rename(temp_filename, filename) != 0) {
-        perror("Error renaming file");
-        exit(EXIT_FAILURE);
-    }
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        print_help(argv[0]);
-        return EXIT_SUCCESS;
-    }
-
     size_t max_indentation = DEFAULT_MAX_INDENTATION;
     int use_tabs = 0;
     char* files[MAX_FILES];
@@ -107,8 +84,30 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    for (int i = 0; i < file_count; i++) {
-        process_file(files[i], max_indentation, use_tabs);
+    if (file_count == 0) {
+        process_file(stdin, stdout, max_indentation, use_tabs);
+    } else {
+        for (int i = 0; i < file_count; i++) {
+            char temp_filename[256];
+            snprintf(temp_filename, sizeof(temp_filename), "%s.tmp", files[i]);
+            FILE *input_file = fopen(files[i], "r");
+            FILE *output_file = fopen(temp_filename, "w");
+
+            if (!input_file || !output_file) {
+                perror("Error opening file");
+                remove(temp_filename);
+                exit(EXIT_FAILURE);
+            }
+
+            process_file(input_file, output_file, max_indentation, use_tabs);
+
+            fclose(input_file);
+            fclose(output_file);
+            if (rename(temp_filename, files[i]) != 0) {
+                perror("Error renaming file");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
     return EXIT_SUCCESS;
