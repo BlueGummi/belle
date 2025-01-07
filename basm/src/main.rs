@@ -7,7 +7,6 @@
 use basm::Error::*;
 use basm::*;
 use colored::Colorize;
-use regex::Regex;
 use std::fs;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
@@ -175,7 +174,6 @@ fn main() -> io::Result<()> {
 }
 
 fn process_includes(input: &String) -> io::Result<Vec<String>> {
-    let include_regex = Regex::new(r#"^\s*#include\s+"([^"]+)""#).unwrap();
     let mut included_lines = Vec::new();
     let file = File::open(input)?;
     let reader = io::BufReader::new(file);
@@ -192,19 +190,26 @@ fn process_includes(input: &String) -> io::Result<Vec<String>> {
             }
         };
 
-        if content.trim().starts_with("#include") {
-            if let Some(captures) = include_regex.captures(content.trim()) {
-                let include_file = captures[1].to_string();
-                if let Ok(included) = read_include_file(&include_file) {
-                    included_lines.extend(included);
-                } else if let Err(e) = read_include_file(&include_file) {
-                    eprintln!(
-                        "{}",
-                        LineLessError(
-                            format!("could not read included file: {include_file}").as_str()
-                        )
-                    );
-                    return Err(e);
+        let trimmed_content = content.trim();
+        
+        if trimmed_content.starts_with("#include") {
+            let start_quote = trimmed_content.find('"');
+            let end_quote = trimmed_content.rfind('"');
+
+            if let (Some(start), Some(end)) = (start_quote, end_quote) {
+                if start < end {
+                    let include_file = &trimmed_content[start + 1..end];
+                    if let Ok(included) = read_include_file(include_file) {
+                        included_lines.extend(included);
+                    } else {
+                        eprintln!(
+                            "{}",
+                            LineLessError(
+                                format!("could not read included file: {include_file}").as_str()
+                            )
+                        );
+                        return Err(io::Error::new(io::ErrorKind::Other, "Include file error"));
+                    }
                 }
             }
             continue;
@@ -215,7 +220,6 @@ fn process_includes(input: &String) -> io::Result<Vec<String>> {
 
     Ok(included_lines)
 }
-
 fn read_include_file(file_name: &str) -> io::Result<Vec<String>> {
     let mut included_lines = Vec::new();
     let reader = io::BufReader::new(File::open(file_name)?);
