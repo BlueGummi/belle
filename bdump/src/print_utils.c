@@ -200,8 +200,7 @@ void print_output(Instruction *ins) {
             printf("$%d, r%d\n", ins->destination, ins->source);
         }
     } else if (strcmp(op, "push") == 0 || strcmp(op, "pop") == 0) {
-        if ((ins->type == 0 && strcmp(op, "push") == 0) ||
-            (strcmp(op, "pop") == 0 && (ins->full_ins & 2048) == 1)) {
+        if ((ins->type == 0 && strcmp(op, "push") == 0)) {
             if (colors) {
                 printf("%sr%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
             } else {
