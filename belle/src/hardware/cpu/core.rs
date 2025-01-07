@@ -18,11 +18,13 @@ pub struct CPU {
     pub int_reg: [i16; 4], // r0 thru r5
     pub uint_reg: [u16; 2],
     pub float_reg: [f32; 2],                     // r6 and r7
-    pub memory: Box<[Option<u16>; MEMORY_SIZE]>, // Use Box to allocate the array on the heap
+    pub memory: Box<[Option<u16>; MEMORY_SIZE]>,
     pub pc: u16,                                 // program counter
-    pub ir: i16,
-    pub starts_at: u16,
-    pub running: bool,
+    pub ir: i16, // this doesn't actually impact much, rust just likes to scream
+                 // about different types, especially with decoder.rs
+                 // so we have it as an i16 variable instead
+    pub starts_at: u16, // .start directive
+    pub running: bool, // running status
     pub has_ran: bool,
     pub zflag: bool,
     pub oflag: bool,

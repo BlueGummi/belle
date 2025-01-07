@@ -42,7 +42,7 @@ clean() {
     cargo clean --quiet
     cd ../../
     cd btils/bfmt
-    cargo clean --quiet
+    make clean --quiet
     cd ../../
     cd site
     rm -rf node_modules
@@ -161,9 +161,9 @@ default_build() {
             btils)
 		cd btils/bfmt
 		if ! [ "$loud" ]; then
-                	cargo build --release --quiet &
+                	make --quiet &
 		else
-			cargo build --release &
+			make &
 		fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
@@ -172,7 +172,7 @@ default_build() {
                     echo "Building BELLE-fmt..."
                     wait $pid
                 fi
-                cp -f target/release/bfmt ../../bin
+                cp -f bfmt ../../bin
                 cd ..
                 ;;
         esac

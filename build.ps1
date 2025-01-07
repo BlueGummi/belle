@@ -32,7 +32,7 @@ function Clean {
     Set-Location ..
     Set-Location ..
     Set-Location btils/bfmt
-    cargo clean --quiet 
+    make clean --quiet 
     Set-Location ..
     Set-Location ..
     Set-Location site
@@ -118,10 +118,10 @@ function Default-Build {
             }
             "bfmt" {
                 Set-Location btils/bfmt
-                Start-Process -FilePath "cargo" -ArgumentList "build", "--release", "--quiet" -NoNewWindow -PassThru | ForEach-Object {
+                Start-Process -FilePath "make" -ArgumentList "--quiet" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE-fmt..."
-                    Copy-Item -Path "target\release\bfmt.exe" -Destination "../../bin" -Force
+                    Copy-Item -Path "bfmt.exe" -Destination "../../bin" -Force
                 }
                 Set-Location ..
 		Set-Location ..

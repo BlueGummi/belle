@@ -94,7 +94,7 @@ fn main() -> io::Result<()> {
                 };
 
                 if CONFIG.debug {
-                    println!("Raw line: {}", line.green());
+                    println!("\nRaw line: {}", line.green());
                 }
                 for token in tokens {
                     if let Token::Ident(_) = token {
@@ -112,9 +112,6 @@ fn main() -> io::Result<()> {
                 }
                 if tokens.contains(&Token::EqualSign) {
                     continue;
-                }
-                if CONFIG.debug {
-                    println!();
                 }
                 if let Some(ins) = instruction {
                     let encoded_instruction =
