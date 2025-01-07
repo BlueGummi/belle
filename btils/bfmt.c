@@ -1,4 +1,5 @@
 #include "bfmt_utils.c"
+#include <unistd.h> // Include for isatty
 
 void trim_and_format_line(char *line, char *formatted_line, size_t max_indentation, int use_tabs) {
     char *lineclone = clone_string(line);
@@ -84,7 +85,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (file_count == 0) {
+    if (file_count == 0 && isatty(STDIN_FILENO)) {
+        print_help(argv[0]);
+	return EXIT_SUCCESS;
+    } else if (file_count == 0) {
         process_file(stdin, stdout, max_indentation, use_tabs);
     } else {
         for (int i = 0; i < file_count; i++) {
