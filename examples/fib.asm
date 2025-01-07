@@ -1,12 +1,12 @@
-	randomloc = 140
+    	randomloc = 140
 .ssp [40]  ; set stack pointer to addr 40
 .sbp [40]  ; set base pointer to addr 40
 .start [41] ; program starts at addr 41
     	jmp @start
 msg:
-        .asciiz "The golden ratio is: "
+.asciiz "The golden ratio is: "
 msg_end:
-        .asciiz "Enter how many numbers to calculate: "
+.asciiz "Enter how many numbers to calculate: "
 start:
     	mov r6, 0 ; move 0 into register 6
     	mov r4, 1 ; move 1 into register 4
@@ -38,7 +38,7 @@ fib_loop:
     	add r2, 1
     	jmp @fib_loop ; continue Fibonacci calculation
 finish:
-	pop r4
+    	pop r4
     	add r1, -2
     	mov r7, &r1 ; get back most recent value
     	add r1, -1
