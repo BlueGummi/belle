@@ -1,3 +1,4 @@
+$Clean = $false
 function Print-Message {
     param (
         [string]$Message,
