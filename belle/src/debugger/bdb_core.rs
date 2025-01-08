@@ -51,7 +51,7 @@ impl BDB {
             match cmd.to_lowercase().as_str() {
                 "q" | "quit" | ":q" => {
                     println!("{}", "Exiting...\n".yellow());
-                    return Ok(());
+                    std::process::exit(0);
                 }
                 "h" | "help" => Self::handle_help(arg),
                 "l" => {
@@ -72,6 +72,7 @@ impl BDB {
                 "pk" => self.handle_poke(arg),
                 "b" => self.handle_set_breakpoint(arg),
                 "br" => self.handle_remove_breakpoint(arg),
+                "bp" => self.handle_print_all_breakpoints(),
                 "ba" => {
                     println!("Breakpoints cleared.");
                     self.breakpoints.clear();

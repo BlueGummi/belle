@@ -31,6 +31,7 @@ impl BDB {
                 ("b", "Set a breakpoint"),
                 ("br", "Remove a breakpoint"),
                 ("ba", "Remove all breakpoints"),
+                ("bp", "Print all breakpoints"),
                 (
                     "im",
                     "Print a value in memory at the clock after the CPU has run",
@@ -64,6 +65,7 @@ impl BDB {
                 "b" => println!("'breakpoint' takes one argument. Sets a breakpoint at a specified memory address."),
                 "br" => println!("'breakpoint remove' takes one argument. Removes a specified breakpoint."),
                 "ba" => println!("'breakpoint remove all' takes no arguments. Removes all breakpoints."),
+                "bp" => println!("'breakpoint print' takes no arguments. Prints all breakpoints."),
                 _ => println!("Unknown command: '{arg}'. Type 'h' or 'help' for a list of commands."),
             }
         }
@@ -190,6 +192,13 @@ impl BDB {
         if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
             self.dbgcpu.ir = n as i16;
             println!("Next instruction: {}", self.dbgcpu.decode_instruction());
+        }
+    }
+
+    pub fn handle_print_all_breakpoints(&self) {
+        print!("Breakpoints: ");
+        for element in &self.breakpoints {
+            print!("{element}, ");
         }
     }
 

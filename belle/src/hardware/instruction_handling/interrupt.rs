@@ -77,7 +77,7 @@ impl CPU {
                     }
 
                     if let Some(value) = memory[index as usize] {
-                        if CONFIG.verbose {
+                        if CONFIG.verbose || CONFIG.debug {
                             stringy = format!("{}{}", stringy, value as u8 as char);
                         } else {
                             print!("{}", value as u8 as char);
