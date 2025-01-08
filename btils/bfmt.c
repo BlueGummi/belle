@@ -1,5 +1,4 @@
 #include "bfmt_utils.c"
-#include <unistd.h> // Include for isatty
 
 void trim_and_format_line(char *line, char *formatted_line, size_t max_indentation, int use_tabs) {
     char *lineclone = clone_string(line);
