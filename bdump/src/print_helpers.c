@@ -31,15 +31,6 @@ void print_help(char *bin) { // bin is the name of the bin
     exit(0);
 }
 
-void print(const char *format, ...) {
-    if (args.debug == 1) {
-        printf(ANSI_GREEN "DEBUG: " ANSI_RESET);
-        va_list arguments;
-        va_start(arguments, format);
-        vprintf(format, arguments);
-        va_end(arguments);
-    }
-}
 void print_instruction_header(int line, bool colors) {
     if (colors) {
         printf("%sline %*d:%s ", ANSI_RED, 3, line, ANSI_RESET);

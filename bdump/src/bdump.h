@@ -43,7 +43,6 @@ typedef struct {
     int line_num;
     int colors;
     int verbosity;
-    int debug;
     int binary;
 } CLI;
 CLI args = {0};
@@ -53,7 +52,6 @@ Instruction parse_instruction(int instruction);
 void print_binary(int num, int leading);
 void print_instruction(Instruction *s);
 void print_help(char *bin);
-void print(const char *format, ...);
 char *match_opcode(Instruction *s);
 int main(int argc, char *argv[]);
 #pragma once

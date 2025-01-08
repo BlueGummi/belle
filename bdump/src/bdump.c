@@ -97,11 +97,6 @@ char *match_opcode(Instruction *s) {
 
 void print_instruction(Instruction *s) {
     print_output(s);
-    if (args.debug == 1) {
-        print("type %d\n", s->type);
-    }
-    if (args.debug == 1)
-        putchar('\n');
 }
 
 Instruction parse_instruction(int instruction) {
@@ -139,8 +134,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.colors = 1;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
-                } else if (strcmp(argv[i], "--debug") == 0) {
-                    opts.debug = 1;
                 } else if (strcmp(argv[i], "--binary") == 0) {
                     opts.binary = 1;
                 } else {
@@ -156,7 +149,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                     case 'l': opts.line_num = 1; break;
                     case 'c': opts.colors = 1; break;
                     case 'v': opts.verbosity++; break;
-                    case 'd': opts.debug = 1; break;
                     case 'b': opts.binary = 1; break;
                     default:
                         fputs("Error: Unknown option -", stderr);
