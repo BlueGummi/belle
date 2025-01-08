@@ -10,7 +10,7 @@ impl CPU {
         let code = self.get_value(arg)? as u16;
         match code {
             0_u16..=3_u16 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.int_reg[code as usize]);
                     println!("╰─────────╯");
@@ -19,7 +19,7 @@ impl CPU {
                 }
             }
             4 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.uint_reg[0]);
                     println!("╰─────────╯");
@@ -28,7 +28,7 @@ impl CPU {
                 }
             }
             5 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.uint_reg[1]);
                     println!("╰─────────╯");
@@ -37,7 +37,7 @@ impl CPU {
                 }
             }
             6 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────╮");
                     println!("│ {:^5.5} │", self.float_reg[0]);
                     println!("╰─────────╯");
@@ -46,7 +46,7 @@ impl CPU {
                 }
             }
             7 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────╮");
                     println!("│ {:^5.5} │", self.float_reg[1]);
                     println!("╰─────────╯");
@@ -84,7 +84,7 @@ impl CPU {
                         }
                     }
                 }
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     let lines: Vec<&str> = stringy.lines().collect();
                     let max_length =
                         if lines.iter().map(|line| line.len()).max().unwrap_or(10) >= 10 {
@@ -123,7 +123,7 @@ impl CPU {
                 io::stdout().flush().expect("Failed to flush stdout");
             }
             9 => {
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────────────────────╮");
                     println!("│ CPU STDIN               │");
                     println!("│ Reading one character.. │");
@@ -156,7 +156,7 @@ impl CPU {
             33 => self.rflag = !self.rflag,
             40 => {
                 let mut input = String::new();
-                if CONFIG.verbose {
+                if CONFIG.verbose || CONFIG.debug {
                     println!("╭─────────────────────────╮");
                     println!("│ CPU STDIN               │");
                     println!("│ Reading one integer..   │");
