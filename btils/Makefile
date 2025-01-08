@@ -1,10 +1,10 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -o
+CFLAGS = -Wall -Wextra -pedantic
 
-all: bfmt
-
-bfmt: bfmt.c
-	$(CC) $(CFLAGS) bfmt bfmt.c
+all:
+	$(CC) $(CFLAGS) -o bfmt bfmt.c
 
 clean:
 	rm -f bfmt
+
+.PHONY: all
