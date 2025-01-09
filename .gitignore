@@ -9,3 +9,6 @@ basm/.cargo
 belle/*.asm
 basm/*.asm
 bdump/*.asm
+.zed
+.vscode
+.idea
