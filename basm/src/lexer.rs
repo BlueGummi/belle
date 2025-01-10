@@ -134,18 +134,17 @@ impl<'a> Lexer<'a> {
             Some(self.position),
         ))
     }
-
     fn lex_number(&self, complete_number: &str) -> Result<i64, String> {
         let complete_number = complete_number.trim();
-        if complete_number.starts_with("0x") {
-            i64::from_str_radix(&complete_number[2..], 16).map_err(|e| e.to_string())
-        } else if complete_number.starts_with("0b") {
-            i64::from_str_radix(&complete_number[2..], 2).map_err(|e| e.to_string())
+
+        if let Some(stripped) = complete_number.strip_prefix("0x") {
+            i64::from_str_radix(stripped, 16).map_err(|e| e.to_string())
+        } else if let Some(stripped) = complete_number.strip_prefix("0b") {
+            i64::from_str_radix(stripped, 2).map_err(|e| e.to_string())
         } else {
             complete_number.parse::<i64>().map_err(|e| e.to_string())
         }
     }
-
     fn lex_pointer(&mut self, c: char) -> Result<(), Error<'a>> {
         let mut pointer = String::new();
         pointer.push(c);
@@ -221,7 +220,7 @@ impl<'a> Lexer<'a> {
     fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
         let pointer_trimmed = pointer.trim();
         if !pointer_trimmed.contains('$') {
-            if let Ok(mem) = self.lex_number(&pointer_trimmed) {
+            if let Ok(mem) = self.lex_number(pointer_trimmed) {
                 self.tokens.push(Token::MemPointer(mem as i16));
             } else {
                 return self.handle_invalid_character(pointer_trimmed);
@@ -435,7 +434,7 @@ impl<'a> Lexer<'a> {
             let addr_val = self.lex_number(&addr[1..addr.len() - 1]);
             if let Ok(address) = addr_val {
                 self.tokens.push(Token::MemAddr(address as i16));
-            } else if let Err(_) = addr_val {
+            } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer: {}",
                     self.line_number,
@@ -458,7 +457,7 @@ impl<'a> Lexer<'a> {
             let addr_val = self.lex_number(&addr[1..]);
             if let Ok(address) = addr_val {
                 self.tokens.push(Token::MemAddr(address as i16));
-            } else if let Err(_) = addr_val {
+            } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer",
                     self.line_number,

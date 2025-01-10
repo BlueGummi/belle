@@ -291,25 +291,23 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
                             }
                         }
                     }
+                } else if let Some(value) = stripped.strip_prefix("0b") {
+                    i32::from_str_radix(value, 2)
+                        .map_err(|_| format!("Invalid binary number: {}", stripped))
+                        .ok()
+                } else if let Some(value) = stripped.strip_prefix("0x") {
+                    i32::from_str_radix(value, 16)
+                        .map_err(|_| format!("Invalid hexadecimal number: {}", stripped))
+                        .ok()
                 } else {
-                    if stripped.starts_with("0b") {
-                        i32::from_str_radix(&stripped[2..], 2)
-                            .map_err(|_| format!("Invalid binary number: {}", stripped))
-                            .ok()
-                    } else if stripped.starts_with("0x") {
-                        i32::from_str_radix(&stripped[2..], 16)
-                            .map_err(|_| format!("Invalid hexadecimal number: {}", stripped))
-                            .ok()
-                    } else {
-                        match stripped.parse::<i32>() {
-                            Ok(n) => Some(n),
-                            Err(_) => {
-                                let vmap = VARIABLE_MAP.lock().unwrap();
-                                if let Some(&replacement) = vmap.get(stripped.trim()) {
-                                    Some(replacement)
-                                } else {
-                                    None
-                                }
+                    match stripped.parse::<i32>() {
+                        Ok(n) => Some(n),
+                        Err(_) => {
+                            let vmap = VARIABLE_MAP.lock().unwrap();
+                            if let Some(&replacement) = vmap.get(stripped.trim()) {
+                                Some(replacement)
+                            } else {
+                                None
                             }
                         }
                     }
@@ -406,11 +404,11 @@ pub fn process_variables(lines: &[String]) -> Result<(), String> {
             let variable_name = line_before_comment[..eq_index].trim();
             let variable_value = line_before_comment[eq_index + 1..].trim();
 
-            let parsed_value = if variable_value.starts_with("0b") {
-                i32::from_str_radix(&variable_value[2..], 2)
+            let parsed_value = if let Some(stripped) = variable_value.strip_prefix("0b") {
+                i32::from_str_radix(stripped, 2)
                     .map_err(|_| format!("Invalid binary number: {}", variable_value))?
-            } else if variable_value.starts_with("0x") {
-                i32::from_str_radix(&variable_value[2..], 16)
+            } else if let Some(stripped) = variable_value.strip_prefix("0x") {
+                i32::from_str_radix(stripped, 16)
                     .map_err(|_| format!("Invalid hexadecimal number: {}", variable_value))?
             } else {
                 variable_value
