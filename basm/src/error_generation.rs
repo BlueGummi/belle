@@ -64,7 +64,7 @@ impl fmt::Display for Error<'_> {
             .enumerate()
         {
             if current_line + 1 == line_number.try_into().unwrap() {
-                writeln!(f, "{}", line.unwrap().trim().bright_white())?;
+                writeln!(f, "{}", line.unwrap().trim())?;
             }
         }
         if let Some(place) = location {

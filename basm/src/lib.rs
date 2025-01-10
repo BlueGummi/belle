@@ -1,10 +1,14 @@
 mod config;
-mod consts_enums;
 mod encode;
+mod error_generation;
+mod help_generation;
 mod lexer;
+mod tokens;
 mod verify;
 pub use config::*;
-pub use consts_enums::*;
 pub use encode::*;
+pub use error_generation::*;
+pub use help_generation::*;
 pub use lexer::*;
+pub use tokens::*;
 pub use verify::*;

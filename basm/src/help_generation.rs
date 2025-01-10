@@ -1,4 +1,3 @@
-use crate::CONFIG;
 use colored::Colorize;
 #[derive(Debug)]
 // tips
@@ -19,8 +18,6 @@ impl Tip<'_> {
         let tip_message = match self {
             Tip::Try(s) | Tip::Maybe(s) | Tip::NoIdea(s) => s,
         };
-        if CONFIG.tips {
-            println!("{} {} {}", "tip:".yellow(), tip, tip_message);
-        }
+        println!("{} {} {}", "tip:".yellow(), tip, tip_message);
     }
 }

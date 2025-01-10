@@ -63,7 +63,7 @@ fn main() -> io::Result<()> {
         write_to_file = false;
     }
     let mut hlt_seen = false;
-    for line in lines {
+    for line in lines.into_iter() {
         let mut lexer = Lexer::new(&line, line_count);
         let line_before_comment = if line.trim().contains(';') {
             line.trim().split(';').next().unwrap_or(&line)
@@ -135,7 +135,7 @@ fn main() -> io::Result<()> {
                         }
                         Err(err_msg) => {
                             write_to_file = false;
-                            eprintln!("{}", err_msg);
+                            eprintln!("{err_msg}");
                         }
                     }
                 }
@@ -153,7 +153,7 @@ fn main() -> io::Result<()> {
         println!(
             "{}: No HLT instruction found in program {}",
             "Warning".yellow(),
-            CONFIG.source.bright_white()
+            CONFIG.source
         );
     }
 
@@ -169,7 +169,6 @@ fn main() -> io::Result<()> {
             std::process::exit(1);
         }
     }
-
     Ok(())
 }
 
@@ -191,7 +190,7 @@ fn process_includes(input: &String) -> io::Result<Vec<String>> {
         };
 
         let trimmed_content = content.trim();
-        
+
         if trimmed_content.starts_with("#include") {
             let start_quote = trimmed_content.find('"');
             let end_quote = trimmed_content.rfind('"');

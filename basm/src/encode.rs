@@ -25,19 +25,19 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
             Ok(*num)
         }
         Some(Token::Literal(literal)) => Ok((1 << 8) | *literal),
-        Some(Token::SR(sr) | Token::SRCall(sr)) => {
+        Some(Token::SRCall(sr)) => {
             let map = SUBROUTINE_MAP.lock().unwrap();
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
                 Err(format!(
-                    "Subroutine \"{}\" does not exist at line {}",
+                    "Label \"{}\" does not exist at line {}",
                     sr, line_num
                 ))
             }
         }
         Some(Token::MemAddr(n)) => Ok(*n),
-        Some(Token::Label(keyword)) => {
+        Some(Token::Directive(keyword)) => {
             let label_val: i16 = match keyword.as_str() {
                 "start" => 1,
                 "ssp" => 2,
@@ -45,7 +45,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
                 "asciiz" | "word" => 0,
                 _ => {
                     return Err(format!(
-                        "Label not recognized after '.' at line {}",
+                        "Directive not recognized after '.' at line {}",
                         line_num
                     ))
                 }
@@ -136,11 +136,7 @@ pub fn encode_instruction(
             "MOV" => Ok(MOV_OP), // 14
             _ => Err(format!("Instruction not recognized at line {}", line_num)),
         },
-        Token::SR(_) => {
-            ins_type = "subr";
-            Ok(0)
-        }
-        Token::Label(s) => {
+        Token::Directive(s) => {
             match s.as_str() {
                 "asciiz" => ins_type = "ascii",
                 "word" => ins_type = "word",
@@ -221,12 +217,14 @@ pub fn encode_instruction(
         }
         "jwr" => {
             let raw_str = arg1
-                .ok_or_else(|| format!("Missing argument for JWR at line {}", line_num))?
+                .ok_or_else(|| format!("Missing argument for indirect jump at line {}", line_num))?
                 .get_raw();
-            let parsed_int = raw_str
-                .trim()
-                .parse::<i16>()
-                .map_err(|_| format!("Failed to parse integer for JWR at line {}", line_num))?;
+            let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
+                format!(
+                    "Failed to parse integer for indirect jump at line {}",
+                    line_num
+                )
+            })?;
             Ok(Some(vec![
                 (instruction_bin << 12)
                     | 1 << 11
@@ -294,14 +292,24 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
                         }
                     }
                 } else {
-                    match stripped.parse::<i32>() {
-                        Ok(n) => Some(n),
-                        Err(_) => {
-                            let vmap = VARIABLE_MAP.lock().unwrap();
-                            if let Some(&replacement) = vmap.get(stripped.trim()) {
-                                Some(replacement)
-                            } else {
-                                None
+                    if stripped.starts_with("0b") {
+                        i32::from_str_radix(&stripped[2..], 2)
+                            .map_err(|_| format!("Invalid binary number: {}", stripped))
+                            .ok()
+                    } else if stripped.starts_with("0x") {
+                        i32::from_str_radix(&stripped[2..], 16)
+                            .map_err(|_| format!("Invalid hexadecimal number: {}", stripped))
+                            .ok()
+                    } else {
+                        match stripped.parse::<i32>() {
+                            Ok(n) => Some(n),
+                            Err(_) => {
+                                let vmap = VARIABLE_MAP.lock().unwrap();
+                                if let Some(&replacement) = vmap.get(stripped.trim()) {
+                                    Some(replacement)
+                                } else {
+                                    None
+                                }
                             }
                         }
                     }
@@ -309,20 +317,20 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
             });
         }
     }
-    if let Some(num) = start_number {
-        let mut start_location = START_LOCATION
-            .lock()
-            .map_err(|_| "Failed to lock START_LOCATION")?;
-        *start_location = num;
-    } else {
-        let mut start_location = START_LOCATION
-            .lock()
-            .map_err(|_| "Failed to lock START_LOCATION")?;
-        *start_location = 100;
+
+    if let Some(val) = start_number {
+        if val > 511 {
+            return Err(String::from("Start location must not exceed 511"));
+        }
     }
+    let mut start_location = START_LOCATION
+        .lock()
+        .map_err(|_| "Failed to lock START_LOCATION")?;
+
+    *start_location = start_number.unwrap_or(100);
+
     Ok(())
 }
-
 pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
     let mut subroutine_counter = *START_LOCATION
         .lock()
@@ -398,14 +406,19 @@ pub fn process_variables(lines: &[String]) -> Result<(), String> {
             let variable_name = line_before_comment[..eq_index].trim();
             let variable_value = line_before_comment[eq_index + 1..].trim();
 
-            if let Ok(value) = variable_value.parse::<i32>() {
-                variable_map.insert(variable_name.to_string(), value);
+            let parsed_value = if variable_value.starts_with("0b") {
+                i32::from_str_radix(&variable_value[2..], 2)
+                    .map_err(|_| format!("Invalid binary number: {}", variable_value))?
+            } else if variable_value.starts_with("0x") {
+                i32::from_str_radix(&variable_value[2..], 16)
+                    .map_err(|_| format!("Invalid hexadecimal number: {}", variable_value))?
             } else {
-                return Err(format!(
-                    "Invalid variable assignment: {}",
-                    line_before_comment
-                ));
-            }
+                variable_value
+                    .parse::<i32>()
+                    .map_err(|_| format!("Invalid variable assignment: {}", line_before_comment))?
+            };
+
+            variable_map.insert(variable_name.to_string(), parsed_value);
         }
     }
 

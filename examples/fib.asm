@@ -1,12 +1,15 @@
-    randomloc = 140
-.ssp [40]  ; set stack pointer to addr 40
-.sbp [40]  ; set base pointer to addr 40
-.start [41] ; program starts at addr 41
+    randomloc = 0x8C
+.ssp [0x28]  ; set stack pointer to addr 40
+.sbp [0x28]  ; set base pointer to addr 40
+.start [0x29] ; program starts at addr 41
     jmp @start
+
 msg:
     .asciiz "The golden ratio is: "
+
 msg_end:
     .asciiz "Enter how many numbers to calculate: "
+
 start:
     mov r6, 0 ; move 0 into register 6
     mov r4, 1 ; move 1 into register 4
@@ -18,6 +21,7 @@ start:
     int 40
     mov r1, 0
     jmp @fib_loop ; perform a jump into the loop
+
 fib_loop:
     pop [randomloc] ; go random
     mov r5, 0 ; clear register 5
@@ -37,6 +41,7 @@ fib_loop:
     add r1, 1
     add r2, 1
     jmp @fib_loop ; continue Fibonacci calculation
+
 finish:
     pop r4
     add r1, -2
