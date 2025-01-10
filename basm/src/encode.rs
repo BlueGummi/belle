@@ -279,19 +279,13 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
         if line_before_comment.starts_with(".start") {
             start_number = line_before_comment.split_whitespace().nth(1).and_then(|s| {
                 let stripped = s.strip_prefix('$').unwrap_or(s);
-                if stripped.starts_with('[') && stripped.ends_with(']') {
-                    match stripped[1..stripped.len() - 1].parse::<i32>() {
-                        Ok(n) => Some(n),
-                        Err(_) => {
-                            let vmap = VARIABLE_MAP.lock().unwrap();
-                            if let Some(&replacement) = vmap.get(&stripped[1..stripped.len() - 1]) {
-                                Some(replacement)
-                            } else {
-                                None
-                            }
-                        }
-                    }
-                } else if let Some(value) = stripped.strip_prefix("0b") {
+                let stripped = s.strip_prefix('[').unwrap_or(stripped);
+                let stripped = if stripped.ends_with(']') {
+                    &stripped[0..stripped.len() - 1]
+                } else {
+                    stripped
+                };
+                if let Some(value) = stripped.strip_prefix("0b") {
                     i32::from_str_radix(value, 2)
                         .map_err(|_| format!("Invalid binary number: {}", stripped))
                         .ok()
