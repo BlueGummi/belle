@@ -61,7 +61,10 @@ impl<'a> Lexer<'a> {
                     self.position += 1;
                     self.lex_memory_address(c)?;
                 }
-                '.' => self.lex_directive()?,
+                '.' => {
+                    self.position += 1;
+                    self.lex_directive()?;
+                }
                 '\'' => {
                     self.position += 1;
                     self.lex_ascii()?;
