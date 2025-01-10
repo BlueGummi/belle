@@ -28,8 +28,7 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 ## [Further documentation](https://bluegummi.github.io/belle)
 
 ### BELLE and the BELLE utilities in action:
-![BELLE Usage GIF](https://github.com/BlueGummi/belle/blob/master/site/src/content/docs/belle-usage.gif)
-
+[![asciicast](https://asciinema.org/a/697734.svg)](https://asciinema.org/a/697734)
 
 ## Naming
 
