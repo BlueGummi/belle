@@ -1,7 +1,7 @@
     randomloc = 0x8C
 .ssp [0x28]  ; set stack pointer to addr 40
 .sbp [0x28]  ; set base pointer to addr 40
-.start [0x29] ; program starts at addr 41
+.start $0x29 ; program starts at addr 41
     jmp @start
 
 msg:
