@@ -43,9 +43,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
 
         if (colors) {
-            printf("%s&%d%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
+            printf("%s&[%d]%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
         } else {
-            printf("&%d\n", memaddr);
+            printf("&[%d]\n", memaddr);
         }
     } break;
 
