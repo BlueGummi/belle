@@ -23,7 +23,7 @@ impl<'a> Lexer<'a> {
         while let Some(c) = self.chars.next() {
             self.position += 1;
             match c {
-                ' ' => continue,
+                ' ' | ']' => continue,
                 '\t' => {
                     self.position += 3;
                     continue;
@@ -168,6 +168,11 @@ impl<'a> Lexer<'a> {
                 pointer.push(self.chars.next().unwrap());
                 false
             }
+            Some(&'[') => {
+                self.position += 1;
+                pointer.push(self.chars.next().unwrap());
+                false
+            }
             _ => {
                 self.position += 1;
                 pointer.push(self.chars.next().unwrap());
@@ -186,7 +191,7 @@ impl<'a> Lexer<'a> {
         if is_reg {
             self.handle_register(pointer)?;
         } else {
-            self.handle_memory(pointer)?;
+            self.handle_memory(pointer[1..].to_string())?;
         }
         Ok(())
     }
@@ -221,17 +226,20 @@ impl<'a> Lexer<'a> {
     }
 
     fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
-        let pointer_trimmed = pointer.trim();
-        if !pointer_trimmed.contains('$') {
-            if let Ok(mem) = self.lex_number(pointer_trimmed) {
-                self.tokens.push(Token::MemPointer(mem as i16));
-            } else {
-                return self.handle_invalid_character(pointer_trimmed);
-            }
-            return Ok(());
-        }
-        if pointer_trimmed.len() > 2 {
-            if let Ok(mem) = self.lex_number(&pointer_trimmed[2..]) {
+        let pointer = pointer.trim();
+
+        let pointer_trimmed = if pointer.starts_with('$') || pointer.starts_with('[') {
+            &pointer[1..]
+        } else {
+            pointer
+        };
+        let pointer_trimmed = if pointer_trimmed.ends_with(']') {
+            &pointer_trimmed[0..pointer_trimmed.len() - 1]
+        } else {
+            pointer_trimmed
+        };
+        if pointer_trimmed.len() > 1 {
+            if let Ok(mem) = self.lex_number(&pointer_trimmed) {
                 self.tokens.push(Token::MemPointer(mem as i16));
             } else {
                 return self.handle_invalid_character(pointer_trimmed);
@@ -336,7 +344,7 @@ impl<'a> Lexer<'a> {
         }
 
         while let Some(&next) = self.chars.peek() {
-            if next.is_ascii_digit() || next.is_alphanumeric() {
+            if next.is_ascii_digit() || next.is_alphanumeric() || next == '_' {
                 number.push(self.chars.next().unwrap());
             } else {
                 break;
