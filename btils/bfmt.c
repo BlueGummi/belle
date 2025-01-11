@@ -1,5 +1,6 @@
 #include "bfmt_utils.c"
 
+
 void trim_and_format_line(char *line, char *formatted_line, size_t max_indentation, int use_tabs) {
     char *lineclone = clone_string(line);
     size_t leading_spaces = 0;
@@ -40,7 +41,7 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
         if (use_tabs) {
             sprintf(formatted_line, "\t%s", trim(line));
         } else {
-            sprintf(formatted_line, "%*s%s", (int) max_indentation, "", trim(line));
+            sprintf(formatted_line, "%*s%s", (int)max_indentation, "", trim(line));
         }
     }
     free(lineclone);
@@ -60,7 +61,7 @@ void process_file(FILE *input_file, FILE *output_file, size_t max_indentation, i
 int main(int argc, char *argv[]) {
     size_t max_indentation = DEFAULT_MAX_INDENTATION;
     int use_tabs = 0;
-    char* files[MAX_FILES];
+    char *files[MAX_FILES];
     int file_count = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
 
     if (file_count == 0 && isatty(STDIN_FILENO)) {
         print_help(argv[0]);
-	return EXIT_SUCCESS;
+        return EXIT_SUCCESS;
     } else if (file_count == 0) {
         process_file(stdin, stdout, max_indentation, use_tabs);
     } else {
