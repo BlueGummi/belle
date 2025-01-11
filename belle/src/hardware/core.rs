@@ -109,7 +109,12 @@ impl CPU {
                     )
                     .only_err()
                     .to_string();
-                    self.pmem = true;
+
+                    if !CONFIG.no_print_memory {
+                        self.pmem = true;
+                    } else {
+                        self.pmem = false;
+                    }
                     if CONFIG.pretty || CONFIG.verbose {
                         println!("{self}");
                     }
@@ -125,7 +130,12 @@ impl CPU {
                 self.err = true;
                 self.errmsg = e.only_err().to_string();
                 self.running = false;
-                self.pmem = true;
+
+                if !CONFIG.no_print_memory {
+                    self.pmem = true;
+                } else {
+                    self.pmem = false;
+                }
                 if CONFIG.pretty || CONFIG.verbose {
                     println!("{self}");
                 }
@@ -165,6 +175,8 @@ impl CPU {
             }
             if !CONFIG.no_print_memory {
                 self.pmem = true;
+            } else {
+                self.pmem = false;
             }
             if CONFIG.pretty ^ CONFIG.verbose {
                 println!("{self}");

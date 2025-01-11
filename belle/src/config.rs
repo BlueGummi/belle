@@ -39,7 +39,7 @@ pub struct Cli {
     #[clap(short = 'w', long, default_value_t = false)]
     pub write: bool,
 
-    /// Write crash to file
+    /// Do not print memory
     #[clap(short = 'n', long, default_value_t = false)]
     pub no_print_memory: bool,
 }
