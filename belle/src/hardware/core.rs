@@ -161,7 +161,9 @@ impl CPU {
                 println!("│ {} │", "Halting...".bold().white());
                 println!("╰────────────╯");
             }
-            self.pmem = true;
+            if !CONFIG.fuzz {
+                self.pmem = true;
+            }
             if CONFIG.pretty ^ CONFIG.verbose {
                 println!("{self}");
             }
