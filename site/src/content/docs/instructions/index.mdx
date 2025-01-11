@@ -603,6 +603,10 @@ Please refer to the [encoding](../encoding) document for more information about 
     The encoding is exactly the same as `LD`, however rather than loading the value at an address, it simply places the address into a register.
 
 
+    Compatible **LHS** argument types: Register
+
+    Compatible **RHS** argument types: Memory address
+
     Flags affected: None
 
     | Name | Arguments | Description | Use case | Example |
@@ -620,5 +624,5 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
         ```go
-        // 😛
-        ```
+        lhs := rhs // but this only handles addresses
+	```
