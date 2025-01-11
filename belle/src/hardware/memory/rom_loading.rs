@@ -28,21 +28,21 @@ impl CPU {
 
             counter += 1;
         }
-        self.shift_memory();
+        self.shift_memory()?;
         self.pc = self.starts_at;
         Ok(())
     }
 
-    fn shift_memory(&mut self) {
+    fn shift_memory(&mut self) -> Result<(), EmuError> {
         if let Some(first_val) = self.memory.iter().position(|&e| e.is_some()) {
             if self.pc == first_val as u16 {
-                return;
+                return Ok(());
             }
         }
         let some_count = self.memory.iter().filter(|&&e| e.is_some()).count();
 
         if some_count as u32 + u32::from(self.starts_at) > MEMORY_SIZE.try_into().unwrap() {
-            eprintln!("{}", EmuError::MemoryOverflow());
+            return Err(EmuError::MemoryOverflow());
         }
 
         let mut new_memory = Box::new([None; MEMORY_SIZE]);
@@ -57,5 +57,6 @@ impl CPU {
 
         std::mem::swap(&mut self.memory, &mut new_memory);
         self.pc = self.starts_at;
+        Ok(())
     }
 }
