@@ -35,13 +35,13 @@ pub struct Cli {
     #[clap(short = 'p', long, default_value_t = false)]
     pub pretty: bool,
 
-    /// Fuzzing mode
-    #[clap(short = 'f', long, default_value_t = false)]
-    pub fuzz: bool,
-
     /// Write crash to file
     #[clap(short = 'w', long, default_value_t = false)]
     pub write: bool,
+
+    /// Write crash to file
+    #[clap(short = 'n', long, default_value_t = false)]
+    pub no_print_memory: bool,
 }
 pub fn declare_config() -> Cli {
     Cli::try_parse().unwrap_or_else(|_| {
@@ -62,8 +62,8 @@ pub fn declare_config() -> Cli {
                 quiet: false,
                 time_delay: None,
                 pretty: false,
-                fuzz: false,
                 write: false,
+                no_print_memory: false,
             }
         }
         #[cfg(fuzzing)]
@@ -75,8 +75,8 @@ pub fn declare_config() -> Cli {
                 quiet: false,
                 time_delay: None,
                 pretty: false,
-                fuzz: true,
                 write: false,
+                no_print_memory: true,
             };
         }
     })

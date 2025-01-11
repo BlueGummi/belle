@@ -1,4 +1,3 @@
-use crate::config::CONFIG;
 use crate::CPU;
 use crate::*;
 use colored::*;
@@ -142,7 +141,7 @@ impl fmt::Display for CPU {
         )?;
         let footer = format!("╰{}┴{}┴{}┴{}┴{}┴{}╯", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
-        if CONFIG.pretty || self.pmem {
+        if self.pmem {
             writeln!(f, "╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)?;
             writeln!(
                 f,

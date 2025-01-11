@@ -33,6 +33,7 @@ pub struct CPU {
     pub debugging: bool,
     pub errmsg: String,
     pub pmem: bool,
+    pub fuzz: bool,
 }
 
 impl Default for CPU {
@@ -70,6 +71,7 @@ impl CPU {
             debugging: false,
             errmsg: String::from(""),
             pmem: false,
+            fuzz: false,
         }
     }
 
@@ -161,7 +163,7 @@ impl CPU {
                 println!("│ {} │", "Halting...".bold().white());
                 println!("╰────────────╯");
             }
-            if !CONFIG.fuzz {
+            if !CONFIG.no_print_memory {
                 self.pmem = true;
             }
             if CONFIG.pretty ^ CONFIG.verbose {

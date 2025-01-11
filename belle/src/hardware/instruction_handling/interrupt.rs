@@ -4,7 +4,7 @@ use std::io::{self, Read, Write};
 
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
-        if CONFIG.fuzz {
+        if self.fuzz {
             return Ok(());
         }
         let code = self.get_value(arg)? as u16;
