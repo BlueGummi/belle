@@ -16,7 +16,7 @@ pub const MUL_OP: i16 = 0b1011; // we need this
 pub const PUSH_OP: i16 = 0b1100; // we need this
 pub const INT_OP: i16 = 0b1101; // we need this
 pub const MOV_OP: i16 = 0b1110; // we need this
-pub const NOP_OP: i16 = 0b1111; // funny
+pub const LEA_OP: i16 = 0b1111; // funny
 
 pub enum Argument {
     Register(i16),
@@ -45,7 +45,7 @@ pub enum Instruction {
     PUSH(Argument),
     INT(Argument),
     MOV(Argument, Argument),
-    NOP,
+    LEA(Argument, Argument),
 }
 
 impl fmt::Display for Argument {
@@ -81,7 +81,7 @@ impl fmt::Display for Instruction {
             Instruction::PUSH(arg) => write!(f, "PUSH {arg}"),
             Instruction::INT(arg) => write!(f, "INT {arg}"),
             Instruction::MOV(arg1, arg2) => write!(f, "MOV {arg1}, {arg2}"),
-            Instruction::NOP => write!(f, "NOP"),
+            Instruction::LEA(arg1, arg2) => write!(f, "LEA {arg1}, {arg2}"),
         }
     }
 }
@@ -306,7 +306,10 @@ impl CPU {
             PUSH_OP => PUSH(part),
             INT_OP => INT(Literal(source)),
             MOV_OP => MOV(Register(destination), part),
-            NOP_OP => NOP,
+            LEA_OP => {
+                let part = self.ir & 0b111111111;
+                LEA(Register(destination), MemAddr(part))
+            }
             _ => {
                 eprintln!(
                     "Cannot parse this. Code should be unreachable. {} line {}",

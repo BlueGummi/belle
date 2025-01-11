@@ -146,23 +146,12 @@ void print_output(Instruction *ins) {
         print_operation(op, ins->destination, colors);
     }
 
-    if (strcmp(op, "nop") == 0) {
-        printf("\n");
-        return;
-    }
-
     bool two_reg_args =
         (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||
          strcmp(op, "mul") == 0 || strcmp(op, "mov") == 0);
 
     if (two_reg_args) {
         print_two_reg_args(ins, colors);
-    } else if (strcmp(op, "sr") == 0) {
-        if (colors) {
-            printf("%sasdfnop%s\n", ANSI_GREEN, ANSI_RESET);
-        } else {
-            printf("%snop\n", op);
-        }
     } else if (strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0) {
         print_jump_instruction(ins, colors);
     } else if (strcmp(op, "ret") == 0) {
@@ -175,7 +164,7 @@ void print_output(Instruction *ins) {
         }
     } else if (strcmp(op, "hlt") == 0) {
         print_hlt_instruction(ins, colors);
-    } else if (strcmp(op, "ld") == 0) {
+    } else if (strcmp(op, "ld") == 0 || strcmp(op, "lea") == 0) {
         if (colors) {
             printf("%sr%d%s, ", ANSI_YELLOW, ins->destination, ANSI_RESET);
         } else {

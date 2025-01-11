@@ -596,26 +596,27 @@ Please refer to the [encoding](../encoding) document for more information about 
         lhs := rhs // we'll ignore segfaults
         ```
 
-## NOP - No operation
+## LEA - Load effective address
 
-    `NOP` is an instruction that does *absolutely nothing* - or as close to nothing as possible - and continues the program.
+    `LEA` is the Load Effective Address instruction that loads a memory address into a register instead of a value.
 
-    In BELLE, the emulated `NOP` instruction calls a *real* `NOP` instruction via *inline assembly*.
+    The encoding is exactly the same as `LD`, however rather than loading the value at an address, it simply places the address into a register.
+
 
     Flags affected: None
 
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | NOP  | 0 | NO-OP | Timing alignments | `nop ; do nothing` |
+    | LEA  | 2 | Load Effective Address | Loading an address for an indirect jump | `lea r0, [33]` |
 
 
     #### Binary encoding
 
-        Instruction: `nop`
+        Instruction: `lea r3, [42]`
 
-        | Opcode   | Rest of instruction |
-        | :-----   | :-----------------: |
-        | `[1111]` | `[000000000000]`  |
+        | Opcode   | LHS     |  Rest of instruction |
+        | :-----   | :----   | :-----------------: |
+        | `[1111]` | `[011]` | `[000101010]`   |
 
     #### Pseudocode representation
         ```go

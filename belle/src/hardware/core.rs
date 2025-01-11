@@ -1,17 +1,8 @@
 use crate::{config::CONFIG, Argument::*, Instruction::*, *};
 use colored::Colorize;
-use std::arch::asm;
 use std::{thread, time::Duration};
 
 pub const MEMORY_SIZE: usize = 65536;
-
-macro_rules! trust_me {
-    ($input:expr) => {
-        unsafe {
-            asm!($input);
-        }
-    };
-}
 
 #[derive(Debug)]
 pub struct CPU {
@@ -202,11 +193,7 @@ impl CPU {
             PUSH(arg) => self.handle_push(arg)?,
             INT(arg) => self.handle_int(arg)?,
             MOV(arg1, arg2) => self.handle_mov(arg1, arg2)?,
-            NOP => {
-                // SAFETY: NOP
-                trust_me!("nop");
-                self.pc += 1;
-            } // NOP
+            LEA(arg1, arg2) => self.handle_lea(arg1, arg2)?,
         }
         Ok(())
     }

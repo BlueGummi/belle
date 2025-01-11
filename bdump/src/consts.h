@@ -21,7 +21,7 @@
 #define PUSH_OP 0b1100
 #define INT_OP 0b1101
 #define MOV_OP 0b1110
-#define NOP_OP 0b1111
+#define LEA_OP 0b1111
 
 #define ANSI_RESET "\033[0m"
 #define ANSI_BOLD "\033[1m"

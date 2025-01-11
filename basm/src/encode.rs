@@ -67,14 +67,6 @@ pub fn encode_instruction(
     let mut ins_type = "default";
     let instruction_bin = match ins {
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
-            "SSP" => {
-                ins_type = "sp";
-                Ok(RET_OP << 1 | 1)
-            }
-            "SBP" => {
-                ins_type = "sp";
-                Ok(NOP_OP << 1 | 1)
-            }
             "HLT" => Ok(HLT_OP), // 0
             "ADD" => Ok(ADD_OP), // 1
             "JO" => {
@@ -95,7 +87,10 @@ pub fn encode_instruction(
             }
             "DIV" => Ok(DIV_OP),        // 4
             "RET" | "ET" => Ok(RET_OP), // 5
-            "LD" => Ok(LD_OP),          // 6
+            "LD" => {
+                ins_type = "ld";
+                Ok(LD_OP) // 6
+            }
             "ST" => {
                 if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
                     ins_type = "sti";
@@ -132,7 +127,10 @@ pub fn encode_instruction(
                 ins_type = "one_arg";
                 Ok(INT_OP) // 13
             }
-            "NOP" => Ok(NOP_OP),
+            "LEA" => {
+                ins_type = "ld";
+                Ok(LEA_OP)
+            }
             "MOV" => Ok(MOV_OP), // 14
             _ => Err(format!("Instruction not recognized at line {}", line_num)),
         },
@@ -231,12 +229,6 @@ pub fn encode_instruction(
                     | argument_to_binary(Some(&Token::Register(parsed_int)), line_num)?,
             ]))
         }
-        "sp" => {
-            Ok(Some(vec![
-                (instruction_bin << 11) | arg1.unwrap().get_num(),
-            ])) // this was verified in verify.rs
-                // unwrapping is safe
-        }
         "ascii" => {
             if arg1.is_none() {
                 return Err(format!("Asciiz argument is empty, line {}", line_num));
@@ -252,6 +244,16 @@ pub fn encode_instruction(
                 return Err(format!("Word argument is empty, line {}", line_num));
             }
             Ok(Some(vec![arg1.unwrap().get_num()]))
+        }
+        "ld" => {
+            if arg1.is_none() || arg2.is_none() {
+                return Err(format!("LEA/LD argument is empty, line {}", line_num));
+            }
+            let arg2_bin = argument_to_binary(arg2, line_num)?;
+            let arg1_bin = argument_to_binary(arg1, line_num)?;
+            Ok(Some(vec![
+                (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
+            ]))
         }
         _ => Err(format!(
             "Instruction type not recognized at line {}",

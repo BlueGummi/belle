@@ -46,7 +46,7 @@ pub fn verify(
 ) -> Result<(), String> {
     let instructions = [
         "ADD", "HLT", "JO", "POP", "DIV", "RET", "LD", "ST", "JMP", "JZ", "PUSH", "CMP", "MUL",
-        "INT", "MOV",
+        "INT", "MOV", "LEA",
     ];
     let raw_token = ins.get_raw().to_uppercase();
 
@@ -78,7 +78,7 @@ fn check_instruction(
 ) -> Result<(), String> {
     match raw_token {
         "HLT" | "RET" => only_none(arg1, arg2, raw_token, line_num),
-        "LD" => {
+        "LD" | "LEA" => {
             only_two(arg1, arg2, raw_token, line_num).and_then(|_| ld_args(arg1, arg2, line_num))
         }
         "ST" => {
@@ -161,13 +161,13 @@ fn only_one(
 fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<(), String> {
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err(format!(
-            "LD requires LHS to be a Register at line {}",
+            "LD/LEA requires LHS to be a Register at line {}",
             line_num
         ));
     }
-    if !arg2.is_some_and(|tok| tok.is_memory_address()) {
+    if !arg2.is_some_and(|tok| tok.is_memory_address() || tok.is_srcall()) {
         return Err(format!(
-            "LD requires RHS to be a Memory address at line {}",
+            "LD/LEA requires RHS to be a Memory address at line {}",
             line_num
         ));
     }

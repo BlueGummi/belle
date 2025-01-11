@@ -60,7 +60,7 @@ macro_rules! test_instruction {
             "PUSH" => PUSH(parse_argument($arg1)),
             "INT" => INT(parse_argument($arg1)),
             "MOV" => MOV(parse_argument($arg1), parse_argument($arg2)),
-            "NOP" => NOP,
+            "LEA" => LEA(parse_argument($arg1), parse_argument($arg2)),
             _ => panic!("cheep cheep"),
         };
 

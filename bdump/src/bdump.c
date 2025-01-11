@@ -74,22 +74,22 @@ int main(int argc, char *argv[]) {
 char *match_opcode(Instruction *s) {
     char *opcode;
     switch (s->opcode) {
-    case HLT_OP : opcode = "hlt"  ; break;
-    case ADD_OP : opcode = "add"  ; break;
-    case JO_OP  : opcode = "jo"   ; break;
-    case POP_OP : opcode = "pop"  ; break;
-    case DIV_OP : opcode = "div"  ; break;
-    case RET_OP : opcode = "ret"  ; break;
-    case LD_OP  : opcode = "ld"   ; break;
-    case ST_OP  : opcode = "st"   ; break;
-    case JMP_OP : opcode = "jmp"  ; break;
-    case JZ_OP  : opcode = "jz"   ; break;
-    case CMP_OP : opcode = "cmp"  ; break;
-    case MUL_OP : opcode = "mul"  ; break;
-    case PUSH_OP: opcode = "push" ; break;
-    case INT_OP : opcode = "int"  ; break;
-    case MOV_OP : opcode = "mov"  ; break;
-    case 0b1111 : opcode = "nop"  ; break;
+    case HLT_OP: opcode = "hlt"; break;
+    case ADD_OP: opcode = "add"; break;
+    case JO_OP: opcode = "jo"; break;
+    case POP_OP: opcode = "pop"; break;
+    case DIV_OP: opcode = "div"; break;
+    case RET_OP: opcode = "ret"; break;
+    case LD_OP: opcode = "ld"; break;
+    case ST_OP: opcode = "st"; break;
+    case JMP_OP: opcode = "jmp"; break;
+    case JZ_OP: opcode = "jz"; break;
+    case CMP_OP: opcode = "cmp"; break;
+    case MUL_OP: opcode = "mul"; break;
+    case PUSH_OP: opcode = "push"; break;
+    case INT_OP: opcode = "int"; break;
+    case MOV_OP: opcode = "mov"; break;
+    case LEA_OP: opcode = "lea"; break;
     default: puts("OPCODE not recognized."); exit(1);
     }
     return opcode;
