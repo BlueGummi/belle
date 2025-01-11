@@ -4,12 +4,12 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.19", features = ["derive"] }
-once_cell = "1.20.1"
 ctrlc = "3.4.5"
-colored = "2.1.0"
 crossterm = "0.28.1"
 ahash = "0.8.11"
+clap = { version = "4.5.26", features = ["derive"] }
+once_cell = "1.20.2"
+colored = "3.0.0"
 
 [lints.rust]
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(fuzzing)'] }
