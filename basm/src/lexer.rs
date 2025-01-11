@@ -109,7 +109,7 @@ impl<'a> Lexer<'a> {
                 '\'' => {
                     if ascii_char.is_empty() {
                         return Err(Error::InvalidSyntax(
-                            "ASCII  value is empty",
+                            "ASCII value is empty",
                             self.line_number,
                             Some(self.position),
                         ));
@@ -362,7 +362,7 @@ impl<'a> Lexer<'a> {
         };
 
         let stored_value = if num_value < 0 {
-            let positive_value = num_value.unsigned_abs() as u8;
+            let positive_value = num_value.unsigned_abs() as u16;
             ((positive_value & 0x7F) | 0x80) as i16
         } else {
             num_value as i16
@@ -453,7 +453,7 @@ impl<'a> Lexer<'a> {
             }
         } else {
             while let Some(&next) = self.chars.peek() {
-                if next.is_alphanumeric() {
+                if next.is_alphanumeric() || next == '_' {
                     addr.push(self.chars.next().unwrap());
                 } else {
                     break;
