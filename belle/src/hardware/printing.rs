@@ -10,15 +10,12 @@ impl fmt::Display for CPU {
         let line = "─".repeat(times);
         let midpart = format!("├{}┼{}┼{}┼{}┴{}┼{}┤\n", line, line, line, line, line, line);
         if !self.err {
-            writeln!(f, "{}", format!("╭{}────────╮", line))?;
+            writeln!(f, "╭{}────────╮", line)?;
         } else {
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "╭{}─────────┬{}─{}─{}─{}────╮",
-                    line, line, line, line, line
-                )
+                "╭{}─────────┬{}─{}─{}─{}────╮",
+                line, line, line, line, line
             )?;
         }
         let exit = if self.running && !self.err {
@@ -50,20 +47,14 @@ impl fmt::Display for CPU {
         if !self.err {
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "├{}────────┴{}─{}─{}─{}─────╮",
-                    line, line, line, line, line
-                )
+                "├{}────────┴{}─{}─{}─{}─────╮",
+                line, line, line, line, line
             )?;
         } else {
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "├{}─────────┴{}─{}─{}─{}────┤",
-                    line, line, line, line, line
-                )
+                "├{}─────────┴{}─{}─{}─{}────┤",
+                line, line, line, line, line
             )?;
         }
         write!(f, "│{}:", " Instruction".bold())?;
@@ -73,11 +64,7 @@ impl fmt::Display for CPU {
         writeln!(f, "{}│", " ".repeat(inslen))?;
         let mut register_lines = Vec::new();
 
-        writeln!(
-            f,
-            "{}",
-            format!("├{}┬{}┬{}┬{}┬{}┬{}┤", line, line, line, line, line, line)
-        )?;
+        writeln!(f, "├{}┬{}┬{}┬{}┬{}┬{}┤", line, line, line, line, line, line)?;
 
         for (i, &val) in self.int_reg.iter().enumerate() {
             register_lines.push(format!(
@@ -156,11 +143,7 @@ impl fmt::Display for CPU {
         let footer = format!("╰{}┴{}┴{}┴{}┴{}┴{}╯", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
         if CONFIG.pretty || self.pmem {
-            writeln!(
-                f,
-                "{}",
-                format!("╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
-            )?;
+            writeln!(f, "╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)?;
             writeln!(
                 f,
                 "│ {}{}│",
@@ -169,11 +152,8 @@ impl fmt::Display for CPU {
             )?;
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "├─────────┬────────{}─────{}─────{}─{}┤",
-                    line, line, line, line
-                )
+                "├─────────┬────────{}─────{}─────{}─{}┤",
+                line, line, line, line
             )?;
             writeln!(
                 f,
@@ -184,11 +164,8 @@ impl fmt::Display for CPU {
             )?;
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "├─────────┼────────{}─────{}─────{}─{}┤",
-                    line, line, line, line
-                )
+                "├─────────┼────────{}─────{}─────{}─{}┤",
+                line, line, line, line
             )?;
             for (index, element) in self.memory.iter().enumerate() {
                 if let Some(value) = element {
@@ -204,10 +181,11 @@ impl fmt::Display for CPU {
                     for _ in displayed.len()..50 {
                         write!(f, " ")?;
                     }
+                    let binary_string = format!("{:016b}", value).bright_white();
                     write!(
                         f,
                         " - {} ({})",
-                        format!("{:016b}", value).bright_white(),
+                        binary_string,
                         value.to_string().bright_green()
                     )?;
 
@@ -308,11 +286,8 @@ impl fmt::Display for CPU {
             }
             writeln!(
                 f,
-                "{}",
-                format!(
-                    "╰─────────┴────────{}─────{}─────{}─{}╯",
-                    line, line, line, line
-                )
+                "╰─────────┴────────{}─────{}─────{}─{}╯",
+                line, line, line, line
             )?;
         }
 
@@ -324,17 +299,11 @@ impl CPU {
     pub fn pmem(&mut self) {
         let times = 12;
         let line = "─".repeat(times);
-        println!(
-            "{}",
-            format!("╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)
-        );
+        println!("╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line);
         println!("│ {}{}│", "MEMORY".bright_purple().bold(), " ".repeat(70));
         println!(
-            "{}",
-            format!(
-                "├─────────┬────────{}─────{}─────{}─{}┤",
-                line, line, line, line
-            )
+            "├─────────┬────────{}─────{}─────{}─{}┤",
+            line, line, line, line
         );
         println!(
             "│ {} │ {}   {}│",
@@ -343,11 +312,8 @@ impl CPU {
             " ".repeat(58)
         );
         println!(
-            "{}",
-            format!(
-                "├─────────┼────────{}─────{}─────{}─{}┤",
-                line, line, line, line
-            )
+            "├─────────┼────────{}─────{}─────{}─{}┤",
+            line, line, line, line
         );
         for (index, element) in self.memory.iter().enumerate() {
             if let Some(value) = element {
@@ -461,11 +427,8 @@ impl CPU {
             }
         }
         println!(
-            "{}",
-            format!(
-                "╰─────────┴────────{}─────{}─────{}─{}╯",
-                line, line, line, line
-            )
+            "╰─────────┴────────{}─────{}─────{}─{}╯",
+            line, line, line, line
         );
     }
 }

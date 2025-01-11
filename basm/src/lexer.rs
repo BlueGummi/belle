@@ -238,8 +238,8 @@ impl<'a> Lexer<'a> {
             pointer_trimmed
         };
         if pointer_trimmed.len() > 1 {
-            if let Ok(mem) = self.lex_number(&pointer_trimmed) {
-                self.tokens.push(Token::MemPointer(mem as i16));
+            if let Ok(mem) = self.lex_number(pointer_trimmed) {
+                self.tokens.push(Token::MemPointer(mem));
             } else {
                 return self.handle_invalid_character(pointer_trimmed);
             }
@@ -351,12 +351,12 @@ impl<'a> Lexer<'a> {
         }
         let num_value = if !number.contains('#') {
             if let Ok(value) = self.lex_number(&number) {
-                value as i16
+                value
             } else {
                 return self.handle_invalid_character(&number);
             }
         } else if let Ok(value) = self.lex_number(&number[1..]) {
-            value as i16
+            value
         } else {
             return self.handle_invalid_character(&number[1..]);
         };
@@ -365,9 +365,9 @@ impl<'a> Lexer<'a> {
             let positive_value = num_value.unsigned_abs() as u8;
             ((positive_value & 0x7F) | 0x80) as i16
         } else {
-            num_value as i16
+            num_value
         };
-        self.tokens.push(Token::Literal(i16::from(stored_value)));
+        self.tokens.push(Token::Literal(stored_value));
         Ok(())
     }
     fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
@@ -443,7 +443,7 @@ impl<'a> Lexer<'a> {
             }
             let addr_val = self.lex_number(&addr[1..addr.len() - 1]);
             if let Ok(address) = addr_val {
-                self.tokens.push(Token::MemAddr(address as i16));
+                self.tokens.push(Token::MemAddr(address));
             } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer: {}",
@@ -466,7 +466,7 @@ impl<'a> Lexer<'a> {
 
             let addr_val = self.lex_number(&addr[1..]);
             if let Ok(address) = addr_val {
-                self.tokens.push(Token::MemAddr(address as i16));
+                self.tokens.push(Token::MemAddr(address));
             } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer",

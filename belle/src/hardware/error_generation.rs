@@ -72,11 +72,7 @@ impl fmt::Display for UnrecoverableError {
         }
         if CONFIG.debug || CONFIG.verbose {
             let line = "─".repeat(12);
-            writeln!(
-                f,
-                "\n{}",
-                format!("╭{}──────────{}─{}────╮", line, line, line)
-            )?;
+            writeln!(f, "\n╭{}──────────{}─{}────╮", line, line, line)?;
             let mut cpu = CPU::new();
             cpu.ir = ir;
             write!(f, "│{}:", " Instruction".bold())?;
@@ -93,11 +89,7 @@ impl fmt::Display for UnrecoverableError {
                 location.to_string().bold()
             )?;
             writeln!(f, "{}│", " ".repeat(inslen))?;
-            writeln!(
-                f,
-                "{}",
-                format!("╰{}──────────{}─{}────╯", line, line, line)
-            )?;
+            writeln!(f, "╰{}──────────{}─{}────╯", line, line, line)?;
         }
         Ok(())
     }
