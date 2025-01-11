@@ -137,14 +137,14 @@ impl<'a> Lexer<'a> {
             Some(self.position),
         ))
     }
-    fn lex_number(&self, complete_number: &str) -> Result<i16, String> {
+    fn lex_number(&self, complete_number: &str) -> Result<i32, String> {
         let complete_number = complete_number.trim();
         if let Some(stripped) = complete_number.strip_prefix("0x") {
-            i16::from_str_radix(stripped, 16).map_err(|e| e.to_string())
+            i32::from_str_radix(stripped, 16).map_err(|e| e.to_string())
         } else if let Some(stripped) = complete_number.strip_prefix("0b") {
-            i16::from_str_radix(stripped, 2).map_err(|e| e.to_string())
+            i32::from_str_radix(stripped, 2).map_err(|e| e.to_string())
         } else {
-            complete_number.parse::<i16>().map_err(|e| e.to_string())
+            complete_number.parse::<i32>().map_err(|e| e.to_string())
         }
     }
     fn lex_pointer(&mut self, c: char) -> Result<(), Error<'a>> {
@@ -239,7 +239,7 @@ impl<'a> Lexer<'a> {
         };
         if pointer_trimmed.len() > 1 {
             if let Ok(mem) = self.lex_number(pointer_trimmed) {
-                self.tokens.push(Token::MemPointer(mem));
+                self.tokens.push(Token::MemPointer(mem as i16));
             } else {
                 return self.handle_invalid_character(pointer_trimmed);
             }
@@ -365,7 +365,7 @@ impl<'a> Lexer<'a> {
             let positive_value = num_value.unsigned_abs() as u8;
             ((positive_value & 0x7F) | 0x80) as i16
         } else {
-            num_value
+            num_value as i16
         };
         self.tokens.push(Token::Literal(stored_value));
         Ok(())
@@ -443,7 +443,7 @@ impl<'a> Lexer<'a> {
             }
             let addr_val = self.lex_number(&addr[1..addr.len() - 1]);
             if let Ok(address) = addr_val {
-                self.tokens.push(Token::MemAddr(address));
+                self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer: {}",
@@ -466,7 +466,7 @@ impl<'a> Lexer<'a> {
 
             let addr_val = self.lex_number(&addr[1..]);
             if let Ok(address) = addr_val {
-                self.tokens.push(Token::MemAddr(address));
+                self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
                 return Err(InvalidSyntax(
                     "Error parsing integer",
