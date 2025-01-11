@@ -55,6 +55,9 @@ pub fn verify(
             return check_instruction(&raw_token, arg1, arg2, line_num);
         }
     } else if let Token::Directive(_) = ins {
+        if ins.get_raw() == "word" {
+            return Ok(());
+        }
         if let Some(value) = arg1 {
             if value.get_num() > 511 {
                 return Err(format!(

@@ -137,15 +137,14 @@ impl<'a> Lexer<'a> {
             Some(self.position),
         ))
     }
-    fn lex_number(&self, complete_number: &str) -> Result<i64, String> {
+    fn lex_number(&self, complete_number: &str) -> Result<i16, String> {
         let complete_number = complete_number.trim();
-
         if let Some(stripped) = complete_number.strip_prefix("0x") {
-            i64::from_str_radix(stripped, 16).map_err(|e| e.to_string())
+            i16::from_str_radix(stripped, 16).map_err(|e| e.to_string())
         } else if let Some(stripped) = complete_number.strip_prefix("0b") {
-            i64::from_str_radix(stripped, 2).map_err(|e| e.to_string())
+            i16::from_str_radix(stripped, 2).map_err(|e| e.to_string())
         } else {
-            complete_number.parse::<i64>().map_err(|e| e.to_string())
+            complete_number.parse::<i16>().map_err(|e| e.to_string())
         }
     }
     fn lex_pointer(&mut self, c: char) -> Result<(), Error<'a>> {
@@ -364,9 +363,9 @@ impl<'a> Lexer<'a> {
 
         let stored_value = if num_value < 0 {
             let positive_value = num_value.unsigned_abs() as u8;
-            (positive_value & 0x7F) | 0x80
+            ((positive_value & 0x7F) | 0x80) as i16
         } else {
-            num_value as u8
+            num_value as i16
         };
         self.tokens.push(Token::Literal(i16::from(stored_value)));
         Ok(())
