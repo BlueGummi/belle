@@ -35,7 +35,8 @@ export default defineConfig({
       {
 	label: "Tutorials",
 	items: [
-	  { label: "Hello, world!", slug: "tutorial/tutorial1" },
+	  { label: "Introduction", slug: "tutorial/tutorial1" },
+	  { label: "Hello, world!", slug: "tutorial/tutorial2" },
 	],
       },
     ],
