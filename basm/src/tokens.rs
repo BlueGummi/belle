@@ -1,4 +1,5 @@
 use crate::CONFIG;
+use crate::*;
 use colored::Colorize;
 use std::fmt;
 pub const HLT_OP: i16 = 0b0000; // we need this
@@ -74,16 +75,25 @@ impl Token {
         }
     }
     pub fn get_num(&self) -> i16 {
-        match *self {
-            Token::Register(n) => n,
-            Token::Literal(n) => n,
-            Token::MemAddr(n) => n,
-            Token::RegPointer(n) => n,
-            Token::MemPointer(n) => n,
+        match self {
+            Token::Register(n) => *n,
+            Token::Literal(n) => *n,
+            Token::MemAddr(n) => *n,
+            Token::RegPointer(n) => *n,
+            Token::MemPointer(n) => *n,
+            Token::SRCall(sr) => {
+                let map = SUBROUTINE_MAP.lock().unwrap();
+                if let Some(&address) = map.get(sr) {
+                    address as i16
+                } else {
+                    0
+                }
+            }
             _ => -1,
         }
     }
 }
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if CONFIG.verbose || CONFIG.debug {

@@ -1,6 +1,6 @@
 use crate::Token;
 
-static MMAFAIL: &str = "memory address too large";
+static MMAFAIL: &str = "memory address or address of label too large";
 static LITFAIL: &str = "literal value too large";
 
 impl Token {
@@ -171,14 +171,16 @@ fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<
             line_num
         ));
     }
-    if arg2.unwrap().get_num() > 2047 {
-        return Err(MMAFAIL.to_string());
+    if arg2.unwrap().get_num() > 511 {
+        return Err(format!("{MMAFAIL} on line {line_num}"));
     }
     Ok(())
 }
 
 fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<(), String> {
-    if !arg1.is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address()) {
+    if !arg1
+        .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
+    {
         return Err(format!(
             "ST requires LHS to be a Register pointer or Memory address at line {}",
             line_num
@@ -190,8 +192,8 @@ fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<
             line_num
         ));
     }
-    if arg1.unwrap().get_num() > 2047 {
-        return Err(MMAFAIL.to_string());
+    if arg1.unwrap().get_num() > 255 {
+        return Err(format!("{MMAFAIL} on line {line_num}"));
     }
     Ok(())
 }
@@ -208,7 +210,6 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result
             || tok.is_literal()
             || tok.is_register_pointer()
             || tok.is_memory_address_pointer()
-            || tok.is_srcall()
     }) {
         return Err(format!(
             "MOV requires RHS to be a Register, literal, register pointer, or memory address pointer at line {}",
@@ -216,14 +217,13 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result
         ));
     }
     match arg2 {
-        Some(tok) if tok.is_literal() => {
-            if tok.get_num() > 255 {
-                return Err(LITFAIL.to_string());
-            }
-        }
-        Some(tok) if tok.is_memory_address_pointer() => {
-            if tok.get_num() > 127 {
-                return Err(MMAFAIL.to_string());
+        Some(tok) => {
+            if tok.get_num() > 511 {
+                if !tok.is_memory_address_pointer() {
+                    return Err(LITFAIL.to_string());
+                } else {
+                    return Err(format!("{MMAFAIL} on line {line_num}"));
+                }
             }
         }
         _ => {
@@ -255,7 +255,7 @@ fn push_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
     }
     match arg1 {
         Some(tok) if tok.is_literal() => {
-            if tok.get_num() > 1023 || tok.get_num() < -1023 {
+            if tok.get_num() > 2047 {
                 return Err(LITFAIL.to_string());
             }
         }
@@ -274,8 +274,8 @@ fn jump_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
         ));
     }
     match arg1 {
-        Some(tok) if tok.is_memory_address() && tok.get_num() > 2047 => {
-            return Err(MMAFAIL.to_string());
+        Some(tok) if tok.get_num() > 2047 => {
+            return Err(format!("{MMAFAIL} on line {line_num}"));
         }
         _ => (),
     }

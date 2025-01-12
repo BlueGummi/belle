@@ -14,7 +14,7 @@ So, now that you've seen a little bit of assembly, let's break down the individu
 
 > Disclaimer: As this is the introductory tutorial, it'll **gloss over** the nitty-gritty parts of how computers work in order to provide a simpler, more abstract model. Do note that things will be expanded upon and some simplifications **aren't 100% correct**.
 
-## Part `0b000`. - Motivation
+### Part `0b000`. - Motivation
 
 Before we get started, you may be wondering "Why would I ever learn this language anyways? I already have JavaScript, which has [awesome libraries to check if a number is even](https://www.npmjs.com/package/is-even)!"
 
@@ -33,12 +33,12 @@ For example, lets say you're writing a C++ function to [compute the multiplied p
 Well, somewhere down the line, this will execute an assembly language instruction. Most CPUs have an `add` instruction to perform this arithmetic operation, and on the popular desktop architecture known as x86, this would become
 
 ```asm
-   add eax, edx
+   add eax, edx ; add a value from one place to another place 
 ```
 
 Understanding what happens under the hood of a program is invaluable, as when debugging a faulty program, you'll encounter these assembly instructions and will have to understand what they're doing to debug the code.
 
-## Part `0b001`. - An introduction to assembly and computation
+### Part `0b001`. - An introduction to assembly and computation
 
 To understand how this **mythical**, peculiar, and sometimes *esoteric* "assembly language" functions, we must first understand the concepts behind CPU design and how CPUs and computer memory function internally.
 
