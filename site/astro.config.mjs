@@ -32,6 +32,12 @@ export default defineConfig({
           { label: "Memory", slug: "memory" },
         ],
       },
+      {
+	label: "Tutorials",
+	items: [
+	  { label: "Hello, world!", slug: "tutorial/tutorial1" },
+	],
+      },
     ],
   })],
   devOptions: {
