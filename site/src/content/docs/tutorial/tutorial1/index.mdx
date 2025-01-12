@@ -1,11 +1,69 @@
 ---
 title: Hello, world!
-author: BlueGummi
+author: Gummi 
 ---
-Welcome to BELLE! This set of tutorials will walk you through assembly language programming, and teach you how to write assembly code for the Big Endian, Low Level Emulator, as well as teach you assembly language concepts!
+Welcome to BELLE! 
 
-Let's dive right in and start off with the classic, very original, and super unique, "Hello, world!" program.
+This set of tutorials will walk you through **assembly language programming**, as well as teach you assembly language concepts!
+
+Let's dive right in and start off with the ***very*** original, and super unique, "Hello, world!" program.
 
 <embed src="https://belle-demo.vercel.app/exercises/hello" style="width:100%; height: 350px;"></embed>
 
+So, now that you've seen a little bit of assembly, let's break down the individual parts of this program.
 
+> Disclaimer: As this is the introductory tutorial, it'll **gloss over** the nitty-gritty parts of how computers work in order to provide a simpler, more abstract model. Do note that things will be expanded upon and some simplifications **aren't 100% correct**.
+
+## Part `0b000`. - Motivation
+
+Before we get started, you may be wondering "Why would I ever learn this language anyways? I already have JavaScript, which has [awesome libraries to check if a number is even](https://www.npmjs.com/package/is-even)!"
+
+Well, assembly language is **key** to understanding the internals of the machine. 
+
+And, understanding how a computer works is **vital** to debugging, appreciating, and comprehending what actually goes on when you hit that glorious, blue, rectangular "Run" button in your editor.
+
+Almost everything that runs on the hardware and not inside a virtual machine will be compiled down to assembly language at some point in time.
+
+For example, lets say you're writing a C++ function to [compute the multiplied packed sums of absolute differences](https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-8/mm256-mpsadbw-epu8.html) between two unsigned vector integer variabl- actually, let's say you write a line of code to add two numbers together.
+
+```c
+   int x = b + a;
+```
+
+Well, somewhere down the line, this will execute an assembly language instruction. Most CPUs have an `add` instruction to perform this arithmetic operation, and on the popular desktop architecture known as x86, this would become
+
+```asm
+   add eax, edx
+```
+
+Understanding what happens under the hood of a program is invaluable, as when debugging a faulty program, you'll encounter these assembly instructions and will have to understand what they're doing to debug the code.
+
+## Part `0b001`. - An introduction to assembly and computation
+
+To understand how this **mythical**, peculiar, and sometimes *esoteric* "assembly language" functions, we must first understand the concepts behind CPU design and how CPUs and computer memory function internally.
+
+Every machine, from your laptop to your phone, to even your smart toothbrush and AI-powered sparkling water **has a CPU**.
+
+The CPU is the "Central Processing Unit" of the machine, and performs the **core computation** required in order for a device to function.
+
+There are various different ***CPU Architectures***, or blueprints on how to design a CPU.
+
+Like most things, the CPU has multiple parts. It's got parts to store data, parts to perform math, and even parts to display all your cute cat pictures on the screen.
+
+#### Registers
+
+Arguably, the most important parts of the CPU are the **registers**. Registers on the CPU are used to hold tiny bits of data, and they are **blazingly** fast. 
+
+To put in perspective how fast they are, most modern processors are able to read and write data to registers in ***nanoseconds***. <img src="https://i.imgflip.com/7e296s.jpg?a482328" alt="Description" width="24" height="24" />
+
+For reference, light travels **30 centimeters** (or one foot) in a nanosecond.
+
+Most modern processors and the assembly language for them allow the programmer to access **between 16-64 registers**, depending on the CPU.
+
+However, processors physically have hundreds, if not **thousands** of physical registers, and when you access one through assembly, the processor picks a physical register to use as that register in the code.
+
+For example, in the **x86 architecture** - one of the most common desktop architectures - there are 16 registers available in 64-bit mode, each **given different names**.
+
+BELLE contains 8 registers, numbered 0-7.
+
+In assembly language, registers can be referred to by their name. To refer to any register in the BELLE-ISA, simply write an `r` and the register's number, such as `r0`, or `r7`
