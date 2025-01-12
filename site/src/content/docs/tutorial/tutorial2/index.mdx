@@ -7,4 +7,47 @@ Let's dive right in and start off with the ***very*** original, and super unique
 
 <embed src="https://belle-demo.vercel.app/exercises/hello" style="width:100%; height: 380px;"></embed>
 
-So, now that you've seen a little bit of assembly, let's break down the individual parts of this program.
+#### What's going on here though?
+
+Now that you've seen a little bit of assembly, let's break down the individual parts of this program.
+
+##### Breaking it down
+
+First, let's start with line 1:
+
+```asm
+   lea r0, @hello_start
+```
+
+We can dissect this line into 3 parts.
+
+The first word here is the ***operation***.
+
+```asm
+   lea
+```
+The left hand side (LHS) is the **first operand**.
+
+```asm
+   r0
+```
+
+And lastly, the right hand side is the **second operand**.
+
+```asm
+   @hello_start
+```
+
+##### But what does this mean?
+
+Every machine is capable of executing **instructions**. These instructions manipulate the different components of the machine in simple and basic ways.
+
+Each instruction is composed of the operation and operands, with the operation specifying **what to do** and the operands specifying **what to do it with**.
+
+This instruction in particular is known as the **Load Effective Address** instruction.
+
+When the CPU encounters this, what actually happens is a **memory address** (not the value at an address) is loaded into a register.
+
+In this case, the memory address of a label - we will talk about what labels are later - is loaded into register 0.
+
+
