@@ -7,14 +7,14 @@ msg1:
 msg2:
 .asciiz "Double of your number is: "
 main:
-    mov r0, @msg1
-    mov r1, @msg2
+    lea r0, @msg1
+    lea r1, @msg2
     int 8
     int 40
     mul r0, 2
     mov r2, r0
-    mov r0, @msg2
-    mov r1, @main
+    lea r0, @msg2
+    lea r1, @main
     int 8
     int 2
     hlt

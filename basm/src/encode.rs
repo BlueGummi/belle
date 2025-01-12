@@ -1,4 +1,3 @@
-use crate::Token::*;
 use crate::*;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -18,7 +17,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
         Some(Token::Register(num)) => {
             if *num > 7 {
                 return Err(format!(
-                    "Register number cannot be greater than 7 at line {}",
+                    "Invalid register number at line {}",
                     line_num
                 ));
             }
@@ -188,17 +187,6 @@ pub fn encode_instruction(
         "default" => {
             let arg1_bin = argument_to_binary(arg1, line_num)?;
             let arg2_bin = argument_to_binary(arg2, line_num)?;
-            if let Some(SRCall(_)) = arg2 {
-                if arg2_bin > 127 {
-                    return Err(format!(
-                        "Label memory address too large on instruction on line {}",
-                        line_num
-                    ));
-                }
-                return Ok(Some(vec![
-                    (instruction_bin << 12) | (arg1_bin << 9) | 1 << 8 | arg2_bin,
-                ]));
-            }
             Ok(Some(vec![
                 (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
             ]))

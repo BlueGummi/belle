@@ -63,7 +63,7 @@ finish:
     int 7
     hlt
 early_exit:
-    mov r0, @text
-    mov r1, @msg
+    lea r0, @text
+    lea r1, @msg
     int 8
     hlt
