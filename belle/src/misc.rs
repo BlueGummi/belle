@@ -61,6 +61,11 @@ macro_rules! test_instruction {
             "INT" => INT(parse_argument($arg1)),
             "MOV" => MOV(parse_argument($arg1), parse_argument($arg2)),
             "LEA" => LEA(parse_argument($arg1), parse_argument($arg2)),
+            "JNZ" => JNZ(parse_argument($arg1)),
+            "JR" => JR(parse_argument($arg1)),
+            "JNO" => JNO(parse_argument($arg1)),
+            "JL" => JL(parse_argument($arg1)),
+            "JG" => JG(parse_argument($arg1)),
             _ => panic!("cheep cheep"),
         };
 
