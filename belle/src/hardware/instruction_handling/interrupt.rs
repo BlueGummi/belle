@@ -154,38 +154,23 @@ impl CPU {
             31 => self.rflag = true,
             32 => self.rflag = false,
             33 => self.rflag = !self.rflag,
-            40 => {
+            40 => loop {
                 let mut input = String::new();
-                if CONFIG.verbose || CONFIG.debug {
-                    println!("╭─────────────────────────╮");
-                    println!("│ CPU STDIN               │");
-                    println!("│ Reading one integer..   │");
-                    println!("╰─────────────────────────╯\n");
-                }
                 match io::stdin().read_line(&mut input) {
                     Ok(_) => match input.trim().parse::<i16>() {
                         Ok(value) => {
                             self.int_reg[0] = value;
+                            break;
                         }
                         Err(e) => {
-                            // println!("{}", EmuError::ReadFail(e.to_string()));
-                            return Err(UnrecoverableError::ReadFail(
-                                self.ir,
-                                self.pc,
-                                Some(e.to_string()),
-                            ));
+                            println!("{}", EmuError::ReadFail(e.to_string()));
                         }
                     },
                     Err(e) => {
-                        // println!("{}", EmuError::ReadFail(e.to_string()));
-                        return Err(UnrecoverableError::ReadFail(
-                            self.ir,
-                            self.pc,
-                            Some(e.to_string()),
-                        ));
+                        println!("{}", EmuError::ReadFail(e.to_string()));
                     }
                 }
-            }
+            },
             41 => self.sflag = true,
             42 => self.sflag = false,
             43 => self.sflag = !self.sflag,
