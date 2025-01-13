@@ -3,12 +3,12 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-check_cargo() {
+check_deps() {
     if ! command -v cargo &> /dev/null; then
         print_message "Cargo is not installed. Would you like to install it? [y/N]" yellow
-        
+
         read -r user_input
-        
+
         if [[ "$user_input" =~ ^[yY]$ ]]; then
             print_message "Installing Cargo..." yellow
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -19,8 +19,17 @@ check_cargo() {
             exit
         fi
     fi
-}
 
+    if ! command -v make &> /dev/null; then
+        print_message "Make is not installed. Please install it." red
+        exit
+    fi
+
+    if ! command -v gcc &> /dev/null; then
+        print_message "GCC is not installed. Please install it." red
+        exit
+    fi
+}
 print_message() {
     local message="$1"
     local color="$2"
@@ -204,7 +213,7 @@ default_build() {
     exit 0
 }
 
-check_cargo
+check_deps
 
 targets=()
 
