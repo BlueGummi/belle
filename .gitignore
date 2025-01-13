@@ -12,3 +12,5 @@ bdump/*.asm
 .zed
 .vscode
 .idea
+site/.astro/
+site/node_modules/
