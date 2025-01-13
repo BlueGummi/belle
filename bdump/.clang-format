@@ -1,12 +1,16 @@
-BasedOnStyle: LLVM
+BasedOnStyle: LLVM 
+
 IndentWidth: 4
+TabWidth: 4
 UseTab: Never
-BreakBeforeBraces: Attach
-AllowShortBlocksOnASingleLine: true
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Inline
-ColumnLimit: 100
-SpaceBeforeParens: ControlStatements
-SpacesInParentheses: false
-SpacesInAngles: false
-SpaceAfterCStyleCast: true
+
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
+
+SpacesBeforeTrailingComments: 1
+
+ColumnLimit: 0
+SortIncludes: true
+IncludeBlocks: Preserve
+
+Cpp11BracedListStyle: true

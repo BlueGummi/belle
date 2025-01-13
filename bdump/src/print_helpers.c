@@ -1,5 +1,5 @@
 #pragma once
-int line = 1;
+int  line = 1;
 void print_binary(int num, int leading) {
     if (args.binary == 1) {
         for (int i = leading - 1; i >= 0; i--) {
@@ -20,14 +20,13 @@ void print_help(char *bin) { // bin is the name of the bin
            ANSI_BOLD, ANSI_RESET);
     printf("  %s-l%s, %s--line-num%s   Enable line numbering\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
-           ANSI_RESET);
+    printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     printf("  %s-c%s, %s--colors%s     Enable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-d%s, %s--debug%s      Print debug messages\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n",
-           ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
+    printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n", ANSI_BOLD,
+           ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     exit(0);
 }
 

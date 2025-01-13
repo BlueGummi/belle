@@ -21,13 +21,15 @@ typedef void *thread_ret_t;
 
 #define CHUNK_SIZE 1024
 
-typedef struct {
-    FILE *input;
+typedef struct
+{
+    FILE   *input;
     uint8_t buffer[BUFFER_SIZE];
-    size_t bytes_read;
+    size_t  bytes_read;
 } ThreadData;
 
-typedef struct {
+typedef struct
+{
     int opcode;
     int destination;
     int source;
@@ -38,22 +40,23 @@ typedef struct {
     int full_ins;
 } Instruction;
 
-typedef struct {
+typedef struct
+{
     char *input_file;
-    int line_num;
-    int colors;
-    int verbosity;
-    int binary;
+    int   line_num;
+    int   colors;
+    int   verbosity;
+    int   binary;
 } CLI;
 CLI args = {0};
 
-CLI parse_arguments(int argc, char *argv[]);
+CLI         parse_arguments(int argc, char *argv[]);
 Instruction parse_instruction(int instruction);
-void print_binary(int num, int leading);
-void print_instruction(Instruction *s);
-void print_help(char *bin);
-char *match_opcode(Instruction *s);
-int main(int argc, char *argv[]);
+void        print_binary(int num, int leading);
+void        print_instruction(Instruction *s);
+void        print_help(char *bin);
+char       *match_opcode(Instruction *s);
+int         main(int argc, char *argv[]);
 #pragma once
 #endif
 #include "consts.h"
