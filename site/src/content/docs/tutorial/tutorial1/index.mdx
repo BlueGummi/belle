@@ -22,13 +22,13 @@ Almost everything that runs on the hardware and not inside a virtual machine wil
 For example, lets say you're writing a C++ function to [compute the multiplied packed sums of absolute differences](https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-8/mm256-mpsadbw-epu8.html) between two unsigned vector integer variabl- actually, let's say you write a line of code to add two numbers together.
 
 ```c
-   int x = b + a;
+int x = b + a;
 ```
 
 Well, somewhere down the line, this will execute an assembly language instruction. Most CPUs have an `add` instruction to perform this arithmetic operation, and on the popular desktop architecture known as x86, this would become
 
 ```asm
-   add eax, edx ; add a value from one place to another place 
+add eax, edx ; add a value from one place to another place 
 ```
 
 Understanding what happens under the hood of a program is invaluable, as when debugging a faulty program, you'll encounter these assembly instructions and will have to understand what they're doing to debug the code.

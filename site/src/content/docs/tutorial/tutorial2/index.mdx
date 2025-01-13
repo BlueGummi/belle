@@ -16,7 +16,7 @@ Now that you've seen a little bit of assembly, let's break down the individual p
 First, let's start with line 1:
 
 ```asm
-   lea r0, @hello_start
+lea r0, @hello_start
 ```
 
 We can dissect this line into 3 parts.
@@ -24,18 +24,18 @@ We can dissect this line into 3 parts.
 The first word here is the ***operation***.
 
 ```asm
-   lea
+lea
 ```
 The left hand side (LHS) is the **first operand**.
 
 ```asm
-   r0
+r0
 ```
 
 And lastly, the right hand side is the **second operand**.
 
 ```asm
-   @hello_start
+@hello_start
 ```
 
 ##### But what does this mean?
@@ -57,7 +57,7 @@ In this case, the memory address of a label - we will talk about what labels are
 ##### What about the next line?
 
 ```asm
-   lea r1, @hello_end
+lea r1, @hello_end
 ```
 
 Similar to the first line, this performs a Load Effective Address instruction to load the memory address of `hello_end` into register 1.
@@ -88,7 +88,7 @@ In BELLE, and other architecures, words are 16 bits in length. Thus, when you de
 #### The next line
 
 ```asm
-   int 8
+int 8
 ```
 
 In many languages, `int` is used to declare integers. However, in many assembly languages, `int` actually means *interrupt*.

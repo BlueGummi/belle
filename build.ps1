@@ -42,7 +42,7 @@ function Clean {
     Print-Message "Cleaned up!" "green"
 }
 
-function Check-Cargo {
+function Check-Deps {
     if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
         Print-Message "Cargo is not installed. Would you like to install it? [y/N]" "yellow"
         
@@ -60,6 +60,20 @@ function Check-Cargo {
             exit
         }
     }
+    if (-not (Get-Command gcc -ErrorAction SilentlyContinue)) {
+	Print-Message "GCC is not installed. Would you like to install GCC and Make? [y/N]" "yellow"
+	
+	$userInput = Read-Host -Prompt ""
+	
+	if ($userInput -eq 'y' -or $userInput -eq 'Y') {
+	    Print-Message "Installing..." "yellow"
+	    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+            $env:PATH += ";C:\tools\mingw\bin"
+	    Print-Message "Make/GCC installed!" "green"
+	} else {
+	    Print-Message "Make/GCC installation skipped." "red"
+	    exit
+	}
 }
 
 function Spinner {
@@ -155,7 +169,7 @@ function Default-Build {
     exit
 }
 
-Check-Cargo
+Check-Deps
 
 $Targets = @()
 

@@ -31,4 +31,6 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 
 ### Roadmap
 
+- [ ] Implement error handling for codegen errors on the assembler
+
 - [ ] Finish tutorials
