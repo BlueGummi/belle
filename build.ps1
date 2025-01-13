@@ -65,15 +65,16 @@ function Check-Deps {
 	
 	$userInput = Read-Host -Prompt ""
 	
-	if ($userInput -eq 'y' -or $userInput -eq 'Y') {
-	    Print-Message "Installing..." "yellow"
-	    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+	    if ($userInput -eq 'y' -or $userInput -eq 'Y') {
+	        Print-Message "Installing..." "yellow"
+	        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
             $env:PATH += ";C:\tools\mingw\bin"
-	    Print-Message "Make/GCC installed!" "green"
-	} else {
-	    Print-Message "Make/GCC installation skipped." "red"
-	    exit
-	}
+	        Print-Message "Make/GCC installed!" "green"
+	    } else {
+	        Print-Message "Make/GCC installation skipped." "red"
+	        exit
+	    }
+    }
 }
 
 function Spinner {
