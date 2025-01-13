@@ -76,17 +76,31 @@ Please refer to the [encoding](../encoding) document for more information about 
         lhs := lhs + rhs
         ```
 
-## JO and JZ/JE - Conditional jump
+## Jcc - Conditional jump
 
-    ### JO - Jump if the overflow flag is set, JZ - Jump if the zero flag is set
+#### - JZ - Jump if zero flag is set
+#### - JNZ - Jump if zero flag is not set
+#### - JO - Jump if overflow flag is set
+#### - JNO - Jump if overflow flag is not set
+#### - JL - Jump if less
+#### - JG - Jump if greater
+#### - JR - Jump if remainder flag
 
-    `JO` and `JZ` perform **conditional jumps**, which set the CPU's program counter to the destination specified.
+    `Jcc` instructions perform **conditional jumps**, which set the CPU's program counter to the destination specified.
 
     `JO` will only jump if the overflow flag on the CPU is set. This flag becomes set if an **arithmetic operation** (e.g. `add`, `mul`) overflows the **destination** register.
 
+    `JNO` will only jump if the overflow flag is **not** set.
+
     `JZ` will only jump if the zero flag is set. This flag becomes set if a *compare* instruction (`cmp`) has two operands that are of the same value.
 
-    When `JO` or `JZ` are performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
+    `JNZ` will only jump if the zero flag is **not** set.
+
+    `JL` will only jump if the left-hand side is smaller than the right-hand side of a `CMP` instruction, and `JG` performs the inverse. 
+
+    `JR` will only jump if the remainder flag is set.
+
+    When a `Jcc` instruction is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
 
     The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
 
@@ -104,15 +118,19 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     Compatible DEST types: Register pointer, memory address
 
-    Flags affected: Affected by overflow flag and zero flag. Cannot change any flags.
+    Flags affected: Affected by overflow flag, sign flag, remainder flag, and zero flag. Cannot change any flags.
 
-    | Name | Arguments | Description | Use case | Example |
-    | :--- | :-------- | :---------: | :------- | :------ |
-    | JO   | 1         | Jump if overflow flag is true | Leaving a loop when a register overflows | `jo [3] ; jump to address 3 if overflow flag is set` |
+    All encoding is similar to the following
 
-| Name | Arguments |        Description        | Use case                        | Example                                            |
-| :--- | :-------- | :-----------------------: | :------------------------------ | :------------------------------------------------- |
-| JZ   | 1         | Jump if zero flag is true | Jumping somewhere after a `cmp` | `jz [42] ; jump to address 42 if zero flag is set` |
+    Opcode listings:
+
+    `JO` : `00100`
+    `JNO`: `00101`
+    `JL` : `01010`
+    `JG` : `01011`
+    `JR` : `10001`
+    `JZ` : `10010`
+    `JNZ`: `10011`
 
     #### Binary encoding
 
@@ -120,15 +138,15 @@ Please refer to the [encoding](../encoding) document for more information about 
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
-        | `[0010]` | `[1]` | `[00000000011]` |
+        | `[00100]` | `[1]` | `[0000000011]` |
 
-#### Binary encoding
+    #### Binary encoding
 
         Instruction: `jz [1]`
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
-        | `[1001]` | `[0]` | `[00000000001]` |
+        | `[10010]` | `[0]` | `[0000000001]` |
 
     #### Pseudocode representation
         ```go
@@ -370,7 +388,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
-        | `[1000]` | `[0]` | `[00000110010]` |
+        | `[10000]` | `[0]` | `[0000110010]` |
 
     #### Pseudocode representation
         ```go
@@ -398,7 +416,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     `CMP` will set the **sign flag** if the LHS is less than the RHS (if the result is negative), and it will be unset if the LHS is **greater than** the RHS.
 
-    `CMP` can be used along with `JZ` to perform a **conditional jump** out of a loop after recursion occurs enough times in a loop.
+    `CMP` can be used along with `JZ`, `JNZ`, `JL`, or `JG` to perform a **conditional jump** out of a loop after recursion occurs enough times in a loop.
 
     Compatible LHS argument types: Register
 
