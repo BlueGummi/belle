@@ -1,7 +1,36 @@
 use crate::{Argument::*, *};
 impl CPU {
+    // all conditions are inverted because we do early returns here
+
     pub fn handle_jo(&mut self, arg: &Argument) -> PossibleCrash {
         if !self.oflag {
+            self.pc += 1;
+            return Ok(());
+        }
+        self.jmp(arg)?;
+        Ok(())
+    }
+
+    pub fn handle_jno(&mut self, arg: &Argument) -> PossibleCrash {
+        if self.oflag {
+            self.pc += 1;
+            return Ok(());
+        }
+        self.jmp(arg)?;
+        Ok(())
+    }
+
+    pub fn handle_jg(&mut self, arg: &Argument) -> PossibleCrash {
+        if self.sflag {
+            self.pc += 1;
+            return Ok(());
+        }
+        self.jmp(arg)?;
+        Ok(())
+    }
+
+    pub fn handle_jl(&mut self, arg: &Argument) -> PossibleCrash {
+        if !self.sflag {
             self.pc += 1;
             return Ok(());
         }
@@ -14,8 +43,26 @@ impl CPU {
         Ok(())
     }
 
+    pub fn handle_jr(&mut self, arg: &Argument) -> PossibleCrash {
+        if !self.rflag {
+            self.pc += 1;
+            return Ok(());
+        }
+        self.jmp(arg)?;
+        Ok(())
+    }
+
     pub fn handle_jz(&mut self, arg: &Argument) -> PossibleCrash {
         if !self.zflag {
+            self.pc += 1;
+            return Ok(());
+        }
+        self.jmp(arg)?;
+        Ok(())
+    }
+
+    pub fn handle_jnz(&mut self, arg: &Argument) -> PossibleCrash {
+        if self.zflag {
             self.pc += 1;
             return Ok(());
         }

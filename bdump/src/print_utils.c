@@ -1,8 +1,27 @@
 #include "bdump.h"
 #include "consts.h"
+#include <string.h>
 #pragma once
 
-void print_operation(const char *op, int destination, bool colors) {
+void print_operation(Instruction *ins, char *op, int destination, bool colors) {
+    bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
+    bool invert = ins->destination >> 2 == 1;
+    if (is_jump && invert) {
+	if (strcmp(op, "jz") == 0)
+	   op = "jnz";
+	else if (strcmp(op, "jo") == 0)
+	   op = "jno";
+	else if (strcmp(op, "jmp") == 0)
+	   op = "jr";
+	else if (strcmp(op, "ret") == 0)
+	   op = "jg";
+    }
+
+    if ((ins->full_ins & 0b111111111111) != 0 && strcmp(op, "ret") == 0) {
+    	if (!invert)
+	   op = "jl";
+    }
+	
     if (colors) {
         printf("%s%s%s ", ANSI_BLUE, op, ANSI_RESET);
     } else {
@@ -64,8 +83,8 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     }
 }
 
-void print_jump_instruction(Instruction *ins, bool colors) {
-    if (ins->destination >> 2 == 1) {
+void print_jump_instruction(Instruction *ins, bool colors, bool invert) {
+    if (((ins->destination >> 1) & 1) == 1) {
         if (colors) {
             printf("%s&r%d%s\n", ANSI_GREEN, ins->source, ANSI_RESET);
         } else {
@@ -142,8 +161,8 @@ void print_output(Instruction *ins) {
         print_instruction_header(line, colors);
     }
 
-    if (strcmp(op, "sr") != 0 && strcmp(op, "hlt") != 0) {
-        print_operation(op, ins->destination, colors);
+    if (strcmp(op, "ret") != 0 && strcmp(op, "hlt") != 0) {
+        print_operation(ins, op, ins->destination, colors);
     }
 
     bool two_reg_args =
@@ -153,9 +172,11 @@ void print_output(Instruction *ins) {
     if (two_reg_args) {
         print_two_reg_args(ins, colors);
     } else if (strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0) {
-        print_jump_instruction(ins, colors);
+        bool invert = ins->destination >> 2 == 1;
+        print_jump_instruction(ins, colors, invert);
     } else if (strcmp(op, "ret") == 0) {
-        printf("\n");
+	if ((ins->full_ins & 0b111111111111) == 0)
+           printf("ret\n");
     } else if (strcmp(op, "int") == 0) {
         if (colors) {
             printf("%s%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);

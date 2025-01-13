@@ -110,11 +110,7 @@ impl CPU {
                     .only_err()
                     .to_string();
 
-                    if !CONFIG.no_print_memory {
-                        self.pmem = true;
-                    } else {
-                        self.pmem = false;
-                    }
+                    self.pmem = !CONFIG.no_print_memory;
                     if CONFIG.pretty || CONFIG.verbose {
                         println!("{self}");
                     }
@@ -131,11 +127,7 @@ impl CPU {
                 self.errmsg = e.only_err().to_string();
                 self.running = false;
 
-                if !CONFIG.no_print_memory {
-                    self.pmem = true;
-                } else {
-                    self.pmem = false;
-                }
+                self.pmem = !CONFIG.no_print_memory;
                 if CONFIG.pretty || CONFIG.verbose {
                     println!("{self}");
                 }
@@ -173,11 +165,7 @@ impl CPU {
                 println!("│ {} │", "Halting...".bold().white());
                 println!("╰────────────╯");
             }
-            if !CONFIG.no_print_memory {
-                self.pmem = true;
-            } else {
-                self.pmem = false;
-            }
+            self.pmem = !CONFIG.no_print_memory;
             if CONFIG.pretty ^ CONFIG.verbose {
                 println!("{self}");
             }
@@ -197,13 +185,18 @@ impl CPU {
             HLT => self.running = false,
             ADD(arg1, arg2) => self.handle_add(arg1, arg2)?,
             JO(arg) => self.handle_jo(arg)?,
+            JNO(arg) => self.handle_jno(arg)?,
             POP(arg) => self.handle_pop(arg)?,
             DIV(arg1, arg2) => self.handle_div(arg1, arg2)?,
             RET => self.handle_ret()?,
+            JL(arg) => self.handle_jl(arg)?,
+            JG(arg) => self.handle_jg(arg)?,
             LD(arg1, arg2) => self.handle_ld(arg1, arg2)?,
             ST(arg1, arg2) => self.handle_st(arg1, arg2)?,
             JMP(arg) => self.handle_jmp(arg)?,
+            JR(arg) => self.handle_jr(arg)?,
             JZ(arg) => self.handle_jz(arg)?,
+            JNZ(arg) => self.handle_jnz(arg)?,
             CMP(arg1, arg2) => self.handle_cmp(arg1, arg2)?,
             MUL(arg1, arg2) => self.handle_mul(arg1, arg2)?,
             PUSH(arg) => self.handle_push(arg)?,

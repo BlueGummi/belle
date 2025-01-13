@@ -16,10 +16,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, Str
     match arg {
         Some(Token::Register(num)) => {
             if *num > 7 {
-                return Err(format!(
-                    "Invalid register number at line {}",
-                    line_num
-                ));
+                return Err(format!("Invalid register number at line {}", line_num));
             }
             Ok(*num)
         }
@@ -68,14 +65,24 @@ pub fn encode_instruction(
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
             "HLT" => Ok(HLT_OP), // 0
             "ADD" => Ok(ADD_OP), // 1
-            "JO" => {
-                ins_type = "one_arg";
+            instruction if instruction.to_uppercase().starts_with('J') => {
+                ins_type = "jump";
                 if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
                     ins_type = "call";
                 } else if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
                     ins_type = "jwr";
                 }
-                Ok(JO_OP) // 2
+                match instruction.to_uppercase().as_str() {
+                    "JO" => Ok(JO_OP),
+                    "JNO" => Ok(JNO_OP),
+                    "JMP" | "J" => Ok(JMP_OP),
+                    "JR" => Ok(JR_OP),
+                    "JZ" | "JE" => Ok(JZ_OP),
+                    "JNZ" | "JNE" => Ok(JNZ_OP),
+                    "JL" => Ok(JL_OP),
+                    "JG" => Ok(JG_OP),
+                    _ => Err(format!("Invalid jump instruction at line {}", line_num)),
+                }
             }
             "POP" => {
                 ins_type = "one_arg";
@@ -97,24 +104,6 @@ pub fn encode_instruction(
                     ins_type = "st";
                 }
                 Ok(ST_OP) // 7
-            }
-            "JMP" | "J" => {
-                ins_type = "one_arg";
-                if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
-                    ins_type = "call";
-                } else if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
-                    ins_type = "jwr";
-                }
-                Ok(JMP_OP)
-            }
-            "JZ" | "JE" => {
-                ins_type = "one_arg";
-                if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
-                    ins_type = "call";
-                } else if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
-                    ins_type = "jwr";
-                }
-                Ok(JZ_OP) // 9
             }
             "CMP" => Ok(CMP_OP), // 10
             "MUL" => Ok(MUL_OP), // 11
@@ -193,13 +182,13 @@ pub fn encode_instruction(
         }
         "call" => {
             let address = argument_to_binary(arg1, line_num)?;
-            if address > 2047 {
+            if address > 1023 {
                 return Err(format!(
                     "Label memory address too large on instruction on line {}",
                     line_num
                 ));
             }
-            Ok(Some(vec![(instruction_bin << 12) | address]))
+            Ok(Some(vec![(instruction_bin << 11) | address]))
         }
         "jwr" => {
             let raw_str = arg1
@@ -212,8 +201,8 @@ pub fn encode_instruction(
                 )
             })?;
             Ok(Some(vec![
-                (instruction_bin << 12)
-                    | 1 << 11
+                (instruction_bin << 11)
+                    | 1 << 10
                     | argument_to_binary(Some(&Token::Register(parsed_int)), line_num)?,
             ]))
         }
@@ -242,6 +231,10 @@ pub fn encode_instruction(
             Ok(Some(vec![
                 (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
             ]))
+        }
+        "jump" => {
+            let arg_bin = argument_to_binary(arg1, line_num)?;
+            Ok(Some(vec![(instruction_bin << 11) | arg_bin]))
         }
         _ => Err(format!(
             "Instruction type not recognized at line {}",

@@ -46,7 +46,7 @@ pub fn verify(
 ) -> Result<(), String> {
     let instructions = [
         "ADD", "HLT", "JO", "POP", "DIV", "RET", "LD", "ST", "JMP", "JZ", "PUSH", "CMP", "MUL",
-        "INT", "MOV", "LEA",
+        "INT", "MOV", "LEA", "JE", "JNE", "JNZ", "JNO", "JG", "JL",
     ];
     let raw_token = ins.get_raw().to_uppercase();
 
@@ -88,7 +88,7 @@ fn check_instruction(
             only_two(arg1, arg2, raw_token, line_num).and_then(|_| mov_args(arg1, arg2, line_num))
         }
         "INT" => one_none(arg1, arg2, raw_token, line_num).and_then(|_| int_args(arg1, line_num)),
-        "JZ" | "JO" | "JMP" => {
+        raw_token if raw_token.starts_with('j') => {
             only_one(arg1, arg2, raw_token, line_num).and_then(|_| jump_args(arg1, line_num))
         }
         "PUSH" | "POP" => {
@@ -269,12 +269,12 @@ fn jump_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
         .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
     {
         return Err(format!(
-            "JMP/JZ/JO requires DEST to be a Register pointer, Memory address, or SRCall at line {}",
+            "Jump requires DEST to be a Register pointer, Memory address, or SRCall at line {}",
             line_num
         ));
     }
     match arg1 {
-        Some(tok) if tok.get_num() > 2047 => {
+        Some(tok) if tok.get_num() > 1023 => {
             return Err(format!("{MMAFAIL} on line {line_num}"));
         }
         _ => (),

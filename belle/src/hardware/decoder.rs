@@ -33,13 +33,18 @@ pub enum Instruction {
     HLT,
     ADD(Argument, Argument),
     JO(Argument),
+    JNO(Argument),
     POP(Argument),
     DIV(Argument, Argument),
     RET,
     LD(Argument, Argument),
     ST(Argument, Argument),
     JMP(Argument),
+    JR(Argument),
     JZ(Argument),
+    JNZ(Argument),
+    JL(Argument),
+    JG(Argument),
     CMP(Argument, Argument),
     MUL(Argument, Argument),
     PUSH(Argument),
@@ -75,6 +80,11 @@ impl fmt::Display for Instruction {
             Instruction::LD(arg1, arg2) => write!(f, "LD {arg1}, {arg2}"),
             Instruction::ST(arg1, arg2) => write!(f, "ST {arg1}, {arg2}"),
             Instruction::JMP(arg) => write!(f, "JMP {arg}"),
+            Instruction::JR(arg) => write!(f, "JR {arg}"),
+            Instruction::JNZ(arg) => write!(f, "JNZ {arg}"),
+            Instruction::JL(arg) => write!(f, "JL {arg}"),
+            Instruction::JG(arg) => write!(f, "JG {arg}"),
+            Instruction::JNO(arg) => write!(f, "JNO {arg}"),
             Instruction::JZ(arg) => write!(f, "JZ {arg}"),
             Instruction::CMP(arg1, arg2) => write!(f, "CMP {arg1}, {arg2}"),
             Instruction::MUL(arg1, arg2) => write!(f, "MUL {arg1}, {arg2}"),
@@ -206,18 +216,19 @@ impl CPU {
         } else {
             0
         };
-        let it_is_bouncy = opcode == JZ_OP || opcode == JO_OP || opcode == JMP_OP;
-        let indirect_bounce = (self.ir & 0b100000000000) >> 11 == 1;
-        let tmp = self.ir & 0b1111111;
+        let it_is_bouncy =
+            opcode == JZ_OP || opcode == JO_OP || opcode == JMP_OP || opcode == RET_OP;
+        let indirect_bounce = (self.ir & 0b0000_0100_0000_0000) >> 10 == 1;
+        let tmp = self.ir & 0b111_1111;
 
         let source = match ins_type {
             1 => {
                 if it_is_bouncy {
                     if indirect_bounce {
                         ins_type = 4;
-                        self.ir & 0b1111
+                        self.ir & 0b111
                     } else {
-                        self.ir & 0b111111111111
+                        self.ir & 0b11_1111_1111
                     }
                 } else if (self.ir & 0b10000000) >> 7 == 1 {
                     -tmp
@@ -229,16 +240,16 @@ impl CPU {
                 if it_is_bouncy {
                     if indirect_bounce {
                         ins_type = 4;
-                        self.ir & 0b1111
+                        self.ir & 0b111
                     } else {
-                        self.ir & 0b111111111111
+                        self.ir & 0b11_1111_1111
                     }
                 } else {
-                    self.ir & 0b1111111
+                    self.ir & 0b111_1111
                 }
             }
         };
-        let destination = (self.ir & 0b111000000000) >> 9;
+        let destination = (self.ir & 0b1110_0000_0000) >> 9;
         let mut part = match ins_type {
             0 => Register(source),
             1 => Literal(source),
@@ -251,18 +262,23 @@ impl CPU {
         }
 
         if let MemPtr(value) = part {
-            part = MemPtr(value & 0b1111111);
+            part = MemPtr(value & 0b111_1111);
         }
-
+        let invert = ((self.ir & 0b0000_1000_0000_0000) >> 11) == 1;
         // println!("{:04b}", opcode);
         match opcode {
             HLT_OP => HLT,
             ADD_OP => ADD(Register(destination), part),
             JO_OP => {
-                if ins_type == 4 {
-                    JO(RegPtr(source))
+                let dest = if ins_type == 4 {
+                    RegPtr(source)
                 } else {
-                    JO(MemAddr(source))
+                    MemAddr(source)
+                };
+                if invert {
+                    JNO(dest)
+                } else {
+                    JO(dest)
                 }
             }
             POP_OP => {
@@ -273,13 +289,27 @@ impl CPU {
                 }
             }
             DIV_OP => DIV(Register(destination), part),
-            RET_OP => RET,
+            RET_OP => {
+                let dest = if ins_type == 4 {
+                    RegPtr(source)
+                } else {
+                    MemAddr(source)
+                };
+
+                if self.ir & 4095 == 0 {
+                    RET
+                } else if invert {
+                    JG(dest)
+                } else {
+                    JL(dest)
+                }
+            }
             LD_OP => {
-                let part = self.ir & 0b111111111;
+                let part = self.ir & 0b0001_1111_1111;
                 LD(Register(destination), MemAddr(part))
             }
             ST_OP => {
-                if (self.ir & 0b100000000000) >> 11 == 1 {
+                if (self.ir & 0b1000_0000_0000) >> 11 == 1 {
                     let part = (self.ir & 0b1110000000) >> 7;
                     ST(RegPtr(part), Register(self.ir & 0b111))
                 } else {
@@ -288,17 +318,27 @@ impl CPU {
                 }
             }
             JMP_OP => {
-                if ins_type == 4 {
-                    JMP(RegPtr(source))
+                let dest = if ins_type == 4 {
+                    RegPtr(source)
                 } else {
-                    JMP(MemAddr(source))
+                    MemAddr(source)
+                };
+                if invert {
+                    JR(dest)
+                } else {
+                    JMP(dest)
                 }
             }
             JZ_OP => {
-                if ins_type == 4 {
-                    JZ(RegPtr(source))
+                let dest = if ins_type == 4 {
+                    RegPtr(source)
                 } else {
-                    JZ(MemAddr(source))
+                    MemAddr(source)
+                };
+                if invert {
+                    JNZ(dest)
+                } else {
+                    JZ(dest)
                 }
             }
             CMP_OP => CMP(Register(destination), part),
