@@ -12,22 +12,22 @@ tableOfContents:
 
 ## Quickstart
 
-```
-git clone https://github.com/BlueGummi/belle && cd belle
+```bash
+git clone https://github.com/BlueGummi/belle --depth=1 && cd belle
 ```
 
 Cargo, RustC, GCC, and Makefile **compatibility must be present on the system** if these programs are to be installed.
 
 Every executable in this repository can have the `--help` flag passed to display helpful information.
 
-```
-./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
+```bash
+./build.sh -w && ./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
 ```
 
 Or, for Windows
 
-```pwsh
-.\install.ps1 -c # This installs the binaries to ~/.local/bin on Windows
+```bash
+.\build.ps1 -w && .\install.ps1 -c # This installs the binaries to ~/.local/bin on Windows
 ```
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
