@@ -22,25 +22,10 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Build BELLE
-        run: |
-          cd .\belle
-          cargo build --release
-
-      - name: Build the BELLE-assembler
-        run: |
-          cd .\basm
-          cargo build --release
-
       - name: Install dependencies gcc on Windows
         run: |
           choco install mingw
           $env:PATH += ";C:\tools\mingw\bin"
-
-      - name: Build the BELLE-disassembler
-        run: |
-          cd .\bdump
-          make
 
       - name: Test build script (Windows)
         run: .\build.ps1 -n

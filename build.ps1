@@ -119,7 +119,7 @@ function Default-Build {
             }
             "bdump" {
                 Set-Location bdump
-                Start-Process -FilePath "build.bat" -ArgumentList "all" -NoNewWindow -PassThru | ForEach-Object {
+                Start-Process -FilePath ".\build.bat" -ArgumentList "all" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE-dump..."
                     Copy-Item -Path "bdump.exe" -Destination "../bin" -Force
@@ -137,7 +137,7 @@ function Default-Build {
             }
             "bfmt" {
                 Set-Location btils
-                Start-Process -FilePath "build.bat" -ArgumentList "all" -NoNewWindow -PassThru | ForEach-Object {
+                Start-Process -FilePath ".\build.bat" -ArgumentList "all" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE-fmt..."
                     Copy-Item -Path "bfmt.exe" -Destination "../bin" -Force
