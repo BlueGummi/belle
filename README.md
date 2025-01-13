@@ -32,7 +32,3 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 ### Roadmap
 
 - [ ] Finish tutorials
-
-- [ ] Streamline Windows build script
-
-- [ ] Change Windows builds to use BATCH files instead of Makefiles
