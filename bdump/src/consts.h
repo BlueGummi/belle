@@ -1,10 +1,26 @@
 #ifndef CONSTS_H
 #define CONSTS_H
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+typedef DWORD thread_ret_t;
+#else
+#include <pthread.h>
+typedef void *thread_ret_t;
+#endif
+
+#define BUFFER_SIZE 1024
+#define THREAD_COUNT 4
+
+#define CHUNK_SIZE 1024
+
 
 #define HLT_OP 0b0000
 #define ADD_OP 0b0001

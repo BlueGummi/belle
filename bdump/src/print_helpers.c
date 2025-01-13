@@ -1,5 +1,4 @@
-#pragma once
-int  line = 1;
+#include "print_utils.c"
 void print_binary(int num, int leading) {
     if (args.binary == 1) {
         for (int i = leading - 1; i >= 0; i--) {

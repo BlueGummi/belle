@@ -1,9 +1,7 @@
 #include "bdump.h"
-#include "consts.h"
-#include <string.h>
-#pragma once
-
-void print_operation(Instruction *ins, char *op, int destination, bool colors) {
+CLI args = {0};
+int  line = 1;
+void print_operation(Instruction *ins, char *op, bool colors) {
     bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
     bool invert  = ins->destination >> 2 == 1;
     if (is_jump && invert) {
@@ -73,7 +71,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     } break;
 
     default:
-        fprintf(stderr, "Unknown instruction type\n");
+        perror("Unknown instruction type\n");
         exit(1);
     }
 }
@@ -150,7 +148,7 @@ void print_output(Instruction *ins) {
     }
 
     if (strcmp(op, "ret") != 0 && strcmp(op, "hlt") != 0) {
-        print_operation(ins, op, ins->destination, colors);
+        print_operation(ins, op, colors);
     }
 
     bool two_reg_args = (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||

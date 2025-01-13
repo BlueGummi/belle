@@ -5,7 +5,7 @@
  * This code is licensed under the BSD 3-Clause License.
  */
 
-#include "bdump.h"
+#include "print_helpers.c"
 
 void *process_instructions(void *arg) {
     ThreadData *data = (ThreadData *)arg;
