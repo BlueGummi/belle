@@ -32,9 +32,8 @@ jobs:
           cd .\basm
           cargo build --release
 
-      - name: Install dependencies (make, gcc) on Windows
+      - name: Install dependencies gcc on Windows
         run: |
-          choco install make
           choco install mingw
           $env:PATH += ";C:\tools\mingw\bin"
 

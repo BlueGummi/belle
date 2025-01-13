@@ -8,11 +8,6 @@ All documentation is available on [the website for this project](https://bluegum
 
 ## Quickstart
 
-Cargo, RustC, GCC, and Makefile **compatibility must be present on the system** if these programs are to be installed.
-
-Every executable in this repository can have the `--help` flag passed to display helpful information.
-
-
 ```
 git clone https://github.com/BlueGummi/belle && cd belle && ./build.sh && ./install.sh
 ```
@@ -33,3 +28,11 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 ## Naming
 
 **BELLE** is the *emulator*, whilst **BELLE-ISA/ISABELLE** is the *instruction set*.
+
+### Roadmap
+
+- [ ] Finish tutorials
+
+- [ ] Streamline Windows build script
+
+- [ ] Change Windows builds to use BATCH files instead of Makefiles
