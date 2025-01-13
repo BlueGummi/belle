@@ -60,3 +60,53 @@ In this case, the memory address of a label - we will talk about what labels are
    lea r1, @hello_end
 ```
 
+Similar to the first line, this performs a Load Effective Address instruction to load the memory address of `hello_end` into register 1.
+
+#### Labels
+
+A label is a symbolic location that is defined with `label_name:` (e.g. `fish:`)
+
+At compile/assemble time, labels are resolved to real memory addresses, and when an instruction references the address of a label (such as with `@label_name`), it is replaced with the address of the label.
+
+Here, we are defining `hello_start` and `hello_end`, and the ASCII string in between them essentially says "Put a string in memory here".
+
+`hello_start` references the first character of the string, and `hello_end` references the end of the string block.
+
+
+##### But what are `.asciiz` and `.word`?
+
+`.asciiz` and `.word` are **assembler directives** that tell the assembler to simply load the memory address(es) where the directive appears with the ASCII values of a string or with a numeric literal.
+
+`.word` will accept a numeric value, whilst `.asciiz` accepts a full string.
+
+###### What is a "word"?
+
+Computer architecture has a concept known as a "word", and "word"s are fixed size units of data for processing.
+
+In BELLE, and other architecures, words are 16 bits in length. Thus, when you declare a `.word`, it simply assigns 16 bits of memory with the given data inside of it.
+
+#### The next line
+
+```asm
+   int 8
+```
+
+In many languages, `int` is used to declare integers. However, in many assembly languages, `int` actually means *interrupt*.
+
+##### What are interrupts?
+
+An *interrupt* in assembly essentially "pauses" the program (or "interrupts" it), to perform some task, and then return to the program execution.
+
+Many CPU architectures and instruction sets have regions of memory that contain code to be executed upon an interrupt call.
+
+For BELLE, the interrupts are not implemented as blocks of code on the machine's memory, and instead are part of the software.
+
+###### What is the '8'?
+
+Each interrupt call is assigned a given interrupt *code*. In many other ISAs, the interrupt code is held in some register when the interrupt is called.
+
+But, in the BELLE-ISA, interrupts are generated with their respective code in the instruction to avoid having to read a register.
+
+In this case, interrupt *8* is the code to "Print all values from the memory address in `r0` to the memory address in `r1` as ASCII characters`
+
+
