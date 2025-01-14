@@ -115,7 +115,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
     } else if (ins->full_ins == 0) {
         if (colors) {
-            printf("%shlt%s\n", ANSI_YELLOW, ANSI_RESET);
+            printf("%shlt%s\n", ANSI_BLUE, ANSI_RESET);
         } else {
             printf("hlt\n");
         }
