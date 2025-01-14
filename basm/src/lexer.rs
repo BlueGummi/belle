@@ -2,15 +2,15 @@ use crate::Error::*;
 use crate::*;
 
 pub struct Lexer<'a> {
-    pub position: u32,
-    pub line_number: u32,
+    pub position: usize,
+    pub line_number: usize,
     pub tokens: Vec<Token>,
     pub chars: std::iter::Peekable<std::str::Chars<'a>>,
 }
 
 impl<'a> Lexer<'a> {
     #[must_use]
-    pub fn new(line: &'a str, line_number: u32) -> Self {
+    pub fn new(line: &'a str, line_number: usize) -> Self {
         Self {
             position: 1,
             line_number,

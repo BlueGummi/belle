@@ -7,11 +7,11 @@ use std::path::Path;
 
 #[derive(Debug)]
 pub enum Error<'a> {
-    InvalidSyntax(&'a str, u32, Option<u32>),
-    ExpectedArgument(&'a str, u32, Option<u32>),
-    NonexistentData(&'a str, u32, Option<u32>),
-    UnknownCharacter(String, u32, Option<u32>),
-    OtherError(&'a str, u32, Option<u32>),
+    InvalidSyntax(&'a str, usize, Option<usize>),
+    ExpectedArgument(&'a str, usize, Option<usize>),
+    NonexistentData(&'a str, usize, Option<usize>),
+    UnknownCharacter(String, usize, Option<usize>),
+    OtherError(&'a str, usize, Option<usize>),
     LineLessError(&'a str),
 }
 
@@ -63,12 +63,12 @@ impl fmt::Display for Error<'_> {
             .lines()
             .enumerate()
         {
-            if current_line + 1 == line_number.try_into().unwrap() {
+            if current_line + 1 == line_number {
                 writeln!(f, "{}", line.unwrap().trim())?;
             }
         }
         if let Some(place) = location {
-            let spaces = " ".repeat((*place as usize) - 1);
+            let spaces = " ".repeat({ *place } - 1);
             writeln!(f, "{}{}", spaces, "^^".red().bold())?;
         }
 

@@ -42,7 +42,7 @@ pub fn verify(
     ins: &Token,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     let instructions = [
         "ADD", "HLT", "JO", "POP", "DIV", "RET", "LD", "ST", "JMP", "JZ", "PUSH", "CMP", "MUL",
@@ -74,7 +74,7 @@ fn check_instruction(
     raw_token: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     match raw_token {
         "HLT" | "RET" => only_none(arg1, arg2, raw_token, line_num),
@@ -102,7 +102,7 @@ fn only_none(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     instruction: &str,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     if arg1.is_some() || arg2.is_some() {
         return Err(format!(
@@ -117,7 +117,7 @@ fn only_two(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     instruction: &str,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     if arg1.is_none() || arg2.is_none() {
         return Err(format!(
@@ -132,7 +132,7 @@ fn one_none(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     instruction: &str,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     if arg1.is_some() && arg2.is_some() {
         return Err(format!(
@@ -147,7 +147,7 @@ fn only_one(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     instruction: &str,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<(), String> {
     if arg1.is_none() || arg2.is_some() {
         return Err(format!(
@@ -158,7 +158,7 @@ fn only_one(
     Ok(())
 }
 
-fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err(format!(
             "LD/LEA requires LHS to be a Register at line {}",
@@ -177,7 +177,7 @@ fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<
     Ok(())
 }
 
-fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1
         .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
     {
@@ -198,7 +198,7 @@ fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<
     Ok(())
 }
 
-fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err(format!(
             "MOV requires LHS to be a Register at line {}",
@@ -233,7 +233,7 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: u32) -> Result
     Ok(())
 }
 
-fn int_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1.is_some_and(|tok| tok.is_literal()) {
         return Err(format!(
             "INT requires SRC to be a Literal at line {}",
@@ -246,7 +246,7 @@ fn int_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
     Ok(())
 }
 
-fn push_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1.is_some_and(|tok| tok.is_memory_address() || tok.is_register() || tok.is_literal()) {
         return Err(format!(
             "PUSH/POP requires SRC to be a Register or Literal or Memory address at line {}",
@@ -264,7 +264,7 @@ fn push_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
     Ok(())
 }
 
-fn jump_args(arg1: Option<&Token>, line_num: u32) -> Result<(), String> {
+fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
     if !arg1
         .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
     {

@@ -3,16 +3,16 @@ use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-pub static SUBROUTINE_MAP: Lazy<Mutex<HashMap<String, u32>>> =
+pub static SUBROUTINE_MAP: Lazy<Mutex<HashMap<String, usize>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, i32>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub static MEMORY_COUNTER: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
+pub static MEMORY_COUNTER: Lazy<Mutex<usize>> = Lazy::new(|| Mutex::new(0));
 static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(0));
 
-pub fn argument_to_binary(arg: Option<&Token>, line_num: u32) -> Result<i16, String> {
+pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, String> {
     match arg {
         Some(Token::Register(num)) => {
             if *num > 7 {
@@ -58,7 +58,7 @@ pub fn encode_instruction(
     ins: &Token,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    line_num: u32,
+    line_num: usize,
 ) -> Result<Option<Vec<i16>>, String> {
     let mut ins_type = "default";
     let instruction_bin = match ins {
@@ -309,7 +309,7 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
 pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
     let mut subroutine_counter = *START_LOCATION
         .lock()
-        .map_err(|_| "Failed to lock START_LOCATION")? as u32;
+        .map_err(|_| "Failed to lock START_LOCATION")? as usize;
     let mut subroutine_map = SUBROUTINE_MAP
         .lock()
         .map_err(|_| "Failed to lock SUBROUTINE_MAP")?;
@@ -342,8 +342,7 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
         if line_before_comment.starts_with(".asciiz") {
             if let Some(start) = line_before_comment.find('\"') {
                 if let Some(end) = line_before_comment[start + 1..].find('\"') {
-                    subroutine_counter +=
-                        line_before_comment[start + 1..start + 1 + end].len() as u32;
+                    subroutine_counter += line_before_comment[start + 1..start + 1 + end].len();
                 }
             }
             continue;

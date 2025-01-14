@@ -48,7 +48,7 @@ fn main() -> io::Result<()> {
     }
 
     let mut encoded_instructions = Vec::new();
-    let mut line_count: u32 = 1;
+    let mut line_count = 1;
     let mut write_to_file: bool = true;
     if let Err(e) = process_variables(&lines) {
         eprintln!("{e}");
