@@ -11,10 +11,32 @@ void *process_instructions(void *arg) {
     ThreadData *data = (ThreadData *)arg;
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
-            uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
-            Instruction ins         = parse_instruction(instruction);
-            if ((ins.full_ins >> 9) == 1) {
-                current_addr = ins.full_ins & 0b111111111;
+            uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            if ((instruction >> 9) == 1) {
+                current_addr = instruction & 0b111111111;
+            }
+        }
+    }
+    if (args.only_code != 1) {
+        if (args.binary != 1) {
+            if (args.colors) {
+                printf("╭───────┬───────┬─────────────╮\n");
+                printf("│ %sADDR%s  │  %sBIN%s  │ %sINSTRUCTION%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                printf("├───────┼───────┼─────────────╯\n");
+            } else {
+                printf("╭───────┬───────┬─────────────╮\n");
+                printf("│ ADDR  │  BIN  │ INSTRUCTION │\n");
+                printf("├───────┼───────┼─────────────╯\n");
+            }
+        } else {
+            if (args.colors) {
+                printf("╭───────┬──────────────────────────┬─────────────╮\n");
+                printf("│ %sADDR%s  │           %sBIN%s            │ %sINSTRUCTION%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                printf("├───────┼──────────────────────────┼─────────────╯\n");
+            } else {
+                printf("╭───────┬──────────────────────────┬─────────────╮\n");
+                printf("│ ADDR  │           BIN            │ INSTRUCTION │\n");
+                printf("├───────┼──────────────────────────┼─────────────╯\n");
             }
         }
     }
@@ -23,6 +45,13 @@ void *process_instructions(void *arg) {
             uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             Instruction ins         = parse_instruction(instruction);
             print_instruction(&ins);
+        }
+    }
+    if (args.only_code != 1) {
+        if (args.binary != 1) {
+            printf("╰───────┴───────╯\n");
+        } else {
+            printf("╰───────┴──────────────────────────╯\n");
         }
     }
     return NULL;
@@ -51,7 +80,7 @@ int main(int argc, char *argv[]) {
 #else
     pthread_t thread_handles[THREAD_COUNT];
 #endif
-
+    // macro programming multithreading tomfoolery - "It works" and "It's not broken, don't fix it"
     while ((bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
         thread_data[0].bytes_read = bytes_read;
         thread_data[0].input      = input;
@@ -136,10 +165,6 @@ char *match_opcode(Instruction *s) {
         exit(1);
     }
     return opcode;
-}
-
-void print_instruction(Instruction *s) {
-    print_output(s);
 }
 
 Instruction parse_instruction(int instruction) {

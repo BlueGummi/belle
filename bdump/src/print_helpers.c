@@ -60,15 +60,15 @@ void print_help(char *bin) { // bin is the name of the bin
 void print_instruction_header(size_t line, bool colors, bool is_directive) {
     if (colors) {
         if (!is_directive) {
-            printf("%s%*lu │ %s", ANSI_RED, 4, line, ANSI_RESET);
+            printf("│ %s%*lu%s │ ", ANSI_RED, 5, line, ANSI_RESET);
         } else {
-            printf("%sXXXX │ %s", ANSI_RED, ANSI_RESET);
+            printf("│ %s  XXX%s │ ", ANSI_RED, ANSI_RESET);
         }
     } else {
         if (!is_directive) {
-            printf("%*lu │ ", 4, line);
+            printf("│ %*lu │ ", 5, line);
         } else {
-            printf("XXXX │ ");
+            printf("│   XXX │ ");
         }
     }
 }
