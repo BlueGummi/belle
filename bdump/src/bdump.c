@@ -8,6 +8,9 @@
 #include "print_helpers.c"
 
 void *process_instructions(void *arg) {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
     ThreadData *data = (ThreadData *)arg;
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
