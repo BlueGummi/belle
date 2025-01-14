@@ -52,23 +52,69 @@ void print_help(char *bin) { // bin is the name of the bin
            ANSI_RESET);
     printf("  %s-o%s, %s--only-code%s  Print only code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
+    printf("  %s-x%s, %s--hex%s        Print memory addresses in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+           ANSI_RESET);
     printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n", ANSI_BOLD,
            ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     exit(0);
 }
 
 void print_instruction_header(size_t line, bool colors, bool is_directive) {
+    size_t lineclone = line;
     if (colors) {
-        if (!is_directive) {
-            printf("│ %s%*lu%s │ ", ANSI_RED, 5, line, ANSI_RESET);
-        } else {
-            printf("│ %s  XXX%s │ ", ANSI_RED, ANSI_RESET);
+        printf("│ ");
+        if (args.print_hex == 1) {
+            char hex[5];
+            hex[4] = '\0';
+            for (int i = 0; i < 4; i++) {
+                hex[3 - i] = "0123456789ABCDEF"[line & 0xF];
+                line >>= 4;
+            }
+
+            for (int i = 0; i < 4; i += 2) {
+                if (is_directive) {
+                    printf("%sXX XX%s", ANSI_RED, ANSI_RESET);
+                    break;
+                }
+                printf("%s%c%c%s", ANSI_MAGENTA, hex[i], hex[i + 1], ANSI_RESET);
+                if (i != 2) {
+                    printf(" ");
+                }
+            }
         }
+        if (!is_directive) {
+            printf("%s%*lu%s ", ANSI_RED, 5, lineclone, ANSI_RESET);
+        } else {
+            printf("%s  XXX%s ", ANSI_RED, ANSI_RESET);
+        }
+        printf("│ ");
     } else {
-        if (!is_directive) {
-            printf("│ %*lu │ ", 5, line);
-        } else {
-            printf("│   XXX │ ");
+        printf("│ ");
+        if (args.print_hex == 1) {
+            char hex[5];
+            hex[4] = '\0';
+            for (int i = 0; i < 4; i++) {
+                hex[3 - i] = "0123456789ABCDEF"[line & 0xF];
+                line >>= 4;
+            }
+
+            for (int i = 0; i < 4; i += 2) {
+                if (is_directive) {
+                    printf("XX XX");
+                    break;
+                }
+                printf("%c%c", hex[i], hex[i + 1]);
+                if (i != 2) {
+                    printf(" ");
+                }
+            }
         }
+
+        if (!is_directive) {
+            printf("%*lu ", 5, lineclone);
+        } else {
+            printf("  XXX ");
+        }
+        printf("│ ");
     }
 }

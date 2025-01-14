@@ -27,6 +27,7 @@ typedef struct
     int   verbosity;
     int   binary;
     int   only_code;
+    int   print_hex;
 } CLI;
 
 CLI         parse_arguments(int argc, char *argv[]);

@@ -274,11 +274,11 @@ void print_instruction(Instruction *ins) {
     }
 
     if (args.verbosity == 1 && args.only_code == 1) {
-	if ((ins->full_ins >> 9) != 1 && (ins->full_ins >> 9) != 2 && (ins->full_ins >> 9) != 3) { 
-        	printf(" ; address %ld", current_addr);
-	} else {
-		printf(" ; no address");
-	}
+        if ((ins->full_ins >> 9) != 1 && (ins->full_ins >> 9) != 2 && (ins->full_ins >> 9) != 3) {
+            printf(" ; address %ld", current_addr);
+        } else {
+            printf(" ; no address");
+        }
     }
     printf("\n");
 }

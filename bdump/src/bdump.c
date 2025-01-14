@@ -19,24 +19,48 @@ void *process_instructions(void *arg) {
     }
     if (args.only_code != 1) {
         if (args.binary != 1) {
-            if (args.colors) {
-                printf("╭───────┬───────┬─────────────╮\n");
-                printf("│ %sADDR%s  │  %sBIN%s  │ %sINSTRUCTION%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                printf("├───────┼───────┼─────────────╯\n");
+            if (args.print_hex == 0) {
+                if (args.colors) {
+                    printf("╭───────┬───────┬─────────────╮\n");
+                    printf("│ %saddr%s  │  %sbin%s  │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├───────┼───────┼─────────────╯\n");
+                } else {
+                    printf("╭───────┬───────┬─────────────╮\n");
+                    printf("│ addr  │  bin  │ instruction │\n");
+                    printf("├───────┼───────┼─────────────╯\n");
+                }
             } else {
-                printf("╭───────┬───────┬─────────────╮\n");
-                printf("│ ADDR  │  BIN  │ INSTRUCTION │\n");
-                printf("├───────┼───────┼─────────────╯\n");
+                if (args.colors) {
+                    printf("╭────────────┬───────┬─────────────╮\n");
+                    printf("│  %saddress%s   │  %sbin%s  │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├────────────┼───────┼─────────────╯\n");
+                } else {
+                    printf("╭────────────┬───────┬─────────────╮\n");
+                    printf("│  address   │  bin  │ instruction │\n");
+                    printf("├────────────┼───────┼─────────────╯\n");
+                }
             }
         } else {
-            if (args.colors) {
-                printf("╭───────┬──────────────────────────┬─────────────╮\n");
-                printf("│ %sADDR%s  │           %sBIN%s            │ %sINSTRUCTION%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                printf("├───────┼──────────────────────────┼─────────────╯\n");
+            if (args.print_hex == 0) {
+                if (args.colors) {
+                    printf("╭───────┬──────────────────────────┬─────────────╮\n");
+                    printf("│ %saddr%s  │          %sbinary%s          │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├───────┼──────────────────────────┼─────────────╯\n");
+                } else {
+                    printf("╭───────┬──────────────────────────┬─────────────╮\n");
+                    printf("│ addr  │         binary           │ instruction │\n");
+                    printf("├───────┼──────────────────────────┼─────────────╯\n");
+                }
             } else {
-                printf("╭───────┬──────────────────────────┬─────────────╮\n");
-                printf("│ ADDR  │           BIN            │ INSTRUCTION │\n");
-                printf("├───────┼──────────────────────────┼─────────────╯\n");
+                if (args.colors) {
+                    printf("╭────────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│  %saddress%s   │          %sbinary%s          │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├────────────┼──────────────────────────┼─────────────╯\n");
+                } else {
+                    printf("╭────────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│  address   │         binary           │ instruction │\n");
+                    printf("├────────────┼──────────────────────────┼─────────────╯\n");
+                }
             }
         }
     }
@@ -49,9 +73,17 @@ void *process_instructions(void *arg) {
     }
     if (args.only_code != 1) {
         if (args.binary != 1) {
-            printf("╰───────┴───────╯\n");
+            if (args.print_hex == 1) {
+                printf("╰────────────┴───────╯\n");
+            } else {
+                printf("╰───────┴───────╯\n");
+            }
         } else {
-            printf("╰───────┴──────────────────────────╯\n");
+            if (args.print_hex == 1) {
+                printf("╰────────────┴──────────────────────────╯\n");
+            } else {
+                printf("╰───────┴──────────────────────────╯\n");
+            }
         }
     }
     return NULL;
@@ -199,6 +231,8 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.colors = 1;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
+                } else if (strcmp(argv[i], "--hex") == 0) {
+                    opts.print_hex = 1;
                 } else if (strcmp(argv[i], "--binary") == 0) {
                     opts.binary = 1;
                 } else if (strcmp(argv[i], "--only-code") == 0) {
@@ -224,6 +258,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                         break;
                     case 'o':
                         opts.only_code = 1;
+                        break;
+                    case 'x':
+                        opts.print_hex = 1;
                         break;
                     default:
                         fputs("Error: Unknown option -", stderr);
