@@ -220,15 +220,16 @@ Instruction parse_instruction(int instruction) {
 CLI parse_arguments(int argc, char *argv[]) {
     CLI opts        = {0};
     opts.input_file = NULL;
-
+    bool seen_color = false;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_help(argv[0]);
             exit(EXIT_SUCCESS);
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
-                if (strcmp(argv[i], "--colors") == 0) {
-                    opts.colors = 1;
+                if (strcmp(argv[i], "--no-colors") == 0) {
+                    seen_color = true;
+                    opts.colors = 0;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
                 } else if (strcmp(argv[i], "--hex") == 0) {
@@ -248,7 +249,8 @@ CLI parse_arguments(int argc, char *argv[]) {
                 for (int j = 1; argv[i][j] != '\0'; j++) {
                     switch (argv[i][j]) {
                     case 'c':
-                        opts.colors = 1;
+                        seen_color = true;
+                        opts.colors = 0;
                         break;
                     case 'v':
                         opts.verbosity++;
@@ -282,6 +284,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
+    }
+    if (!seen_color) {
+        opts.colors = 1;
     }
     return opts;
 }
