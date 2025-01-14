@@ -25,17 +25,3 @@ The BELLE disassembler can be used to easily and quickly disassemble binaries ba
 Subroutines, however, are not preserved, as they are an abstraction at assembly level and will only appear in binary as a location that is jumped to.
 
 The BELLE disassembler can be utilized to verify that the assembler has worked properly, and prove that it is possible to extract the original assembly back out of the binary.
-
-## Re-assembling
-
-As the disassembler produces the same code that is assembled, just without labels or directives, the diassembled code can be re-assembled into a binary by invoking the assembler.
-
-The output of the disassembler can be piped to a file with the `>` operator on most systems.
-
-```
-bdump main > main.asm
-```
-
-After piping the disassembled code to a file, the file can then be re-assembled to produce the original binary once again, and can be disassembled once more to verify that the assembler has functioned.
-
-The colored output may not emit properly if the terminal being used does not support ANSI escape codes.
