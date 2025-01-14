@@ -163,7 +163,7 @@ void print_output(Instruction *ins) {
         } else {
             print_instruction_header(current_addr, colors, true);
         }
-        print_binary(ins->full_ins, 4);
+        print_binary(ins->full_ins);
     }
 
     if (!is_directive(ins)) {
