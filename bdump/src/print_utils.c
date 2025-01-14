@@ -1,7 +1,8 @@
 #include "bdump.h"
-CLI args = {0};
-int  line = 1;
-void print_operation(Instruction *ins, char *op, bool colors) {
+size_t current_addr = 100;
+CLI    args         = {0};
+int    line         = 1;
+void   print_operation(Instruction *ins, char *op, bool colors) {
     bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
     bool invert  = ins->destination >> 2 == 1;
     if (is_jump && invert) {
@@ -48,14 +49,14 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         }
     } break;
 
-    case 2: // memory address
+    case 2: // memory address indirect
     {
         int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
 
         if (colors) {
-            printf("%s&[%d]%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
+            printf("%s&%d%s\n", ANSI_YELLOW, memaddr, ANSI_RESET);
         } else {
-            printf("&[%d]\n", memaddr);
+            printf("&%d\n", memaddr);
         }
     } break;
 
@@ -87,7 +88,7 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     }
 
     if (colors) {
-        printf("%s[%d]%s\n", ANSI_YELLOW, ins->full_ins & 1023, ANSI_RESET);
+        printf("[%s%d%s]\n", ANSI_GREEN, ins->full_ins & 1023, ANSI_RESET);
     } else {
         printf("[%d]\n", ins->full_ins & 1023);
     }
@@ -96,21 +97,21 @@ void print_jump_instruction(Instruction *ins, bool colors) {
 void print_hlt_instruction(Instruction *ins, bool colors) {
     if (ins->destination == 1) {
         if (colors) {
-            printf("%s.start%s%s [%d]%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.start%s [%s%d%s]\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
-            printf(".start [%d]\n", ins->source);
+            printf(".start [%d]\n", ins->full_ins & 0b111111111);
         }
     } else if (ins->destination == 2) {
         if (colors) {
-            printf("%s.ssp%s%s [%d]%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.ssp%s%s [%d]%s\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
-            printf(".ssp [%d]\n", ins->source);
+            printf(".ssp [%d]\n", ins->full_ins & 0b111111111);
         }
     } else if (ins->destination == 3) {
         if (colors) {
-            printf("%s.sbp%s%s [%d]%s\n", ANSI_GREEN, ANSI_RESET, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s.sbp%s [%s%d%s]\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
-            printf(".sbp [%d]\n", ins->source);
+            printf(".sbp [%d]\n", ins->full_ins & 0b111111111);
         }
     } else if (ins->full_ins == 0) {
         if (colors) {
@@ -139,13 +140,24 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
     }
 }
 
+bool is_directive(Instruction *ins) {
+    int part = ins->full_ins >> 9;
+    return (part == 1) || (part == 2) || (part == 3);
+}
+
 void print_output(Instruction *ins) {
     bool  colors = args.colors == 1;
     char *op     = match_opcode(ins);
 
-    if (args.line_num == 1) {
-        print_instruction_header(line, colors);
+    if (!is_directive(ins)) {
+        print_instruction_header(current_addr, colors, false);
+    } else {
+        print_instruction_header(current_addr, colors, true);
     }
+    if (!is_directive(ins)) {
+        current_addr++;
+    }
+    print_binary(ins->full_ins, 4);
 
     if (strcmp(op, "ret") != 0 && strcmp(op, "hlt") != 0) {
         print_operation(ins, op, colors);
@@ -180,7 +192,7 @@ void print_output(Instruction *ins) {
         }
     } else if (strcmp(op, "int") == 0) {
         if (colors) {
-            printf("%s%d%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s%d%s\n", ANSI_GREEN, ins->source, ANSI_RESET);
         } else {
             printf("%d\n", ins->source);
         }
@@ -188,7 +200,7 @@ void print_output(Instruction *ins) {
         print_hlt_instruction(ins, colors);
     } else if (strcmp(op, "ld") == 0 || strcmp(op, "lea") == 0) {
         if (colors) {
-            printf("%sr%d%s, ", ANSI_YELLOW, ins->destination, ANSI_RESET);
+            printf("%sr%d%s, ", ANSI_GREEN, ins->destination, ANSI_RESET);
         } else {
             printf("r%d, ", ins->destination);
         }
@@ -196,7 +208,7 @@ void print_output(Instruction *ins) {
         ins->type = (ins->type << 8) | ins->source;
 
         if (colors) {
-            printf("%s[%d]%s\n", ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("[%s%d%s]\n", ANSI_YELLOW, ins->source, ANSI_RESET);
         } else {
             printf("[%d]\n", ins->source);
         }
@@ -217,7 +229,7 @@ void print_output(Instruction *ins) {
         ins->destination = (reconstructed & 0xFFF8) >> 3;
 
         if (colors) {
-            printf("%s[%d]%s, %sr%d%s\n", ANSI_YELLOW, ins->destination, ANSI_RESET, ANSI_YELLOW,
+            printf("[%s%d%s], %sr%d%s\n", ANSI_GREEN, ins->destination, ANSI_RESET, ANSI_YELLOW,
                    ins->source, ANSI_RESET);
         } else {
             printf("[%d], r%d\n", ins->destination, ins->source);
@@ -225,20 +237,20 @@ void print_output(Instruction *ins) {
     } else if (strcmp(op, "push") == 0 || strcmp(op, "pop") == 0) {
         if ((ins->type == 0 && strcmp(op, "push") == 0)) {
             if (colors) {
-                printf("%sr%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
+                printf("%sr%d%s\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
             } else {
                 printf("r%d\n", ins->source);
             }
         } else {
             if (strcmp(op, "push") == 0) {
                 if (colors) {
-                    printf("%s%d%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
+                    printf("%s%d%s\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
                 } else {
                     printf("%d\n", ins->source);
                 }
             } else {
                 if (colors) {
-                    printf("%s[%d]%s\n", ANSI_YELLOW, ins->full_ins & 2047, ANSI_RESET);
+                    printf("[%s%d%s]\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
                 } else {
                     printf("[%d]\n", ins->full_ins & 2047);
                 }

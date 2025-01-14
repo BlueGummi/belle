@@ -35,13 +35,15 @@ Ordered from easy to complex
 
 - [ ] Implement error line printing for codegen errors on the assembler
 
-- [ ] Make colored disassembling consistent
+- [x] Make colored disassembling consistent
 
-- [ ] Implement address printing for the disassembler
+- [x] Implement address printing for the disassembler
 
-- [ ] Implement hex printing for the disassembler
+- [x] Implement hex printing for the disassembler
 
-- [ ] ~~Fix formatter unsafety~~ Put on hold until I find a way to allow consistent use of safe functions across systems
+  **ON HOLD** ~~Fix formatter unsafety~~ 
+
+- [ ] Write safe versions of C string functions (for formatter)
 
 - [ ] Finish tutorials
 

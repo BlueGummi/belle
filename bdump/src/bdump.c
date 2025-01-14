@@ -13,6 +13,15 @@ void *process_instructions(void *arg) {
         if (i + 1 < data->bytes_read) {
             uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             Instruction ins         = parse_instruction(instruction);
+            if ((ins.full_ins >> 9) == 1) {
+                current_addr = ins.full_ins & 0b111111111;
+            }
+        }
+    }
+    for (size_t i = 0; i < data->bytes_read; i += 2) {
+        if (i + 1 < data->bytes_read) {
+            uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            Instruction ins         = parse_instruction(instruction);
             print_instruction(&ins);
         }
     }
@@ -148,7 +157,6 @@ Instruction parse_instruction(int instruction) {
             parsed_ins.type = 3;
     }
     parsed_ins.full_ins = instruction;
-    print_binary(instruction, 16);
     return parsed_ins;
 }
 
@@ -162,8 +170,8 @@ CLI parse_arguments(int argc, char *argv[]) {
             exit(EXIT_SUCCESS);
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
-                if (strcmp(argv[i], "--line-num") == 0) {
-                    opts.line_num = 1;
+                if (strcmp(argv[i], "--address") == 0) {
+                    opts.address = 1;
                 } else if (strcmp(argv[i], "--colors") == 0) {
                     opts.colors = 1;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
@@ -180,8 +188,8 @@ CLI parse_arguments(int argc, char *argv[]) {
             } else {
                 for (int j = 1; argv[i][j] != '\0'; j++) {
                     switch (argv[i][j]) {
-                    case 'l':
-                        opts.line_num = 1;
+                    case 'a':
+                        opts.address = 1;
                         break;
                     case 'c':
                         opts.colors = 1;

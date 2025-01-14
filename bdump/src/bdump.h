@@ -23,7 +23,7 @@ typedef struct
 typedef struct
 {
     char *input_file;
-    int   line_num;
+    int   address;
     int   colors;
     int   verbosity;
     int   binary;
@@ -36,6 +36,6 @@ void        print_instruction(Instruction *s);
 void        print_help(char *bin);
 char       *match_opcode(Instruction *s);
 int         main(int argc, char *argv[]);
-void print_instruction_header(int line, bool colors);
+void        print_instruction_header(size_t line, bool colors, bool is_directive);
 #pragma once
 #endif

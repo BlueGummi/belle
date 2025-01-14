@@ -21,7 +21,6 @@ typedef void *thread_ret_t;
 
 #define CHUNK_SIZE 1024
 
-
 #define HLT_OP 0b0000
 #define ADD_OP 0b0001
 #define JO_OP 0b0010

@@ -1,11 +1,33 @@
 #include "print_utils.c"
 void print_binary(int num, int leading) {
-    if (args.binary == 1) {
-        for (int i = leading - 1; i >= 0; i--) {
-            printf("%d", (num >> i) & 1);
+    char hex[9];
+    sprintf(hex, "%08X", num);
+
+    for (int i = 0; i < 8; i += 2) {
+        if (args.colors) {
+            printf("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
+        } else {
+            printf("%c%c", hex[i], hex[i + 1]);
         }
-        printf(": ");
+        if (i != 6) {
+            printf(" ");
+        }
     }
+    if (args.binary == 1) {
+        if (args.colors) {
+            printf(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
+        } else {
+            printf(" 0b");
+        }
+        for (int i = (leading * 4) - 1; i >= 0; i--) {
+            if (args.colors) {
+                printf("%s%d%s", ANSI_MAGENTA, (num >> i) & 1, ANSI_RESET);
+            } else {
+                printf("%d", (num >> i) & 1);
+            }
+        }
+    }
+    printf(" │ ");
 }
 
 void print_help(char *bin) { // bin is the name of the bin
@@ -17,7 +39,7 @@ void print_help(char *bin) { // bin is the name of the bin
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
-    printf("  %s-l%s, %s--line-num%s   Enable line numbering\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-a%s, %s--addresses%s   Enable address printing\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     printf("  %s-c%s, %s--colors%s     Enable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
@@ -29,10 +51,18 @@ void print_help(char *bin) { // bin is the name of the bin
     exit(0);
 }
 
-void print_instruction_header(int line, bool colors) {
+void print_instruction_header(size_t line, bool colors, bool is_directive) {
     if (colors) {
-        printf("%sline %*d:%s ", ANSI_RED, 3, line, ANSI_RESET);
+        if (!is_directive) {
+            printf("%s%*lu │ %s", ANSI_RED, 4, line, ANSI_RESET);
+        } else {
+            printf("%sXXXX │ %s", ANSI_RED, ANSI_RESET);
+        }
     } else {
-        printf("line %*d: ", 3, line);
+        if (!is_directive) {
+            printf("%*lu │ ", 4, line);
+        } else {
+            printf("XXXX │ ");
+        }
     }
 }
