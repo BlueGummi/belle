@@ -2,7 +2,7 @@
 void print_binary(int num) {
 
     char hex[5];
-    hex[4] = '\0';
+    hex[4]       = '\0';
     int numclone = num;
     for (int i = 0; i < 4; i++) {
         hex[3 - i] = "0123456789ABCDEF"[num & 0xF];
@@ -19,22 +19,22 @@ void print_binary(int num) {
             printf(" ");
         }
     }
-if (args.binary == 1) {
+    if (args.binary == 1) {
 
-    if (args.colors) {
-        printf(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
-    } else {
-        printf(" 0b");
-    }
-
-    for (int i = 16; i >= 0; i--) {
         if (args.colors) {
-            printf("%s%d%s", ANSI_MAGENTA, (numclone >> i) & 1, ANSI_RESET);
+            printf(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
         } else {
-            printf("%d", (numclone >> i) & 1);
+            printf(" 0b");
+        }
+
+        for (int i = 16; i >= 0; i--) {
+            if (args.colors) {
+                printf("%s%d%s", ANSI_MAGENTA, (numclone >> i) & 1, ANSI_RESET);
+            } else {
+                printf("%d", (numclone >> i) & 1);
+            }
         }
     }
-}
     printf(" │ ");
 }
 
