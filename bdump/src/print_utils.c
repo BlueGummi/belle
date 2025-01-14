@@ -258,10 +258,18 @@ void print_output(Instruction *ins) {
                     printf("%d\n", ins->source);
                 }
             } else {
-                if (colors) {
-                    printf("[%s%d%s]\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
+                if (ins->destination == 0b100) {
+                    if (colors) {
+                        printf("[%s%d%s]\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
+                    } else {
+                        printf("[%d]\n", ins->full_ins & 2047);
+                    }
                 } else {
-                    printf("[%d]\n", ins->full_ins & 2047);
+                    if (colors) {
+                        printf("%sr%d%s\n", ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
+                    } else {
+                        printf("r%d\n", ins->full_ins & 2047);
+                    }
                 }
             }
         }
