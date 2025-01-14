@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stddef.h>
 #include <stdarg.h>
 
 #define ANSI_RESET "\033[0m"
@@ -33,9 +34,16 @@
 #define MAX_LINE_LENGTH 4096
 #define MAX_FILES 100
 
+void safe_strcpy(char *dest, const char *src, size_t dest_size) {
+    if (dest_size == 0) return;
+    strncpy(dest, src, dest_size - 1);
+    dest[dest_size - 1] = '\0';
+}
+
 void print_help(const char *program_name) {
     printf("BELLE-fmt - Format code written for the BELLE-assembler\n");
-    printf("\n%s%sUsage:%s %s%s%s [OPTIONS] <FILES>\n\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET, ANSI_BOLD, program_name, ANSI_RESET);
+    printf("\n%s%sUsage:%s %s%s%s [OPTIONS] <FILES>\n\n", 
+           ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET, ANSI_BOLD, program_name, ANSI_RESET);
     printf("%sArguments:%s\n", ANSI_UNDERLINE, ANSI_RESET);
     printf(" <FILES> The files to format\n\n");
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
@@ -44,30 +52,29 @@ void print_help(const char *program_name) {
     printf("  %s-t%s, %s--tabs%s Use tabs for indentation\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     printf("  %s-h%s, %s--help%s Print help\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
 }
+
 char *trim(const char *str) {
-    while (isspace((unsigned char) *str)) {
+    while (isspace((unsigned char)*str)) {
         str++;
     }
 
-    char *trimmed = (char *) malloc(strlen(str) + 1);
+    size_t len = strlen(str);
+    char *trimmed = (char *)malloc(len + 1);
     if (trimmed == NULL) {
         return NULL;
     }
 
-    strcpy(trimmed, str);
+    safe_strcpy(trimmed, str, len + 1);
     return trimmed;
 }
 
 char *clone_string(const char *original) {
-    char *clone = (char *) malloc(strlen(original) + 1);
-
+    size_t len = strlen(original);
+    char *clone = (char *)malloc(len + 1);
     if (clone == NULL) {
         return NULL;
     }
 
-    strcpy(clone, original);
-
+    safe_strcpy(clone, original, len + 1);
     return clone;
 }
-
-

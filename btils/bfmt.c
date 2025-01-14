@@ -1,15 +1,27 @@
 #include "bfmt_utils.c"
+bool starts_with_semicolon(const char *str) {
+    while (isspace((unsigned char)*str)) {
+        str++;
+    }
 
+    return *str == ';';
+}
 
 void trim_and_format_line(char *line, char *formatted_line, size_t max_indentation, int use_tabs) {
     char *lineclone = clone_string(line);
+    if (strcmp(line, "\n") == 0) {
+	formatted_line = "\n\n";
+	return;
+    }
+    if (lineclone == NULL) {
+        perror("Memory allocation failed\n");
+        return;
+    }
+
     size_t leading_spaces = 0;
     while (lineclone[leading_spaces] == ' ') {
         leading_spaces++;
     }
-
-    char *cut_line = &lineclone[leading_spaces];
-    cut_line = cut_line + strspn(cut_line, " ");
 
     char *cut = (leading_spaces > max_indentation) ? &lineclone[leading_spaces] : lineclone;
     cut = cut + strspn(cut, " ");
@@ -23,9 +35,9 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
 
     if (*cut == '\0') {
         formatted_line[0] = '\0';
+        free(lineclone); 
         return;
     }
-
     bool should_not_trim = false;
     char *last_colon = strrchr(cut, ':');
 
@@ -35,26 +47,41 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
         should_not_trim = (last_colon != NULL || *cut == ';');
     }
 
+    char *trimmed_line = trim(line);
+    if (trimmed_line == NULL) {
+        perror("Memory allocation failed\n");
+        free(lineclone);
+        return;
+    }
+
     if (should_not_trim) {
-        strcpy(formatted_line, trim(line));
+        safe_strcpy(formatted_line, trimmed_line, MAX_LINE_LENGTH);
     } else {
         if (use_tabs) {
-            sprintf(formatted_line, "\t%s", trim(line));
+            snprintf(formatted_line, MAX_LINE_LENGTH, "\t%s", trimmed_line);
         } else {
-            sprintf(formatted_line, "%*s%s", (int)max_indentation, "", trim(line));
+            snprintf(formatted_line, MAX_LINE_LENGTH, "%*s%s", (int)max_indentation, "", trimmed_line);
         }
     }
+
+    free(trimmed_line);
     free(lineclone);
 }
-
 void process_file(FILE *input_file, FILE *output_file, size_t max_indentation, int use_tabs) {
     char line[MAX_LINE_LENGTH];
     while (fgets(line, sizeof(line), input_file)) {
+	printf("%s", line);
+	if (strcmp(line, "\n") == 0) {
+		fprintf(output_file, "%s", "\n");
+		continue;
+	}
+	if (starts_with_semicolon(line)) {
+		fprintf(output_file, "%s", line);
+		continue;
+	}
         char formatted_line[MAX_LINE_LENGTH] = {0};
         trim_and_format_line(line, formatted_line, max_indentation, use_tabs);
-        if (formatted_line[0] != '\0') {
-            fprintf(output_file, "%s", formatted_line);
-        }
+        fprintf(output_file, "%s", formatted_line);
     }
 }
 
