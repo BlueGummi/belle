@@ -83,7 +83,11 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
             }
         }
         if (!is_directive) {
+#ifdef _WIN32
+            printf(" %s%*llu%s ", ANSI_GREEN, 5, lineclone, ANSI_RESET);
+#else
             printf(" %s%*lu%s ", ANSI_GREEN, 5, lineclone, ANSI_RESET);
+#endif
         } else {
             printf("%s XXXXX%s ", ANSI_RED, ANSI_RESET);
         }
@@ -111,7 +115,11 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
         }
 
         if (!is_directive) {
+#ifdef _WIN32
+            printf(" %*llu ", 5, lineclone);
+#else
             printf(" %*lu ", 5, lineclone);
+#endif
         } else {
             printf(" XXXXX ");
         }
