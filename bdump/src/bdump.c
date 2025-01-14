@@ -21,45 +21,45 @@ void *process_instructions(void *arg) {
         if (args.binary != 1) {
             if (args.print_hex == 0) {
                 if (args.colors) {
-                    printf("╭───────┬───────┬─────────────╮\n");
-                    printf("│ %saddr%s  │  %sbin%s  │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├───────┼───────┼─────────────╯\n");
+                    printf("╭────────┬───────┬─────────────╮\n");
+                    printf("│  %saddr%s  │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├────────┼───────┼─────────────╯\n");
                 } else {
-                    printf("╭───────┬───────┬─────────────╮\n");
-                    printf("│ addr  │  bin  │ instruction │\n");
-                    printf("├───────┼───────┼─────────────╯\n");
+                    printf("╭────────┬───────┬─────────────╮\n");
+                    printf("│  addr  │  bin  │ instruction │\n");
+                    printf("├────────┼───────┼─────────────╯\n");
                 }
             } else {
                 if (args.colors) {
-                    printf("╭────────────┬───────┬─────────────╮\n");
-                    printf("│  %saddress%s   │  %sbin%s  │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├────────────┼───────┼─────────────╯\n");
+                    printf("╭─────────────┬───────┬─────────────╮\n");
+                    printf("│   %saddress%s   │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├─────────────┼───────┼─────────────╯\n");
                 } else {
-                    printf("╭────────────┬───────┬─────────────╮\n");
-                    printf("│  address   │  bin  │ instruction │\n");
-                    printf("├────────────┼───────┼─────────────╯\n");
+                    printf("╭─────────────┬───────┬─────────────╮\n");
+                    printf("│   address   │  bin  │ instruction │\n");
+                    printf("├─────────────┼───────┼─────────────╯\n");
                 }
             }
         } else {
             if (args.print_hex == 0) {
                 if (args.colors) {
-                    printf("╭───────┬──────────────────────────┬─────────────╮\n");
-                    printf("│ %saddr%s  │          %sbinary%s          │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├───────┼──────────────────────────┼─────────────╯\n");
+                    printf("╭────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│  %saddr%s  │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├────────┼──────────────────────────┼─────────────╯\n");
                 } else {
-                    printf("╭───────┬──────────────────────────┬─────────────╮\n");
-                    printf("│ addr  │         binary           │ instruction │\n");
-                    printf("├───────┼──────────────────────────┼─────────────╯\n");
+                    printf("╭────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│  addr  │         binary           │ instruction │\n");
+                    printf("├────────┼──────────────────────────┼─────────────╯\n");
                 }
             } else {
                 if (args.colors) {
-                    printf("╭────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  %saddress%s   │          %sbinary%s          │ %sinstruction%s │\n", ANSI_RED, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├────────────┼──────────────────────────┼─────────────╯\n");
+                    printf("╭─────────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│   %saddress%s   │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
+                    printf("├─────────────┼──────────────────────────┼─────────────╯\n");
                 } else {
-                    printf("╭────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  address   │         binary           │ instruction │\n");
-                    printf("├────────────┼──────────────────────────┼─────────────╯\n");
+                    printf("╭─────────────┬──────────────────────────┬─────────────╮\n");
+                    printf("│   address   │         binary           │ instruction │\n");
+                    printf("├─────────────┼──────────────────────────┼─────────────╯\n");
                 }
             }
         }
@@ -74,15 +74,15 @@ void *process_instructions(void *arg) {
     if (args.only_code != 1) {
         if (args.binary != 1) {
             if (args.print_hex == 1) {
-                printf("╰────────────┴───────╯\n");
+                printf("╰─────────────┴───────╯\n");
             } else {
-                printf("╰───────┴───────╯\n");
+                printf("╰────────┴───────╯\n");
             }
         } else {
             if (args.print_hex == 1) {
-                printf("╰────────────┴──────────────────────────╯\n");
+                printf("╰─────────────┴──────────────────────────╯\n");
             } else {
-                printf("╰───────┴──────────────────────────╯\n");
+                printf("╰────────┴──────────────────────────╯\n");
             }
         }
     }

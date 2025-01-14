@@ -76,16 +76,16 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
                     printf("%sXX XX%s", ANSI_RED, ANSI_RESET);
                     break;
                 }
-                printf("%s%c%c%s", ANSI_MAGENTA, hex[i], hex[i + 1], ANSI_RESET);
+                printf("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
                 if (i != 2) {
                     printf(" ");
                 }
             }
         }
         if (!is_directive) {
-            printf("%s%*lu%s ", ANSI_RED, 5, lineclone, ANSI_RESET);
+            printf(" %s%*lu%s ", ANSI_GREEN, 5, lineclone, ANSI_RESET);
         } else {
-            printf("%s  XXX%s ", ANSI_RED, ANSI_RESET);
+            printf("%s XXXXX%s ", ANSI_RED, ANSI_RESET);
         }
         printf("│ ");
     } else {
@@ -111,9 +111,9 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
         }
 
         if (!is_directive) {
-            printf("%*lu ", 5, lineclone);
+            printf(" %*lu ", 5, lineclone);
         } else {
-            printf("  XXX ");
+            printf(" XXXXX ");
         }
         printf("│ ");
     }
