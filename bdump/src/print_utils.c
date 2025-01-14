@@ -120,22 +120,30 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
             printf("hlt\n");
         }
     } else {
-        if (colors) {
-            printf("%s%s%s (%s%d%s)\n", ANSI_BLUE,
-                   (ins->full_ins == '\n'                          ? "\\n"
-                    : ins->full_ins == '\t'                        ? "\\t"
-                    : ins->full_ins == '\\'                        ? "\\\\"
-                    : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
-                                                                   : "?"),
-                   ANSI_RESET, ANSI_YELLOW, ins->full_ins, ANSI_RESET);
+        if (!args.only_code) {
+            if (colors) {
+                printf("%s%s%s (%s%d%s)\n", ANSI_BLUE,
+                       (ins->full_ins == '\n'                          ? "\\n"
+                        : ins->full_ins == '\t'                        ? "\\t"
+                        : ins->full_ins == '\\'                        ? "\\\\"
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
+                                                                       : "?"),
+                       ANSI_RESET, ANSI_YELLOW, ins->full_ins, ANSI_RESET);
+            } else {
+                printf("%s (%d)\n",
+                       (ins->full_ins == '\n'                          ? "\\n"
+                        : ins->full_ins == '\t'                        ? "\\t"
+                        : ins->full_ins == '\\'                        ? "\\\\"
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
+                                                                       : "?"),
+                       ins->full_ins);
+            }
         } else {
-            printf("%s (%d)\n",
-                   (ins->full_ins == '\n'                          ? "\\n"
-                    : ins->full_ins == '\t'                        ? "\\t"
-                    : ins->full_ins == '\\'                        ? "\\\\"
-                    : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
-                                                                   : "?"),
-                   ins->full_ins);
+            if (colors) {
+                printf("%s.word%s %s%d%s\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins, ANSI_RESET);
+            } else {
+                printf(".word %d\n", ins->full_ins);
+            }
         }
     }
 }
