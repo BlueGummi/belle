@@ -41,7 +41,7 @@ Ordered from easy to complex
 
 - [ ] Implement hex printing for the disassembler
 
-~~- [ ] Fix formatter unsafety~~ Put on hold until I find a way to allow consistent use of safe functions across systems
+- [ ] ~~Fix formatter unsafety~~ Put on hold until I find a way to allow consistent use of safe functions across systems
 
 - [ ] Finish tutorials
 
