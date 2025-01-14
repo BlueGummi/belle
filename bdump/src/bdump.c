@@ -228,7 +228,7 @@ CLI parse_arguments(int argc, char *argv[]) {
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
                 if (strcmp(argv[i], "--no-colors") == 0) {
-                    seen_color = true;
+                    seen_color  = true;
                     opts.colors = 0;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
@@ -249,7 +249,7 @@ CLI parse_arguments(int argc, char *argv[]) {
                 for (int j = 1; argv[i][j] != '\0'; j++) {
                     switch (argv[i][j]) {
                     case 'c':
-                        seen_color = true;
+                        seen_color  = true;
                         opts.colors = 0;
                         break;
                     case 'v':
