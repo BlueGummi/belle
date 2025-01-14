@@ -8,6 +8,9 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
         leading_spaces++;
     }
 
+    char *cut_line = &lineclone[leading_spaces];
+    cut_line = cut_line + strspn(cut_line, " ");
+
     char *cut = (leading_spaces > max_indentation) ? &lineclone[leading_spaces] : lineclone;
     cut = cut + strspn(cut, " ");
 
@@ -33,7 +36,7 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
     }
 
     if (should_not_trim) {
-        strlcpy(formatted_line, trim(line), sizeof(formatted_line));
+        strcpy(formatted_line, trim(line));
     } else {
         if (use_tabs) {
             sprintf(formatted_line, "\t%s", trim(line));
@@ -76,7 +79,7 @@ int main(int argc, char *argv[]) {
             if (file_count < MAX_FILES) {
                 files[file_count++] = argv[i];
             } else {
-                perror("Too many files specified.\n");
+                fprintf(stderr, "Too many files specified.\n");
                 return EXIT_FAILURE;
             }
         }
