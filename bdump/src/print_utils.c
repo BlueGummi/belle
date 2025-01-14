@@ -103,7 +103,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
     } else if (ins->destination == 2) {
         if (colors) {
-            printf("%s.ssp%s%s [%d]%s\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf("%s.ssp%s [%s%d%s]\n", ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
             printf(".ssp [%d]\n", ins->full_ins & 0b111111111);
         }
