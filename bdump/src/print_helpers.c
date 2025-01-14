@@ -1,21 +1,21 @@
 #include "print_utils.c"
 void print_binary(int num, int leading) {
 
-    char hex[9];
-    hex[8] = '\0';
+    char hex[5];
+    hex[4] = '\0';
 
-    for (int i = 0; i < 8; i++) {
-        hex[7 - i] = "0123456789ABCDEF"[num & 0xF];
+    for (int i = 0; i < 4; i++) {
+        hex[3 - i] = "0123456789ABCDEF"[num & 0xF];
         num >>= 4;
     }
 
-    for (int i = 0; i < 8; i += 2) {
+    for (int i = 0; i < 4; i += 2) {
         if (args.colors) {
             printf("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
         } else {
             printf("%c%c", hex[i], hex[i + 1]);
         }
-        if (i != 6) {
+        if (i != 2) {
             printf(" ");
         }
     }
@@ -48,8 +48,6 @@ void print_help(char *bin) { // bin is the name of the bin
            ANSI_BOLD, ANSI_RESET);
     printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     printf("  %s-c%s, %s--colors%s     Enable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
-           ANSI_RESET);
-    printf("  %s-d%s, %s--debug%s      Print debug messages\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-o%s, %s--only-code%s  Print only code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
