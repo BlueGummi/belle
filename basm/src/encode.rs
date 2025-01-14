@@ -1,8 +1,11 @@
 use crate::*;
+use colored::*;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
 use std::sync::Mutex;
-
 pub static SUBROUTINE_MAP: Lazy<Mutex<HashMap<String, usize>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
@@ -243,10 +246,10 @@ pub fn encode_instruction(
     }
 }
 
-pub fn process_start(lines: &[String]) -> Result<(), String> {
+pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
     let mut start_number: Option<i32> = None;
 
-    for line in lines {
+    for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty() || trimmed_line.starts_with(';') {
@@ -270,11 +273,24 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
                 };
                 if let Some(value) = stripped.strip_prefix("0b") {
                     i32::from_str_radix(value, 2)
-                        .map_err(|_| format!("Invalid binary number: {}", stripped))
+                        .map_err(|_| {
+                            (
+                                index,
+                                format!("Invalid .start directive binary number: {}", stripped),
+                            )
+                        })
                         .ok()
                 } else if let Some(value) = stripped.strip_prefix("0x") {
                     i32::from_str_radix(value, 16)
-                        .map_err(|_| format!("Invalid hexadecimal number: {}", stripped))
+                        .map_err(|_| {
+                            (
+                                index,
+                                format!(
+                                    "Invalid .start directive hexadecimal number: {}",
+                                    stripped
+                                ),
+                            )
+                        })
                         .ok()
                 } else {
                     match stripped.parse::<i32>() {
@@ -295,12 +311,12 @@ pub fn process_start(lines: &[String]) -> Result<(), String> {
 
     if let Some(val) = start_number {
         if val > 511 {
-            return Err(String::from("Start location must not exceed 511"));
+            return Err((0, String::from("Start location must not exceed 511")));
         }
     }
     let mut start_location = START_LOCATION
         .lock()
-        .map_err(|_| "Failed to lock START_LOCATION")?;
+        .map_err(|_| (0, "Failed to lock START_LOCATION".to_string()))?;
 
     *start_location = start_number.unwrap_or(100);
 
@@ -358,12 +374,12 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
 
     Ok(())
 }
-pub fn process_variables(lines: &[String]) -> Result<(), String> {
+pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
     let mut variable_map = VARIABLE_MAP
         .lock()
-        .map_err(|_| "Failed to lock VARIABLE_MAP")?;
+        .map_err(|_| (0, "Failed to lock VARIABLE_MAP".to_string()))?;
 
-    for line in lines {
+    for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty() || trimmed_line.starts_with(';') {
@@ -382,14 +398,21 @@ pub fn process_variables(lines: &[String]) -> Result<(), String> {
 
             let parsed_value = if let Some(stripped) = variable_value.strip_prefix("0b") {
                 i32::from_str_radix(stripped, 2)
-                    .map_err(|_| format!("Invalid binary number: {}", variable_value))?
+                    .map_err(|_| (index, format!("Invalid binary number: {}", variable_value)))?
             } else if let Some(stripped) = variable_value.strip_prefix("0x") {
-                i32::from_str_radix(stripped, 16)
-                    .map_err(|_| format!("Invalid hexadecimal number: {}", variable_value))?
+                i32::from_str_radix(stripped, 16).map_err(|_| {
+                    (
+                        index,
+                        format!("Invalid hexadecimal number: {}", variable_value),
+                    )
+                })?
             } else {
-                variable_value
-                    .parse::<i32>()
-                    .map_err(|_| format!("Invalid variable assignment: {}", line_before_comment))?
+                variable_value.parse::<i32>().map_err(|_| {
+                    (
+                        index,
+                        format!("Invalid variable assignment: {}", line_before_comment),
+                    )
+                })?
             };
 
             variable_map.insert(variable_name.to_string(), parsed_value);
@@ -404,4 +427,31 @@ pub fn update_memory_counter() -> Result<(), String> {
         .map_err(|_| "Failed to lock MEMORY_COUNTER")?;
     *counter += 1;
     Ok(())
+}
+
+pub fn print_line(line_number: usize) -> io::Result<()> {
+    let path = Path::new(&CONFIG.source);
+    let file = File::open(path)?;
+    let reader = io::BufReader::new(file);
+
+    for (current_line, line) in reader.lines().enumerate() {
+        if current_line == line_number {
+            match line {
+                Ok(content) => {
+                    println!("{}\n", content.green());
+                    return Ok(());
+                }
+                Err(e) => {
+                    eprintln!("Error reading line: {}", e);
+                    return Err(e);
+                }
+            }
+        }
+    }
+
+    eprintln!("Line number {} is out of bounds.", line_number);
+    Err(io::Error::new(
+        io::ErrorKind::UnexpectedEof,
+        "Line not found",
+    ))
 }

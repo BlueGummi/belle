@@ -33,7 +33,7 @@ The binaries can be run by calling `basm`, `belle`, or `bdump`.
 
 Ordered from easy to complex
 
-- [ ] Implement error line printing for codegen errors on the assembler
+- [x] Implement error line printing for codegen errors on the assembler
 
 - [x] Make colored disassembling consistent
 

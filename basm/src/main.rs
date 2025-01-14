@@ -50,12 +50,14 @@ fn main() -> io::Result<()> {
     let mut encoded_instructions = Vec::new();
     let mut line_count = 1;
     let mut write_to_file: bool = true;
-    if let Err(e) = process_variables(&lines) {
-        eprintln!("{e}");
+    if let Err((l, m)) = process_variables(&lines) {
+        eprintln!("{m}");
+        print_line(l)?;
         write_to_file = false;
     }
-    if let Err(e) = process_start(&lines) {
+    if let Err((l, e)) = process_start(&lines) {
         eprintln!("{e}");
+        print_line(l)?;
         write_to_file = false;
     }
     if let Err(e) = load_subroutines(&lines) {
@@ -121,6 +123,7 @@ fn main() -> io::Result<()> {
                             if let Err(err_msg) = verify(ins, operand1, operand2, line_count) {
                                 write_to_file = false;
                                 eprintln!("{}", err_msg);
+                                print_line(line_count)?;
                             } else {
                                 for encoded in vector {
                                     encoded_instructions.extend(&encoded.to_be_bytes());
@@ -135,6 +138,7 @@ fn main() -> io::Result<()> {
                         }
                         Err(err_msg) => {
                             write_to_file = false;
+                            print_line(line_count)?;
                             eprintln!("{err_msg}");
                         }
                     }
@@ -237,7 +241,6 @@ fn read_include_file(file_name: &str) -> io::Result<Vec<String>> {
     }
     Ok(included_lines)
 }
-
 fn write_encoded_instructions_to_file(
     filename: &str,
     encoded_instructions: &[u8],
