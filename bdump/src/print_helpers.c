@@ -1,7 +1,13 @@
 #include "print_utils.c"
 void print_binary(int num, int leading) {
+
     char hex[9];
-    sprintf(hex, "%08X", num);
+    hex[8] = '\0';
+
+    for (int i = 0; i < 8; i++) {
+        hex[7 - i] = "0123456789ABCDEF"[num & 0xF];
+        num >>= 4;
+    }
 
     for (int i = 0; i < 8; i += 2) {
         if (args.colors) {
@@ -13,6 +19,7 @@ void print_binary(int num, int leading) {
             printf(" ");
         }
     }
+
     if (args.binary == 1) {
         if (args.colors) {
             printf(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
