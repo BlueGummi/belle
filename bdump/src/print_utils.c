@@ -224,10 +224,10 @@ void print_output(Instruction *ins) {
     } else if (strcmp(op, "st") == 0) {
         if (ins->destination >> 2 == 1) {
             if (colors) {
-                printf("%s&r%d%s, %sr%d%s\n", ANSI_GREEN, ins->type << 1 | (ins->source & 0b10000000) >> 7,
+                printf("%s&r%d%s, %sr%d%s\n", ANSI_GREEN, (ins->full_ins & 0b1110000000) >> 7,
                        ANSI_RESET, ANSI_YELLOW, ins->source & 7, ANSI_RESET);
             } else {
-                printf("&r%d, r%d\n", ins->type << 1 | (ins->source & 0b10000000) >> 7,
+                printf("&r%d, r%d\n", (ins->full_ins & 0b1110000000) >> 7, 
                        (ins->source & 0b111));
             }
             return;
