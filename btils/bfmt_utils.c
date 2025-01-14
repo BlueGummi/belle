@@ -54,7 +54,7 @@ char *trim(const char *str) {
         return NULL;
     }
 
-    strcpy(trimmed, str);
+    strlcpy(trimmed, str, sizeof(trimmed));
     return trimmed;
 }
 
@@ -65,7 +65,7 @@ char *clone_string(const char *original) {
         return NULL;
     }
 
-    strcpy(clone, original);
+    strlcpy(clone, original, sizeof(clone));
 
     return clone;
 }
