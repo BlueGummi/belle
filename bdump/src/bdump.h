@@ -27,6 +27,7 @@ typedef struct
     int   colors;
     int   verbosity;
     int   binary;
+    int   only_code;
 } CLI;
 
 CLI         parse_arguments(int argc, char *argv[]);

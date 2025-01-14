@@ -46,12 +46,14 @@ void print_help(char *bin) { // bin is the name of the bin
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
-    printf("  %s-a%s, %s--addresses%s   Enable address printing\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-a%s, %s--addresses%s  Enable address printing\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     printf("  %s-c%s, %s--colors%s     Enable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-d%s, %s--debug%s      Print debug messages\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+           ANSI_RESET);
+    printf("  %s-o%s, %s--only-code%s  Print only code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n", ANSI_BOLD,
            ANSI_RESET, ANSI_BOLD, ANSI_RESET);

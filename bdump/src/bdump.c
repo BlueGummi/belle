@@ -178,6 +178,8 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.verbosity++;
                 } else if (strcmp(argv[i], "--binary") == 0) {
                     opts.binary = 1;
+                } else if (strcmp(argv[i], "--only-code") == 0) {
+                    opts.only_code = 1;
                 } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
@@ -199,6 +201,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                         break;
                     case 'b':
                         opts.binary = 1;
+                        break;
+                    case 'o':
+                        opts.only_code = 1;
                         break;
                     default:
                         fputs("Error: Unknown option -", stderr);

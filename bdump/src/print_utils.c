@@ -149,20 +149,21 @@ void print_output(Instruction *ins) {
     bool  colors = args.colors == 1;
     char *op     = match_opcode(ins);
 
-    if (!is_directive(ins)) {
-        print_instruction_header(current_addr, colors, false);
-    } else {
-        print_instruction_header(current_addr, colors, true);
+    if (args.only_code != 1) {
+        if (!is_directive(ins)) {
+            print_instruction_header(current_addr, colors, false);
+        } else {
+            print_instruction_header(current_addr, colors, true);
+        }
+        print_binary(ins->full_ins, 4);
     }
+
     if (!is_directive(ins)) {
         current_addr++;
     }
-    print_binary(ins->full_ins, 4);
-
     if (strcmp(op, "ret") != 0 && strcmp(op, "hlt") != 0) {
         print_operation(ins, op, colors);
     }
-
     bool two_reg_args = (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||
                          strcmp(op, "mul") == 0 || strcmp(op, "mov") == 0);
 
