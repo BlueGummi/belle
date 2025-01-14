@@ -27,7 +27,7 @@ void print_binary(int num) {
             printf(" 0b");
         }
 
-        for (int i = 16; i >= 0; i--) {
+        for (int i = 15; i >= 0; i--) {
             if (args.colors) {
                 printf("%s%d%s", ANSI_MAGENTA, (numclone >> i) & 1, ANSI_RESET);
             } else {
