@@ -23,7 +23,6 @@ typedef struct
 typedef struct
 {
     char *input_file;
-    int   address;
     int   colors;
     int   verbosity;
     int   binary;

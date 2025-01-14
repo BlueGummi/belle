@@ -170,9 +170,7 @@ CLI parse_arguments(int argc, char *argv[]) {
             exit(EXIT_SUCCESS);
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
-                if (strcmp(argv[i], "--address") == 0) {
-                    opts.address = 1;
-                } else if (strcmp(argv[i], "--colors") == 0) {
+                if (strcmp(argv[i], "--colors") == 0) {
                     opts.colors = 1;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
@@ -190,9 +188,6 @@ CLI parse_arguments(int argc, char *argv[]) {
             } else {
                 for (int j = 1; argv[i][j] != '\0'; j++) {
                     switch (argv[i][j]) {
-                    case 'a':
-                        opts.address = 1;
-                        break;
                     case 'c':
                         opts.colors = 1;
                         break;
