@@ -1,0 +1,51 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 0 * * *' 
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -f .Dockerfile -t belle-image .
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Copy files from Docker builds
+        run: |
+          docker create --name temp-container belle-image
+          docker cp temp-container:/app ./output
+          docker rm temp-container
+          ./build.sh && ./install.sh
+          cd bdump && make release && cp bdump ../bin && cd ..
+          cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
+          tar -czvf belle.tar.gz bin
+
+      - name: 'Upload BELLE build Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BELLE-Docker-Image
+          path: belle.tar.gz
+          retention-days: 3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          body: Nightly release for BELLE
+          prerelease: true
+          token: ${{ secrets.RELEASE_TOKEN }}
+          name: Nightly release
+          files: |
+            belle.tar.gz
