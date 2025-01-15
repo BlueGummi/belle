@@ -5,7 +5,13 @@ author: BlueGummi
 
 ## Quickstart
 
-If the build and install scripts have not been run, run `make` in the `bdump/` directory to build the disassembler. Then, the diassembler can be executed by calling it with `./bdump`, or can be moved to the PATH of the machine so it can be executed without the need to directly call the binary located in the source code directory.
+If the build and install scripts have not been run, run 
+
+```
+make
+```` 
+
+in the `bdump/` directory to build the disassembler. Then, the diassembler can be executed by calling it with `./bdump`, or can be moved to the PATH of the machine so it can be executed without the need to directly call the binary located in the source code directory.
 
 Different flags can be passed to make the disassembler **emit different output**, but none will affect how it assembles code.
 
@@ -14,15 +20,17 @@ Different flags can be passed to make the disassembler **emit different output**
 | Binary                 | `file`              | String        |     `""`      | `main`  |
 | Output original binary | `-b` or `--binary`  | Boolean       |    `false`    | `-b`    |
 | Verbose output         | `-v` or `--verbose` | Boolean       |    `false`    | `-v`    |
-| Debug output           | `-d` or `--debug`   | Boolean       |    `false`    | `-d`    |
-| Display colors         | `-c` or `--colors`  | Boolean       |    `false`    | `-c`    |
+| Display only ASM           | `-o` or `--only-code`   | Boolean       |    `false`    | `-o`    |
+| Disable colors         | `-c` or `--colorless`  | Boolean       |    `false`    | `-c`    |
+| Output memory as hex  | `-x` or `--hex-mem`  | Boolean       |    `false`    | `-x`    |
+| Output operands as hex | `-X` or `--hex`  | Boolean       |    `false`    | `-X`    |
 | Display help           | `-h` or `--help`    | Boolean       |    `false`    | `-h`    |
 
 ## Use cases
 
 The BELLE disassembler can be used to easily and quickly disassemble binaries back into their original source code.
 
-Subroutines, however, are not preserved, as they are an abstraction at assembly level and will only appear in binary as a location that is jumped to.
+Labels, however, are not preserved, as they are an abstraction at assembly level and will only appear in binary as a location that is jumped to.
 
 The BELLE disassembler can be utilized to verify that the assembler has worked properly, and prove that it is possible to extract the original assembly back out of the binary.
 
@@ -33,7 +41,7 @@ As the disassembler produces the same code that is assembled, just without label
 The output of the disassembler can be piped to a file with the `>` operator on most systems.
 
 ```
-bdump main --only-code > main.asm
+bdump main --only-code --colorless > main.asm
 ```
 
 After piping the disassembled code to a file, the file can then be re-assembled to produce the original binary once again, and can be disassembled once more to verify that the assembler has functioned.

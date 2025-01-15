@@ -38,12 +38,12 @@ void print_binary(int num) {
     printf(" │ ");
 }
 
-void print_help(char *bin) { // bin is the name of the bin
-    printf("The disassembler for BELLE-ISA\n\n");
+void print_help(char *bin) { // bin is the name of the bin program
+    printf("The disassembler for the BELLE-ISA\n\n");
     printf("%s%sUsage:%s %s%s%s [OPTIONS] <BINARY>\n\n", ANSI_UNDERLINE, ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, bin, ANSI_RESET);
     printf("%s%sArguments:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
-    printf("  <BINARY> Path to binary\n\n");
+    printf("  <BINARY>  Path to binary\n\n");
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
