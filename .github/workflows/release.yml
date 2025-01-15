@@ -74,6 +74,7 @@ jobs:
           prerelease: true
           token: ${{ secrets.RELEASE_TOKEN }}
           name: Nightly release
+          draft: false
           files: |
             belle-nightly-linux-x86_64.tar.gz
             belle-nightly-linux-x86_64.zip
