@@ -15,12 +15,66 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build project
+      - name: Build project for Linux
         run: |
-          ./build.sh && ./install.sh
+          mkdir bin
+          cp -r ./examples ./bin
+          mkdir windows-bin
+          cp -r ./examples ./bin
+          mkdir macos-bin
+          cp -r ./examples ./bin
+
+          export RUSTFLAGS="-C target-feature=+crt-static"
+          rustup target add x86_64-unknown-linux-musl
+
+          cd belle && cargo build --target x86_64-unknown-linux-musl --release
+          cp target/x86_64-unknown-linux-musl/release/belle ../bin && cd ..
+
+          cd basm && cargo build --target x86_64-unknown-linux-musl --release
+          cp target/x86_64-unknown-linux-musl/release/basm ../bin && cd ..
+
           cd bdump && make release && cp bdump ../bin && cd ..
           cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
-          tar -czvf belle.tar.gz bin
+
+          sudo apt install zip -y
+          tar -czvf belle-nightly-linux-x86_64.tar.gz bin
+          zip -r belle-nightly-linux-x86_64.zip bin
+
+      - name: Build project for Windows
+        run: |
+          sudo apt install mingw-w64 -y
+
+          cd bdump && make release CC=x86_64-w64-mingw32-gcc && cp bdump.exe ../windows-bin && cd ..
+          cd btils && x86_64-w64-mingw32-gcc -o bfmt.exe bfmt.c -static && cp bfmt.exe ../windows-bin && cd ..
+
+          rustup target add x86_64-pc-windows-gnu
+
+          cd belle && cargo build --target x86_64-pc-windows-gnu --release
+          cp target/x86_64-pc-windows-gnu/release/belle ../windows-bin && cd ..
+
+          cd basm && cargo build --target x86_64-pc-windows-gnu --release
+          cp target/x86_64-pc-windows-gnu/release/basm ../windows-bin && cd ..
+
+          tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
+          zip -r belle-nightly-windows-x86_64.zip windows-bin
+
+      - name: Build project for macOS
+        run: | 
+          sudo apt install cmake clang -y
+ 
+          cd bdump && make release CC=o64-clang && cp bdump ../macos-bin && cd ..
+          cd btils && o64-clang -o bfmt bfmt.c -static && cp bfmt ../macos-bin && cd ..
+
+          rustup target add x86_64-apple-darwin
+
+          cd belle && cargo build --target x86_64-apple-darwin --release
+          cp target/x86_64-pc-apple-darwin/release/belle ../macos-bin && cd ..
+
+          cd basm && cargo build --target x86_64-apple-darwin --release
+          cp target/x86_64-pc-apple-darwin/release/basm ../macos-bin && cd ..
+
+          tar -czvf belle-nightly-macos-x86_64.tar.gz macos-bin
+          zip -r belle-nightly-macos-x86_64.zip macos-bin
 
       - name: 'Upload BELLE build Artifact'
         uses: actions/upload-artifact@v4
@@ -29,21 +83,10 @@ jobs:
           path: belle.tar.gz
           retention-days: 3
 
-      - name: Delete Latest Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE_ID=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            https://api.github.com/repos/<owner>/<repo>/releases/latest | \
-            jq -r .id)
-
-          if [ -n "$RELEASE_ID" ]; then
-            curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
-              https://api.github.com/repos/<owner>/<repo>/releases/$RELEASE_ID
-            echo "Deleted release with ID: $RELEASE_ID"
-          else
-            echo "No releases found."
-          fi
+      - name: Delete latest release
+        uses: liudonghua123/delete-release-action@v1
+        with:
+          release_name: 'nightly'
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -54,4 +97,9 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
           name: Nightly release
           files: |
-            belle.tar.gz
+            belle-nightly-linux-x86_64.tar.gz
+            belle-nightly-linux-x86_64.zip
+            belle-nightly-windows-x86_64.tar.gz
+            belle-nightly-windows-x86_64.zip
+            belle-nightly-macos-x86_64.tar.gz
+            belle-nightly-macos-x86_64.zip
