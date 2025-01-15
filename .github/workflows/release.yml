@@ -32,7 +32,7 @@ jobs:
       - name: Delete
         uses: actions/github-script@v4
         with:
-            github-token: ${{secrets.GITHUB_TOKEN}}
+            github-token: ${{ secrets.RELEASE_TOKEN }}
             script: |
               const { owner, repo } = context.repo
               const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
