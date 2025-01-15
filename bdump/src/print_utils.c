@@ -39,7 +39,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     case 1: // literal
     {
         bool sign = (ins->source >> 7) == 1;
-        ins->source &= 0b01111111; // Clear the sign bit
+        ins->source &= 0b01111111;
 
         if (colors) {
             printf(FORMAT_STRING_COLORED, ANSI_VARIED, sign ? -ins->source : ins->source, ANSI_RESET);
@@ -50,8 +50,8 @@ void print_two_reg_args(Instruction *ins, bool colors) {
 
     case 2: // memory address indirect
     {
-        int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
-
+        int memaddr = ins->full_ins & 0b1111111;
+	
         if (colors) {
             printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
         } else {
@@ -61,12 +61,10 @@ void print_two_reg_args(Instruction *ins, bool colors) {
 
     case 3: // register indirect
     {
-        int reg = ((ins->source << 3) & 0b1111111) >> 3;
-
         if (colors) {
-            printf("%s&r%d%s", ANSI_YELLOW, reg, ANSI_RESET);
+            printf("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
         } else {
-            printf("&r%d", reg);
+            printf("&r%d", ins->source & 7);
         }
     } break;
 
