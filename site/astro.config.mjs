@@ -43,6 +43,8 @@ export default defineConfig({
 	  { label: "The Stack", slug: "tutorial/tutorial6" },
 	  { label: "Addressing Modes", slug: "tutorial/tutorial7" },
 	  { label: "The CPU itself", slug: "tutorial/tutorial8" },
+	  { label: "A Look at the Binary", slug: "tutorial/tutorial9" },
+	  { label: "Reverse engineering", slug: "tutorial/tutorial10" },
 	],
       },
     ],
