@@ -27,7 +27,7 @@ yay -S belle-cpu
 Or, for Windows
 
 ```pwsh
-git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && .\build.ps1 -w && .\install.ps1 -c
+iex ((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/BlueGummi/7ebc6a09cbf39cc88304cb8a8d8bb571/raw/55918c8bd172e56b33b9ff94a79867a0e6b7ac0d/binstall.ps1'))
 ```
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.

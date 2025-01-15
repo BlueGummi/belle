@@ -12,8 +12,15 @@ tableOfContents:
 
 ## Quickstart
 
+On **Windows**, run
+
+```
+iex ((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/BlueGummi/7ebc6a09cbf39cc88304cb8a8d8bb571/raw/55918c8bd172e56b33b9ff94a79867a0e6b7ac0d/binstall.ps1'))```
+
+On **Unix systems** run
+
 ```bash
-git clone https://github.com/BlueGummi/belle --depth=1 && cd belle
+git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
 ```
 
 ###### AUR Installation - Binary
@@ -21,21 +28,9 @@ git clone https://github.com/BlueGummi/belle --depth=1 && cd belle
 yay -S belle-cpu
 ```
 
-Cargo, RustC, GCC, and Makefile **compatibility must be present on the system** if these programs are to be installed.
-
-Every executable in this repository can have the `--help` flag passed to display helpful information.
-
-```bash
-./build.sh -w && ./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
-```
-
-Or, for Windows
-
-```bash
-.\build.ps1 -w && .\install.ps1 -c # This installs the binaries to ~/.local/bin on Windows
-```
-
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
+
+## Further Documentation
 
 ### ISA (Instruction set) - [docs/isa](instructions)
 
