@@ -59,24 +59,6 @@ jobs:
           tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
           zip -r belle-nightly-windows-x86_64.zip windows-bin
 
-      - name: Build project for macOS
-        run: | 
-          sudo apt install cmake clang -y
- 
-          cd bdump && make release CC=o64-clang && cp bdump ../macos-bin && cd ..
-          cd btils && o64-clang -o bfmt bfmt.c -static && cp bfmt ../macos-bin && cd ..
-
-          rustup target add x86_64-apple-darwin
-
-          cd belle && cargo build --target x86_64-apple-darwin --release
-          cp target/x86_64-pc-apple-darwin/release/belle ../macos-bin && cd ..
-
-          cd basm && cargo build --target x86_64-apple-darwin --release
-          cp target/x86_64-pc-apple-darwin/release/basm ../macos-bin && cd ..
-
-          tar -czvf belle-nightly-macos-x86_64.tar.gz macos-bin
-          zip -r belle-nightly-macos-x86_64.zip macos-bin
-
       - name: Delete latest release
         uses: liudonghua123/delete-release-action@v1
         with:
@@ -95,5 +77,3 @@ jobs:
             belle-nightly-linux-x86_64.zip
             belle-nightly-windows-x86_64.tar.gz
             belle-nightly-windows-x86_64.zip
-            belle-nightly-macos-x86_64.tar.gz
-            belle-nightly-macos-x86_64.zip
