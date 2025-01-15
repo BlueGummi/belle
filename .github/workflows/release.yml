@@ -40,9 +40,8 @@ jobs:
           retention-days: 3
 
       - name: Delete
-        steps:
-        - uses: actions/github-script@v4
-          with:
+        uses: actions/github-script@v4
+        with:
             github-token: ${{secrets.GITHUB_TOKEN}}
             script: |
               const { owner, repo } = context.repo
