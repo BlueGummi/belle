@@ -17,10 +17,16 @@ On **Windows**, run
 ```
 iex ((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/BlueGummi/7ebc6a09cbf39cc88304cb8a8d8bb571/raw/55918c8bd172e56b33b9ff94a79867a0e6b7ac0d/binstall.ps1'))```
 
-On **Unix systems** run
+On **x86 Linux** systems, run
 
 ```bash
-git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c # This installs the binaries to ~/.local/bin on Unix OS's
+curl https://gist.githubusercontent.com/BlueGummi/beca806b9339c4d934260d1eaf3d84cb/raw/32e89f0e8c4c88867e9faae77d2587e67690d8b6/binstall.sh | bash
+```
+
+On **macOS and other Unix systems**, run
+
+```bash
+git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c
 ```
 
 ###### AUR Installation - Binary

@@ -8,16 +8,23 @@ All documentation is available on [the website for this project](https://bluegum
 
 ## Quickstart
 
+On **x86 Linux** systems, run
+
+```bash
+curl https://gist.githubusercontent.com/BlueGummi/beca806b9339c4d934260d1eaf3d84cb/raw/32e89f0e8c4c88867e9faae77d2587e67690d8b6/binstall.sh | bash
 ```
+
+On **macOS and other Unix systems**, run
+
+```bash
 git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c
 ```
 
-
-<details open>
+<details close>
 <summary>AUR Installation - Binary</summary>
 <br>
 
-```
+```bash
 yay -S belle-cpu
 ```
 
