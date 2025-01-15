@@ -12,6 +12,16 @@ All documentation is available on [the website for this project](https://bluegum
 git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c
 ```
 
+
+<details open>
+<summary>AUR Installation - Arch Linux and any machine that can install AUR packages</summary>
+<br>
+```
+git clone https://aur.archlinux.org/belle-cpu.git && cd belle-cpu && makepkg -si
+```
+</details>
+
+
 Or, for Windows
 
 ```pwsh
