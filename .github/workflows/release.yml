@@ -15,6 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Delete Release
+      - uses: sgpublic/delete-release-action@v1.1
+        with:
+          release-drop: true
+          release-keep-count: 2
+          release-drop-tag: true
+          pre-release-drop: true
+          pre-release-keep-count: -1
+          pre-release-drop-tag: true
+          draft-drop: true
+          draft-drop-count: -1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+
       - name: Build project for Linux
         run: |
           mkdir bin
@@ -58,11 +73,6 @@ jobs:
 
           tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
           zip -r belle-nightly-windows-x86_64.zip windows-bin
-
-      - name: Delete Release
-        run: gh release delete nightly --yes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
