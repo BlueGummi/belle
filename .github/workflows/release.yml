@@ -15,18 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build Docker image
+      - name: Build project
         run: |
-          docker build -f .Dockerfile -t belle-image .
-
-      - name: Create output directory
-        run: mkdir -p output
-
-      - name: Copy files from Docker builds
-        run: |
-          docker create --name temp-container belle-image
-          docker cp temp-container:/app ./output
-          docker rm temp-container
           ./build.sh && ./install.sh
           cd bdump && make release && cp bdump ../bin && cd ..
           cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
