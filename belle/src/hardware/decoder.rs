@@ -201,7 +201,11 @@ impl CPU {
                 }
                 Ok(self.memory[*n as usize].unwrap() as f32)
             }
-            _ => unreachable!("Argument types are invalid on line {} at file {} (how did you get here?)", line!(), file!()),
+            _ => unreachable!(
+                "Argument types are invalid on line {} at file {} (how did you get here?)",
+                line!(),
+                file!()
+            ),
         }
     }
 

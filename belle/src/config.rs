@@ -44,40 +44,32 @@ pub struct Cli {
     pub no_print_memory: bool,
 }
 pub fn declare_config() -> Cli {
-    Cli::try_parse().unwrap_or_else(|_| {
-        #[cfg(not(test))]
-        #[cfg(not(fuzzing))]
-        {
-            Cli::command().print_help().unwrap();
-            std::process::exit(0);
-        }
-
-        #[allow(unreachable_code)]
-        #[cfg(not(fuzzing))]
-        {
-            Cli {
-                rom: "".to_string(),
-                debug: false,
-                verbose: false,
-                quiet: false,
-                time_delay: None,
-                pretty: false,
-                write: false,
-                no_print_memory: false,
-            }
-        }
-        #[cfg(fuzzing)]
-        {
-            return Cli {
-                rom: "".to_string(),
-                debug: false,
-                verbose: false,
-                quiet: false,
-                time_delay: None,
-                pretty: false,
-                write: false,
-                no_print_memory: true,
-            };
-        }
-    })
+    #[allow(unreachable_code)]
+    #[cfg(test)]
+    {
+        return Cli {
+            rom: "".to_string(),
+            debug: false,
+            verbose: false,
+            quiet: false,
+            time_delay: None,
+            pretty: false,
+            write: false,
+            no_print_memory: false,
+        };
+    }
+    #[cfg(fuzzing)]
+    {
+        return Cli {
+            rom: "".to_string(),
+            debug: false,
+            verbose: false,
+            quiet: false,
+            time_delay: None,
+            pretty: false,
+            write: false,
+            no_print_memory: true,
+        };
+    }
+    Cli::parse()
 }

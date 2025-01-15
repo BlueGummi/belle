@@ -1,4 +1,3 @@
-use clap::CommandFactory;
 use clap::Parser;
 pub use once_cell::sync::Lazy;
 
@@ -33,10 +32,7 @@ pub struct Args {
 }
 
 pub fn declare_config() -> Args {
-    let cli = Args::try_parse().unwrap_or_else(|_| {
-        Args::command().print_help().unwrap();
-        std::process::exit(0); // will be changed if i need testing
-    });
+    let cli = Args::parse();
 
     let binary = cli.binary.unwrap_or_else(|| "a.out".to_string());
 
