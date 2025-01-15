@@ -59,10 +59,10 @@ jobs:
           tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
           zip -r belle-nightly-windows-x86_64.zip windows-bin
 
-      - name: Delete latest release
-        uses: liudonghua123/delete-release-action@v1
-        with:
-          release_name: 'nightly'
+      - name: Delete Release
+        run: |
+          gh auth login --with-token < ${{ secrets.GITHUB_TOKEN }}
+          gh release delete nightly --yes
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
