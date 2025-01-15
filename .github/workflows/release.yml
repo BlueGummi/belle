@@ -61,7 +61,7 @@ jobs:
 
       - name: Delete release
         run: |
-          git config --global url."https://${{ secrets.RELEASE_TOKEN }}@github.com".insteadOf "https://github.com"
+          git config --global url."https://${{ secrets.DELETE_TOKEN }}@github.com".insteadOf "https://github.com"
           git push --delete origin nightly
 
       - name: Create Release
