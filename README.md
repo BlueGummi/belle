@@ -9,13 +9,13 @@ All documentation is available on [the website for this project](https://bluegum
 ## Quickstart
 
 ```
-git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh && ./install.sh
+git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh -w && ./install.sh -c
 ```
 
 Or, for Windows
 
 ```pwsh
-git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && .\build.ps1 && .\install.ps1 
+git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && .\build.ps1 -w && .\install.ps1 -c
 ```
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
