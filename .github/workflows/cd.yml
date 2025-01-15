@@ -69,6 +69,7 @@ jobs:
       with:
         tag_name: nightly
         prerelease: true
+        token: ${{ secrets.RELEASE_TOKEN }}
         name: Nightly release
         files: |
           belle.tar.gz
