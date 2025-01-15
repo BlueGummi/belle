@@ -32,7 +32,7 @@ jobs:
       with:
         name: BELLE-Docker-Image
         path: belle.tar.gz
-        retention-days: 30
+        retention-days: 5
 
     - name: Set up Git
       run: |
@@ -63,3 +63,11 @@ jobs:
         git add * || true
         git commit -m "AUTOCOMMIT - ${{ env.LAST_COMMIT_MESSAGE }}" || true
         git push origin || true
+
+    - name: Create GitHub Release
+      run: |
+        echo 'TAG_NAME=nightly' >> $GITHUB_ENV
+        gh release delete nightly --yes || true
+        gh release create nightly --title "Nightly build!" --notes "Automated BELLE nightly build" --target belle.tar.gz 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

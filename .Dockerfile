@@ -1,10 +1,12 @@
-FROM rust:1.83 as builder
+FROM rust:1.84 as builder
 
 WORKDIR /usr/src/belle
 
 COPY . .
 
 RUN chmod +x build.sh && ./build.sh -n
+RUN cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
+RUN cd bdump && make release && cp bdump ../bin && cd ..
 
 FROM debian:bullseye-slim
 
