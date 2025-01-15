@@ -39,6 +39,16 @@ jobs:
           path: belle.tar.gz
           retention-days: 3
 
+      - name: Delete
+        steps:
+        - uses: actions/github-script@v4
+          with:
+            github-token: ${{secrets.GITHUB_TOKEN}}
+            script: |
+              const { owner, repo } = context.repo
+              const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
+              await github.repos.deleteRelease({ owner, repo, release_id: id })
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
