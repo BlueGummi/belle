@@ -25,7 +25,8 @@ jobs:
         docker create --name temp-container belle-image
         docker cp temp-container:/app ./output
         docker rm temp-container
-        tar -czvf belle.tar.gz output
+        ./build.sh && ./install.sh
+        tar -czvf belle.tar.gz bin
 
     - name: 'Upload BELLE build Artifact'
       uses: actions/upload-artifact@v4
