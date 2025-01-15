@@ -18,7 +18,7 @@ git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh
 <br>
 
 ```
-git clone https://aur.archlinux.org/belle-cpu.git && cd belle-cpu && makepkg -si
+yay -S belle-cpu
 ```
 
 </details>
