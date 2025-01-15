@@ -65,7 +65,7 @@ void        print_instruction_header(size_t line, bool colors, bool is_directive
 #define FORMAT_STRING_ST_COLORED (args.hex_operands ? "[%s0x%x%s], %sr%d%s" : "[%s%d%s], %sr%d%s")
 #define FORMAT_STRING_ST (args.hex_operands ? "[0x%x], r%d" : "[%d], r%d")
 #define ANSI_VARIED (args.hex_operands ? ANSI_CYAN : ANSI_GREEN)
-#define FORMAT_STRING_COLORED_SIGNED (args.hex_operands ? "%s0x%x%s" : "%s-%d%s")
+#define FORMAT_STRING_COLORED_SIGNED (args.hex_operands ? "%s0x%x%s" : "-%s%d%s")
 
 #define FMTS (sign ? FORMAT_STRING_SIGNED : FORMAT_STRING)
 #define FMTSC (sign ? FORMAT_STRING_COLORED_SIGNED : FORMAT_STRING_COLORED)
