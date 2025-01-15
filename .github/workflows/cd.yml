@@ -63,16 +63,12 @@ jobs:
         git add * || true
         git commit -m "AUTOCOMMIT - ${{ env.LAST_COMMIT_MESSAGE }}" || true
         git push origin || true
-
-    - name : Create nightly release
-      id: create_release
-      uses: andelf/nightly-release@main
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: nightly
-        name: 'Nightly build'
-        prerelease: true
-        body: 'Linux build for BELLE - Nightly release'
-        files: |
-            belle.tar.gz
+        tag: nightly
+        name: Nightly release
+        files: belle.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
