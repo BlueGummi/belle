@@ -52,7 +52,9 @@ void print_help(char *bin) { // bin is the name of the bin
            ANSI_RESET);
     printf("  %s-o%s, %s--only-code%s  Print only code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-x%s, %s--hex%s        Print memory addresses in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-x%s, %s--hex-mem%s    Print memory addresses in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+           ANSI_RESET);
+    printf("  %s-X%s, %s--hex%s        Print instruction operands in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n", ANSI_BOLD,
            ANSI_RESET, ANSI_BOLD, ANSI_RESET);

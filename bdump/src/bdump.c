@@ -235,13 +235,15 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.colors = 0;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
                     opts.verbosity++;
-                } else if (strcmp(argv[i], "--hex") == 0) {
+                } else if (strcmp(argv[i], "--hex-mem") == 0) {
                     opts.print_hex = 1;
                 } else if (strcmp(argv[i], "--binary") == 0) {
                     opts.binary = 1;
                 } else if (strcmp(argv[i], "--only-code") == 0) {
                     opts.only_code = 1;
-                } else {
+                } else if (strcmp(argv[i], "--hex") == 0) {
+                    opts.hex_operands = 1;
+                }else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
                     fputc('\n', stderr);
@@ -266,6 +268,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                         break;
                     case 'x':
                         opts.print_hex = 1;
+                        break;
+                    case 'X':
+                        opts.hex_operands = 1;
                         break;
                     default:
                         fputs("Error: Unknown option -", stderr);

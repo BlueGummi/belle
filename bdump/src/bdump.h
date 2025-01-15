@@ -28,6 +28,7 @@ typedef struct
     int   binary;
     int   only_code;
     int   print_hex;
+    int   hex_operands;
 } CLI;
 
 CLI         parse_arguments(int argc, char *argv[]);
@@ -40,3 +41,25 @@ int         main(int argc, char *argv[]);
 void        print_instruction_header(size_t line, bool colors, bool is_directive);
 #pragma once
 #endif
+#define FORMAT_STRING_MEMPTR (args.hex_operands ? "&0x%x" : "&%d")
+#define FORMAT_STRING_MEMPTR_COLORED (args.hex_operands ? "&%s0x%x%s" : "&%s%d%s")
+#define FORMAT_STRING_MEM_COLORED (args.hex_operands ? "[%s0x%x%s]" : "[%s%d%s]")
+#define FORMAT_STRING_MEM (args.hex_operands ? "[0x%x]" : "[%d]")
+#define FORMAT_STRING_COLORED (args.hex_operands ? "%s0x%x%s" : "%s%d%s")
+#define FORMAT_STRING (args.hex_operands ? "0x%x" : "%d")
+
+#define FORMAT_STRING_WORD_COLORED (args.hex_operands ? "%s.word%s %s0x0x%x%s" : "%s.word%s %s%d%s")
+#define FORMAT_STRING_WORD (args.hex_operands ? ".word 0x0x%x" : ".word %d")
+
+#define FORMAT_STRING_START (args.hex_operands ? ".start [0x%x]" : ".start [%d]")
+#define FORMAT_STRING_START_COLORED (args.hex_operands ? "%s.start%s [%s0x%x%s]" : "%s.start%s [%s%d%s]")
+#define FORMAT_STRING_SSP (args.hex_operands ? ".ssp [0x%x]" : ".ssp [%d]")
+#define FORMAT_STRING_SBP (args.hex_operands ? ".sbp [0x%x]" : ".sbp [%d]")
+#define FORMAT_STRING_SSP_COLORED (args.hex_operands ? "%s.ssp%s [%s0x%x%s]" : "%s.ssp%s [%s%d%s]")
+#define FORMAT_STRING_SBP_COLORED (args.hex_operands ? "%s.sbp%s [%s0x%x%s]" : "%s.sbp%s [%s%d%s]")
+
+#define FORMAT_STRING_ASCII_COLORED (args.hex_operands ? "%s%s%s (%s0x%x%s)" :"%s%s%s (%s%d%s)")
+#define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%x)" :"%s (%x)")
+
+#define FORMAT_STRING_ST_COLORED (args.hex_operands ? "[%s0x%x%s], %sr%d%s" : "[%s%d%s], %sr%d%s")
+#define FORMAT_STRING_ST (args.hex_operands ? "[0x%x], r%d" : "[%d], r%d")
