@@ -37,6 +37,12 @@ export default defineConfig({
 	items: [
 	  { label: "Introduction", slug: "tutorial/tutorial1" },
 	  { label: "Hello, world!", slug: "tutorial/tutorial2" },
+	  { label: "Moving Things Around", slug: "tutorial/tutorial3" },
+	  { label: "Math and more", slug: "tutorial/tutorial4" },
+	  { label: "Branches and conditionals", slug: "tutorial/tutorial5" },
+	  { label: "The Stack", slug: "tutorial/tutorial6" },
+	  { label: "Addressing Modes", slug: "tutorial/tutorial7" },
+	  { label: "The CPU itself", slug: "tutorial/tutorial8" },
 	],
       },
     ],

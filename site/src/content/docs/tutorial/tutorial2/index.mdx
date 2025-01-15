@@ -109,9 +109,17 @@ Each interrupt call is assigned a given interrupt *code*. In many other ISAs, th
 
 But, in the BELLE-ISA, interrupts are generated with their respective code in the instruction to avoid having to read a register.
 
-In this case, interrupt *8* is the code to "Print all values from the memory address in `r0` to the memory address in `r1` as ASCII characters`
+In this case, interrupt *8* is the code to "Print all values from the memory address in `r0` to the memory address in `r1` as ASCII characters.
 
 #### Concluding
+
+Lastly, the program has a
+
+```asm
+hlt
+```
+
+To tell the CPU to stop execution.
 
 So, there you have it! Your very first "Hello, world!" program for the Big Endian, Low Level Emulator. Try to change some text or some instructions and see what happens. The interactive box is ***fully*** interactive, so all parts of the assembler and emulator work just fine in every instance that you'll see it.
 
