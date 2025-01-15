@@ -59,6 +59,11 @@ jobs:
           tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
           zip -r belle-nightly-windows-x86_64.zip windows-bin
 
+      - name: Delete release
+        run: |
+          git config --global url."https://${{ secrets.RELEASE_TOKEN }}@github.com".insteadOf "https://github.com"
+          git push --delete origin nightly
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
