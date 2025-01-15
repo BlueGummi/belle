@@ -68,5 +68,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: nightly
+        prerelease: true
         name: Nightly release
-        files: belle.tar.gz
+        files: |
+          belle.tar.gz
