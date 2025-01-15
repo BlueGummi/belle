@@ -64,10 +64,12 @@ jobs:
         git commit -m "AUTOCOMMIT - ${{ env.LAST_COMMIT_MESSAGE }}" || true
         git push origin || true
 
-    - name: Create GitHub Release
-      run: |
-        echo 'TAG_NAME=nightly' >> $GITHUB_ENV
-        gh release delete nightly --yes || true
-        gh release create nightly --title "Nightly build!" --notes "Automated BELLE nightly build" --target belle.tar.gz 
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name : Create nightly release
+      uses: "bluegummi/belle@master"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: nightly
+        prerelease: true
+        files: |
+          belle.tar.gz
+
