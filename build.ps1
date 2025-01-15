@@ -1,6 +1,6 @@
 $Clean = $false
 $WithCleanup = $false
-
+$CargoInstalled = $false
 function Print-Message {
     param (
         [string]$Message,
@@ -54,6 +54,7 @@ function Check-Deps {
             Start-Process -FilePath ".\rustup-init.exe" -ArgumentList "-y" -NoNewWindow -Wait
             Remove-Item -Path "rustup-init.exe" -Force
             $env:Path += ";$HOME\.cargo\bin"
+            $CargoInstalled = $true
             Print-Message "Cargo installed successfully!" "green"
         } else {
             Print-Message "Cargo installation skipped." "red"
@@ -164,6 +165,16 @@ function Default-Build {
 
     if ($WithCleanup) {
         Clean
+        if ($CargoInstalled) {
+            Print-Message "Would you like to uninstall cargo? [y/N]" "yellow"
+	        $userInput = Read-Host -Prompt ""
+	        if ($userInput -eq 'y' -or $userInput -eq 'Y') {
+                rustup self uninstall -y
+                Print-Message "Cargo successfully uninstalled!" "green"
+            } else {
+                Print-Message "Cargo uninstallation skipped." "red"
+            }
+        }
     }
 
     Print-Message "Build complete" "green"

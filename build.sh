@@ -2,7 +2,7 @@
 set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
-
+cargo_installed=false
 check_deps() {
     if ! command -v cargo &> /dev/null; then
         print_message "Cargo is not installed. Would you like to install it? [y/N]" yellow
@@ -14,6 +14,7 @@ check_deps() {
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
             source "$HOME/.cargo/env"
             print_message "Cargo installed successfully!" green
+            cargo_installed=true
         else
             print_message "Cargo installation skipped." red
             exit
@@ -207,6 +208,18 @@ default_build() {
 
     if [ "$with_cleanup" ]; then
         clean
+        if [ "$cargo_installed" ]; then
+            print_message "Would you like to uninstall cargo now? [y/N]" yellow
+            read -r user_input
+
+                if [[ "$user_input" =~ ^[yY]$ ]]; then
+                    rustup self uninstall
+                    print_message "Cargo successfully uninstalled!" green
+                else
+                    print_message "Cargo uninstallation skipped." red
+                fi
+        fi
+
     fi
 
     print_message "Build complete" green
