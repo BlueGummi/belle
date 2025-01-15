@@ -208,18 +208,6 @@ default_build() {
 
     if [ "$with_cleanup" ]; then
         clean
-        if [ "$cargo_installed" ]; then
-            print_message "Would you like to uninstall cargo now? [y/N]" yellow
-            read -r user_input
-
-                if [[ "$user_input" =~ ^[yY]$ ]]; then
-                    rustup self uninstall
-                    print_message "Cargo successfully uninstalled!" green
-                else
-                    print_message "Cargo uninstallation skipped." red
-                fi
-        fi
-
     fi
 
     print_message "Build complete" green
