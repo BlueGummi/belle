@@ -230,7 +230,7 @@ CLI parse_arguments(int argc, char *argv[]) {
             exit(EXIT_SUCCESS);
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
-                if (strcmp(argv[i], "--no-colors") == 0) {
+                if (strcmp(argv[i], "--colorless") == 0) {
                     seen_color  = true;
                     opts.colors = 0;
                 } else if (strcmp(argv[i], "--verbose") == 0) {
@@ -243,7 +243,7 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.only_code = 1;
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
-                }else {
+                } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
                     fputc('\n', stderr);

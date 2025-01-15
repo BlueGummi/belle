@@ -1,7 +1,7 @@
 #include "bdump.h"
 size_t current_addr = 100;
 CLI    args         = {0};
-void print_operation(Instruction *ins, char *op, bool colors) {
+void   print_operation(Instruction *ins, char *op, bool colors) {
     bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
     bool invert  = ins->destination >> 2 == 1;
     if (is_jump && invert) {
@@ -42,7 +42,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         ins->source &= 0b01111111; // Clear the sign bit
 
         if (colors) {
-            printf(FORMAT_STRING_COLORED, ANSI_YELLOW, sign ? -ins->source : ins->source, ANSI_RESET);
+            printf(FORMAT_STRING_COLORED, ANSI_VARIED, sign ? -ins->source : ins->source, ANSI_RESET);
         } else {
             printf(FORMAT_STRING, sign ? -ins->source : ins->source);
         }
@@ -53,7 +53,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         int memaddr = ((ins->source << 1) & 0b1111111) >> 1;
 
         if (colors) {
-            printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_YELLOW, memaddr, ANSI_RESET);
+            printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
         } else {
             printf(FORMAT_STRING_MEMPTR, memaddr);
         }
@@ -87,7 +87,7 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     }
 
     if (colors) {
-        printf(FORMAT_STRING_MEM_COLORED, ANSI_GREEN, ins->full_ins & 1023, ANSI_RESET);
+        printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 1023, ANSI_RESET);
     } else {
         printf(FORMAT_STRING_MEM, ins->full_ins & 1023);
     }
@@ -96,19 +96,19 @@ void print_jump_instruction(Instruction *ins, bool colors) {
 void print_hlt_instruction(Instruction *ins, bool colors) {
     if (ins->destination == 1) {
         if (colors) {
-            printf(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
             printf(FORMAT_STRING_START, ins->full_ins & 0b111111111);
         }
     } else if (ins->destination == 2) {
         if (colors) {
-            printf(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
             printf(FORMAT_STRING_SSP, ins->full_ins & 0b111111111);
         }
     } else if (ins->destination == 3) {
         if (colors) {
-            printf(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
         } else {
             printf(FORMAT_STRING_SBP, ins->full_ins & 0b111111111);
         }
@@ -127,7 +127,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                         : ins->full_ins == '\\'                        ? "\\\\"
                         : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
                                                                        : "?"),
-                       ANSI_RESET, ANSI_YELLOW, ins->full_ins, ANSI_RESET);
+                       ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
                 printf(FORMAT_STRING_ASCII,
                        (ins->full_ins == '\n'                          ? "\\n"
@@ -139,7 +139,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
             }
         } else {
             if (colors) {
-                printf(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_GREEN, ins->full_ins, ANSI_RESET);
+                printf(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
                 printf(FORMAT_STRING_WORD, ins->full_ins);
             }
@@ -200,7 +200,7 @@ void print_instruction(Instruction *ins) {
         }
     } else if (strcmp(op, "int") == 0) {
         if (colors) {
-            printf(FORMAT_STRING_COLORED, ANSI_GREEN, ins->source, ANSI_RESET);
+            printf(FORMAT_STRING_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
         } else {
             printf(FORMAT_STRING, ins->source);
         }
@@ -216,7 +216,7 @@ void print_instruction(Instruction *ins) {
         ins->type = (ins->type << 8) | ins->source;
 
         if (colors) {
-            printf(FORMAT_STRING_MEM_COLORED, ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
         } else {
             printf(FORMAT_STRING_MEM, ins->source);
         }
@@ -234,7 +234,7 @@ void print_instruction(Instruction *ins) {
             ins->source &= 0b111;
             ins->destination = (ins->full_ins & 0b111111111000) >> 3;
             if (colors) {
-                printf(FORMAT_STRING_ST_COLORED, ANSI_GREEN, ins->destination, ANSI_RESET, ANSI_YELLOW,
+                printf(FORMAT_STRING_ST_COLORED, ANSI_VARIED, ins->destination, ANSI_RESET, ANSI_YELLOW,
                        ins->source, ANSI_RESET);
             } else {
                 printf(FORMAT_STRING_ST, ins->destination, ins->source);
@@ -250,14 +250,14 @@ void print_instruction(Instruction *ins) {
         } else {
             if (strcmp(op, "push") == 0) {
                 if (colors) {
-                    printf(FORMAT_STRING_COLORED, ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
+                    printf(FORMAT_STRING_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                 } else {
                     printf(FORMAT_STRING, ins->source);
                 }
             } else {
                 if (ins->destination == 0b100) {
                     if (colors) {
-                        printf(FORMAT_STRING_MEM_COLORED, ANSI_GREEN, ins->full_ins & 2047, ANSI_RESET);
+                        printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                     } else {
                         printf(FORMAT_STRING_MEM, ins->full_ins & 2047);
                     }
@@ -275,9 +275,9 @@ void print_instruction(Instruction *ins) {
     if (args.verbosity == 1 && args.only_code == 1) {
         if ((ins->full_ins >> 9) != 1 && (ins->full_ins >> 9) != 2 && (ins->full_ins >> 9) != 3) {
 #ifdef _WIN32
-	    printf(" ; address %lld", current_addr);
+            printf(" ; address %lld", current_addr);
 #else
-	    printf(" ; address %ld", current_addr);
+            printf(" ; address %ld", current_addr);
 #endif
         } else {
             printf(" ; no address");

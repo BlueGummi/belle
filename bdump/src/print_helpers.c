@@ -47,10 +47,10 @@ void print_help(char *bin) { // bin is the name of the bin
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
-    printf("  %s-b%s, %s--binary%s     Print binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
-    printf("  %s-c%s, %s--no-colors%s  Disable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-b%s, %s--binary%s     Print instruction binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
+    printf("  %s-c%s, %s--colorless%s  Disable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-o%s, %s--only-code%s  Print only code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-o%s, %s--only-code%s  Print only disassembled code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-x%s, %s--hex-mem%s    Print memory addresses in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);

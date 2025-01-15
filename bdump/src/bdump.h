@@ -58,8 +58,9 @@ void        print_instruction_header(size_t line, bool colors, bool is_directive
 #define FORMAT_STRING_SSP_COLORED (args.hex_operands ? "%s.ssp%s [%s0x%x%s]" : "%s.ssp%s [%s%d%s]")
 #define FORMAT_STRING_SBP_COLORED (args.hex_operands ? "%s.sbp%s [%s0x%x%s]" : "%s.sbp%s [%s%d%s]")
 
-#define FORMAT_STRING_ASCII_COLORED (args.hex_operands ? "%s%s%s (%s0x%x%s)" :"%s%s%s (%s%d%s)")
-#define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%x)" :"%s (%x)")
+#define FORMAT_STRING_ASCII_COLORED (args.hex_operands ? "%s%s%s (%s0x%x%s)" : "%s%s%s (%s%d%s)")
+#define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%x)" : "%s (%x)")
 
 #define FORMAT_STRING_ST_COLORED (args.hex_operands ? "[%s0x%x%s], %sr%d%s" : "[%s%d%s], %sr%d%s")
 #define FORMAT_STRING_ST (args.hex_operands ? "[0x%x], r%d" : "[%d], r%d")
+#define ANSI_VARIED (args.hex_operands ? ANSI_CYAN : ANSI_GREEN)
