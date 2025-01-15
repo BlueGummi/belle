@@ -26,6 +26,8 @@ jobs:
         docker cp temp-container:/app ./output
         docker rm temp-container
         ./build.sh && ./install.sh
+        cd bdump && make release && cp bdump ../bin && cd ..
+        cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
         tar -czvf belle.tar.gz bin
 
     - name: 'Upload BELLE build Artifact'
