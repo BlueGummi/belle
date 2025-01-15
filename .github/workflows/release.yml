@@ -24,6 +24,7 @@ jobs:
           mkdir macos-bin
           cp -r ./examples ./bin
 
+
           export RUSTFLAGS="-C target-feature=+crt-static"
           rustup target add x86_64-unknown-linux-musl
 
@@ -50,10 +51,10 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
           cd belle && cargo build --target x86_64-pc-windows-gnu --release
-          cp target/x86_64-pc-windows-gnu/release/belle ../windows-bin && cd ..
+          cp target/x86_64-pc-windows-gnu/release/belle.exe ../windows-bin && cd ..
 
           cd basm && cargo build --target x86_64-pc-windows-gnu --release
-          cp target/x86_64-pc-windows-gnu/release/basm ../windows-bin && cd ..
+          cp target/x86_64-pc-windows-gnu/release/basm.exe ../windows-bin && cd ..
 
           tar -czvf belle-nightly-windows-x86_64.tar.gz windows-bin
           zip -r belle-nightly-windows-x86_64.zip windows-bin
