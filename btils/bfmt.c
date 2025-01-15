@@ -70,7 +70,6 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
 void process_file(FILE *input_file, FILE *output_file, size_t max_indentation, int use_tabs) {
     char line[MAX_LINE_LENGTH];
     while (fgets(line, sizeof(line), input_file)) {
-	printf("%s", line);
 	if (strcmp(line, "\n") == 0) {
 		fprintf(output_file, "%s", "\n");
 		continue;
