@@ -65,10 +65,8 @@ jobs:
         git push origin || true
                 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag: nightly
         name: Nightly release
         files: belle.tar.gz
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
