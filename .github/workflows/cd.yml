@@ -15,7 +15,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t belle-image .
+        docker build -f .Dockerfile -t belle-image .
 
     - name: Create output directory
       run: mkdir -p output
