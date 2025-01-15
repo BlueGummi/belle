@@ -77,13 +77,6 @@ jobs:
           tar -czvf belle-nightly-macos-x86_64.tar.gz macos-bin
           zip -r belle-nightly-macos-x86_64.zip macos-bin
 
-      - name: 'Upload BELLE build Artifact'
-        uses: actions/upload-artifact@v4
-        with:
-          name: BELLE-Docker-Image
-          path: belle.tar.gz
-          retention-days: 3
-
       - name: Delete latest release
         uses: liudonghua123/delete-release-action@v1
         with:
