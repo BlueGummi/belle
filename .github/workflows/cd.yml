@@ -65,11 +65,14 @@ jobs:
         git push origin || true
 
     - name : Create nightly release
-      uses: "bluegummi/belle@master"
+      id: create_release
+      uses: andelf/nightly-release@main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: nightly
+        tag_name: nightly
+        name: 'Nightly build'
         prerelease: true
+        body: 'Linux build for BELLE - Nightly release'
         files: |
-          belle.tar.gz
-
+            belle.tar.gz
