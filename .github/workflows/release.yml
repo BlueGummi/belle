@@ -65,6 +65,7 @@ jobs:
           git config --global user.name "BlueGummi"
           git config --global url."https://${{ secrets.RELEASE_TOKEN }}@github.com".insteadOf "https://github.com"
           git push --delete origin nightly
+          sleep 10s
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
