@@ -14,11 +14,11 @@ git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh
 
 
 <details open>
-<summary>AUR Installation - Arch Linux and any machine that can install AUR packages</summary>
+<summary>AUR Installation - Binary</summary>
 <br>
 
 ```
-yay -S belle-cpu-git
+yay -S belle-cpu
 ```
 
 </details>
