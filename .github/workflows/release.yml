@@ -60,9 +60,9 @@ jobs:
           zip -r belle-nightly-windows-x86_64.zip windows-bin
 
       - name: Delete Release
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-          gh release delete nightly --yes
+        run: gh release delete nightly --yes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
