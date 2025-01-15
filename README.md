@@ -18,7 +18,7 @@ git clone https://github.com/BlueGummi/belle --depth=1 && cd belle && ./build.sh
 <br>
 
 ```
-yay -S belle-cpu
+yay -S belle-cpu-git
 ```
 
 </details>
