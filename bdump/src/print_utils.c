@@ -39,19 +39,20 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     case 1: // literal
     {
         bool sign = (ins->source >> 7) == 1;
-        ins->source &= 0b01111111;
+
+        int8_t val = (int8_t)ins->source & 0b1111111;
 
         if (colors) {
-            printf(FORMAT_STRING_COLORED, ANSI_VARIED, sign ? -ins->source : ins->source, ANSI_RESET);
+            printf(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING, sign ? -ins->source : ins->source);
+            printf(FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
         }
     } break;
 
     case 2: // memory address indirect
     {
         int memaddr = ins->full_ins & 0b1111111;
-	
+
         if (colors) {
             printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
         } else {

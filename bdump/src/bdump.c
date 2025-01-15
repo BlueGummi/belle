@@ -244,9 +244,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
                 } else if (strcmp(argv[i], "--help") == 0) {
-		    print_help(argv[0]);
-		    exit(EXIT_SUCCESS);
-		} else {
+                    print_help(argv[0]);
+                    exit(EXIT_SUCCESS);
+                } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
                     fputc('\n', stderr);
@@ -275,10 +275,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                     case 'X':
                         opts.hex_operands = 1;
                         break;
-		    case 'h':
-			print_help(argv[0]);
-		    	exit(EXIT_SUCCESS);
-			break;
+                    case 'h':
+                        print_help(argv[0]);
+                        exit(EXIT_SUCCESS);
+                        break;
                     default:
                         fputs("Error: Unknown option -", stderr);
                         fputc(argv[i][j], stderr);
