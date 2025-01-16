@@ -32,7 +32,7 @@ typedef struct
 } CLI;
 
 CLI         parse_arguments(int argc, char *argv[]);
-Instruction parse_instruction(int16_t instruction);
+Instruction parse_instruction(uint32_t instruction);
 void        print_binary(int16_t num);
 void        print_instruction(Instruction *s);
 void        print_help(char *bin);

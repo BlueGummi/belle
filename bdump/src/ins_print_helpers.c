@@ -1,6 +1,7 @@
 #include "bdump.h"
 size_t current_addr = 100;
 CLI    args         = {0};
+uint64_t len        = 0;
 void   print_operation(Instruction *ins, char *op, bool colors) {
     bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
     bool invert  = ins->destination >> 2 == 1;
@@ -18,6 +19,7 @@ void   print_operation(Instruction *ins, char *op, bool colors) {
     } else {
         printf("%s ", op);
     }
+    len += strlen(op);
 }
 
 void print_two_reg_args(Instruction *ins, bool colors) {
@@ -26,7 +28,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     } else {
         printf("r%d, ", ins->destination);
     }
-
+    char str[20];
+    snprintf(str, sizeof(str), "r%d, ", ins->destination);
+    len += strlen(str);
     switch (ins->type) {
     case 0: // register
         if (colors) {
@@ -34,8 +38,10 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         } else {
             printf("r%d", ins->source);
         }
+    	char str[20];
+    	snprintf(str, sizeof(str), "r%d", ins->source);
+    	len += strlen(str);
         break;
-
     case 1: // literal
     {
         bool sign = (ins->source >> 7) == 1;
@@ -47,6 +53,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         } else {
             printf(FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
         }
+	char str[20];
+	snprintf(str, sizeof(str), FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
+	len += strlen(str);
     } break;
 
     case 2: // memory address indirect
@@ -58,6 +67,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         } else {
             printf(FORMAT_STRING_MEMPTR, memaddr);
         }
+	char str[20];
+	snprintf(str, sizeof(str), FORMAT_STRING_MEMPTR, memaddr); 
+	len += strlen(str);
     } break;
 
     case 3: // register indirect
@@ -67,6 +79,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         } else {
             printf("&r%d", ins->source & 7);
         }
+	char str[20];
+	snprintf(str, sizeof(str), "&r%d", ins->source & 7); 
+	len += strlen(str);
     } break;
 
     default:
@@ -82,6 +97,9 @@ void print_jump_instruction(Instruction *ins, bool colors) {
         } else {
             printf("&r%d", ins->source);
         }
+	char str[20];
+	snprintf(str, sizeof(str), "&r%d", ins->source); 
+	len += strlen(str);
         return;
     }
 
@@ -90,6 +108,9 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     } else {
         printf(FORMAT_STRING_MEM, ins->full_ins & 1023);
     }
+    	char str[20];
+	snprintf(str, sizeof(str), FORMAT_STRING_MEM, ins->full_ins & 1023); 
+	len += strlen(str);
 }
 
 void print_hlt_instruction(Instruction *ins, bool colors) {

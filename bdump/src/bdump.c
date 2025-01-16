@@ -202,7 +202,7 @@ char *match_opcode(Instruction *s) {
     return opcode;
 }
 
-Instruction parse_instruction(int16_t instruction) {
+Instruction parse_instruction(uint32_t instruction) {
     Instruction parsed_ins;
     parsed_ins.opcode      = instruction >> 12;
     parsed_ins.destination = (instruction >> 9) & 0b111;
