@@ -68,4 +68,6 @@ Ordered from easy to complex
 
 - [ ] Finish tutorials
 
+- [ ] Implement objdump-like jump visualization
+
 - [ ] Forth-like language + compiler
