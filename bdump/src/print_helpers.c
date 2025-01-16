@@ -1,5 +1,5 @@
 #include "print_utils.c"
-void print_binary(int num) {
+void print_binary(int16_t num) {
 
     char hex[5];
     hex[4]       = '\0';

@@ -10,30 +10,30 @@ typedef struct
 
 typedef struct
 {
-    int opcode;
-    int destination;
-    int source;
-    int type; // type 0 is reg, reg
+    int16_t opcode;
+    int16_t destination;
+    int16_t source;
+    int16_t type; // type 0 is reg, reg
               // type 1 is reg, lit
               // type 2 is reg, mptr
               // type 3 is reg, rptr
-    int full_ins;
+    int16_t full_ins;
 } Instruction;
 
 typedef struct
 {
     char *input_file;
-    int   colors;
-    int   verbosity;
-    int   binary;
-    int   only_code;
-    int   print_hex;
-    int   hex_operands;
+    uint8_t   colors;
+    uint8_t   verbosity;
+    uint8_t   binary;
+    uint8_t   only_code;
+    uint8_t   print_hex;
+    uint8_t   hex_operands;
 } CLI;
 
 CLI         parse_arguments(int argc, char *argv[]);
-Instruction parse_instruction(int instruction);
-void        print_binary(int num);
+Instruction parse_instruction(int16_t instruction);
+void        print_binary(int16_t num);
 void        print_instruction(Instruction *s);
 void        print_help(char *bin);
 char       *match_opcode(Instruction *s);
