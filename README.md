@@ -34,7 +34,7 @@ yay -S belle-cpu
 And on Windows, run
 
 ```pwsh
-iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/BlueGummi/belle/refs/heads/master/examples/binstall.ps1'))
+irm ('https://raw.githubusercontent.com/BlueGummi/belle/refs/heads/master/examples/binstall.ps1') | iex
 ```
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
