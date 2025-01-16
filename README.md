@@ -31,7 +31,7 @@ yay -S belle-cpu
 </details>
 
 
-Or, for Windows
+And on Windows, run
 
 ```pwsh
 iex ((New-Object System.Net.WebClient).DownloadString('https://gist.githubusercontent.com/BlueGummi/7ebc6a09cbf39cc88304cb8a8d8bb571/raw/55918c8bd172e56b33b9ff94a79867a0e6b7ac0d/binstall.ps1'))
