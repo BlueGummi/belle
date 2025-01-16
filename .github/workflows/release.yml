@@ -3,9 +3,6 @@ name: Nightly Build
 on:
   schedule:
     - cron: '0 0 * * *' 
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
