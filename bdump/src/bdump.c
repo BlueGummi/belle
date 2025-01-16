@@ -5,75 +5,65 @@
  * This code is licensed under the BSD 3-Clause License.
  */
 
-#include "print_helpers.c"
+#include "cli.c"
 
 void *process_instructions(void *arg) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
     ThreadData *data = (ThreadData *)arg;
+    jump_map_global  = jump_map_create();
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
                 current_addr = instruction & 0b111111111;
-            }
+            } // First loop finds starting address
         }
     }
-    if (args.only_code != 1) {
-        if (args.binary != 1) {
-            if (args.print_hex == 0) {
-                if (args.colors) {
-                    printf("╭────────┬───────┬─────────────╮\n");
-                    printf("│  %saddr%s  │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├────────┼───────┼─────────────╯\n");
-                } else {
-                    printf("╭────────┬───────┬─────────────╮\n");
-                    printf("│  addr  │  bin  │ instruction │\n");
-                    printf("├────────┼───────┼─────────────╯\n");
-                }
-            } else {
-                if (args.colors) {
-                    printf("╭─────────────┬───────┬─────────────╮\n");
-                    printf("│   %saddress%s   │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├─────────────┼───────┼─────────────╯\n");
-                } else {
-                    printf("╭─────────────┬───────┬─────────────╮\n");
-                    printf("│   address   │  bin  │ instruction │\n");
-                    printf("├─────────────┼───────┼─────────────╯\n");
-                }
-            }
-        } else {
-            if (args.print_hex == 0) {
-                if (args.colors) {
-                    printf("╭────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  %saddr%s  │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├────────┼──────────────────────────┼─────────────╯\n");
-                } else {
-                    printf("╭────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  addr  │         binary           │ instruction │\n");
-                    printf("├────────┼──────────────────────────┼─────────────╯\n");
-                }
-            } else {
-                if (args.colors) {
-                    printf("╭─────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│   %saddress%s   │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├─────────────┼──────────────────────────┼─────────────╯\n");
-                } else {
-                    printf("╭─────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│   address   │         binary           │ instruction │\n");
-                    printf("├─────────────┼──────────────────────────┼─────────────╯\n");
-                }
-            }
-        }
-    }
-    for (size_t i = 0; i < data->bytes_read; i += 2) {
+    size_t current_addr_tmp = current_addr;
+    int    column           = 1;
+    for (size_t i = 0; i < data->bytes_read; i += 2) { // second loop finds jumps
         if (i + 1 < data->bytes_read) {
+            uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            switch (instruction >> 12) {
+            case JMP_OP:
+            case JO_OP:
+            case JZ_OP:
+            case RET_OP:
+                if (instruction >> 12 == RET_OP && (instruction & 0b111111111111) == 0)
+                    break;
+                Jump jump_data;
+                jump_data.source      = current_addr;
+                jump_data.destination = instruction & 0b11111111111;
+                jump_data.column      = column++;
+                jump_data.reverse     = jump_data.destination < jump_data.source;
+                jump_data.color       = get_color(jump_data.column);
+                jump_map_insert(jump_map_global, current_addr, jump_data);
+                break;
+            default:
+                break;
+            }
+            Instruction ins = parse_instruction(instruction);
+            if (!is_directive(&ins)) {
+                current_addr++;
+            }
+        }
+    }
+
+    print_header();
+    current_addr = current_addr_tmp;
+    for (size_t i = 0; i < data->bytes_read; i += 2) {
+        if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints
             uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             Instruction ins         = parse_instruction(instruction);
-            print_instruction(&ins);
+            JumpVector *jumpsHere   = find_jumps_at_address(jump_map_global, current_addr);
+            adjust_jump_vector(jumpsHere);
+            len = 0;
+            print_instruction(&ins, jumpsHere);
         }
     }
+
     if (args.only_code != 1) {
         if (args.binary != 1) {
             if (args.print_hex == 1) {
@@ -89,6 +79,7 @@ void *process_instructions(void *arg) {
             }
         }
     }
+    // jump_map_print(jump_map_global);
     return NULL;
 }
 
@@ -144,6 +135,7 @@ int main(int argc, char *argv[]) {
     fclose(input);
     return EXIT_SUCCESS;
 }
+
 char *match_opcode(Instruction *s) {
     char *opcode;
     switch (s->opcode) {
@@ -218,90 +210,4 @@ Instruction parse_instruction(uint32_t instruction) {
     }
     parsed_ins.full_ins = instruction;
     return parsed_ins;
-}
-
-CLI parse_arguments(int argc, char *argv[]) {
-    CLI opts        = {0};
-    opts.input_file = NULL;
-    bool seen_color = false;
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            print_help(argv[0]);
-            exit(EXIT_SUCCESS);
-        } else if (argv[i][0] == '-') {
-            if (argv[i][1] == '-') {
-                if (strcmp(argv[i], "--colorless") == 0) {
-                    seen_color  = true;
-                    opts.colors = 0;
-                } else if (strcmp(argv[i], "--verbose") == 0) {
-                    opts.verbosity++;
-                } else if (strcmp(argv[i], "--hex-mem") == 0) {
-                    opts.print_hex = 1;
-                } else if (strcmp(argv[i], "--binary") == 0) {
-                    opts.binary = 1;
-                } else if (strcmp(argv[i], "--only-code") == 0) {
-                    opts.only_code = 1;
-                } else if (strcmp(argv[i], "--hex") == 0) {
-                    opts.hex_operands = 1;
-                } else if (strcmp(argv[i], "--help") == 0) {
-                    print_help(argv[0]);
-                    exit(EXIT_SUCCESS);
-                } else {
-                    fputs("Error: Unknown option ", stderr);
-                    fputs(argv[i], stderr);
-                    fputc('\n', stderr);
-                    print_help(argv[0]);
-                    exit(EXIT_FAILURE);
-                }
-            } else {
-                for (int j = 1; argv[i][j] != '\0'; j++) {
-                    switch (argv[i][j]) {
-                    case 'c':
-                        seen_color  = true;
-                        opts.colors = 0;
-                        break;
-                    case 'v':
-                        opts.verbosity++;
-                        break;
-                    case 'b':
-                        opts.binary = 1;
-                        break;
-                    case 'o':
-                        opts.only_code = 1;
-                        break;
-                    case 'x':
-                        opts.print_hex = 1;
-                        break;
-                    case 'X':
-                        opts.hex_operands = 1;
-                        break;
-                    case 'h':
-                        print_help(argv[0]);
-                        exit(EXIT_SUCCESS);
-                        break;
-                    default:
-                        fputs("Error: Unknown option -", stderr);
-                        fputc(argv[i][j], stderr);
-                        fputc('\n', stderr);
-                        print_help(argv[0]);
-                        exit(EXIT_FAILURE);
-                    }
-                }
-            }
-        } else {
-            if (opts.input_file == NULL) {
-                opts.input_file = argv[i];
-            } else {
-                fputs("Error: Unexpected argument: ", stderr);
-                fputs(argv[i], stderr);
-                fputc('\n', stderr);
-                print_help(argv[0]);
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-    if (!seen_color) {
-        opts.colors = 1;
-    }
-    return opts;
 }

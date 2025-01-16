@@ -14,27 +14,63 @@ typedef struct
     int16_t destination;
     int16_t source;
     int16_t type; // type 0 is reg, reg
-              // type 1 is reg, lit
-              // type 2 is reg, mptr
-              // type 3 is reg, rptr
+                  // type 1 is reg, lit
+                  // type 2 is reg, mptr
+                  // type 3 is reg, rptr
     int16_t full_ins;
 } Instruction;
 
 typedef struct
 {
-    char *input_file;
-    uint8_t   colors;
-    uint8_t   verbosity;
-    uint8_t   binary;
-    uint8_t   only_code;
-    uint8_t   print_hex;
-    uint8_t   hex_operands;
+    char   *input_file;
+    uint8_t colors;
+    uint8_t verbosity;
+    uint8_t binary;
+    uint8_t only_code;
+    uint8_t print_hex;
+    uint8_t hex_operands;
 } CLI;
+typedef enum {
+    COLOR_RESET,
+    COLOR_BLACK,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_BLUE,
+    COLOR_MAGENTA,
+    COLOR_CYAN,
+    COLOR_WHITE,
+    COLOR_GRAY,
+    COLOR_LIGHT_GRAY,
+    COLOR_BG_BLACK,
+    COLOR_BG_RED,
+    COLOR_BG_GREEN,
+    COLOR_BG_YELLOW,
+    COLOR_BG_BLUE,
+    COLOR_BG_MAGENTA,
+    COLOR_BG_CYAN,
+    COLOR_BG_WHITE,
+    COLOR_COUNT
+} Color;
 
+typedef struct
+{
+    Color    color;
+    uint64_t source;
+    uint64_t destination;
+    uint8_t  column;
+    bool     reverse;
+} Jump;
+
+typedef struct {
+    Jump  *data;
+    size_t size;
+    size_t capacity;
+} JumpVector;
 CLI         parse_arguments(int argc, char *argv[]);
 Instruction parse_instruction(uint32_t instruction);
 void        print_binary(int16_t num);
-void        print_instruction(Instruction *s);
+void        print_instruction(Instruction *s, JumpVector *jumpsHere);
 void        print_help(char *bin);
 char       *match_opcode(Instruction *s);
 int         main(int argc, char *argv[]);
@@ -60,7 +96,7 @@ void        print_instruction_header(size_t line, bool colors, bool is_directive
 #define FORMAT_STRING_SBP_COLORED (args.hex_operands ? "%s.sbp%s [%s0x%x%s]" : "%s.sbp%s [%s%d%s]")
 
 #define FORMAT_STRING_ASCII_COLORED (args.hex_operands ? "%s%s%s (%s0x%x%s)" : "%s%s%s (%s%d%s)")
-#define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%x)" : "%s (%x)")
+#define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%x)" : "%s (%d)")
 
 #define FORMAT_STRING_ST_COLORED (args.hex_operands ? "[%s0x%x%s], %sr%d%s" : "[%s%d%s], %sr%d%s")
 #define FORMAT_STRING_ST (args.hex_operands ? "[0x%x], r%d" : "[%d], r%d")
