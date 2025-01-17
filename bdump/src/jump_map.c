@@ -56,29 +56,6 @@ void free_map(HashMap *map) {
     free(map);
 }
 
-void print_jump(Jump *jump) {
-
-    printf("Jump: { ");
-    printf("color: %s, ", get_color_name(jump->color));
-    printf("source: %" PRIu64 ", ", jump->source);
-    printf("destination: %" PRIu64 ", ", jump->destination);
-    printf("column: %d, ", jump->column);
-    printf("reverse: %s ", jump->reverse ? "\033[32mtrue\033[0m" : "\033[31mfalse\033[0m");
-    printf("}");
-}
-void jump_map_print(HashMap *map) {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        Node *current = map->table[i];
-        if (current == NULL) {
-            continue;
-        }
-        while (current) {
-            printf("Key: %zu, ", current->key);
-            print_jump(&current->value);
-            current = current->next;
-        }
-    }
-}
 void init_jump_vector(JumpVector *vector) {
     vector->size = 0;
     vector->capacity = 4;
@@ -127,15 +104,3 @@ JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
 }
 
 HashMap *jump_map_global;
-void adjust_jump_vector(JumpVector *vector) {
-    for (size_t i = 0; i < vector->size; i++) {
-        JumpVector *tempvector = find_jumps_at_address(jump_map_global, vector->data[i].source);
-        for (size_t s = 0; s < tempvector->size; s++) {
-            tempvector->data[s].column = s;
-        }
-        vector->data[i] = tempvector->data[i];
-        free(tempvector);
-        if ((i + 1) > max_columns)
-            max_columns = i + 1;
-    }
-}

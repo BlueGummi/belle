@@ -67,7 +67,7 @@ void *process_instructions(void *arg) {
             JumpVector *jumpsHere = find_jumps_at_address(jump_map_global, current_addr);
             len = 0;
             print_instruction(&ins, jumpsHere);
-            free(jumpsHere);
+            free_jump_vector(jumpsHere);
         }
     }
 
@@ -86,6 +86,7 @@ void *process_instructions(void *arg) {
             }
         }
     }
+    free_map(jump_map_global);
     // jump_map_print(jump_map_global);
     return NULL;
 }
