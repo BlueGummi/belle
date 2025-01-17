@@ -129,7 +129,9 @@ JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
 void adjust_jump_vector(const JumpVector *vector) {
     for (size_t i = 0; i < vector->size; i++) {
         if (vector->data[i].column != i) {
-            vector->data[i].column = i + 1;
+            if (vector->data[i].source < vector->data[i].destination) {
+                vector->data[i].column = i;
+            }
         }
         if ((i + 1) > max_columns)
             max_columns = i + 1;

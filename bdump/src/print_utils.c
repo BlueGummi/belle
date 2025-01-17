@@ -146,19 +146,41 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     size_t spaces = 14 - len;
     for (size_t s = 0; s < spaces; s++)
         printf(" ");
-    bool has_jump = false;
+    bool has_jump      = false;
     if (!is_directive(ins)) {
         for (size_t i = 0; i < jumpsHere->size; i++) {
             if (current_addr == jumpsHere->data[i].destination && !has_jump) {
-		const char *color = color_to_ansi(jumpsHere->data[i].color);
-                printf("%s<-%s", color, ANSI_RESET);
-                has_jump = true;
+                const char *color = color_to_ansi(jumpsHere->data[i].color);
+                printf("%s◀%s", color, ANSI_RESET);
+                has_jump      = true;
             } else if (current_addr == jumpsHere->data[i].source) {
-		const char *color = color_to_ansi(jumpsHere->data[i].color);
-                printf("%s->%s", color, ANSI_RESET);
+                const char *color = color_to_ansi(jumpsHere->data[i].color);
+                printf("%s▶%s", color, ANSI_RESET);
+                has_jump = true;
             }
         }
+        if (!has_jump)
+            printf(" ");
+        for (size_t i = 0; i < jumpsHere->size; i++) {
 
+            const char *color = color_to_ansi(jumpsHere->data[i].color);
+            if (has_jump) {
+                if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
+                    if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
+                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - i + has_jump), " ");
+                    }
+                    printf("%s│%s", color, ANSI_RESET);
+                } else
+                    printf("%s┤%s", color, ANSI_RESET);
+            } else {
+                if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
+                    if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
+                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - i + has_jump), " ");
+                    }
+                }
+                printf("%s│%s", color, ANSI_RESET);
+            }
+        }
         current_addr++;
     }
     printf("\n");

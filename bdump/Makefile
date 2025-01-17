@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -flto -O2 -Wno-cast-function-type
+CFLAGS = -Wall -Wextra -flto -O2 -Wno-cast-function-type -g
 SRCDIR = src
 OBJ = bdump.o # print_utils.o # math_functions.o
 TARGET = bdump

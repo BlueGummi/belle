@@ -56,6 +56,7 @@ typedef enum {
 typedef struct
 {
     Color    color;
+    uint64_t id;
     uint64_t source;
     uint64_t destination;
     uint8_t  column;

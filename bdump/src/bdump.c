@@ -18,6 +18,7 @@ void *process_instructions(void *arg) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
                 current_addr = instruction & 0b111111111;
+                break;
             } // First loop finds starting address
         }
     }
@@ -34,6 +35,7 @@ void *process_instructions(void *arg) {
                 if (instruction >> 12 == RET_OP && (instruction & 0b111111111111) == 0)
                     break;
                 Jump jump_data;
+                jump_data.id          = column;
                 jump_data.source      = current_addr;
                 jump_data.destination = instruction & 0b11111111111;
                 jump_data.column      = column++;
