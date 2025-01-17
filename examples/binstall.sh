@@ -36,4 +36,5 @@ rm -rf bin
 ls
 echo "Installed."
 echo "Run 'make' in this directory to compile examples programs and execute them"
+rm -rf examples/binstall*
 cd examples

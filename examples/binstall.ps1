@@ -29,6 +29,9 @@ if ($pathEnv -notlike "*$localBinPath*") {
 
 Remove-Item -Path $zipFile -Force
 
+Remove-Item -Path "windows-bin\examples\binstall.sh" -Force
+Remove-Item -Path "windows-bin\examples\binstall.ps1" -Force
+
 Remove-Item -Path (Join-Path -Path $extractPath -ChildPath "windows-bin\*.exe") -Force
 
 Move-Item -Path "windows-bin/examples" -Destination "." -Recurse -Force
