@@ -86,3 +86,11 @@ jobs:
             belle-nightly-linux-x86_64.zip
             belle-nightly-windows-x86_64.tar.gz
             belle-nightly-windows-x86_64.zip
+
+      - name: eep
+        run: sleep 2s
+      
+      - name: Delete drafts
+        uses: hugo19941994/delete-draft-releases@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
