@@ -1,10 +1,10 @@
 #include "jump_map.c"
-size_t   current_addr = 100;
-CLI      args         = {0};
-uint64_t len          = 0;
-void     print_operation(Instruction *ins, char *op, bool colors) {
+size_t current_addr = 100;
+CLI args = {0};
+uint64_t len = 0;
+void print_operation(Instruction *ins, char *op, bool colors) {
     bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
-    bool invert  = ins->destination >> 2 == 1;
+    bool invert = ins->destination >> 2 == 1;
     if (is_jump && invert) {
         if (strcmp(op, "jz") == 0)
             op = "jnz";
@@ -46,7 +46,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     {
         bool sign = (ins->source >> 7) == 1;
 
-        int8_t val = (int8_t)ins->source & 0b1111111;
+        int8_t val = (int8_t) ins->source & 0b1111111;
 
         if (colors) {
             printf(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
@@ -147,7 +147,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                        : "?"),
                        ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
@@ -155,7 +155,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                        : "?"),
                        ins->full_ins);
             }
@@ -163,7 +163,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                      (ins->full_ins == '\n'                          ? "\\n"
                       : ins->full_ins == '\t'                        ? "\\t"
                       : ins->full_ins == '\\'                        ? "\\\\"
-                      : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char)ins->full_ins, '\0'}
+                      : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                      : "?"),
                      ins->full_ins);
             len += strlen(str);

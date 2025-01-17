@@ -1,9 +1,9 @@
 #include "ins_print_helpers.c"
 
 void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
-    bool  colors  = args.colors == 1;
-    char *op      = match_opcode(ins);
-    char  str[50] = "";
+    bool colors = args.colors == 1;
+    char *op = match_opcode(ins);
+    char str[50] = "";
     if (args.only_code != 1) {
         if (!is_directive(ins)) {
             print_instruction_header(current_addr, colors, false);
@@ -148,48 +148,23 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
         printf(" ");
     bool has_jump = false;
     if (!is_directive(ins)) {
-        int length = 0;
         if (!args.only_code) {
             for (size_t i = 0; i < jumpsHere->size; i++) {
+                const char *color = color_to_ansi(jumpsHere->data[i].color);
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
-                    const char *color = color_to_ansi(jumpsHere->data[i].color);
                     printf("%s◀%s", color, ANSI_RESET);
-                    length += 1;
+                    printf("%s from %ld,%s", color, jumpsHere->data[i].source, ANSI_RESET);
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].source) {
-                    const char *color = color_to_ansi(jumpsHere->data[i].color);
                     printf("%s▶%s", color, ANSI_RESET);
-                    length += 1;
+                    printf("%s to %ld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
                     has_jump = true;
+                } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
+                    printf("%s %ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
                 }
             }
             if (!has_jump) {
                 printf(" ");
-                length += 1;
-            }
-            for (size_t i = 0; i < jumpsHere->size; i++) {
-
-                const char *color = color_to_ansi(jumpsHere->data[i].color);
-                if (has_jump) {
-                    if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
-                        if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
-                            printf("%*s", (int)(jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - length), " ");
-                        }
-                        printf("%s│%s", color, ANSI_RESET);
-                        length += 1;
-                    } else {
-                        printf("%s┤%s", color, ANSI_RESET);
-                        length += 1;
-                    }
-                } else {
-                    if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
-                        if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
-                            printf("%*s", (int)(jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - length), " ");
-                        }
-                    }
-                    printf("%s│%s", color, ANSI_RESET);
-                    length += 1;
-                }
             }
         }
         current_addr++;

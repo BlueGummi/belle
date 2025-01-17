@@ -2,7 +2,7 @@
 void print_binary(int16_t num) {
 
     char hex[5];
-    hex[4]       = '\0';
+    hex[4] = '\0';
     int numclone = num;
     for (int i = 0; i < 4; i++) {
         hex[3 - i] = "0123456789ABCDEF"[num & 0xF];

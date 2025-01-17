@@ -11,8 +11,8 @@ void *process_instructions(void *arg) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
-    ThreadData *data = (ThreadData *)arg;
-    jump_map_global  = jump_map_create();
+    ThreadData *data = (ThreadData *) arg;
+    jump_map_global = jump_map_create();
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
@@ -23,7 +23,8 @@ void *process_instructions(void *arg) {
         }
     }
     size_t current_addr_tmp = current_addr;
-    int    column           = 1;
+    int column = 1;
+    int counter = 1;
     for (size_t i = 0; i < data->bytes_read; i += 2) { // second loop finds jumps
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
@@ -35,13 +36,17 @@ void *process_instructions(void *arg) {
                 if (instruction >> 12 == RET_OP && (instruction & 0b111111111111) == 0)
                     break;
                 Jump jump_data;
-                jump_data.id          = column;
-                jump_data.source      = current_addr;
+                counter++;
+                jump_data.id = column;
+                jump_data.source = current_addr;
                 jump_data.destination = instruction & 0b11111111111;
-                jump_data.column      = column++;
-                jump_data.reverse     = jump_data.destination < jump_data.source;
-                jump_data.color       = get_color(jump_data.column);
+                jump_data.column = column;
+                jump_data.reverse = jump_data.destination < jump_data.source;
+                jump_data.color = get_color(counter);
                 jump_map_insert(jump_map_global, current_addr, jump_data);
+                if (column > 0) {
+                    column--;
+                }
                 break;
             default:
                 break;
@@ -57,12 +62,12 @@ void *process_instructions(void *arg) {
     current_addr = current_addr_tmp;
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints
-            uint16_t    instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
-            Instruction ins         = parse_instruction(instruction);
-            JumpVector *jumpsHere   = find_jumps_at_address(jump_map_global, current_addr);
-            adjust_jump_vector(jumpsHere);
+            uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            Instruction ins = parse_instruction(instruction);
+            JumpVector *jumpsHere = find_jumps_at_address(jump_map_global, current_addr);
             len = 0;
             print_instruction(&ins, jumpsHere);
+            free(jumpsHere);
         }
     }
 
@@ -101,7 +106,7 @@ int main(int argc, char *argv[]) {
     }
 
     ThreadData thread_data[THREAD_COUNT];
-    size_t     bytes_read;
+    size_t bytes_read;
 
 #ifdef _WIN32
     HANDLE thread_handles[THREAD_COUNT];
@@ -111,10 +116,10 @@ int main(int argc, char *argv[]) {
     // macro programming multithreading tomfoolery - "It works" and "It's not broken, don't fix it"
     while ((bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
         thread_data[0].bytes_read = bytes_read;
-        thread_data[0].input      = input;
+        thread_data[0].input = input;
 
 #ifdef _WIN32
-        thread_handles[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)process_instructions,
+        thread_handles[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) process_instructions,
                                          &thread_data[0], 0, NULL);
         if (thread_handles[0] == NULL) {
             fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
@@ -198,9 +203,9 @@ char *match_opcode(Instruction *s) {
 
 Instruction parse_instruction(uint32_t instruction) {
     Instruction parsed_ins;
-    parsed_ins.opcode      = instruction >> 12;
+    parsed_ins.opcode = instruction >> 12;
     parsed_ins.destination = (instruction >> 9) & 0b111;
-    parsed_ins.source      = instruction & 0xFF;
+    parsed_ins.source = instruction & 0xFF;
     if (((instruction >> 8) & 1) == 1) {
         parsed_ins.type = 1;
     } else {

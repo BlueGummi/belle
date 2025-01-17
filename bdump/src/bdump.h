@@ -3,9 +3,9 @@
 #include "consts.h"
 typedef struct
 {
-    FILE   *input;
+    FILE *input;
     uint8_t buffer[BUFFER_SIZE];
-    size_t  bytes_read;
+    size_t bytes_read;
 } ThreadData;
 
 typedef struct
@@ -22,7 +22,7 @@ typedef struct
 
 typedef struct
 {
-    char   *input_file;
+    char *input_file;
     uint8_t colors;
     uint8_t verbosity;
     uint8_t binary;
@@ -31,8 +31,6 @@ typedef struct
     uint8_t hex_operands;
 } CLI;
 typedef enum {
-    COLOR_RESET,
-    COLOR_BLACK,
     COLOR_RED,
     COLOR_GREEN,
     COLOR_YELLOW,
@@ -55,27 +53,27 @@ typedef enum {
 
 typedef struct
 {
-    Color    color;
+    Color color;
     uint64_t id;
     uint64_t source;
     uint64_t destination;
-    uint8_t  column;
-    bool     reverse;
+    uint8_t column;
+    bool reverse;
 } Jump;
 
 typedef struct {
-    Jump  *data;
+    Jump *data;
     size_t size;
     size_t capacity;
 } JumpVector;
-CLI         parse_arguments(int argc, char *argv[]);
+CLI parse_arguments(int argc, char *argv[]);
 Instruction parse_instruction(uint32_t instruction);
-void        print_binary(int16_t num);
-void        print_instruction(Instruction *s, JumpVector *jumpsHere);
-void        print_help(char *bin);
-char       *match_opcode(Instruction *s);
-int         main(int argc, char *argv[]);
-void        print_instruction_header(size_t line, bool colors, bool is_directive);
+void print_binary(int16_t num);
+void print_instruction(Instruction *s, JumpVector *jumpsHere);
+void print_help(char *bin);
+char *match_opcode(Instruction *s);
+int main(int argc, char *argv[]);
+void print_instruction_header(size_t line, bool colors, bool is_directive);
 #pragma once
 #endif
 #define FORMAT_STRING_MEMPTR (args.hex_operands ? "&0x%x" : "&%d")

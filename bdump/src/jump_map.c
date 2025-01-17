@@ -2,8 +2,8 @@
 #define TABLE_SIZE 512
 
 typedef struct Node {
-    size_t       key;
-    Jump         value;
+    size_t key;
+    Jump value;
     struct Node *next;
 } Node;
 
@@ -14,7 +14,7 @@ typedef struct {
 unsigned int hash(size_t key) {
     return key % TABLE_SIZE;
 }
-size_t   max_columns = 0;
+size_t max_columns = 0;
 HashMap *jump_map_create() {
     HashMap *map = malloc(sizeof(HashMap));
     for (int i = 0; i < TABLE_SIZE; i++) {
@@ -24,17 +24,17 @@ HashMap *jump_map_create() {
 }
 
 void jump_map_insert(HashMap *map, size_t key, Jump value) {
-    unsigned int index   = hash(key);
-    Node        *newNode = malloc(sizeof(Node));
-    newNode->key         = key;
-    newNode->value       = value;
-    newNode->next        = map->table[index];
-    map->table[index]    = newNode;
+    unsigned int index = hash(key);
+    Node *newNode = malloc(sizeof(Node));
+    newNode->key = key;
+    newNode->value = value;
+    newNode->next = map->table[index];
+    map->table[index] = newNode;
 }
 
 Jump *jump_map_get(HashMap *map, size_t key) {
-    unsigned int index   = hash(key);
-    Node        *current = map->table[index];
+    unsigned int index = hash(key);
+    Node *current = map->table[index];
     while (current) {
         if (current->key == key) {
             return &current->value;
@@ -49,7 +49,7 @@ void free_map(HashMap *map) {
         Node *current = map->table[i];
         while (current) {
             Node *temp = current;
-            current    = current->next;
+            current = current->next;
             free(temp);
         }
     }
@@ -80,9 +80,9 @@ void jump_map_print(HashMap *map) {
     }
 }
 void init_jump_vector(JumpVector *vector) {
-    vector->size     = 0;
+    vector->size = 0;
     vector->capacity = 4;
-    vector->data     = malloc(vector->capacity * sizeof(Jump));
+    vector->data = malloc(vector->capacity * sizeof(Jump));
 }
 
 void add_jump(JumpVector *vector, Jump jump) {
@@ -99,8 +99,8 @@ void add_jump(JumpVector *vector, Jump jump) {
 
 void free_jump_vector(JumpVector *vector) {
     free(vector->data);
-    vector->data     = NULL;
-    vector->size     = 0;
+    vector->data = NULL;
+    vector->size = 0;
     vector->capacity = 0;
 }
 
@@ -126,15 +126,16 @@ JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
     return jump_vector;
 }
 
-void adjust_jump_vector(const JumpVector *vector) {
+HashMap *jump_map_global;
+void adjust_jump_vector(JumpVector *vector) {
     for (size_t i = 0; i < vector->size; i++) {
-        if (vector->data[i].column != i) {
-            if (vector->data[i].source < vector->data[i].destination) {
-                vector->data[i].column = i;
-            }
+        JumpVector *tempvector = find_jumps_at_address(jump_map_global, vector->data[i].source);
+        for (size_t s = 0; s < tempvector->size; s++) {
+            tempvector->data[s].column = s;
         }
+        vector->data[i] = tempvector->data[i];
+        free(tempvector);
         if ((i + 1) > max_columns)
             max_columns = i + 1;
     }
 }
-HashMap *jump_map_global;

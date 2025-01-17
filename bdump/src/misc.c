@@ -2,9 +2,9 @@
 
 Color get_color(int index) {
     Color color_codes[] = {
-        COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
+        COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
         COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE,
-        COLOR_GRAY, COLOR_RESET};
+        COLOR_GRAY};
 
     int num_codes = sizeof(color_codes) / sizeof(color_codes[0]);
 
@@ -15,8 +15,6 @@ Color get_color(int index) {
 
 const char *color_to_ansi(Color color) {
     switch (color) {
-    case COLOR_BLACK:
-        return ANSI_BLACK;
     case COLOR_RED:
         return ANSI_RED;
     case COLOR_GREEN:
@@ -51,10 +49,8 @@ const char *color_to_ansi(Color color) {
         return ANSI_BG_CYAN;
     case COLOR_BG_WHITE:
         return ANSI_BG_WHITE;
-    case COLOR_RESET:
-        return ANSI_RESET;
     default:
-        return ANSI_RESET;
+        return ANSI_CYAN;
     }
 }
 const char *get_color_name(Color color) {
@@ -65,9 +61,6 @@ const char *get_color_name(Color color) {
     }
 
     switch (color) {
-    case COLOR_BLACK:
-        strcpy(color_name, "Black");
-        break;
     case COLOR_RED:
         strcpy(color_name, "Red");
         break;
@@ -118,9 +111,6 @@ const char *get_color_name(Color color) {
         break;
     case COLOR_BG_WHITE:
         strcpy(color_name, "Background White");
-        break;
-    case COLOR_RESET:
-        strcpy(color_name, "Reset");
         break;
     default:
         strcpy(color_name, "Unknown Color");
