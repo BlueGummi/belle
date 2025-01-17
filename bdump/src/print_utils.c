@@ -148,37 +148,46 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
         printf(" ");
     bool has_jump      = false;
     if (!is_directive(ins)) {
+	int length = 0;
         for (size_t i = 0; i < jumpsHere->size; i++) {
             if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                 const char *color = color_to_ansi(jumpsHere->data[i].color);
                 printf("%s◀%s", color, ANSI_RESET);
+		length += 1;
                 has_jump      = true;
             } else if (current_addr == jumpsHere->data[i].source) {
                 const char *color = color_to_ansi(jumpsHere->data[i].color);
                 printf("%s▶%s", color, ANSI_RESET);
+		length += 1;
                 has_jump = true;
             }
         }
-        if (!has_jump)
+        if (!has_jump) {
             printf(" ");
+	    length += 1;
+	}
         for (size_t i = 0; i < jumpsHere->size; i++) {
 
             const char *color = color_to_ansi(jumpsHere->data[i].color);
             if (has_jump) {
                 if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
                     if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
-                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - i + has_jump), " ");
+                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - length), " ");
                     }
                     printf("%s│%s", color, ANSI_RESET);
-                } else
+		    length += 1;
+                } else {
                     printf("%s┤%s", color, ANSI_RESET);
+		    length += 1;
+		}
             } else {
                 if (jumpsHere->data[i].destination < jumpsHere->data[i].source) {
                     if (jump_map_get(jump_map_global, jumpsHere->data[i].source) != NULL) {
-                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - i + has_jump), " ");
+                        printf("%*s", (int) (jump_map_get(jump_map_global, jumpsHere->data[i].source)->column - length), " ");
                     }
                 }
                 printf("%s│%s", color, ANSI_RESET);
+		length += 1;
             }
         }
         current_addr++;
