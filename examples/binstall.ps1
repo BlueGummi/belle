@@ -24,11 +24,20 @@ foreach ($exe in $exeFiles) {
 $pathEnv = [System.Environment]::GetEnvironmentVariable("PATH")
 if ($pathEnv -notlike "*$localBinPath*") {
     [System.Environment]::SetEnvironmentVariable("PATH", "$pathEnv;$localBinPath", [System.EnvironmentVariableTarget]::User)
+    Write-Host "Restart your terminal"
 }
 
 Remove-Item -Path $zipFile -Force
 
 Remove-Item -Path (Join-Path -Path $extractPath -ChildPath "windows-bin\*.exe") -Force
 
+Move-Item -Path "windows-bin/examples" -Destination "." -Recurse -Force
+
+Remove-Item -Path "windows-bin" -Recurse -Force
+
+Set-Location -Path "examples"
+
+ls
+
 Write-Host "Installed."
-Write-Host "Restart your terminal"
+Write-Host "Run 'make' in this directory to compile examples programs and execute them"
