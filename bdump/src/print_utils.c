@@ -150,10 +150,12 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     if (!is_directive(ins)) {
         for (size_t i = 0; i < jumpsHere->size; i++) {
             if (current_addr == jumpsHere->data[i].destination && !has_jump) {
-                printf("<-");
+		const char *color = color_to_ansi(jumpsHere->data[i].color);
+                printf("%s<-%s", color, ANSI_RESET);
                 has_jump = true;
             } else if (current_addr == jumpsHere->data[i].source) {
-                printf("->");
+		const char *color = color_to_ansi(jumpsHere->data[i].color);
+                printf("%s->%s", color, ANSI_RESET);
             }
         }
 
