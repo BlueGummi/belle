@@ -153,14 +153,14 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 const char *color = color_to_ansi(jumpsHere->data[i].color);
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     printf("%s◀%s", color, ANSI_RESET);
-                    printf("%s from %ld,%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s from %ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
-                    printf("%s to %ld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf(" %sto %ld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
-                    printf("%s %ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s%ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
                 }
             }
             if (!has_jump) {
