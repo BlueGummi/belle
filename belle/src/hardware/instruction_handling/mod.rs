@@ -145,6 +145,52 @@ fn jo_no_jump() {
 }
 
 #[test]
+fn jno_no_jump() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, add, "r0", "4444");
+    test_instruction!(bcpu, mul, "r0", "r0");
+    assert_eq!(bcpu.oflag, true);
+    test_instruction!(bcpu, jno, "$300");
+    assert_eq!(bcpu.pc, 3);
+
+    bcpu.uint_reg[0] = 444;
+    test_instruction!(bcpu, jno, "&r4");
+    assert_eq!(bcpu.pc, 4);
+}
+
+#[test]
+fn jno_jump() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, jno, "$300");
+    assert_eq!(bcpu.pc, 300);
+}
+
+#[test]
+fn jnz_no_jump() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, cmp, "r0", "r0");
+    assert_eq!(bcpu.zflag, true);
+
+    test_instruction!(bcpu, jnz, "$300");
+    assert_eq!(bcpu.pc, 2);
+
+    bcpu.uint_reg[0] = 444;
+    test_instruction!(bcpu, jnz, "&r4");
+    assert_eq!(bcpu.pc, 3);
+}
+
+#[test]
+fn jnz_jump() {
+    let mut bcpu = CPU::new();
+
+    test_instruction!(bcpu, jnz, "$120");
+    assert_eq!(bcpu.pc, 120);
+}
+
+#[test]
 fn jz_jump() {
     let mut bcpu = CPU::new();
 
@@ -232,6 +278,30 @@ fn push_fail_2() {
     bcpu.sp = u16::MAX;
 
     test_instruction!(bcpu, push, "434");
+}
+
+#[test]
+fn st_success() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 45;
+    test_instruction!(bcpu, st, "$31", "r0");
+    assert_eq!(bcpu.memory[31], Some(45));
+}
+
+#[test]
+fn lea_success() {
+    let mut bcpu = CPU::new();
+    bcpu.memory[44] = Some(45);
+    test_instruction!(bcpu, lea, "r0", "$44");
+    assert_eq!(bcpu.int_reg[0], 44);
+}
+
+#[test]
+fn ld_success() {
+    let mut bcpu = CPU::new();
+    bcpu.memory[44] = Some(45);
+    test_instruction!(bcpu, ld, "r0", "$44");
+    assert_eq!(bcpu.int_reg[0], 45);
 }
 
 #[test]
@@ -473,4 +543,64 @@ fn int_success() {
     // BP
     test_instruction!(bcpu, int, "61");
     assert_eq!(bcpu.bp, 6154);
+}
+
+#[test]
+fn jl_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 55;
+    bcpu.int_reg[1] = 56;
+    test_instruction!(bcpu, cmp, "r0", "r1");
+    test_instruction!(bcpu, jl, "$120");
+    assert_eq!(bcpu.pc, 120);
+}
+
+#[test]
+fn jl_no_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 56;
+    bcpu.int_reg[1] = 55;
+    test_instruction!(bcpu, cmp, "r0", "r1");
+    test_instruction!(bcpu, jl, "$120");
+    assert_eq!(bcpu.pc, 2);
+}
+
+#[test]
+fn jg_no_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 55;
+    bcpu.int_reg[1] = 56;
+    test_instruction!(bcpu, cmp, "r0", "r1");
+    test_instruction!(bcpu, jg, "$120");
+    assert_eq!(bcpu.pc, 2);
+}
+
+#[test]
+fn jg_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 56;
+    bcpu.int_reg[1] = 55;
+    test_instruction!(bcpu, cmp, "r0", "r1");
+    test_instruction!(bcpu, jg, "$120");
+    assert_eq!(bcpu.pc, 120);
+}
+
+#[test]
+fn jr_no_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 55;
+    bcpu.int_reg[1] = 56;
+    test_instruction!(bcpu, div, "r0", "r0");
+    test_instruction!(bcpu, jr, "$120");
+    assert_eq!(bcpu.pc, 2);
+}
+
+#[test]
+fn jr_jump() {
+    let mut bcpu = CPU::new();
+    bcpu.int_reg[0] = 56;
+    bcpu.int_reg[1] = 55;
+    test_instruction!(bcpu, div, "r0", "r1");
+    test_instruction!(bcpu, jr, "$120");
+    assert_eq!(bcpu.pc, 120);
 }

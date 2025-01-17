@@ -43,8 +43,8 @@ pub struct Cli {
     #[clap(short = 'n', long, default_value_t = false)]
     pub no_print_memory: bool,
 }
+#[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
-    #[allow(unreachable_code)]
     #[cfg(test)]
     {
         return Cli {
