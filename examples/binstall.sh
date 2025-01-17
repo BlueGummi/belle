@@ -31,4 +31,9 @@ if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     echo "Please restart your terminal or run 'source ~/.bashrc' or 'source ~/.zshrc' or 'source ~/.config/fish/config.fish' to refresh your PATH."
 fi
 
+mv -r bin/examples .
+rm -rf bin
+cd examples
+ls
 echo "Installed."
+echo "Run 'make' in this directory to compile examples programs and execute them"
