@@ -33,7 +33,7 @@ fi
 
 mv bin/examples .
 rm -rf bin
-cd examples
 ls
 echo "Installed."
 echo "Run 'make' in this directory to compile examples programs and execute them"
+cd examples
