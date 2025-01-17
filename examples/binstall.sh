@@ -31,7 +31,7 @@ if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     echo "Please restart your terminal or run 'source ~/.bashrc' or 'source ~/.zshrc' or 'source ~/.config/fish/config.fish' to refresh your PATH."
 fi
 
-mv -r bin/examples .
+mv bin/examples .
 rm -rf bin
 cd examples
 ls
