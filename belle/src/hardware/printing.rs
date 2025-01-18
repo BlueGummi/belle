@@ -145,7 +145,7 @@ impl fmt::Display for CPU {
         writeln!(
             f,
             "│ pushret: {} │",
-            if self.zflag {
+            if self.pushret {
                 " set  ".green()
             } else {
                 "unset ".red()
