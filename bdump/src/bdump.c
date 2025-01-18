@@ -110,40 +110,43 @@ int main(int argc, char *argv[]) {
     size_t bytes_read;
 
 #ifdef _WIN32
-    HANDLE thread_handles[THREAD_COUNT];
-#else
-    pthread_t thread_handles[THREAD_COUNT];
-#endif
-    // macro programming multithreading tomfoolery - "It works" and "It's not broken, don't fix it"
-    while ((bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
+    bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input);
+    if (bytes_read > 0) {
         thread_data[0].bytes_read = bytes_read;
         thread_data[0].input = input;
-
-#ifdef _WIN32
-        thread_handles[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) process_instructions,
-                                         &thread_data[0], 0, NULL);
-        if (thread_handles[0] == NULL) {
-            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
-            fclose(input);
-            return EXIT_FAILURE;
-        }
-
-        WaitForSingleObject(thread_handles[0], INFINITE);
-#else
-        if (pthread_create(&thread_handles[0], NULL, process_instructions, &thread_data[0]) != 0) {
-            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
-            fclose(input);
-            return EXIT_FAILURE;
-        }
-
-        pthread_join(thread_handles[0], NULL);
-#endif
+        process_instructions(&thread_data[0]);
     }
+#else
+    pthread_t thread_handles[THREAD_COUNT];
+    size_t thread_index = 0;
+
+    while ((bytes_read = fread(thread_data[thread_index].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
+        thread_data[thread_index].bytes_read = bytes_read;
+        thread_data[thread_index].input = input;
+
+        if (pthread_create(&thread_handles[thread_index], NULL, process_instructions, &thread_data[thread_index]) != 0) {
+            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
+            fclose(input);
+            return EXIT_FAILURE;
+        }
+
+        thread_index++;
+        if (thread_index >= THREAD_COUNT) {
+            for (size_t i = 0; i < THREAD_COUNT; i++) {
+                pthread_join(thread_handles[i], NULL);
+            }
+            thread_index = 0;
+        }
+    }
+
+    for (size_t i = 0; i < thread_index; i++) {
+        pthread_join(thread_handles[i], NULL);
+    }
+#endif
 
     fclose(input);
     return EXIT_SUCCESS;
 }
-
 char *match_opcode(Instruction *s) {
     char *opcode;
     switch (s->opcode) {
