@@ -2,6 +2,7 @@
 .ssp [0x28]  ; set stack pointer to addr 40
 .sbp [0x28]  ; set base pointer to addr 40
 .start $0x29 ; program starts at addr 41
+    int 71   ; don't push returns
     jmp @start
 text:
     .asciiz "The number entered is too small."
@@ -28,10 +29,7 @@ start:
     cmp r0, 2
     jz @early_exit
     mov r1, 0
-    jmp @fib_loop ; perform a jump into the loop
-
 fib_loop:
-    pop [randomloc] ; go random
     mov r5, 0 ; clear register 5
     pop r4
     pop r6 ; retrieve values
@@ -51,7 +49,6 @@ fib_loop:
     jmp @fib_loop ; continue Fibonacci calculation
 
 finish:
-    pop r4
     add r1, -2
     mov r7, &r1 ; get back most recent value
     add r1, -1

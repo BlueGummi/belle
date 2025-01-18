@@ -71,7 +71,9 @@ impl CPU {
     }
 
     fn jmp(&mut self, arg: &Argument) -> PossibleCrash {
-        self.handle_push(&Argument::Literal(self.pc.try_into().unwrap()))?;
+        if self.pushret {
+            self.handle_push(&Argument::Literal(self.pc.try_into().unwrap()))?;
+        }
         if let MemAddr(n) = arg {
             if *n < 0 {
                 return Err(UnrecoverableError::SegmentationFault(

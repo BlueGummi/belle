@@ -33,6 +33,7 @@ pub struct CPU {
     pub debugging: bool,
     pub errmsg: String,
     pub pmem: bool,
+    pub pushret: bool,
     pub fuzz: bool,
 }
 
@@ -68,6 +69,7 @@ impl CPU {
             hit_max_clk: false,
             do_not_run: false,
             err: false,
+            pushret: true,
             debugging: false,
             errmsg: String::from(""),
             pmem: false,

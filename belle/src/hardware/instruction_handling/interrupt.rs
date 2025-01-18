@@ -181,7 +181,8 @@ impl CPU {
 
             60 => self.sp = self.uint_reg[0],
             61 => self.bp = self.uint_reg[0],
-
+            70 => self.pushret = true,
+            71 => self.pushret = false,
             // 10 - 20 set flags
             // 20 - 30 unset them
             // 30 - 40 invert them

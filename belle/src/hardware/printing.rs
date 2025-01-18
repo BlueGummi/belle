@@ -141,6 +141,18 @@ impl fmt::Display for CPU {
         )?;
         let footer = format!("╰{}┴{}┴{}┴{}┴{}┴{}╯", line, line, line, line, line, line);
         writeln!(f, "{}", footer)?;
+        writeln!(f, "╭─────────────────╮")?;
+        writeln!(
+            f,
+            "│ pushret: {} │",
+            if self.zflag {
+                " set  ".green()
+            } else {
+                "unset ".red()
+            },
+        )?;
+        writeln!(f, "╰─────────────────╯")?;
+
         if self.pmem {
             writeln!(f, "╭{}─{}─{}─{}─{}─{}╮", line, line, line, line, line, line)?;
             writeln!(

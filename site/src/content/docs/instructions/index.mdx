@@ -100,7 +100,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     `JR` will only jump if the remainder flag is set.
 
-    When a `Jcc` instruction is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack. This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
+    When a `Jcc` instruction is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack (if the **PUSHRET** flag is enabled). This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
 
     The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
 
@@ -568,6 +568,8 @@ Please refer to the [encoding](../encoding) document for more information about 
 | 53 | Invert the CPU's halt on overflow property |
 | 60 | Set the stack pointer to the value in `r4` |
 | 61 | Set the base pointer to the value in `r4` |
+| 70 | Set the "Push return address" flag | 
+| 71 | Unset the "Push return address" flag |
 
     Flags affected: All
 
