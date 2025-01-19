@@ -438,7 +438,7 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
         if current_line == line_number {
             match line {
                 Ok(content) => {
-                    println!("{}\n", content.green());
+                    println!("{:^3} {} {}\n", (current_line + 1).to_string().blue(), "|".blue(), content);
                     return Ok(());
                 }
                 Err(e) => {

@@ -13,7 +13,7 @@ Color get_color(int index) {
     return color_codes[index];
 }
 
-const char *color_to_ansi(Color color) {
+char *color_to_ansi(Color color) {
     switch (color) {
     case COLOR_RED:
         return ANSI_RED;
