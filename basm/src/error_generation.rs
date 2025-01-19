@@ -64,11 +64,11 @@ impl fmt::Display for Error<'_> {
             .enumerate()
         {
             if current_line + 1 == line_number {
-                writeln!(f, "{}", line.unwrap().trim())?;
+                writeln!(f, "{:^6} {} {}", line_number.to_string().blue(), "|".blue(), line.unwrap().trim())?;
             }
         }
         if let Some(place) = location {
-            let spaces = " ".repeat({ *place } - 1);
+            let spaces = " ".repeat({ *place } + 7);
             writeln!(f, "{}{}", spaces, "^^".red().bold())?;
         }
 
