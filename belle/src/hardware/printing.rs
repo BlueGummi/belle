@@ -8,14 +8,14 @@ impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if CONFIG.compact_print {
             let exit = if self.running && !self.err {
-                "R".green()
+                "RUN".green()
             } else if self.err {
                 writeln!(f, "{}", self.errmsg)?;
                 return Ok(());
             } else if self.debugging {
-                "D".bright_purple()
+                "DBG".bright_purple()
             } else {
-                "H".red()
+                "STP".red()
             };
             let r0 = self.int_reg[0].to_string().magenta();
             let r1 = self.int_reg[1].to_string().magenta();
