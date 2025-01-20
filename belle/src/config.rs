@@ -43,8 +43,9 @@ pub struct Cli {
     #[clap(short = 'n', long, default_value_t = false)]
     pub no_print_memory: bool,
 
-    #[clap(short = 's', long, default_value_t = false)]
-    pub short_print: bool,
+    /// Print CPU state compactly
+    #[clap(short = 'c', long, default_value_t = false)]
+    pub compact_print: bool,
 }
 #[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
@@ -59,7 +60,7 @@ pub fn declare_config() -> Cli {
             pretty: false,
             write: false,
             no_print_memory: false,
-            short_print: false,
+            compact_print: false,
         };
     }
     #[cfg(fuzzing)]
@@ -73,7 +74,7 @@ pub fn declare_config() -> Cli {
             pretty: false,
             write: false,
             no_print_memory: true,
-            short_print: false,
+            compact_print: false,
         };
     }
     Cli::parse()

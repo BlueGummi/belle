@@ -6,7 +6,7 @@ use std::fmt;
 
 impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if CONFIG.short_print {
+        if CONFIG.compact_print {
             let exit = if self.running && !self.err {
                 "run".green()
             } else if self.err {
