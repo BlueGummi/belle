@@ -135,7 +135,7 @@ impl CPU {
                 }
                 return Err(e);
             }
-            if CONFIG.verbose {
+            if CONFIG.verbose && self.running { // avoid printing halted twice
                 println!("{self}");
             }
             if !self.running {
@@ -162,7 +162,7 @@ impl CPU {
         }
 
         if !self.running {
-            if CONFIG.verbose {
+            if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
                 println!("│ {} │", "Halting...".bold().white());
                 println!("╰────────────╯");

@@ -32,7 +32,7 @@ impl fmt::Display for CPU {
             let pc = self.pc.to_string().blue();
             let sp = self.sp.to_string().green();
             let bp = self.bp.to_string().red();
-            write!(f, " {exit} │ {:12} │ reg: │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^5} │ r7: {r7:^5} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ flag: │ {zf} │ {of} │ {sf} ", self.decode_instruction().to_string().to_lowercase().bold())?;
+            write!(f, " {exit} │ {:14} │ REG: │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^8} │ r7: {r7:^8} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ FLAG: │ {zf} │ {of} │ {sf} ", self.decode_instruction().to_string().to_lowercase().bold())?;
             return Ok(());
         }
         let times = 12;
