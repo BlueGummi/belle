@@ -135,7 +135,8 @@ impl CPU {
                 }
                 return Err(e);
             }
-            if CONFIG.verbose && self.running { // avoid printing halted twice
+            if CONFIG.verbose && self.running {
+                // avoid printing halted twice
                 println!("{self}");
             }
             if !self.running {

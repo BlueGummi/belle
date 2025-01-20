@@ -97,7 +97,7 @@ impl fmt::Display for UnrecoverableError {
 
 impl fmt::Display for RecoverableError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if CONFIG.compact_print || (!CONFIG.debug && !CONFIG.verbose){
+        if CONFIG.compact_print || (!CONFIG.debug && !CONFIG.verbose) {
             return Ok(());
         }
         let (err_type, location, msg) = self.details();
