@@ -7,16 +7,10 @@ use std::fmt;
 impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if CONFIG.compact_print {
-            let exit = if self.running && !self.err {
-                "RUN".green()
-            } else if self.err {
+            if self.err {
                 writeln!(f, "{}", self.errmsg)?;
                 return Ok(());
-            } else if self.debugging {
-                "DBG".bright_purple()
-            } else {
-                "STP".red()
-            };
+            }
             let r0 = self.int_reg[0].to_string().magenta();
             let r1 = self.int_reg[1].to_string().magenta();
             let r2 = self.int_reg[2].to_string().magenta();
@@ -35,7 +29,7 @@ impl fmt::Display for CPU {
             let bp = self.bp.to_string().cyan();
             let reg = "REG:".black().bold().on_white();
             let flag = "FLAG:".red().bold().on_white();
-            write!(f, " {exit} │ {:14} │ {reg} │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^8} │ r7: {r7:^8} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ {flag} │ {zf} │ {of} │ {sf} ", self.decode_instruction().to_string().to_lowercase().bold())?;
+            write!(f, "│ {:14} │ {reg} │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^8} │ r7: {r7:^8} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ {flag} │ {zf} │ {of} │ {sf} ", self.decode_instruction().to_string().to_lowercase().bright_blue().bold())?;
             return Ok(());
         }
         let times = 12;
