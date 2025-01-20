@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::CPU;
 use crate::*;
 use colored::*;
@@ -5,6 +6,35 @@ use std::fmt;
 
 impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if CONFIG.short_print {
+            let exit = if self.running && !self.err {
+                "run".green()
+            } else if self.err {
+                "sad".bright_red()
+            } else if self.debugging {
+                "dbg".bright_purple()
+            } else {
+                "hlt".red()
+            };
+            let r0 = self.int_reg[0].to_string().magenta();
+            let r1 = self.int_reg[1].to_string().magenta();
+            let r2 = self.int_reg[2].to_string().magenta();
+            let r3 = self.int_reg[3].to_string().magenta();
+            let r4 = self.uint_reg[0].to_string().green();
+            let r5 = self.uint_reg[1].to_string().green();
+            let r6 = self.float_reg[0].to_string().yellow();
+            let r7 = self.float_reg[1].to_string().yellow();
+            let zf = if self.zflag { "zf".green() } else { "zf".red() };
+
+            let of = if self.oflag { "of".green() } else { "of".red() };
+
+            let sf = if self.sflag { "sf".green() } else { "sf".red() };
+            let pc = self.pc.to_string().blue();
+            let sp = self.sp.to_string().green();
+            let bp = self.bp.to_string().red();
+            write!(f, " {exit} │ {:12} │ reg: │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^5} │ r7: {r7:^5} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ flag: │ {zf} │ {of} │ {sf} ", self.decode_instruction().to_string().to_lowercase().bold())?;
+            return Ok(());
+        }
         let times = 12;
         let line = "─".repeat(times);
         let midpart = format!("├{}┼{}┼{}┼{}┴{}┼{}┤\n", line, line, line, line, line, line);

@@ -42,6 +42,9 @@ pub struct Cli {
     /// Do not print memory
     #[clap(short = 'n', long, default_value_t = false)]
     pub no_print_memory: bool,
+
+    #[clap(short = 's', long, default_value_t = false)]
+    pub short_print: bool,
 }
 #[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
@@ -56,6 +59,7 @@ pub fn declare_config() -> Cli {
             pretty: false,
             write: false,
             no_print_memory: false,
+            short_print: false,
         };
     }
     #[cfg(fuzzing)]
@@ -69,6 +73,7 @@ pub fn declare_config() -> Cli {
             pretty: false,
             write: false,
             no_print_memory: true,
+            short_print: false,
         };
     }
     Cli::parse()

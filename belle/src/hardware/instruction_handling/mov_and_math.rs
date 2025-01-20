@@ -56,33 +56,28 @@ impl CPU {
         if let Register(n) = arg1 {
             let new_value = match *n {
                 4 => {
-                    if self.uint_reg[0] as f32 % divisor != 0.0 {
-                        self.rflag = true;
-                    }
+                    self.rflag = self.uint_reg[0] as f32 % divisor != 0.0;
                     let result = self.uint_reg[0] as i32 / divisor as i32;
                     self.uint_reg[0] = result as u16;
                     result as i64
                 }
                 5 => {
-                    if self.uint_reg[1] as f32 % divisor != 0.0 {
-                        self.rflag = true;
-                    }
+                    self.rflag = self.uint_reg[1] as f32 % divisor != 0.0;
+
                     let result = self.uint_reg[1] as i32 / divisor as i32;
                     self.uint_reg[1] = result as u16;
                     result as i64
                 }
                 6 => {
-                    if self.float_reg[0] % divisor != 0.0 {
-                        self.rflag = true;
-                    }
+                    self.rflag = self.float_reg[0] % divisor != 0.0;
+
                     let result = self.float_reg[0] / divisor;
                     self.float_reg[0] = result;
                     result as i64
                 }
                 7 => {
-                    if self.float_reg[1] % divisor != 0.0 {
-                        self.rflag = true;
-                    }
+                    self.rflag = self.float_reg[1] % divisor != 0.0;
+
                     let result = self.float_reg[1] / divisor;
                     self.float_reg[1] = result;
                     result as i64
@@ -91,9 +86,8 @@ impl CPU {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
-                    if f32::from(self.int_reg[*n as usize]) % divisor != 0.0 {
-                        self.rflag = true;
-                    }
+                    self.rflag = f32::from(self.int_reg[*n as usize]) % divisor != 0.0;
+
                     let result = if arg2.is_ptr() {
                         self.int_reg[*n as usize] / divisor as u16 as i16
                     } else {
