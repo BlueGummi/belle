@@ -109,40 +109,12 @@ int main(int argc, char *argv[]) {
     ThreadData thread_data[THREAD_COUNT];
     size_t bytes_read;
 
-#ifdef _WIN32
     bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input);
     if (bytes_read > 0) {
         thread_data[0].bytes_read = bytes_read;
         thread_data[0].input = input;
         process_instructions(&thread_data[0]);
     }
-#else
-    pthread_t thread_handles[THREAD_COUNT];
-    size_t thread_index = 0;
-
-    while ((bytes_read = fread(thread_data[thread_index].buffer, sizeof(uint8_t), BUFFER_SIZE, input)) > 0) {
-        thread_data[thread_index].bytes_read = bytes_read;
-        thread_data[thread_index].input = input;
-
-        if (pthread_create(&thread_handles[thread_index], NULL, process_instructions, &thread_data[thread_index]) != 0) {
-            fputs(ANSI_RED "Failed to create thread\n" ANSI_RESET, stderr);
-            fclose(input);
-            return EXIT_FAILURE;
-        }
-
-        thread_index++;
-        if (thread_index >= THREAD_COUNT) {
-            for (size_t i = 0; i < THREAD_COUNT; i++) {
-                pthread_join(thread_handles[i], NULL);
-            }
-            thread_index = 0;
-        }
-    }
-
-    for (size_t i = 0; i < thread_index; i++) {
-        pthread_join(thread_handles[i], NULL);
-    }
-#endif
 
     fclose(input);
     return EXIT_SUCCESS;
