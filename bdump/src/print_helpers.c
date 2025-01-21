@@ -58,6 +58,8 @@ void print_help(char *bin) { // bin is the name of the bin program
            ANSI_RESET);
     printf("  %s-v%s, %s--verbose%s    Increase verbosity level (use multiple for more)\n", ANSI_BOLD,
            ANSI_RESET, ANSI_BOLD, ANSI_RESET);
+    printf("  %s-V%s, %s--version%s    Print version\n", ANSI_BOLD,
+           ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     exit(0);
 }
 

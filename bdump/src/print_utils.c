@@ -151,9 +151,9 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
         if (!args.only_code) {
             for (size_t i = 0; i < jumpsHere->size; i++) {
                 char *color = color_to_ansi(jumpsHere->data[i].color);
-		if (!args.colors) {
-			color = ANSI_RESET;
-		}
+                if (!args.colors) {
+                    color = ANSI_RESET;
+                }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     printf("%s◀%s", color, ANSI_RESET);
 #ifdef _WIN32

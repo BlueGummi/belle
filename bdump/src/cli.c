@@ -25,6 +25,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                 } else if (strcmp(argv[i], "--help") == 0) {
                     print_help(argv[0]);
                     exit(EXIT_SUCCESS);
+                } else if (strcmp(argv[i], "--version") == 0) {
+
+                    printf("bdump 0.2.0\n");
+                    exit(0);
                 } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
@@ -57,6 +61,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                     case 'h':
                         print_help(argv[0]);
                         exit(EXIT_SUCCESS);
+                        break;
+                    case 'V':
+                        printf("bdump 0.2.0\n");
+                        exit(0);
                         break;
                     default:
                         fputs("Error: Unknown option -", stderr);

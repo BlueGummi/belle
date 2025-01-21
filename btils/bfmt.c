@@ -1,6 +1,6 @@
 #include "bfmt_utils.c"
 bool starts_with_semicolon(const char *str) {
-    while (isspace((unsigned char)*str)) {
+    while (isspace((unsigned char) *str)) {
         str++;
     }
 
@@ -10,8 +10,8 @@ bool starts_with_semicolon(const char *str) {
 void trim_and_format_line(char *line, char *formatted_line, size_t max_indentation, int use_tabs) {
     char *lineclone = clone_string(line);
     if (strcmp(line, "\n") == 0) {
-	formatted_line = "\n\n";
-	return;
+        formatted_line = "\n\n";
+        return;
     }
     if (lineclone == NULL) {
         perror("Memory allocation failed\n");
@@ -35,7 +35,7 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
 
     if (*cut == '\0') {
         formatted_line[0] = '\0';
-        free(lineclone); 
+        free(lineclone);
         return;
     }
     bool should_not_trim = false;
@@ -60,7 +60,8 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
         if (use_tabs) {
             snprintf(formatted_line, MAX_LINE_LENGTH, "\t%s", trimmed_line);
         } else {
-            snprintf(formatted_line, MAX_LINE_LENGTH, "%*s%s", (int)max_indentation, "", trimmed_line);
+            snprintf(formatted_line, MAX_LINE_LENGTH, "%*s%s", (int) max_indentation, "",
+                     trimmed_line);
         }
     }
 
@@ -70,14 +71,14 @@ void trim_and_format_line(char *line, char *formatted_line, size_t max_indentati
 void process_file(FILE *input_file, FILE *output_file, size_t max_indentation, int use_tabs) {
     char line[MAX_LINE_LENGTH];
     while (fgets(line, sizeof(line), input_file)) {
-	if (strcmp(line, "\n") == 0) {
-		fprintf(output_file, "%s", "\n");
-		continue;
-	}
-	if (starts_with_semicolon(line)) {
-		fprintf(output_file, "%s", line);
-		continue;
-	}
+        if (strcmp(line, "\n") == 0) {
+            fprintf(output_file, "%s", "\n");
+            continue;
+        }
+        if (starts_with_semicolon(line)) {
+            fprintf(output_file, "%s", line);
+            continue;
+        }
         char formatted_line[MAX_LINE_LENGTH] = {0};
         trim_and_format_line(line, formatted_line, max_indentation, use_tabs);
         fprintf(output_file, "%s", formatted_line);
@@ -101,6 +102,9 @@ int main(int argc, char *argv[]) {
             max_indentation = atoi(value);
         } else if (strcmp(argv[i], "-I") == 0 && i + 1 < argc) {
             max_indentation = strtoul(argv[++i], NULL, 10);
+        } else if ((strcmp(argv[i], "-V") == 0) || (strncmp(argv[i], "--version", 9) == 0)) {
+            printf("bfmt 0.2.0\n");
+            exit(0);
         } else {
             if (file_count < MAX_FILES) {
                 files[file_count++] = argv[i];
