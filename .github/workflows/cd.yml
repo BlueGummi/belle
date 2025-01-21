@@ -44,12 +44,6 @@ jobs:
         rm belle || true
         cp -r ../output/app/* ./
 
-    - name: Retrieve last commit message from belle
-      id: get_commit_message
-      run: |
-        LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-        echo "LAST_COMMIT_MESSAGE=${LAST_COMMIT_MESSAGE}" >> $GITHUB_ENV
-
     - name: Configure Git for commit
       run: |
         git config --global user.email "105593618+BlueGummi@users.noreply.github.com"
@@ -59,5 +53,5 @@ jobs:
       run: |
         cd belle-demo || true
         git add * || true
-        git commit -m "AUTOCOMMIT - ${{ env.LAST_COMMIT_MESSAGE }}" || true
+        git commit -m "AUTOCOMMIT" || true
         git push origin || true
