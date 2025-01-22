@@ -77,7 +77,7 @@ jobs:
         with:
           tag_name: nightly
           body: Nightly release for BELLE
-          prerelease: true
+          prerelease: false 
           token: ${{ secrets.RELEASE_TOKEN }}
           name: Nightly release
           draft: false
