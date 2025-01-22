@@ -62,10 +62,6 @@ Ordered from easy to complex
 
 - [x] Implement hex printing for the disassembler
 
-  **ON HOLD** ~~Fix formatter unsafety~~ 
-
-- [ ] Write safe versions of C string functions (for formatter)
-
 - [ ] Finish tutorials
 
 - [x] Implement objdump-like jump visualization
