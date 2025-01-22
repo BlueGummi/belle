@@ -156,23 +156,29 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     printf("%s◀%s", color, ANSI_RESET);
-#ifdef _WIN32
+#if defined(_WIN32)
                     printf("%s from %lld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
+#elif defined(__APPLE__)
+                    printf("%s from %llu, %s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
                     printf("%s from %ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
-#ifdef _WIN32
+#if defined(_WIN32)
                     printf(" %sto %lld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
+#elif defined(__APPLE__)
+                    printf(" %sto %llu %s", color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
                     printf(" %sto %ld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
-#ifdef _WIN32
+#if defined(_WIN32)
                     printf("%s%lld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
+#elif defined(__APPLE__)
+                    printf("%s%llu, %s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
                     printf("%s%ld, %s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif

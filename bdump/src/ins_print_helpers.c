@@ -147,7 +147,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char) ins->full_ins, '\0'}
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                        : "?"),
                        ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
@@ -155,7 +155,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char) ins->full_ins, '\0'}
+                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                        : "?"),
                        ins->full_ins);
             }
@@ -163,7 +163,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                      (ins->full_ins == '\n'                          ? "\\n"
                       : ins->full_ins == '\t'                        ? "\\t"
                       : ins->full_ins == '\\'                        ? "\\\\"
-                      : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]){(char) ins->full_ins, '\0'}
+                      : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
                                                                      : "?"),
                      ins->full_ins);
             len += strlen(str);
