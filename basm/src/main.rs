@@ -51,17 +51,17 @@ fn main() -> io::Result<()> {
     let mut line_count = 1;
     let mut write_to_file: bool = true;
     if let Err((l, m)) = process_variables(&lines) {
-        eprintln!("{m}");
+        eprintln!("{}: {}", "error".bright_red().bold(), m);
         print_line(l)?;
         write_to_file = false;
     }
     if let Err((l, e)) = process_start(&lines) {
-        eprintln!("{e}");
+        eprintln!("{}: {}", "error".bright_red().bold(), e);
         print_line(l)?;
         write_to_file = false;
     }
     if let Err(e) = load_subroutines(&lines) {
-        eprintln!("{e}");
+        eprintln!("{}: {}", "error".bright_red().bold(), e);
         write_to_file = false;
     }
     let mut hlt_seen = false;
@@ -122,7 +122,7 @@ fn main() -> io::Result<()> {
                         Ok(Some(vector)) => {
                             if let Err(err_msg) = verify(ins, operand1, operand2, line_count) {
                                 write_to_file = false;
-                                eprintln!("{}", err_msg);
+                                eprintln!("{}: {}", "error".bright_red().bold(), err_msg);
                                 print_line(line_count)?;
                             } else {
                                 for encoded in vector {
@@ -136,10 +136,10 @@ fn main() -> io::Result<()> {
                         Ok(None) => {
                             continue;
                         }
-                        Err(err_msg) => {
+                        Err((line_num, err_msg)) => {
                             write_to_file = false;
-                            print_line(line_count)?;
-                            eprintln!("{err_msg}");
+                            eprintln!("{}: {}", "error".bright_red().bold(), err_msg);
+                            print_line(line_num)?;
                         }
                     }
                 }
@@ -155,9 +155,10 @@ fn main() -> io::Result<()> {
 
     if !hlt_seen {
         println!(
-            "{}: No HLT instruction found in program {}",
-            "Warning".yellow(),
-            CONFIG.source
+            "{}: {} {}",
+            "warning".yellow(),
+            "no HLT instruction present in".bold(),
+            CONFIG.source.green()
         );
     }
 

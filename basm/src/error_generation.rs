@@ -33,10 +33,14 @@ impl fmt::Display for Error<'_> {
         };
 
         let error_message = match self {
-            Error::InvalidSyntax(s, _, _) => format!("invalid syntax: \n{s}"),
-            Error::ExpectedArgument(s, _, _) => format!("expected an argument: \n{s}"),
-            Error::NonexistentData(s, _, _) => format!("nonexistent data: \n{s}"),
-            Error::UnknownCharacter(s, _, _) => format!("has unknown character: \n{s}"),
+            Error::InvalidSyntax(s, _, _) => format!("invalid syntax: {}", s.cyan()),
+            Error::ExpectedArgument(s, _, _) => {
+                format!("expected an argument: {}", s.cyan())
+            }
+            Error::NonexistentData(s, _, _) => format!("nonexistent data: {}", s.cyan()),
+            Error::UnknownCharacter(s, _, _) => {
+                format!("has unknown character: {}", s.cyan())
+            }
             Error::OtherError(s, _, _) => (*s).to_string(),
             _ => unreachable!(),
         };
@@ -50,12 +54,7 @@ impl fmt::Display for Error<'_> {
             _ => unreachable!(),
         };
 
-        writeln!(
-            f,
-            "error on line {}: {}",
-            line_number.to_string().as_str().green(),
-            error_message
-        )?;
+        writeln!(f, "{}: {}", "error".bright_red().bold(), error_message)?;
 
         let input: &String = &CONFIG.source;
         let path = Path::new(input);
@@ -64,7 +63,13 @@ impl fmt::Display for Error<'_> {
             .enumerate()
         {
             if current_line + 1 == line_number {
-                writeln!(f, "{:^6} {} {}", line_number.to_string().blue(), "|".blue(), line.unwrap().trim())?;
+                writeln!(
+                    f,
+                    "{:^6} {} {}",
+                    line_number.to_string().blue(),
+                    "|".blue(),
+                    line.unwrap().trim()
+                )?;
             }
         }
         if let Some(place) = location {
@@ -77,10 +82,10 @@ impl fmt::Display for Error<'_> {
 }
 
 impl Error<'_> {
-    fn message(&self) -> &str {
+    fn message(&self) -> String {
         match self {
-            Error::LineLessError(s) => s,
-            _ => "",
+            Error::LineLessError(s) => s.bold().to_string(),
+            _ => String::from(""),
         }
     }
 }

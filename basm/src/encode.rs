@@ -15,11 +15,11 @@ pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, i32>>> =
 pub static MEMORY_COUNTER: Lazy<Mutex<usize>> = Lazy::new(|| Mutex::new(0));
 static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(0));
 
-pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, String> {
+pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, String)> {
     match arg {
         Some(Token::Register(num)) => {
             if *num > 7 {
-                return Err(format!("Invalid register number at line {}", line_num));
+                return Err((line_num, "Invalid register number".to_string()));
             }
             Ok(*num)
         }
@@ -29,10 +29,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, S
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
-                Err(format!(
-                    "Label \"{}\" does not exist at line {}",
-                    sr, line_num
-                ))
+                Err((line_num, format!("Label \"{}\" does not exist", sr)))
             }
         }
         Some(Token::MemAddr(n)) => Ok(*n),
@@ -42,12 +39,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, S
                 "ssp" => 2,
                 "sbp" => 3,
                 "asciiz" | "word" => 0,
-                _ => {
-                    return Err(format!(
-                        "Directive not recognized after '.' at line {}",
-                        line_num
-                    ))
-                }
+                _ => return Err((line_num, "Directive not recognized".to_string())),
             };
             Ok(label_val)
         }
@@ -62,7 +54,7 @@ pub fn encode_instruction(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
-) -> Result<Option<Vec<i16>>, String> {
+) -> Result<Option<Vec<i16>>, (usize, String)> {
     let mut ins_type = "default";
     let instruction_bin = match ins {
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
@@ -84,7 +76,7 @@ pub fn encode_instruction(
                     "JNZ" | "JNE" => Ok(JNZ_OP),
                     "JL" => Ok(JL_OP),
                     "JG" => Ok(JG_OP),
-                    _ => Err(format!("Invalid jump instruction at line {}", line_num)),
+                    _ => Err((line_num, "Invalid jump instruction".to_string())),
                 }
             }
             "POP" => {
@@ -123,7 +115,7 @@ pub fn encode_instruction(
                 Ok(LEA_OP)
             }
             "MOV" => Ok(MOV_OP), // 14
-            _ => Err(format!("Instruction not recognized at line {}", line_num)),
+            _ => Err((line_num, "Instruction not recognized".to_string())),
         },
         Token::Directive(s) => {
             match s.as_str() {
@@ -134,7 +126,7 @@ pub fn encode_instruction(
 
             Ok(HLT_OP)
         }
-        _ => Err(format!("Invalid instruction type at line {}", line_num)),
+        _ => Err((line_num, "Invalid instruction type".to_string())),
     }?;
 
     match ins_type.trim().to_lowercase().as_str() {
@@ -144,7 +136,7 @@ pub fn encode_instruction(
         }
         "popmem" => {
             let arg_bin = arg1
-                .ok_or_else(|| format!("Missing argument for POP at line {}", line_num))?
+                .ok_or_else(|| (line_num, "Missing argument for POP".to_string()))?
                 .get_num();
             Ok(Some(vec![instruction_bin << 12 | 1 << 11 | arg_bin]))
         }
@@ -157,12 +149,12 @@ pub fn encode_instruction(
         }
         "sti" => {
             let raw = arg1
-                .ok_or_else(|| format!("Missing argument for STI at line {}", line_num))?
+                .ok_or_else(|| (line_num, "Missing argument for STI".to_string()))?
                 .get_raw();
             let parsed_int = raw
                 .trim()
                 .parse::<i16>()
-                .map_err(|_| format!("Failed to parse integer at line {}", line_num))?;
+                .map_err(|_| (line_num, "Failed to parse integer".to_string()))?;
             Ok(Some(vec![
                 (instruction_bin << 12)
                     | (1 << 11)
@@ -186,21 +178,21 @@ pub fn encode_instruction(
         "call" => {
             let address = argument_to_binary(arg1, line_num)?;
             if address > 1023 {
-                return Err(format!(
-                    "Label memory address too large on instruction on line {}",
-                    line_num
+                return Err((
+                    line_num,
+                    "Label memory address too large on instruction on line".to_string(),
                 ));
             }
             Ok(Some(vec![(instruction_bin << 11) | address]))
         }
         "jwr" => {
             let raw_str = arg1
-                .ok_or_else(|| format!("Missing argument for indirect jump at line {}", line_num))?
+                .ok_or_else(|| (line_num, "Missing argument for indirect jump".to_string()))?
                 .get_raw();
             let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
-                format!(
-                    "Failed to parse integer for indirect jump at line {}",
-                    line_num
+                (
+                    line_num,
+                    "Failed to parse integer for indirect jump".to_string(),
                 )
             })?;
             Ok(Some(vec![
@@ -211,7 +203,7 @@ pub fn encode_instruction(
         }
         "ascii" => {
             if arg1.is_none() {
-                return Err(format!("Asciiz argument is empty, line {}", line_num));
+                return Err((line_num, "Asciiz argument is empty".to_string()));
             }
             let mut collected: Vec<i16> = Vec::new();
             for character in arg1.unwrap().get_raw().chars() {
@@ -221,13 +213,13 @@ pub fn encode_instruction(
         }
         "word" => {
             if arg1.is_none() {
-                return Err(format!("Word argument is empty, line {}", line_num));
+                return Err((line_num, "Word argument is empty".to_string()));
             }
             Ok(Some(vec![arg1.unwrap().get_num()]))
         }
         "ld" => {
             if arg1.is_none() || arg2.is_none() {
-                return Err(format!("LEA/LD argument is empty, line {}", line_num));
+                return Err((line_num, "LEA/LD argument is empty".to_string()));
             }
             let arg2_bin = argument_to_binary(arg2, line_num)?;
             let arg1_bin = argument_to_binary(arg1, line_num)?;
@@ -239,10 +231,7 @@ pub fn encode_instruction(
             let arg_bin = argument_to_binary(arg1, line_num)?;
             Ok(Some(vec![(instruction_bin << 11) | arg_bin]))
         }
-        _ => Err(format!(
-            "Instruction type not recognized at line {}",
-            line_num
-        )),
+        _ => Err((line_num, "Instruction type not recognized".to_string())),
     }
 }
 
@@ -438,7 +427,12 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
         if current_line == line_number {
             match line {
                 Ok(content) => {
-                    println!("{:^6} {} {}\n", (current_line + 1).to_string().blue(), "|".blue(), content);
+                    println!(
+                        "{:^6} {} {}\n",
+                        current_line.to_string().blue(),
+                        "|".blue(),
+                        content
+                    );
                     return Ok(());
                 }
                 Err(e) => {
