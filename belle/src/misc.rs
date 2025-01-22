@@ -129,6 +129,13 @@ pub fn cli_argument_check() {
         );
         process::exit(1);
     }
+    if CONFIG.compact_print && !(CONFIG.debug || CONFIG.verbose) {
+        eprintln!(
+            "{}",
+            EmuError::Impossible("Must enable debug or verbose flags with compact print".to_string())
+        );
+        process::exit(1);
+    }
     let executable_path = &CONFIG.rom;
     if let Ok(metadata) = fs::metadata(executable_path) {
         if metadata.is_dir() {

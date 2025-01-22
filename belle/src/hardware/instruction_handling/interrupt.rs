@@ -11,45 +11,55 @@ impl CPU {
         match code {
             0_u16..=3_u16 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.int_reg[code as usize]);
                     println!("╰─────────╯");
+                    print_t();
                 } else {
                     println!("{}", self.int_reg[code as usize]);
                 }
             }
             4 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.uint_reg[0]);
                     println!("╰─────────╯");
+                    print_t();
                 } else {
                     println!("{}", self.uint_reg[0]);
                 }
             }
             5 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────╮");
                     println!("│ {:^5}   │", self.uint_reg[1]);
                     println!("╰─────────╯");
+                    print_t();
                 } else {
                     println!("{}", self.uint_reg[1]);
                 }
             }
             6 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────╮");
                     println!("│ {:^5.5} │", self.float_reg[0]);
                     println!("╰─────────╯");
+                    print_t();
                 } else {
                     println!("{}", self.float_reg[0]);
                 }
             }
             7 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────╮");
                     println!("│ {:^5.5} │", self.float_reg[1]);
                     println!("╰─────────╯");
+                    print_t();
                 } else {
                     println!("{}", self.float_reg[1]);
                 }
@@ -85,6 +95,7 @@ impl CPU {
                     }
                 }
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     let lines: Vec<&str> = stringy.lines().collect();
                     let max_length =
                         if lines.iter().map(|line| line.len()).max().unwrap_or(10) >= 10 {
@@ -115,19 +126,25 @@ impl CPU {
                         println!("│ {}{} │", line, " ".repeat(max_length - line.len()));
                     }
                     if max_length >= 10 {
-                        println!("╰{}╯\n", "─".repeat(max_length + 2));
+                        println!("╰{}╯", "─".repeat(max_length + 2));
                     } else {
-                        println!("╰{}╯\n", "─".repeat(12));
+                        println!("╰{}╯", "─".repeat(12));
                     }
+                    if !CONFIG.compact_print {
+                        println!();
+                    }
+                    print_t();
                 }
                 io::stdout().flush().expect("Failed to flush stdout");
             }
             9 => {
                 if CONFIG.verbose || CONFIG.debug {
+                    print_b();
                     println!("╭─────────────────────────╮");
                     println!("│ CPU STDIN               │");
                     println!("│ Reading one character.. │");
                     println!("╰─────────────────────────╯\n");
+                    print_t();
                 }
                 use crossterm::terminal;
                 terminal::enable_raw_mode().unwrap();
@@ -154,23 +171,28 @@ impl CPU {
             31 => self.rflag = true,
             32 => self.rflag = false,
             33 => self.rflag = !self.rflag,
-            40 => loop {
-                let mut input = String::new();
-                match io::stdin().read_line(&mut input) {
-                    Ok(_) => match input.trim().parse::<i16>() {
-                        Ok(value) => {
-                            self.int_reg[0] = value;
-                            break;
-                        }
+            40 => {
+                print_b();
+                loop {
+                    let mut input = String::new();
+                    match io::stdin().read_line(&mut input) {
+                        Ok(_) => match input.trim().parse::<i16>() {
+                            Ok(value) => {
+                                self.int_reg[0] = value;
+                                break;
+                            }
+                            Err(e) => {
+                                println!("{}", EmuError::ReadFail(e.to_string()));
+                            }
+                        },
                         Err(e) => {
                             println!("{}", EmuError::ReadFail(e.to_string()));
                         }
-                    },
-                    Err(e) => {
-                        println!("{}", EmuError::ReadFail(e.to_string()));
                     }
                 }
-            },
+
+                print_t();
+            }
             41 => self.sflag = true,
             42 => self.sflag = false,
             43 => self.sflag = !self.sflag,
@@ -196,5 +218,17 @@ impl CPU {
         }
         self.pc += 1;
         Ok(())
+    }
+}
+
+pub fn print_b() {
+    if CONFIG.compact_print && CONFIG.verbose {
+        println!("╰────────────────┴──────┴───────────┴───────────┴───────────┴───────────┴───────────┴───────────┴──────────────┴──────────────┴───────────┴───────────┴───────────┴───────┴────┴────┴────╯");
+    }
+}
+
+pub fn print_t() {
+    if CONFIG.compact_print && CONFIG.verbose {
+        println!("╭────────────────┬──────┬───────────┬───────────┬───────────┬───────────┬───────────┬───────────┬──────────────┬──────────────┬───────────┬───────────┬───────────┬───────┬────┬────┬────╮");
     }
 }

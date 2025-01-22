@@ -1,4 +1,4 @@
-use crate::{config::CONFIG, Argument::*, Instruction::*, *};
+use crate::{config::CONFIG, interrupt::*, Argument::*, Instruction::*, *};
 use colored::Colorize;
 use std::{thread, time::Duration};
 
@@ -83,9 +83,7 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
-        if CONFIG.compact_print {
-            println!("╭────────────────┬──────┬───────────┬───────────┬───────────┬───────────┬───────────┬───────────┬──────────────┬──────────────┬───────────┬───────────┬───────────┬───────┬────┬────┬────╮");
-        }
+        print_t();
         while self.running {
             if !CONFIG.debug {
                 let _ = ctrlc::set_handler(move || {
@@ -116,7 +114,7 @@ impl CPU {
                     .to_string();
 
                     self.pmem = !CONFIG.no_print_memory;
-                    println!("╰────────────────┴──────┴───────────┴───────────┴───────────┴───────────┴───────────┴───────────┴──────────────┴──────────────┴───────────┴───────────┴───────────┴───────┴────┴────┴────╯");
+                    print_b();
                     if CONFIG.pretty || CONFIG.verbose {
                         println!("{self}");
                     }
@@ -176,7 +174,7 @@ impl CPU {
             if CONFIG.pretty ^ CONFIG.verbose {
                 println!("{self}");
             }
-            println!("╰────────────────┴──────┴───────────┴───────────┴───────────┴───────────┴───────────┴───────────┴──────────────┴──────────────┴───────────┴───────────┴───────────┴───────┴────┴────┴────╯");
+            print_b();
             let mut clock = CLOCK.lock().unwrap(); // might panic
             *clock += 1;
             std::mem::drop(clock);
