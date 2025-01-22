@@ -187,5 +187,4 @@ void print_footer() {
             }
         }
     }
-
 }
