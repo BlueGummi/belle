@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
             fclose(output_file);
             if (rename(temp_filename, files[i]) != 0) {
                 perror("Error renaming file");
+                remove(temp_filename);
                 exit(EXIT_FAILURE);
             }
         }
