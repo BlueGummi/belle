@@ -70,22 +70,7 @@ void *process_instructions(void *arg) {
             free_jump_vector(jumpsHere);
         }
     }
-
-    if (args.only_code != 1) {
-        if (args.binary != 1) {
-            if (args.print_hex == 1) {
-                printf("╰─────────────┴───────╯\n");
-            } else {
-                printf("╰────────┴───────╯\n");
-            }
-        } else {
-            if (args.print_hex == 1) {
-                printf("╰─────────────┴──────────────────────────╯\n");
-            } else {
-                printf("╰────────┴──────────────────────────╯\n");
-            }
-        }
-    }
+    print_footer();
     free_map(jump_map_global);
     // jump_map_print(jump_map_global);
     return NULL;

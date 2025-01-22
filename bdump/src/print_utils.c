@@ -166,6 +166,9 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     printf("%s◀%s", color, ANSI_RESET);
+                    if (args.verbosity >= 1 && likely_label) {
+                        printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
+                    }
 #if defined(_WIN32)
                     printf("%s from %lld%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
@@ -197,11 +200,10 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
 #endif
                     if (i < jumpsHere->size - 1) {
                         printf(", ");
+                    } else {
+                        printf(" ");
                     }
                 }
-            }
-            if (!has_jump) {
-                printf(" ");
             }
         }
         current_addr++;
