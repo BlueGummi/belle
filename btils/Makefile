@@ -1,5 +1,5 @@
 all:
-	cc -o bfmt bfmt.c
+	gcc -o bfmt bfmt.c
 
 clean:
 	rm -f bfmt
