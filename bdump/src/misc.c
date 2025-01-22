@@ -1,5 +1,5 @@
 #include "bdump.h"
-
+bool likely_label = false;
 Color get_color(int index) {
     Color color_codes[] = {
         COLOR_RED, COLOR_GREEN, COLOR_YELLOW,

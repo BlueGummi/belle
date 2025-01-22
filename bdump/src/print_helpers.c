@@ -63,72 +63,62 @@ void print_help(char *bin) { // bin is the name of the bin program
     exit(0);
 }
 
+#define PRINT_COLOR_AND_VALUE(color, format, value) \
+    do {                                            \
+        if (colors) {                               \
+            printf("%s", color);                    \
+        }                                           \
+        printf(format, value);                      \
+        if (colors) {                               \
+            printf(ANSI_RESET);                     \
+        }                                           \
+    } while (0)
+
 void print_instruction_header(size_t line, bool colors, bool is_directive) {
     size_t lineclone = line;
-    if (colors) {
-        printf("│ ");
-        if (args.print_hex == 1) {
-            char hex[5];
-            hex[4] = '\0';
-            for (int i = 0; i < 4; i++) {
-                hex[3 - i] = "0123456789ABCDEF"[line & 0xF];
-                line >>= 4;
-            }
 
-            for (int i = 0; i < 4; i += 2) {
-                if (is_directive) {
-                    printf("%sXX XX%s", ANSI_RED, ANSI_RESET);
-                    break;
-                }
-                printf("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
-                if (i != 2) {
-                    printf(" ");
-                }
-            }
-        }
-        if (!is_directive) {
-#ifdef _WIN32
-            printf(" %s%*llu%s ", ANSI_GREEN, 5, lineclone, ANSI_RESET);
-#else
-            printf(" %s%*lu%s ", ANSI_GREEN, 5, lineclone, ANSI_RESET);
-#endif
-        } else {
-            printf("%s XXXXX%s ", ANSI_RED, ANSI_RESET);
-        }
-        printf("│ ");
-    } else {
-        printf("│ ");
-        if (args.print_hex == 1) {
-            char hex[5];
-            hex[4] = '\0';
-            for (int i = 0; i < 4; i++) {
-                hex[3 - i] = "0123456789ABCDEF"[line & 0xF];
-                line >>= 4;
-            }
-
-            for (int i = 0; i < 4; i += 2) {
-                if (is_directive) {
-                    printf("XX XX");
-                    break;
-                }
-                printf("%c%c", hex[i], hex[i + 1]);
-                if (i != 2) {
-                    printf(" ");
-                }
-            }
+    printf("│ ");
+    if (args.print_hex == 1) {
+        char hex[5];
+        hex[4] = '\0';
+        for (int i = 0; i < 4; i++) {
+            hex[3 - i] = "0123456789ABCDEF"[line & 0xF];
+            line >>= 4;
         }
 
-        if (!is_directive) {
-#ifdef _WIN32
-            printf(" %*llu ", 5, lineclone);
-#else
-            printf(" %*lu ", 5, lineclone);
-#endif
-        } else {
-            printf(" XXXXX ");
+        for (int i = 0; i < 4; i += 2) {
+            if (is_directive) {
+                PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", "XX XX");
+                break;
+            }
+            char tmpstr[5];
+            snprintf(tmpstr, sizeof(tmpstr), "%c%c", hex[i], hex[i + 1]);
+            PRINT_COLOR_AND_VALUE(ANSI_CYAN, "%s", tmpstr);
+            if (i != 2) {
+                printf(" ");
+            }
         }
-        printf("│ ");
     }
+
+    if (!is_directive) {
+        char tmpstr[20];
+        if (likely_label) {
+            printf("%s●", ANSI_RESET);
+        } else {
+            printf(" ");
+        }
+#ifdef _WIN32
+        snprintf(tmpstr, sizeof(tmpstr), "%*llu", 5, lineclone);
+#else
+        snprintf(tmpstr, sizeof(tmpstr), "%*lu", 5, lineclone);
+#endif
+        PRINT_COLOR_AND_VALUE(ANSI_GREEN, "%s", tmpstr);
+        printf("%s ", ANSI_RESET);
+    } else {
+        PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", " XXXXX ");
+    }
+
+    printf("│ ");
 }
 
 void print_header() {
