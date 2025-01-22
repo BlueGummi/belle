@@ -91,6 +91,6 @@ jobs:
         run: sleep 2s
       
       - name: Delete drafts
-        uses: hugo19941994/delete-draft-releases@v1.0.0
+        uses: hugo19941994/delete-draft-releases@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
