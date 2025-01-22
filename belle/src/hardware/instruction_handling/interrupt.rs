@@ -144,7 +144,6 @@ impl CPU {
                     println!("│ CPU STDIN               │");
                     println!("│ Reading one character.. │");
                     println!("╰─────────────────────────╯\n");
-                    print_t();
                 }
                 use crossterm::terminal;
                 terminal::enable_raw_mode().unwrap();
@@ -154,6 +153,7 @@ impl CPU {
 
                 terminal::disable_raw_mode().unwrap();
                 io::stdout().flush().expect("Failed to flush stdout");
+                print_t();
             }
             10 => {
                 std::thread::sleep(std::time::Duration::from_secs(1));
