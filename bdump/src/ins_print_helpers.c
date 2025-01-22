@@ -26,7 +26,7 @@ void print_operation(Instruction *ins, char *op, bool colors) {
 
 void print_two_reg_args(Instruction *ins, bool colors) {
     if (colors) {
-        printf("%sr%d%s, ", ANSI_GREEN, ins->destination, ANSI_RESET);
+        printf("%sr%d%s, ", ANSI_YELLOW, ins->destination, ANSI_RESET);
     } else {
         printf("r%d, ", ins->destination);
     }
@@ -89,7 +89,7 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     char str[20];
     if (((ins->destination >> 1) & 1) == 1) {
         if (colors) {
-            printf("%s&r%d%s", ANSI_GREEN, ins->source, ANSI_RESET);
+            printf("%s&r%d%s", ANSI_YELLOW, ins->source, ANSI_RESET);
         } else {
             printf("&r%d", ins->source);
         }
