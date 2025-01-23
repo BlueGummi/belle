@@ -85,12 +85,13 @@ impl BDB {
             }
         } else {
             self.dbgcpu.has_ran = true;
-            while !self.breakpoints.contains(&self.dbgcpu.pc) {
+            self.dbgcpu.running = true;
+            while !self.breakpoints.contains(&self.dbgcpu.pc) && self.dbgcpu.running {
                 self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
                     value as i16
                 } else {
                     eprintln!("Nothing at PC {}", self.dbgcpu.pc);
-                    return;
+                    break;
                 };
                 let parsed_ins = self.dbgcpu.decode_instruction();
                 if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
