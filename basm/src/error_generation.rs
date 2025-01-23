@@ -28,7 +28,7 @@ impl fmt::Display for Error<'_> {
             | Error::OtherError(_, n, _) => *n,
 
             Error::LineLessError(_) => {
-                return write!(f, "error: {}", self.message());
+                return write!(f, "{}: {}", "error".bright_red().bold(), self.message());
             }
         };
 
