@@ -1,4 +1,4 @@
 *.astro linguist-language=plaintext
 *.mjs linguist-language=plaintext
-*.js linguist-language=plaintext
 *.mdx linguist-language=plaintext
+*.asm linguist-language=assembly
