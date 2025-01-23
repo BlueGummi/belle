@@ -22,10 +22,6 @@ pub struct Args {
     #[clap(short = 'v', long, default_value_t = false)]
     pub verbose: bool,
 
-    /// Display debug messages
-    #[clap(short = 'd', long, default_value_t = false)]
-    pub debug: bool,
-
     /// Display tips (may improve errors)
     #[clap(short = 't', long, default_value_t = true)]
     pub tips: bool,
@@ -40,7 +36,6 @@ pub fn declare_config() -> Args {
         source: cli.source,
         binary: Some(binary),
         verbose: cli.verbose,
-        debug: cli.debug,
         tips: cli.tips,
     }
 }

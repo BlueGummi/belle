@@ -40,7 +40,7 @@ fn main() -> io::Result<()> {
 
     let lines: Vec<String> = lines.iter().map(|line| line.trim().to_string()).collect();
 
-    if CONFIG.verbose || CONFIG.debug {
+    if CONFIG.verbose {
         println!("{}", "Processing lines:".blue());
         for (index, line) in lines.iter().enumerate() {
             println!("{}: {}", index + 1, line.green());
@@ -94,21 +94,11 @@ fn main() -> io::Result<()> {
                     }
                 };
 
-                if CONFIG.debug {
-                    println!("\nRaw line: {}", line.green());
-                }
                 for token in tokens {
                     if let Token::Ident(_) = token {
                         if token.get_raw().to_lowercase() == "hlt" {
                             hlt_seen = true;
                         }
-                    }
-                    if CONFIG.debug {
-                        println!(
-                            "{} {}",
-                            "Token:".green().bold(),
-                            token.to_string().blue().bold()
-                        );
                     }
                 }
                 if tokens.contains(&Token::EqualSign) {
@@ -127,9 +117,6 @@ fn main() -> io::Result<()> {
                             } else {
                                 for encoded in vector {
                                     encoded_instructions.extend(&encoded.to_be_bytes());
-                                    if CONFIG.verbose || CONFIG.debug {
-                                        println!("Instruction: {:016b}", encoded);
-                                    }
                                 }
                             }
                         }
@@ -162,9 +149,7 @@ fn main() -> io::Result<()> {
         );
     }
 
-    if CONFIG.debug {
-        print_subroutine_map();
-    }
+    print_subroutine_map();
 
     match &CONFIG.binary {
         Some(output_file) if write_to_file => {
@@ -246,7 +231,7 @@ fn write_encoded_instructions_to_file(
     filename: &str,
     encoded_instructions: &[u8],
 ) -> io::Result<()> {
-    if CONFIG.debug || CONFIG.verbose {
+    if CONFIG.verbose {
         println!("{}", "Wrote to file.".green());
     }
     let mut file = File::create(filename)?;

@@ -101,7 +101,7 @@ impl Token {
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if CONFIG.verbose || CONFIG.debug {
+        if CONFIG.verbose {
             match self {
                 Token::Ident(s) => {
                     write!(f, "{} (\"{}\") Length: [{}]", "Ident".green(), s, s.len())

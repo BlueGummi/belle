@@ -496,13 +496,13 @@ impl<'a> Lexer<'a> {
 pub fn print_subroutine_map() {
     let map = SUBROUTINE_MAP.lock().unwrap();
     for (name, counter) in map.iter() {
-        if CONFIG.verbose || CONFIG.debug {
+        if CONFIG.verbose {
             println!("Label: {name}, Address: {counter}");
         }
     }
     let vmap = VARIABLE_MAP.lock().unwrap();
     for (name, counter) in vmap.iter() {
-        if CONFIG.verbose || CONFIG.debug {
+        if CONFIG.verbose {
             println!("Variable: {name}, Value: {counter}");
         }
     }
