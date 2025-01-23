@@ -89,11 +89,11 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     char str[20];
     if (((ins->destination >> 1) & 1) == 1) {
         if (colors) {
-            printf("%s&r%d%s", ANSI_YELLOW, ins->source, ANSI_RESET);
+            printf("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
         } else {
-            printf("&r%d", ins->source);
+            printf("&r%d", ins->source & 7);
         }
-        snprintf(str, sizeof(str), "&r%d", ins->source);
+        snprintf(str, sizeof(str), "&r%d", ins->source & 7);
         len += strlen(str);
         return;
     }
