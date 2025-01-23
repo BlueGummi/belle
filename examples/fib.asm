@@ -4,6 +4,9 @@
 .start $0x29 ; program starts at addr 41
     int 71   ; don't push returns
     jmp @start
+msg2:
+    .asciiz "The number entered is too large."
+    .word 10
 text:
     .asciiz "The number entered is too small."
     .word 10
@@ -11,7 +14,7 @@ msg:
     .asciiz "The golden ratio is: "
 
 msg_end:
-    .asciiz "Enter how many numbers to calculate: "
+    .asciiz "Enter how many numbers to calculate (max 23): " 
 
 start:
     mov r6, 0 ; move 0 into register 6
@@ -28,6 +31,8 @@ start:
     jz @early_exit
     cmp r0, 2
     jz @early_exit
+    cmp r0, 24
+    jg @early_exit2
     mov r1, 0
 fib_loop:
     mov r5, 0 ; clear register 5
@@ -39,7 +44,6 @@ fib_loop:
     mov r4, r5
     push r6
     push r4 ; push updated Fibonacci values back onto stack
-    jo @finish ; jump if a value overflowed
     cmp r0, r2
     jz @finish
     int 5
@@ -62,5 +66,10 @@ finish:
 early_exit:
     lea r0, @text
     lea r1, @msg
+    int 8
+    hlt
+early_exit2:
+    lea r0, @msg2
+    lea r1, @text
     int 8
     hlt

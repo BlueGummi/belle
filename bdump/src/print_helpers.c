@@ -40,10 +40,10 @@ void print_binary(int16_t num) {
 
 void print_help(char *bin) { // bin is the name of the bin program
     printf("The disassembler for the BELLE-ISA\n\n");
-    printf("%s%sUsage:%s %s%s%s [OPTIONS] <BINARY>\n\n", ANSI_UNDERLINE, ANSI_BOLD, ANSI_RESET,
+    printf("%s%sUsage:%s %s%s%s [OPTIONS] <ROMS>\n\n", ANSI_UNDERLINE, ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, bin, ANSI_RESET);
     printf("%s%sArguments:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
-    printf("  <BINARY>  Path to binary\n\n");
+    printf("  <ROMS>  Path to ROMs\n\n");
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
@@ -121,56 +121,73 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
     printf("│ ");
 }
 
-void print_header(void) {
+#define PRINT_HEADER(colors, format, ...)       \
+    if (colors) {                               \
+        printf(format, __VA_ARGS__);            \
+    } else {                                    \
+        printf(format, "", "", "", "", "", ""); \
+    }
+
+#define PRINT_FILENAME(colors, format, filename, ...) \
+    if (colors) {                                     \
+        printf(format, __VA_ARGS__);                  \
+    } else {                                          \
+        printf(format, "", "", "", filename, "");     \
+    }
+
+void print_header(char *filename) {
     if (args.only_code != 1) {
         if (args.binary != 1) {
             if (args.print_hex == 0) {
-                if (args.colors) {
-                    printf("╭─────────┬───────┬─────────────╮\n");
-                    printf("│  %saddr%s   │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├─────────┼───────┼─────────────╯\n");
-                } else {
-                    printf("╭─────────┬───────┬─────────────╮\n");
-                    printf("│  addr   │  bin  │ instruction │\n");
-                    printf("├─────────┼───────┼─────────────╯\n");
-                }
+                PRINT_FILENAME(args.colors,
+                               "╭───────────────────────────────╮\n"
+                               "│  %sfile%s: %s%-10s%s             │\n",
+                               filename,
+                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+                PRINT_HEADER(args.colors,
+                             "├─────────┬───────┬─────────────┤\n"
+                             "│  %saddr%s   │  %sbin%s  │ %sinstruction%s │\n"
+                             "├─────────┼───────┼─────────────╯\n",
+                             ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
-                if (args.colors) {
-                    printf("╭──────────────┬───────┬─────────────╮\n");
-                    printf("│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├──────────────┼───────┼─────────────╯\n");
-                } else {
-                    printf("╭──────────────┬───────┬─────────────╮\n");
-                    printf("│   address    │  bin  │ instruction │\n");
-                    printf("├──────────────┼───────┼─────────────╯\n");
-                }
+                PRINT_FILENAME(args.colors,
+                               "╭────────────────────────────────────╮\n"
+                               "│  %sfile%s: %s%-10s%s                  │\n",
+                               filename,
+                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+                PRINT_HEADER(args.colors,
+                             "├──────────────┬───────┬─────────────┤\n"
+                             "│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n"
+                             "├──────────────┼───────┼─────────────╯\n",
+                             ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             }
         } else {
             if (args.print_hex == 0) {
-                if (args.colors) {
-                    printf("╭─────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  %saddr%s   │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├─────────┼──────────────────────────┼─────────────╯\n");
-                } else {
-                    printf("╭─────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│  addr   │         binary           │ instruction │\n");
-                    printf("├─────────┼──────────────────────────┼─────────────╯\n");
-                }
+                PRINT_FILENAME(args.colors,
+                               "╭──────────────────────────────────────────────────╮\n"
+                               "│  %sfile%s: %s%-10s%s                                │\n",
+                               filename,
+                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+                PRINT_HEADER(args.colors,
+                             "├─────────┬──────────────────────────┬─────────────┤\n"
+                             "│  %saddr%s   │          %sbinary%s          │ %sinstruction%s │\n"
+                             "├─────────┼──────────────────────────┼─────────────╯\n",
+                             ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
-                if (args.colors) {
-                    printf("╭──────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n", ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
-                    printf("├──────────────┼──────────────────────────┼─────────────╯\n");
-                } else {
-                    printf("╭──────────────┬──────────────────────────┬─────────────╮\n");
-                    printf("│   address    │         binary           │ instruction │\n");
-                    printf("├──────────────┼──────────────────────────┼─────────────╯\n");
-                }
+                PRINT_FILENAME(args.colors,
+                               "╭───────────────────────────────────────────────────────╮\n"
+                               "│  %sfile%s: %s%-10s%s                                     │\n",
+                               filename,
+                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+                PRINT_HEADER(args.colors,
+                             "├──────────────┬──────────────────────────┬─────────────┤\n"
+                             "│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n"
+                             "├──────────────┼──────────────────────────┼─────────────╯\n",
+                             ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             }
         }
     }
 }
-
 void print_footer(void) {
     if (args.only_code != 1) {
         if (args.binary != 1) {

@@ -56,7 +56,7 @@ void add_jump(JumpVector *vector, Jump jump) {
         vector->capacity *= 2;
         vector->data = realloc(vector->data, vector->capacity * sizeof(Jump));
         if (vector->data == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
+            perror("Memory allocation failed\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -73,7 +73,7 @@ void free_jump_vector(JumpVector *vector) {
 JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
     JumpVector *jump_vector = malloc(sizeof(JumpVector));
     if (jump_vector == NULL) {
-        fprintf(stderr, "Memory allocation failed for JumpVector\n");
+        perror("Memory allocation failed for JumpVector\n");
         return NULL;
     }
     init_jump_vector(jump_vector);

@@ -7,7 +7,7 @@
 
 #include "cli.c"
 
-void *process_instructions(void *arg) {
+void *process_instructions(void *arg, char *filename) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
@@ -58,7 +58,7 @@ void *process_instructions(void *arg) {
         }
     }
 
-    print_header();
+    print_header(filename);
     current_addr = current_addr_tmp;
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints
@@ -75,33 +75,34 @@ void *process_instructions(void *arg) {
     // jump_map_print(jump_map_global);
     return NULL;
 }
-
 int main(int argc, char *argv[]) {
     args = parse_arguments(argc, argv);
-    if (args.input_file == NULL) {
+    if (args.num_files == 0) {
         print_help(argv[0]);
         return EXIT_FAILURE;
     }
 
-    FILE *input = fopen(args.input_file, "rb");
-    if (!input) {
-        fputs(ANSI_RED ANSI_BOLD "Failed to open file: " ANSI_RESET, stderr);
-        fputs(args.input_file, stderr);
-        fputc('\n', stderr);
-        return EXIT_FAILURE;
-    }
-
     ThreadData thread_data[THREAD_COUNT];
-    size_t bytes_read;
 
-    bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input);
-    if (bytes_read > 0) {
-        thread_data[0].bytes_read = bytes_read;
-        thread_data[0].input = input;
-        process_instructions(&thread_data[0]);
+    for (uint8_t i = 0; i < args.num_files; i++) {
+        FILE *input = fopen(args.input_files[i], "rb");
+        if (!input) {
+            fputs(ANSI_RED ANSI_BOLD "Failed to open file: " ANSI_RESET, stderr);
+            fputs(args.input_files[i], stderr);
+            fputc('\n', stderr);
+            return EXIT_FAILURE;
+        }
+
+        size_t bytes_read = fread(thread_data[0].buffer, sizeof(uint8_t), BUFFER_SIZE, input);
+        if (bytes_read > 0) {
+            thread_data[0].bytes_read = bytes_read;
+            thread_data[0].input = input;
+            process_instructions(&thread_data[0], args.input_files[i]);
+        }
+
+        fclose(input);
     }
 
-    fclose(input);
     return EXIT_SUCCESS;
 }
 char *match_opcode(Instruction *s) {

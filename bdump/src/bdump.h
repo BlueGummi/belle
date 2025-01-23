@@ -20,10 +20,11 @@ typedef struct
                   // type 3 is reg, rptr
     int16_t full_ins;
 } Instruction;
+#define MAX_INPUT_FILES 100
 
-typedef struct
-{
-    char *input_file;
+typedef struct {
+    char *input_files[MAX_INPUT_FILES];
+    uint8_t num_files;
     uint8_t colors;
     uint8_t verbosity;
     uint8_t binary;
@@ -86,7 +87,7 @@ char *match_opcode(Instruction *s);
 int main(int argc, char *argv[]);
 void print_instruction_header(size_t line, bool colors, bool is_directive);
 HashMap *jump_map_create(void);
-void print_header(void);
+void print_header(char *filename);
 void print_footer(void);
 #pragma once
 #endif

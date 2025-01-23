@@ -45,7 +45,7 @@ void print_help(const char *program_name) {
     printf("BELLE-fmt - Format code written for the BELLE-assembler\n");
     printf("\n%s%sUsage:%s %s%s%s [OPTIONS] <FILES>\n\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET,
            ANSI_BOLD, program_name, ANSI_RESET);
-    printf("%sArguments:%s\n", ANSI_UNDERLINE, ANSI_RESET);
+    printf("%s%sArguments:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf(" <FILES> The files to format\n\n");
     printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
     printf("  %s-I%s, %s--max-indent%s <INDENTATION> Set the maximum indentation level "

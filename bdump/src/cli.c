@@ -1,8 +1,10 @@
 #include "print_helpers.c"
 CLI parse_arguments(int argc, char *argv[]) {
     CLI opts = {0};
-    opts.input_file = NULL;
+    opts.num_files = 0;
     bool seen_color = false;
+
+    opts.colors = 1;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_help(argv[0]);
@@ -22,13 +24,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.only_code = 1;
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
-                } else if (strcmp(argv[i], "--help") == 0) {
-                    print_help(argv[0]);
-                    exit(EXIT_SUCCESS);
-                } else if (strcmp(argv[i], "--version") == 0) {
-
-                    printf("bdump 0.2.0\n");
-                    exit(0);
                 } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
@@ -62,10 +57,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                         print_help(argv[0]);
                         exit(EXIT_SUCCESS);
                         break;
-                    case 'V':
-                        printf("bdump 0.2.0\n");
-                        exit(0);
-                        break;
                     default:
                         fputs("Error: Unknown option -", stderr);
                         fputc(argv[i][j], stderr);
@@ -76,12 +67,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                 }
             }
         } else {
-            if (opts.input_file == NULL) {
-                opts.input_file = argv[i];
+            if (opts.num_files < MAX_INPUT_FILES) {
+                opts.input_files[opts.num_files++] = argv[i];
             } else {
-                fputs("Error: Unexpected argument: ", stderr);
-                fputs(argv[i], stderr);
-                fputc('\n', stderr);
+                fputs("Error: Too many input files specified\n", stderr);
                 print_help(argv[0]);
                 exit(EXIT_FAILURE);
             }
