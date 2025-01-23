@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #define BUFFER_SIZE 1024
 #define THREAD_COUNT 4
 
