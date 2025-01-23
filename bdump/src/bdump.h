@@ -1,5 +1,6 @@
 #ifndef BDUMP_H
 #define BDUMP_H
+#define TABLE_SIZE 512
 #include "consts.h"
 typedef struct
 {
@@ -61,6 +62,16 @@ typedef struct
     bool reverse;
 } Jump;
 
+typedef struct Node {
+    size_t key;
+    Jump value;
+    struct Node *next;
+} Node;
+
+typedef struct {
+    Node *table[TABLE_SIZE];
+} HashMap;
+
 typedef struct {
     Jump *data;
     size_t size;
@@ -74,6 +85,9 @@ void print_help(char *bin);
 char *match_opcode(Instruction *s);
 int main(int argc, char *argv[]);
 void print_instruction_header(size_t line, bool colors, bool is_directive);
+HashMap *jump_map_create(void);
+void print_header(void);
+void print_footer(void);
 #pragma once
 #endif
 #define FORMAT_STRING_MEMPTR (args.hex_operands ? "&0x%x" : "&%d")

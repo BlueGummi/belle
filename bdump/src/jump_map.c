@@ -1,21 +1,10 @@
 #include "misc.c"
-#define TABLE_SIZE 512
-
-typedef struct Node {
-    size_t key;
-    Jump value;
-    struct Node *next;
-} Node;
-
-typedef struct {
-    Node *table[TABLE_SIZE];
-} HashMap;
-
 unsigned int hash(size_t key) {
     return key % TABLE_SIZE;
 }
+
 size_t max_columns = 0;
-HashMap *jump_map_create() {
+HashMap *jump_map_create(void) {
     HashMap *map = malloc(sizeof(HashMap));
     for (int i = 0; i < TABLE_SIZE; i++) {
         map->table[i] = NULL;

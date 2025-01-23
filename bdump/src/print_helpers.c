@@ -121,7 +121,7 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
     printf("│ ");
 }
 
-void print_header() {
+void print_header(void) {
     if (args.only_code != 1) {
         if (args.binary != 1) {
             if (args.print_hex == 0) {
@@ -171,7 +171,7 @@ void print_header() {
     }
 }
 
-void print_footer() {
+void print_footer(void) {
     if (args.only_code != 1) {
         if (args.binary != 1) {
             if (args.print_hex == 1) {
