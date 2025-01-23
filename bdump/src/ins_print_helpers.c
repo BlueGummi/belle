@@ -46,7 +46,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     {
         bool sign = (ins->source >> 7) == 1;
 
-        int8_t val = (int8_t) ins->source & 0b1111111;
+        int8_t val = (int8_t) ins->source & 0x7f;
 
         if (colors) {
             printf(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
@@ -58,7 +58,7 @@ void print_two_reg_args(Instruction *ins, bool colors) {
 
     case 2: // memory address indirect
     {
-        int memaddr = ins->full_ins & 0b1111111;
+        int memaddr = ins->full_ins & 0x7f;
 
         if (colors) {
             printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
@@ -111,27 +111,27 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
     char str[40];
     if (ins->destination == 1) {
         if (colors) {
-            printf(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_START, ins->full_ins & 0b111111111);
+            printf(FORMAT_STRING_START, ins->full_ins & 0x1ff);
         }
-        snprintf(str, sizeof(str), FORMAT_STRING_START, ins->full_ins & 0b111111111);
+        snprintf(str, sizeof(str), FORMAT_STRING_START, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->destination == 2) {
         if (colors) {
-            printf(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_SSP, ins->full_ins & 0b111111111);
+            printf(FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
         }
-        snprintf(str, sizeof(str), FORMAT_STRING_SSP, ins->full_ins & 0b111111111);
+        snprintf(str, sizeof(str), FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->destination == 3) {
         if (colors) {
-            printf(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0b111111111, ANSI_RESET);
+            printf(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_SBP, ins->full_ins & 0b111111111);
+            printf(FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
         }
-        snprintf(str, sizeof(str), FORMAT_STRING_SBP, ins->full_ins & 0b111111111);
+        snprintf(str, sizeof(str), FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->full_ins == 0) {
         if (colors) {

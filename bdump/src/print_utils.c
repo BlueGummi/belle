@@ -36,7 +36,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     } else if (strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0) {
         print_jump_instruction(ins, colors);
     } else if (strcmp(op, "ret") == 0) {
-        if ((ins->full_ins & 0b111111111111) == 0) {
+        if ((ins->full_ins & 0xfff) == 0) {
             if (colors)
                 printf("%sret%s", ANSI_BLUE, ANSI_RESET);
             else
@@ -86,16 +86,16 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     } else if (strcmp(op, "st") == 0) {
         if (ins->destination >> 2 == 1) {
             if (colors) {
-                printf("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0b1110000000) >> 7,
+                printf("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0x380) >> 7,
                        ANSI_RESET, ANSI_YELLOW, ins->source & 7, ANSI_RESET);
             } else {
-                printf("&r%d, r%d", (ins->full_ins & 0b1110000000) >> 7,
-                       (ins->source & 0b111));
+                printf("&r%d, r%d", (ins->full_ins & 0x380) >> 7,
+                       (ins->source & 0x7));
             }
-            snprintf(str, sizeof(str), "&r%d, r%d", (ins->full_ins & 0b1110000000) >> 7, ins->source & 0b111);
+            snprintf(str, sizeof(str), "&r%d, r%d", (ins->full_ins & 0x380) >> 7, ins->source & 0x7);
         } else {
-            ins->source &= 0b111;
-            ins->destination = (ins->full_ins & 0b111111111000) >> 3;
+            ins->source &= 0x7;
+            ins->destination = (ins->full_ins & 0xff8) >> 3;
             if (colors) {
                 printf(FORMAT_STRING_ST_COLORED, ANSI_VARIED, ins->destination, ANSI_RESET, ANSI_YELLOW,
                        ins->source, ANSI_RESET);
@@ -121,7 +121,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 }
                 snprintf(str, sizeof(str), FORMAT_STRING, ins->source);
             } else {
-                if (ins->destination == 0b100) {
+                if (ins->destination == 0x4) {
                     if (colors) {
                         printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                     } else {

@@ -17,7 +17,7 @@ void *process_instructions(void *arg) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
-                current_addr = instruction & 0b111111111;
+                current_addr = instruction & 0x1ff;
                 break;
             } // First loop finds starting address
         }
@@ -33,13 +33,13 @@ void *process_instructions(void *arg) {
             case JO_OP:
             case JZ_OP:
             case RET_OP:
-                if (instruction >> 12 == RET_OP && (instruction & 0b111111111111) == 0)
+                if (instruction >> 12 == RET_OP && (instruction & 0xfff) == 0)
                     break;
                 Jump jump_data;
                 counter++;
                 jump_data.id = column;
                 jump_data.source = current_addr;
-                jump_data.destination = instruction & 0b11111111111;
+                jump_data.destination = instruction & 0x7ff;
                 jump_data.column = column;
                 jump_data.reverse = jump_data.destination < jump_data.source;
                 jump_data.color = get_color(counter);
@@ -165,7 +165,7 @@ char *match_opcode(Instruction *s) {
 Instruction parse_instruction(uint32_t instruction) {
     Instruction parsed_ins;
     parsed_ins.opcode = instruction >> 12;
-    parsed_ins.destination = (instruction >> 9) & 0b111;
+    parsed_ins.destination = (instruction >> 9) & 0x7;
     parsed_ins.source = instruction & 0xFF;
     if (((instruction >> 8) & 1) == 1) {
         parsed_ins.type = 1;
