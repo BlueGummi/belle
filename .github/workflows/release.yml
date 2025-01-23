@@ -73,7 +73,7 @@ jobs:
         run: sleep 2s
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: nightly
           body: Nightly release for BELLE
