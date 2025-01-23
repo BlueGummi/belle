@@ -9,14 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#include <windows.h>
-typedef DWORD thread_ret_t;
-#else
-#include <pthread.h>
-typedef void *thread_ret_t;
-#endif
-
 #define BUFFER_SIZE 1024
 #define THREAD_COUNT 4
 
@@ -61,4 +53,3 @@ typedef void *thread_ret_t;
 #define ANSI_BG_CYAN "\033[46m"
 #define ANSI_BG_WHITE "\033[47m"
 #endif
-#pragma once

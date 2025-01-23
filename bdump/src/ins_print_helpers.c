@@ -173,7 +173,6 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
             } else {
                 printf(FORMAT_STRING_WORD, ins->full_ins);
             }
-            char str[40];
             snprintf(str, sizeof(str), FORMAT_STRING_WORD, ins->full_ins);
             len += strlen(str);
         }

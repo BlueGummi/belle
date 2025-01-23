@@ -11,10 +11,10 @@ typedef struct
 
 typedef struct
 {
-    int16_t opcode;
-    int16_t destination;
-    int16_t source;
-    int16_t type; // type 0 is reg, reg
+    uint32_t opcode;
+    int32_t destination;
+    int32_t source;
+    int32_t type; // type 0 is reg, reg
                   // type 1 is reg, lit
                   // type 2 is reg, mptr
                   // type 3 is reg, rptr
@@ -56,10 +56,8 @@ typedef enum {
 typedef struct
 {
     Color color;
-    uint64_t id;
     uint64_t source;
     uint64_t destination;
-    uint8_t column;
     bool reverse;
 } Jump;
 
@@ -89,7 +87,6 @@ void print_instruction_header(size_t line, bool colors, bool is_directive);
 HashMap *jump_map_create(void);
 void print_header(char *filename);
 void print_footer(void);
-#pragma once
 #endif
 #define FORMAT_STRING_MEMPTR (args.hex_operands ? "&0x%x" : "&%d")
 #define FORMAT_STRING_MEMPTR_COLORED (args.hex_operands ? "&%s0x%x%s" : "&%s%d%s")

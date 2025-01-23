@@ -22,9 +22,8 @@ void *process_instructions(void *arg, char *filename) {
             } // First loop finds starting address
         }
     }
+    int counter = 0;
     size_t current_addr_tmp = current_addr;
-    int column = 1;
-    int counter = 1;
     for (size_t i = 0; i < data->bytes_read; i += 2) { // second loop finds jumps
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
@@ -36,17 +35,11 @@ void *process_instructions(void *arg, char *filename) {
                 if (instruction >> 12 == RET_OP && (instruction & 0xfff) == 0)
                     break;
                 Jump jump_data;
-                counter++;
-                jump_data.id = column;
                 jump_data.source = current_addr;
                 jump_data.destination = instruction & 0x7ff;
-                jump_data.column = column;
                 jump_data.reverse = jump_data.destination < jump_data.source;
-                jump_data.color = get_color(counter);
+                jump_data.color = get_color(counter++);
                 jump_map_insert(jump_map_global, current_addr, jump_data);
-                if (column > 0) {
-                    column--;
-                }
                 break;
             default:
                 break;
@@ -106,61 +99,59 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 char *match_opcode(Instruction *s) {
-    char *opcode;
     switch (s->opcode) {
     case HLT_OP:
-        opcode = "hlt";
-        break;
+        return "hlt";
+
     case ADD_OP:
-        opcode = "add";
-        break;
+        return "add";
+
     case JO_OP:
-        opcode = "jo";
-        break;
+        return "jo";
+
     case POP_OP:
-        opcode = "pop";
-        break;
+        return "pop";
+
     case DIV_OP:
-        opcode = "div";
-        break;
+        return "div";
+
     case RET_OP:
-        opcode = "ret";
-        break;
+        return "ret";
+
     case LD_OP:
-        opcode = "ld";
-        break;
+        return "ld";
+
     case ST_OP:
-        opcode = "st";
-        break;
+        return "st";
+
     case JMP_OP:
-        opcode = "jmp";
-        break;
+        return "jmp";
+
     case JZ_OP:
-        opcode = "jz";
-        break;
+        return "jz";
+
     case CMP_OP:
-        opcode = "cmp";
-        break;
+        return "cmp";
+
     case MUL_OP:
-        opcode = "mul";
-        break;
+        return "mul";
+
     case PUSH_OP:
-        opcode = "push";
-        break;
+        return "push";
+
     case INT_OP:
-        opcode = "int";
-        break;
+        return "int";
+
     case MOV_OP:
-        opcode = "mov";
-        break;
+        return "mov";
+
     case LEA_OP:
-        opcode = "lea";
-        break;
+        return "lea";
+
     default:
         puts("OPCODE not recognized.");
         exit(1);
     }
-    return opcode;
 }
 
 Instruction parse_instruction(uint32_t instruction) {
@@ -177,6 +168,6 @@ Instruction parse_instruction(uint32_t instruction) {
         else if (((instruction >> 6) & 1) == 1)
             parsed_ins.type = 3;
     }
-    parsed_ins.full_ins = instruction;
+    parsed_ins.full_ins = (int16_t) instruction;
     return parsed_ins;
 }
