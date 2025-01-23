@@ -3,6 +3,7 @@
 
 #include <errno.h>
 #include <inttypes.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -56,4 +57,5 @@
 #define ANSI_BG_MAGENTA "\033[45m"
 #define ANSI_BG_CYAN "\033[46m"
 #define ANSI_BG_WHITE "\033[47m"
+#define MAX_SUGGESTIONS 5
 #endif

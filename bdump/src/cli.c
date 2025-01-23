@@ -5,6 +5,11 @@ CLI parse_arguments(int argc, char *argv[]) {
     bool seen_color = false;
 
     opts.colors = 1;
+    const char *valid_options[] = {
+        "--help", "--colorless", "--verbose", "--hex-mem", "--binary",
+        "--only-code", "--hex", "-h", "-c", "-v", "-b", "-o", "-x", "-X"};
+    int valid_count = sizeof(valid_options) / sizeof(valid_options[0]);
+
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_help(argv[0]);
@@ -25,10 +30,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
                 } else {
-                    fputs("Error: Unknown option ", stderr);
-                    fputs(argv[i], stderr);
-                    fputc('\n', stderr);
-                    print_help(argv[0]);
+                    perror("Error: Unknown option ");
+                    perror(argv[i]);
+                    perror("\n");
+                    suggest_option(argv[i], valid_options, valid_count);
                     exit(EXIT_FAILURE);
                 }
             } else {
@@ -58,10 +63,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                         exit(EXIT_SUCCESS);
                         break;
                     default:
-                        fputs("Error: Unknown option -", stderr);
+                        perror("Error: Unknown option -");
                         fputc(argv[i][j], stderr);
-                        fputc('\n', stderr);
-                        print_help(argv[0]);
+                        perror("\n");
+                        suggest_option(argv[i], valid_options, valid_count);
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -70,8 +75,7 @@ CLI parse_arguments(int argc, char *argv[]) {
             if (opts.num_files < MAX_INPUT_FILES) {
                 opts.input_files[opts.num_files++] = argv[i];
             } else {
-                fputs("Error: Too many input files specified\n", stderr);
-                print_help(argv[0]);
+                perror("Error: Too many input files specified\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -80,4 +84,46 @@ CLI parse_arguments(int argc, char *argv[]) {
         opts.colors = 1;
     }
     return opts;
+}
+
+int levenshtein_distance(const char *s1, const char *s2) {
+    int len1 = (int) strlen(s1);
+    int len2 = (int) strlen(s2);
+    int dp[len1 + 1][len2 + 1];
+
+    for (int i = 0; i <= len1; i++) {
+        for (int j = 0; j <= len2; j++) {
+            if (i == 0) {
+                dp[i][j] = j;
+            } else if (j == 0) {
+                dp[i][j] = i;
+            } else {
+                dp[i][j] = (int) (s1[i - 1] == s2[j - 1]) ? dp[i - 1][j - 1] : 1 + fmin(fmin(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]);
+            }
+        }
+    }
+    return dp[len1][len2];
+}
+
+void suggest_option(const char *invalid_option, const char *valid_options[], int valid_count) {
+    int min_distance = 3;
+    char *suggestions[MAX_SUGGESTIONS];
+    int suggestion_count = 0;
+
+    for (int i = 0; i < valid_count; i++) {
+        int distance = levenshtein_distance(invalid_option, valid_options[i]);
+        if (distance < min_distance && suggestion_count < MAX_SUGGESTIONS) {
+            suggestions[suggestion_count++] = (char *) valid_options[i];
+        }
+    }
+    if (suggestion_count > 0) {
+        perror("Did you mean one of these options?\n");
+    } else {
+        perror("No similar arguments found\n");
+    }
+    for (int i = 0; i < suggestion_count; i++) {
+        perror("  ");
+        perror(suggestions[i]);
+        perror("\n");
+    }
 }

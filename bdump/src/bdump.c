@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
     for (uint8_t i = 0; i < args.num_files; i++) {
         FILE *input = fopen(args.input_files[i], "rb");
         if (!input) {
-            fputs(ANSI_RED ANSI_BOLD "Failed to open file: " ANSI_RESET, stderr);
-            fputs(args.input_files[i], stderr);
-            fputc('\n', stderr);
+            perror(ANSI_RED ANSI_BOLD "Failed to open file: " ANSI_RESET);
+            perror(args.input_files[i]);
+            perror("\n");
             return EXIT_FAILURE;
         }
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -flto -O2 -Wpedantic
+CFLAGS = -Wall -Wextra -flto -O2 -Wpedantic -lm
 SRCDIR = src
 OBJ = bdump.o # print_utils.o # math_functions.o
 TARGET = bdump
