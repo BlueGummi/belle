@@ -30,9 +30,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
                 } else {
-                    perror("Error: Unknown option ");
-                    perror(argv[i]);
-                    perror("\n");
+                    fputs("Error: Unknown option ", stderr);
+                    fputs(argv[i], stderr);
+                    fputc('\n', stderr);
                     suggest_option(argv[i], valid_options, valid_count);
                     exit(EXIT_FAILURE);
                 }
@@ -63,9 +63,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                         exit(EXIT_SUCCESS);
                         break;
                     default:
-                        perror("Error: Unknown option -");
+                        fputs("Error: Unknown option -", stderr);
                         fputc(argv[i][j], stderr);
-                        perror("\n");
+                        fputc('\n', stderr);
                         suggest_option(argv[i], valid_options, valid_count);
                         exit(EXIT_FAILURE);
                     }
@@ -75,7 +75,7 @@ CLI parse_arguments(int argc, char *argv[]) {
             if (opts.num_files < MAX_INPUT_FILES) {
                 opts.input_files[opts.num_files++] = argv[i];
             } else {
-                perror("Error: Too many input files specified\n");
+                fputs("Error: Too many input files specified\n", stderr);
                 exit(EXIT_FAILURE);
             }
         }
@@ -87,8 +87,8 @@ CLI parse_arguments(int argc, char *argv[]) {
 }
 
 int levenshtein_distance(const char *s1, const char *s2) {
-    int len1 = (int) strlen(s1);
-    int len2 = (int) strlen(s2);
+    int len1 = strlen(s1);
+    int len2 = strlen(s2);
     int dp[len1 + 1][len2 + 1];
 
     for (int i = 0; i <= len1; i++) {
@@ -98,7 +98,7 @@ int levenshtein_distance(const char *s1, const char *s2) {
             } else if (j == 0) {
                 dp[i][j] = i;
             } else {
-                dp[i][j] = (int) (s1[i - 1] == s2[j - 1]) ? dp[i - 1][j - 1] : 1 + fmin(fmin(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]);
+                dp[i][j] = (s1[i - 1] == s2[j - 1]) ? dp[i - 1][j - 1] : 1 + fmin(fmin(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]);
             }
         }
     }
@@ -116,14 +116,10 @@ void suggest_option(const char *invalid_option, const char *valid_options[], int
             suggestions[suggestion_count++] = (char *) valid_options[i];
         }
     }
-    if (suggestion_count > 0) {
-        perror("Did you mean one of these options?\n");
-    } else {
-        perror("No similar arguments found\n");
-    }
+    fputs("Did you mean one of these options?\n", stderr);
     for (int i = 0; i < suggestion_count; i++) {
-        perror("  ");
-        perror(suggestions[i]);
-        perror("\n");
+        fputs("  ", stderr);
+        fputs(suggestions[i], stderr);
+        fputc('\n', stderr);
     }
 }
