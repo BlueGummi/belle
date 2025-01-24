@@ -14,7 +14,7 @@ msg:
     .asciiz "The golden ratio is: "
 
 msg_end:
-    .asciiz "Enter how many numbers to calculate (max 23): " 
+    .asciiz "Enter how many numbers to calculate (max 23): "
 
 start:
     mov r6, 0 ; move 0 into register 6
