@@ -424,12 +424,12 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
     let reader = io::BufReader::new(file);
 
     for (current_line, line) in reader.lines().enumerate() {
-        if current_line == line_number {
+        if current_line + 1 == line_number {
             match line {
                 Ok(content) => {
                     println!(
                         "{:^6} {} {}\n",
-                        current_line.to_string().blue(),
+                        (current_line + 1).to_string().blue(),
                         "|".blue(),
                         content
                     );
