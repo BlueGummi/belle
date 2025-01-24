@@ -110,10 +110,12 @@ fn main() -> io::Result<()> {
 
                     match encoded_instruction {
                         Ok(Some(vector)) => {
-                            if let Err(err_msg) = verify(ins, operand1, operand2, line_count) {
+                            if let Err((lineee, err_msg)) =
+                                verify(ins, operand1, operand2, line_count)
+                            {
                                 write_to_file = false;
                                 eprintln!("{}: {}", "error".bright_red().bold(), err_msg);
-                                print_line(line_count)?;
+                                print_line(lineee)?;
                             } else {
                                 for encoded in vector {
                                     encoded_instructions.extend(&encoded.to_be_bytes());

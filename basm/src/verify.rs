@@ -43,7 +43,7 @@ pub fn verify(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     let instructions = [
         "ADD", "HLT", "JO", "POP", "DIV", "RET", "LD", "ST", "JMP", "JZ", "PUSH", "CMP", "MUL",
         "INT", "MOV", "LEA", "JE", "JNE", "JNZ", "JNO", "JG", "JL",
@@ -60,10 +60,7 @@ pub fn verify(
         }
         if let Some(value) = arg1 {
             if value.get_num() > 511 {
-                return Err(format!(
-                    "Directive address cannot exceed 511, on line {}",
-                    line_num
-                ));
+                return Err((line_num, "Directive address cannot exceed 511".to_string()));
             }
         }
     }
@@ -75,7 +72,7 @@ fn check_instruction(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     match raw_token {
         "HLT" | "RET" => only_none(arg1, arg2, raw_token, line_num),
         "LD" | "LEA" => {
@@ -103,12 +100,9 @@ fn only_none(
     arg2: Option<&Token>,
     instruction: &str,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     if arg1.is_some() || arg2.is_some() {
-        return Err(format!(
-            "{} requires no arguments at line {}",
-            instruction, line_num
-        ));
+        return Err((line_num, format!("{} requires no arguments", instruction)));
     }
     Ok(())
 }
@@ -118,12 +112,9 @@ fn only_two(
     arg2: Option<&Token>,
     instruction: &str,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     if arg1.is_none() || arg2.is_none() {
-        return Err(format!(
-            "{} requires two arguments at line {}",
-            instruction, line_num
-        ));
+        return Err((line_num, format!("{} requires two arguments", instruction)));
     }
     Ok(())
 }
@@ -133,11 +124,11 @@ fn one_none(
     arg2: Option<&Token>,
     instruction: &str,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     if arg1.is_some() && arg2.is_some() {
-        return Err(format!(
-            "{} requires one or no arguments at line {}",
-            instruction, line_num
+        return Err((
+            line_num,
+            format!("{} requires one or no arguments", instruction),
         ));
     }
     Ok(())
@@ -148,62 +139,62 @@ fn only_one(
     arg2: Option<&Token>,
     instruction: &str,
     line_num: usize,
-) -> Result<(), String> {
+) -> Result<(), (usize, String)> {
     if arg1.is_none() || arg2.is_some() {
-        return Err(format!(
-            "{} requires one argument at line {}",
-            instruction, line_num
-        ));
+        return Err((line_num, format!("{} requires one argument", instruction)));
     }
     Ok(())
 }
 
-fn ld_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn ld_args(
+    arg1: Option<&Token>,
+    arg2: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_register()) {
-        return Err(format!(
-            "LD/LEA requires LHS to be a Register at line {}",
-            line_num
-        ));
+        return Err((line_num, "LD/LEA requires LHS to be a Register".to_string()));
     }
     if !arg2.is_some_and(|tok| tok.is_memory_address() || tok.is_srcall()) {
-        return Err(format!(
-            "LD/LEA requires RHS to be a Memory address at line {}",
-            line_num
+        return Err((
+            line_num,
+            "LD/LEA requires RHS to be a Memory address".to_string(),
         ));
     }
     if arg2.unwrap().get_num() > 511 {
-        return Err(format!("{MMAFAIL} on line {line_num}"));
+        return Err((line_num, MMAFAIL.to_string()));
     }
     Ok(())
 }
 
-fn st_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn st_args(
+    arg1: Option<&Token>,
+    arg2: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1
         .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
     {
-        return Err(format!(
-            "ST requires LHS to be a Register pointer or Memory address at line {}",
-            line_num
+        return Err((
+            line_num,
+            "ST requires LHS to be a Register pointer or Memory address".to_string(),
         ));
     }
     if !arg2.is_some_and(|tok| tok.is_register()) {
-        return Err(format!(
-            "ST requires RHS to be a Register at line {}",
-            line_num
-        ));
+        return Err((line_num, "ST requires RHS to be a Register".to_string()));
     }
     if arg1.unwrap().get_num() > 255 {
-        return Err(format!("{MMAFAIL} on line {line_num}"));
+        return Err((line_num, MMAFAIL.to_string()));
     }
     Ok(())
 }
 
-fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn mov_args(
+    arg1: Option<&Token>,
+    arg2: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_register()) {
-        return Err(format!(
-            "MOV requires LHS to be a Register at line {}",
-            line_num
-        ));
+        return Err((line_num, "MOV requires LHS to be a Register".to_string()));
     }
     if !arg2.is_some_and(|tok| {
         tok.is_register()
@@ -211,18 +202,15 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Resu
             || tok.is_register_pointer()
             || tok.is_memory_address_pointer()
     }) {
-        return Err(format!(
-            "MOV requires RHS to be a Register, literal, register pointer, or memory address pointer at line {}",
-            line_num
-        ));
+        return Err((line_num, "MOV requires RHS to be a Register, literal, register pointer, or memory address pointer".to_string()));
     }
     match arg2 {
         Some(tok) => {
             if tok.get_num() > 511 {
                 if !tok.is_memory_address_pointer() {
-                    return Err(LITFAIL.to_string());
+                    return Err((line_num, LITFAIL.to_string()));
                 } else {
-                    return Err(format!("{MMAFAIL} on line {line_num}"));
+                    return Err((line_num, MMAFAIL.to_string()));
                 }
             }
         }
@@ -233,30 +221,27 @@ fn mov_args(arg1: Option<&Token>, arg2: Option<&Token>, line_num: usize) -> Resu
     Ok(())
 }
 
-fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_literal()) {
-        return Err(format!(
-            "INT requires SRC to be a Literal at line {}",
-            line_num
-        ));
+        return Err((line_num, "INT requires SRC to be a Literal".to_string()));
     }
     if arg1.unwrap().get_num() > 2047 || arg1.unwrap().get_num() < -1 {
-        return Err("invalid interrupt number".to_string());
+        return Err((line_num, "invalid interrupt number".to_string()));
     }
     Ok(())
 }
 
-fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_memory_address() || tok.is_register() || tok.is_literal()) {
-        return Err(format!(
-            "PUSH/POP requires SRC to be a Register or Literal or Memory address at line {}",
-            line_num
+        return Err((
+            line_num,
+            "PUSH/POP requires SRC to be a Register or Literal or Memory address".to_string(),
         ));
     }
     match arg1 {
         Some(tok) if tok.is_literal() => {
             if tok.get_num() > 2047 {
-                return Err(LITFAIL.to_string());
+                return Err((line_num, LITFAIL.to_string()));
             }
         }
         _ => (),
@@ -264,18 +249,18 @@ fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
     Ok(())
 }
 
-fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), String> {
+fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
     if !arg1
         .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
     {
-        return Err(format!(
-            "Jump requires DEST to be a Register pointer, Memory address, or SRCall at line {}",
-            line_num
+        return Err((
+            line_num,
+            "Jump requires DEST to be a Register pointer, Memory address, or SRCall".to_string(),
         ));
     }
     match arg1 {
         Some(tok) if tok.get_num() > 1023 => {
-            return Err(format!("{MMAFAIL} on line {line_num}"));
+            return Err((line_num, MMAFAIL.to_string()));
         }
         _ => (),
     }
