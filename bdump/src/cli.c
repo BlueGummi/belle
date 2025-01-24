@@ -116,7 +116,11 @@ void suggest_option(const char *invalid_option, const char *valid_options[], int
             suggestions[suggestion_count++] = (char *) valid_options[i];
         }
     }
-    fputs("Did you mean one of these options?\n", stderr);
+    if (suggestion_count > 0) {
+        fputs("Did you mean one of these options?\n", stderr);
+    } else {
+        fputs("No similar arguments found\n", stderr);
+    }
     for (int i = 0; i < suggestion_count; i++) {
         fputs("  ", stderr);
         fputs(suggestions[i], stderr);
