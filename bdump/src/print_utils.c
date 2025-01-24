@@ -170,7 +170,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                         printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
                     }
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s from 0x%lX%s" : "%s from %lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s from 0x%llX%s" : "%s from %lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
                     printf((args.print_hex ? "%s from 0x%lX%s" : "%s from %llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #else
@@ -183,7 +183,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s to 0x%lX%s" : " %s to %lld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%llX%s" : " %s to %lld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
                     printf((args.print_hex ? "%s to 0x%lX%s" : " %s to %llu%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
@@ -192,7 +192,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s0x%lX%s" : "%s%lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s0x%llX%s" : "%s%lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
                     printf((args.print_hex ? "%s0x%lX%s" : "%s%llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #else
