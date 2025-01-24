@@ -31,6 +31,7 @@ typedef struct {
     bool only_code;
     bool print_hex;
     bool hex_operands;
+    bool no_jump;
 } CLI;
 typedef enum {
     COLOR_RED,

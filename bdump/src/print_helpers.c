@@ -48,9 +48,11 @@ void print_help(char *bin) { // bin is the name of the bin program
     printf("  %s-h%s, %s--help%s       Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
     printf("  %s-b%s, %s--binary%s     Print instruction binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
-    printf("  %s-c%s, %s--colorless%s  Disable colored output\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    printf("  %s-c%s, %s--colorless%s  Disable colors\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-o%s, %s--only-code%s  Print only disassembled code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+           ANSI_RESET);
+    printf("  %s-j%s, %s--no-jump%s    Disable jump visuals\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
     printf("  %s-x%s, %s--hex-mem%s    Print memory addresses in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);

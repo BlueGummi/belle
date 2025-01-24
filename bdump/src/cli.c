@@ -29,6 +29,8 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.only_code = 1;
                 } else if (strcmp(argv[i], "--hex") == 0) {
                     opts.hex_operands = 1;
+                } else if (strcmp(argv[i], "--no-jump") == 0) {
+                    opts.no_jump = 1;
                 } else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
@@ -57,6 +59,9 @@ CLI parse_arguments(int argc, char *argv[]) {
                         break;
                     case 'X':
                         opts.hex_operands = 1;
+                        break;
+                    case 'j':
+                        opts.no_jump = 1;
                         break;
                     case 'h':
                         print_help(argv[0]);
