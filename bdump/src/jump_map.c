@@ -74,7 +74,7 @@ void free_jump_vector(JumpVector *vector) {
     }
 
     free(vector->data);
-    free(vector); 
+    free(vector);
 }
 JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
     JumpVector *jump_vector = malloc(sizeof(JumpVector));
