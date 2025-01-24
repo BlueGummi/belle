@@ -8,7 +8,7 @@ if [ ! -d "$INSTALL_DIR" ]; then
     mkdir -p "$INSTALL_DIR"
 fi
 
-curl -L -o "$TAR_FILE" "$URL"
+curl -s -L -o "$TAR_FILE" "$URL"
 
 tar -xzf "$TAR_FILE"
 
