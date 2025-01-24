@@ -142,10 +142,10 @@ void print_header(char *filename) {
     get_last_modified_date(filename, fdate, sizeof(fdate));
     if (!args.only_code) {
         PRINT_FILENAME(args.colors,
-                       "╭───────────────────┬──────────────╮\n"
-                       "│ %sfile%s: %s%-11s%s │ %ssize%s: %s%-6s%s │\n"
-                       "├───────────────────┴──────────────┤\n"
-                       "│ %smodified%s: %s%-22s%s │\n",
+                       "╭───────────────────┬─────────────────╮\n"
+                       "│ %sfile%s: %s%-11s%s │ %ssize%s: %s%-9s%s │\n"
+                       "├───────────────────┴─────────────────┤\n"
+                       "│ %smodified%s: %s%-25s%s │\n",
                        filename,
                        fsize,
                        fdate,
@@ -154,13 +154,13 @@ void print_header(char *filename) {
         if (!args.binary) {
             if (!args.print_hex) {
                 PRINT_HEADER(args.colors,
-                             "├─────────┬───────┬─────────────┬──╯\n"
+                             "├─────────┬───────┬─────────────┬─────╯\n"
                              "│  %saddr%s   │  %sbin%s  │ %sinstruction%s │\n"
                              "├─────────┼───────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
                 PRINT_HEADER(args.colors,
-                             "├──────────────┬───────┬───────────┴─╮\n"
+                             "├──────────────┬───────┬─────────────┬╯\n"
                              "│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n"
                              "├──────────────┼───────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
@@ -168,13 +168,13 @@ void print_header(char *filename) {
         } else {
             if (!args.print_hex) {
                 PRINT_HEADER(args.colors,
-                             "├─────────┬────────────────────────┴─┬─────────────╮\n"
+                             "├─────────┬──────────────────────────┬┴────────────╮\n"
                              "│  %saddr%s   │          %sbinary%s          │ %sinstruction%s │\n"
                              "├─────────┼──────────────────────────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
                 PRINT_HEADER(args.colors,
-                             "├──────────────┬───────────────────┴──────┬─────────────╮\n"
+                             "├──────────────┬──────────────────────┴───┬─────────────╮\n"
                              "│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n"
                              "├──────────────┼──────────────────────────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
