@@ -51,17 +51,17 @@ fn main() -> io::Result<()> {
     let mut line_count = 1;
     let mut write_to_file: bool = true;
     if let Err((l, m)) = process_variables(&lines) {
-        eprintln!("{}: {}", "error".bright_red().bold(), m);
+        println!("{}: {}", "error".bright_red().bold(), m);
         print_line(l)?;
         write_to_file = false;
     }
     if let Err((l, e)) = process_start(&lines) {
-        eprintln!("{}: {}", "error".bright_red().bold(), e);
+        println!("{}: {}", "error".bright_red().bold(), e);
         print_line(l)?;
         write_to_file = false;
     }
     if let Err(e) = load_subroutines(&lines) {
-        eprintln!("{}: {}", "error".bright_red().bold(), e);
+        println!("{}: {}", "error".bright_red().bold(), e);
         write_to_file = false;
     }
     let mut hlt_seen = false;
@@ -114,7 +114,7 @@ fn main() -> io::Result<()> {
                                 verify(ins, operand1, operand2, line_count)
                             {
                                 write_to_file = false;
-                                eprintln!("{}: {}", "error".bright_red().bold(), err_msg);
+                                println!("{}: {}", "error".bright_red().bold(), err_msg);
                                 print_line(lineee)?;
                             } else {
                                 for encoded in vector {
@@ -127,7 +127,7 @@ fn main() -> io::Result<()> {
                         }
                         Err((line_num, err_msg)) => {
                             write_to_file = false;
-                            eprintln!("{}: {}", "error".bright_red().bold(), err_msg);
+                            println!("{}: {}", "error".bright_red().bold(), err_msg);
                             print_line(line_num)?;
                         }
                     }
@@ -136,7 +136,7 @@ fn main() -> io::Result<()> {
                 line_count += 1;
             }
             Err(err) => {
-                eprintln!("{err}");
+                println!("{err}");
                 write_to_file = false;
             }
         }
