@@ -10,8 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 #define BUFFER_SIZE 1024
@@ -57,5 +61,13 @@
 #define ANSI_BG_MAGENTA "\033[45m"
 #define ANSI_BG_CYAN "\033[46m"
 #define ANSI_BG_WHITE "\033[47m"
+#define ANSI_BRIGHT_BLACK "\033[90m"
+#define ANSI_BRIGHT_RED "\033[91m"
+#define ANSI_BRIGHT_GREEN "\033[92m"
+#define ANSI_BRIGHT_YELLOW "\033[93m"
+#define ANSI_BRIGHT_BLUE "\033[94m"
+#define ANSI_BRIGHT_MAGENTA "\033[95m"
+#define ANSI_BRIGHT_CYAN "\033[96m"
+#define ANSI_BRIGHT_WHITE "\033[97m"
 #define MAX_SUGGESTIONS 5
 #endif

@@ -19,7 +19,7 @@ void print_binary(int16_t num) {
             printf(" ");
         }
     }
-    if (args.binary == 1) {
+    if (args.binary) {
 
         if (args.colors) {
             printf(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
@@ -78,7 +78,7 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
     size_t lineclone = line;
 
     printf("│ ");
-    if (args.print_hex == 1) {
+    if (args.print_hex) {
         char hex[5];
         hex[4] = '\0';
         for (int i = 0; i < 4; i++) {
@@ -128,59 +128,53 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
         printf(format, "", "", "", "", "", ""); \
     }
 
-#define PRINT_FILENAME(colors, format, filename, ...) \
-    if (colors) {                                     \
-        printf(format, __VA_ARGS__);                  \
-    } else {                                          \
-        printf(format, "", "", "", filename, "");     \
+#define PRINT_FILENAME(colors, format, filename, filesize, fdate, ...)                             \
+    if (colors) {                                                                                  \
+        printf(format, __VA_ARGS__);                                                               \
+    } else {                                                                                       \
+        printf(format, "", "", "", filename, "", "", "", "", filesize, "", "", "", "", fdate, ""); \
     }
 
 void print_header(char *filename) {
-    if (args.only_code != 1) {
-        if (args.binary != 1) {
-            if (args.print_hex == 0) {
-                PRINT_FILENAME(args.colors,
-                               "╭───────────────────────────────╮\n"
-                               "│  %sfile%s: %s%-10s%s             │\n",
-                               filename,
-                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+    char fsize[15];
+    get_file_size(filename, fsize, sizeof(fsize));
+    char fdate[30];
+    get_last_modified_date(filename, fdate, sizeof(fdate));
+    if (!args.only_code) {
+        PRINT_FILENAME(args.colors,
+                       "╭───────────────────┬──────────────╮\n"
+                       "│ %sfile%s: %s%-11s%s │ %ssize%s: %s%-6s%s │\n"
+                       "├───────────────────┴──────────────┤\n"
+                       "│ %smodified%s: %s%-22s%s │\n",
+                       filename,
+                       fsize,
+                       fdate,
+                       ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET);
+
+        if (!args.binary) {
+            if (!args.print_hex) {
                 PRINT_HEADER(args.colors,
-                             "├─────────┬───────┬─────────────┤\n"
+                             "├─────────┬───────┬─────────────┬──╯\n"
                              "│  %saddr%s   │  %sbin%s  │ %sinstruction%s │\n"
                              "├─────────┼───────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
-                PRINT_FILENAME(args.colors,
-                               "╭────────────────────────────────────╮\n"
-                               "│  %sfile%s: %s%-10s%s                  │\n",
-                               filename,
-                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
                 PRINT_HEADER(args.colors,
-                             "├──────────────┬───────┬─────────────┤\n"
+                             "├──────────────┬───────┬───────────┴─╮\n"
                              "│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n"
                              "├──────────────┼───────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             }
         } else {
-            if (args.print_hex == 0) {
-                PRINT_FILENAME(args.colors,
-                               "╭──────────────────────────────────────────────────╮\n"
-                               "│  %sfile%s: %s%-10s%s                                │\n",
-                               filename,
-                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
+            if (!args.print_hex) {
                 PRINT_HEADER(args.colors,
-                             "├─────────┬──────────────────────────┬─────────────┤\n"
+                             "├─────────┬────────────────────────┴─┬─────────────╮\n"
                              "│  %saddr%s   │          %sbinary%s          │ %sinstruction%s │\n"
                              "├─────────┼──────────────────────────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
             } else {
-                PRINT_FILENAME(args.colors,
-                               "╭───────────────────────────────────────────────────────╮\n"
-                               "│  %sfile%s: %s%-10s%s                                     │\n",
-                               filename,
-                               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET);
                 PRINT_HEADER(args.colors,
-                             "├──────────────┬──────────────────────────┬─────────────┤\n"
+                             "├──────────────┬───────────────────┴──────┬─────────────╮\n"
                              "│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n"
                              "├──────────────┼──────────────────────────┼─────────────╯\n",
                              ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
@@ -189,15 +183,15 @@ void print_header(char *filename) {
     }
 }
 void print_footer(void) {
-    if (args.only_code != 1) {
-        if (args.binary != 1) {
-            if (args.print_hex == 1) {
+    if (!args.only_code) {
+        if (!args.binary) {
+            if (args.print_hex) {
                 printf("╰──────────────┴───────╯\n");
             } else {
                 printf("╰─────────┴───────╯\n");
             }
         } else {
-            if (args.print_hex == 1) {
+            if (args.print_hex) {
                 printf("╰──────────────┴──────────────────────────╯\n");
             } else {
                 printf("╰─────────┴──────────────────────────╯\n");

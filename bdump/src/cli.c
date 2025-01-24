@@ -7,7 +7,7 @@ CLI parse_arguments(int argc, char *argv[]) {
     opts.colors = 1;
     const char *valid_options[] = {
         "--help", "--colorless", "--verbose", "--hex-mem", "--binary",
-        "--only-code", "--hex", "-h", "-c", "-v", "-b", "-o", "-x", "-X"};
+        "--only-code", "--version", "--hex", "-h", "-c", "-v", "-V", "-b", "-o", "-x", "-X"};
     int valid_count = sizeof(valid_options) / sizeof(valid_options[0]);
 
     for (int i = 1; i < argc; i++) {
@@ -118,8 +118,6 @@ void suggest_option(const char *invalid_option, const char *valid_options[], int
     }
     if (suggestion_count > 0) {
         fputs("Did you mean one of these options?\n", stderr);
-    } else {
-        fputs("No similar arguments found\n", stderr);
     }
     for (int i = 0; i < suggestion_count; i++) {
         fputs("  ", stderr);
