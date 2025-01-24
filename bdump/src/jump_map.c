@@ -20,7 +20,13 @@ void jump_map_insert(HashMap *map, size_t key, Jump value) {
     newNode->next = map->table[index];
     map->table[index] = newNode;
 }
+void free_node(Node *node) {
+    if (node == NULL) {
+        return;
+    }
 
+    free(node);
+}
 Jump *jump_map_get(HashMap *map, size_t key) {
     unsigned int index = hash(key);
     Node *current = map->table[index];
@@ -62,14 +68,14 @@ void add_jump(JumpVector *vector, Jump jump) {
     }
     vector->data[vector->size++] = jump;
 }
-
 void free_jump_vector(JumpVector *vector) {
-    free(vector->data);
-    vector->data = NULL;
-    vector->size = 0;
-    vector->capacity = 0;
-}
+    if (vector == NULL) {
+        return;
+    }
 
+    free(vector->data);
+    free(vector); 
+}
 JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
     JumpVector *jump_vector = malloc(sizeof(JumpVector));
     if (jump_vector == NULL) {
@@ -87,8 +93,8 @@ JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
             }
             current = current->next;
         }
+        free_node(current);
     }
-
     return jump_vector;
 }
 
