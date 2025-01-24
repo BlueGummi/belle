@@ -170,11 +170,11 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                         printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
                     }
 #if defined(_WIN32)
-                    printf("%s from %lld%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s from 0x%lx%s" : "%s from %lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s from %llu%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s from 0x%lx%s" : "%s from %llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf("%s from %ld%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s from 0x%lx%s" : "%s from %ld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
                         printf(", ");
@@ -183,20 +183,20 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
 #if defined(_WIN32)
-                    printf(" %sto %lld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%lx%s" : " %s to %lld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf(" %sto %llu %s", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%lx%s" : " %s to %llu%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
-                    printf(" %sto %ld %s", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%lx%s" : " %s to %ld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
 #if defined(_WIN32)
-                    printf("%s%lld%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s0x%lx%s" : "%s%lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s%llu%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s0x%lx%s" : "%s%llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf("%s%ld%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf((args.print_hex ? "%s0x%lx%s" : "%s%ld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
                         printf(", ");
