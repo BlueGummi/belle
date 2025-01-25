@@ -49,23 +49,26 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         print_jump_instruction(ins, colors);
     } else if (strcmp(op, "ret") == 0) {
         if ((ins->full_ins & 0xfff) == 0) {
-            if (colors)
+            if (colors) {
                 PRINTF("%sret%s", ANSI_BLUE, ANSI_RESET);
-            else
+            } else {
                 PRINTF("ret");
+            }
             len += 3;
         } else {
             if ((ins->destination >> 2) == 1) {
-                if (colors)
+                if (colors) {
                     PRINTF("%sjg %s", ANSI_BLUE, ANSI_RESET);
-                else
+                } else {
                     PRINTF("jg ");
+                }
                 len += 3;
             } else if ((ins->destination >> 2) == 0) {
-                if (colors)
+                if (colors) {
                     PRINTF("%sjl %s", ANSI_BLUE, ANSI_RESET);
-                else
+                } else {
                     PRINTF("jl ");
+                }
                 len += 3;
             }
             print_jump_instruction(ins, colors);
@@ -152,8 +155,9 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         } // Push
     } // push + pop
     //
-    if (strcmp(op, "jz") != 0 && strcmp(op, "jo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args)
+    if (strcmp(op, "jz") != 0 && strcmp(op, "jo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args) {
         len += strlen(str);
+    }
     if (in_char && args.concat_chars) {
         if (!is_directive(ins)) {
             current_addr++;
@@ -161,8 +165,9 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         return;
     }
     size_t spaces = 16 - len;
-    for (size_t s = 0; s < spaces; s++)
+    for (size_t s = 0; s < spaces; s++) {
         PRINTF(" ");
+    }
     bool has_jump = false;
     bool has_outgoing_jump = false;
     if (!is_directive(ins)) {

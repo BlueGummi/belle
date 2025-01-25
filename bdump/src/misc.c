@@ -4,6 +4,11 @@ bool next_in_char = false;
 bool likely_label = false;
 bool printed_addr = false;
 char global_str[512] = "";
+
+#ifdef _WIN32
+char buffer[1024];
+#endif
+
 Color get_color(int index) {
     Color color_codes[] = {
         COLOR_RED, COLOR_GREEN, COLOR_YELLOW,
