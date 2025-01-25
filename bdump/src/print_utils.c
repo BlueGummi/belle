@@ -157,6 +157,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     for (size_t s = 0; s < spaces; s++)
         printf(" ");
     bool has_jump = false;
+    bool has_outgoing_jump = false;
     if (!is_directive(ins)) {
         if (!args.only_code || args.no_jump) {
             for (size_t i = 0; i < jumpsHere->size; i++) {
@@ -165,6 +166,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                     color = ANSI_RESET;
                 }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
+                    if (has_outgoing_jump) printf(" ");
                     printf("%s◀%s", color, ANSI_RESET);
                     if (args.verbosity > 0 && likely_label) {
                         printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
@@ -189,7 +191,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
 #else
                     printf((args.print_hex ? "%s to 0x%lX%s " : " %s to %ld%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
-                    has_jump = true;
+                    has_outgoing_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
 #if defined(_WIN32)
                     printf((args.print_hex ? "%s0x%llX%s" : "%s%lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
