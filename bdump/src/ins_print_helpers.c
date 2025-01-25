@@ -15,9 +15,9 @@ void print_operation(Instruction *ins, char *op, bool colors) {
     }
 
     if (colors) {
-        printf("%s%s%s ", ANSI_BLUE, op, ANSI_RESET);
+        PRINTF("%s%s%s ", ANSI_BLUE, op, ANSI_RESET);
     } else {
-        printf("%s ", op);
+        PRINTF("%s ", op);
     }
     char tempstr[40];
     snprintf(tempstr, sizeof(tempstr), "%s ", op);
@@ -26,9 +26,9 @@ void print_operation(Instruction *ins, char *op, bool colors) {
 
 void print_two_reg_args(Instruction *ins, bool colors) {
     if (colors) {
-        printf("%sr%d%s, ", ANSI_YELLOW, ins->destination, ANSI_RESET);
+        PRINTF("%sr%d%s, ", ANSI_YELLOW, ins->destination, ANSI_RESET);
     } else {
-        printf("r%d, ", ins->destination);
+        PRINTF("r%d, ", ins->destination);
     }
     char str[20];
     snprintf(str, sizeof(str), "r%d, ", ins->destination);
@@ -36,9 +36,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     switch (ins->type) {
     case 0: // register
         if (colors) {
-            printf("%sr%d%s", ANSI_YELLOW, ins->source, ANSI_RESET);
+            PRINTF("%sr%d%s", ANSI_YELLOW, ins->source, ANSI_RESET);
         } else {
-            printf("r%d", ins->source);
+            PRINTF("r%d", ins->source);
         }
         snprintf(str, sizeof(str), "r%d", ins->source);
         break;
@@ -49,9 +49,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         int8_t val = (int8_t) ins->source & 0x7f;
 
         if (colors) {
-            printf(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
+            PRINTF(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
         } else {
-            printf(FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
+            PRINTF(FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
         }
         snprintf(str, sizeof(str), FMTS, args.hex_operands ? (sign ? ins->source : val) : val);
     } break;
@@ -61,9 +61,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
         int memaddr = ins->full_ins & 0x7f;
 
         if (colors) {
-            printf(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
+            PRINTF(FORMAT_STRING_MEMPTR_COLORED, ANSI_VARIED, memaddr, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_MEMPTR, memaddr);
+            PRINTF(FORMAT_STRING_MEMPTR, memaddr);
         }
         snprintf(str, sizeof(str), FORMAT_STRING_MEMPTR, memaddr);
     } break;
@@ -71,9 +71,9 @@ void print_two_reg_args(Instruction *ins, bool colors) {
     case 3: // register indirect
     {
         if (colors) {
-            printf("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
+            PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
         } else {
-            printf("&r%d", ins->source & 7);
+            PRINTF("&r%d", ins->source & 7);
         }
         snprintf(str, sizeof(str), "&r%d", ins->source & 7);
     } break;
@@ -89,9 +89,9 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     char str[20];
     if (((ins->destination >> 1) & 1) == 1) {
         if (colors) {
-            printf("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
+            PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
         } else {
-            printf("&r%d", ins->source & 7);
+            PRINTF("&r%d", ins->source & 7);
         }
         snprintf(str, sizeof(str), "&r%d", ins->source & 7);
         len += strlen(str);
@@ -99,9 +99,9 @@ void print_jump_instruction(Instruction *ins, bool colors) {
     }
 
     if (colors) {
-        printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 1023, ANSI_RESET);
+        PRINTF(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 1023, ANSI_RESET);
     } else {
-        printf(FORMAT_STRING_MEM, ins->full_ins & 1023);
+        PRINTF(FORMAT_STRING_MEM, ins->full_ins & 1023);
     }
     snprintf(str, sizeof(str), FORMAT_STRING_MEM, ins->full_ins & 1023);
     len += strlen(str);
@@ -111,33 +111,33 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
     char str[40];
     if (ins->destination == 1) {
         if (colors) {
-            printf(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
+            PRINTF(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_START, ins->full_ins & 0x1ff);
+            PRINTF(FORMAT_STRING_START, ins->full_ins & 0x1ff);
         }
         snprintf(str, sizeof(str), FORMAT_STRING_START, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->destination == 2) {
         if (colors) {
-            printf(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
+            PRINTF(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
+            PRINTF(FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
         }
         snprintf(str, sizeof(str), FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->destination == 3) {
         if (colors) {
-            printf(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
+            PRINTF(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
+            PRINTF(FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
         }
         snprintf(str, sizeof(str), FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
         len += strlen(str);
     } else if (ins->full_ins == 0) {
         if (colors) {
-            printf("%shlt%s", ANSI_BLUE, ANSI_RESET);
+            PRINTF("%shlt%s", ANSI_BLUE, ANSI_RESET);
         } else {
-            printf("hlt");
+            PRINTF("hlt");
         }
         len += 3;
     } else {
@@ -161,7 +161,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
         if (!args.only_code) {
             if (colors) {
-                printf(FORMAT_STRING_ASCII_COLORED, ANSI_BLUE,
+                PRINTF(FORMAT_STRING_ASCII_COLORED, ANSI_BLUE,
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
@@ -169,7 +169,7 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
                                                                        : "???"),
                        ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
-                printf(FORMAT_STRING_ASCII,
+                PRINTF(FORMAT_STRING_ASCII,
                        (ins->full_ins == '\n'                          ? "\\n"
                         : ins->full_ins == '\t'                        ? "\\t"
                         : ins->full_ins == '\\'                        ? "\\\\"
@@ -187,9 +187,9 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
             len += strlen(str);
         } else {
             if (colors) {
-                printf(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
+                PRINTF(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
             } else {
-                printf(FORMAT_STRING_WORD, ins->full_ins);
+                PRINTF(FORMAT_STRING_WORD, ins->full_ins);
             }
             snprintf(str, sizeof(str), FORMAT_STRING_WORD, ins->full_ins);
             len += strlen(str);

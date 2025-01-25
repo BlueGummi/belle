@@ -122,26 +122,26 @@ int levenshtein_distance(const char *s1, const char *s2) {
 }
 
 void print_help(char *bin) { // bin is the name of the bin program
-    printf("The disassembler for the BELLE-ISA\n\n");
-    printf("%s%sUsage:%s %s%s%s [OPTIONS] <ROMS>\n\n", ANSI_UNDERLINE, ANSI_BOLD, ANSI_RESET,
+    PRINTF("The disassembler for the BELLE-ISA\n\n");
+    PRINTF("%s%sUsage:%s %s%s%s [OPTIONS] <ROMS>\n\n", ANSI_UNDERLINE, ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, bin, ANSI_RESET);
-    printf("%s%sArguments:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
-    printf("  <ROMS>  Path to ROMs\n\n");
-    printf("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
-    printf("  %s-h%s, %s--help%s          Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
+    PRINTF("%s%sArguments:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
+    PRINTF("  <ROMS>  Path to ROMs\n\n");
+    PRINTF("%s%sOptions:%s\n", ANSI_BOLD, ANSI_UNDERLINE, ANSI_RESET);
+    PRINTF("  %s-h%s, %s--help%s          Show this help message and exit\n", ANSI_BOLD, ANSI_RESET,
            ANSI_BOLD, ANSI_RESET);
-    printf("  %s-c%s, %s--colorless%s     Disable colors\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    PRINTF("  %s-c%s, %s--colorless%s     Disable colors\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-j%s, %s--no-jump%s       Disable jump visuals\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    PRINTF("  %s-j%s, %s--no-jump%s       Disable jump visuals\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-o%s, %s--only-code%s     Print only disassembled code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    PRINTF("  %s-o%s, %s--only-code%s     Print only disassembled code\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-C%s, %s--concat-chars%s  Concatenate characters\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    PRINTF("  %s-C%s, %s--concat-chars%s  Concatenate characters\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-b%s, %s--binary%s        Print instruction binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
-    printf("  %s-X%s, %s--hex%s           Print instruction operands in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
+    PRINTF("  %s-b%s, %s--binary%s        Print instruction binary\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD, ANSI_RESET);
+    PRINTF("  %s-X%s, %s--hex%s           Print instruction operands in hexadecimal\n", ANSI_BOLD, ANSI_RESET, ANSI_BOLD,
            ANSI_RESET);
-    printf("  %s-V%s, %s--version%s       Print version\n", ANSI_BOLD,
+    PRINTF("  %s-V%s, %s--version%s       Print version\n", ANSI_BOLD,
            ANSI_RESET, ANSI_BOLD, ANSI_RESET);
     exit(0);
 }

@@ -50,47 +50,47 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     } else if (strcmp(op, "ret") == 0) {
         if ((ins->full_ins & 0xfff) == 0) {
             if (colors)
-                printf("%sret%s", ANSI_BLUE, ANSI_RESET);
+                PRINTF("%sret%s", ANSI_BLUE, ANSI_RESET);
             else
-                printf("ret");
+                PRINTF("ret");
             len += 3;
         } else {
             if ((ins->destination >> 2) == 1) {
                 if (colors)
-                    printf("%sjg %s", ANSI_BLUE, ANSI_RESET);
+                    PRINTF("%sjg %s", ANSI_BLUE, ANSI_RESET);
                 else
-                    printf("jg ");
+                    PRINTF("jg ");
                 len += 3;
             } else if ((ins->destination >> 2) == 0) {
                 if (colors)
-                    printf("%sjl %s", ANSI_BLUE, ANSI_RESET);
+                    PRINTF("%sjl %s", ANSI_BLUE, ANSI_RESET);
                 else
-                    printf("jl ");
+                    PRINTF("jl ");
                 len += 3;
             }
             print_jump_instruction(ins, colors);
         }
     } else if (strcmp(op, "int") == 0) {
         if (colors) {
-            printf(FORMAT_STRING_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
+            PRINTF(FORMAT_STRING_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING, ins->source);
+            PRINTF(FORMAT_STRING, ins->source);
         }
         snprintf(str, sizeof(str), FORMAT_STRING, ins->source);
     } else if (strcmp(op, "hlt") == 0) {
         print_hlt_instruction(ins, colors);
     } else if (strcmp(op, "ld") == 0 || strcmp(op, "lea") == 0) {
         if (colors) {
-            printf("%sr%d%s, ", ANSI_YELLOW, ins->destination & 7, ANSI_RESET);
+            PRINTF("%sr%d%s, ", ANSI_YELLOW, ins->destination & 7, ANSI_RESET);
         } else {
-            printf("r%d, ", ins->destination & 7);
+            PRINTF("r%d, ", ins->destination & 7);
         }
         snprintf(str, sizeof(str), "r%d, ", ins->destination);
 
         if (colors) {
-            printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 511, ANSI_RESET);
+            PRINTF(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 511, ANSI_RESET);
         } else {
-            printf(FORMAT_STRING_MEM, ins->full_ins & 511);
+            PRINTF(FORMAT_STRING_MEM, ins->full_ins & 511);
         }
         char tempstr[30];
         snprintf(tempstr, sizeof(tempstr), FORMAT_STRING_MEM, ins->source);
@@ -98,10 +98,10 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     } else if (strcmp(op, "st") == 0) {
         if (ins->destination >> 2 == 1) {
             if (colors) {
-                printf("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0x380) >> 7,
+                PRINTF("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0x380) >> 7,
                        ANSI_RESET, ANSI_YELLOW, ins->source & 7, ANSI_RESET);
             } else {
-                printf("&r%d, r%d", (ins->full_ins & 0x380) >> 7,
+                PRINTF("&r%d, r%d", (ins->full_ins & 0x380) >> 7,
                        (ins->source & 0x7));
             }
             snprintf(str, sizeof(str), "&r%d, r%d", (ins->full_ins & 0x380) >> 7, ins->source & 0x7);
@@ -109,42 +109,42 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
             ins->source &= 0x7;
             ins->destination = (ins->full_ins & 0xff8) >> 3;
             if (colors) {
-                printf(FORMAT_STRING_ST_COLORED, ANSI_VARIED, ins->destination, ANSI_RESET, ANSI_YELLOW,
+                PRINTF(FORMAT_STRING_ST_COLORED, ANSI_VARIED, ins->destination, ANSI_RESET, ANSI_YELLOW,
                        ins->source, ANSI_RESET);
             } else {
-                printf(FORMAT_STRING_ST, ins->destination, ins->source);
+                PRINTF(FORMAT_STRING_ST, ins->destination, ins->source);
             }
             snprintf(str, sizeof(str), FORMAT_STRING_ST, ins->destination, ins->source);
         }
     } else if (strcmp(op, "push") == 0 || strcmp(op, "pop") == 0) {
         if ((ins->type == 0 && strcmp(op, "push") == 0)) {
             if (colors) {
-                printf("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
+                PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
             } else {
-                printf("r%d", ins->source & 7);
+                PRINTF("r%d", ins->source & 7);
             }
             snprintf(str, sizeof(str), "r%d", ins->source & 7);
         } else {
             if (strcmp(op, "push") == 0) {
                 if (colors) {
-                    printf(FORMAT_STRING_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
+                    PRINTF(FORMAT_STRING_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                 } else {
-                    printf(FORMAT_STRING, ins->source & 2047);
+                    PRINTF(FORMAT_STRING, ins->source & 2047);
                 }
                 snprintf(str, sizeof(str), FORMAT_STRING, ins->source);
             } else {
                 if (ins->destination == 0x4) {
                     if (colors) {
-                        printf(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
+                        PRINTF(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                     } else {
-                        printf(FORMAT_STRING_MEM, ins->full_ins & 2047);
+                        PRINTF(FORMAT_STRING_MEM, ins->full_ins & 2047);
                     }
                     snprintf(str, sizeof(str), FORMAT_STRING_MEM, ins->full_ins & 2047);
                 } else {
                     if (colors) {
-                        printf("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
+                        PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
                     } else {
-                        printf("r%d", ins->source & 7);
+                        PRINTF("r%d", ins->source & 7);
                     }
                     snprintf(str, sizeof(str), "r%d", ins->source & 7);
                 }
@@ -162,7 +162,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     }
     size_t spaces = 16 - len;
     for (size_t s = 0; s < spaces; s++)
-        printf(" ");
+        PRINTF(" ");
     bool has_jump = false;
     bool has_outgoing_jump = false;
     if (!is_directive(ins)) {
@@ -174,49 +174,49 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
                 }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     if (has_outgoing_jump)
-                        printf(" ");
-                    printf("%s◀%s", color, ANSI_RESET);
+                        PRINTF(" ");
+                    PRINTF("%s◀%s", color, ANSI_RESET);
                     if (likely_label) {
-                        printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
+                        PRINTF("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
                     }
 #if defined(_WIN32)
-                    printf("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
-                        printf(", ");
+                        PRINTF(", ");
                     }
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].source) {
-                    printf("%s▶%s", color, ANSI_RESET);
+                    PRINTF("%s▶%s", color, ANSI_RESET);
 #if defined(_WIN32)
-                    printf("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    PRINTF("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    PRINTF("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
-                    printf("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    PRINTF("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
                     has_outgoing_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
 #if defined(_WIN32)
-                    printf("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    PRINTF("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
-                        printf(", ");
+                        PRINTF(", ");
                     } else {
-                        printf(" ");
+                        PRINTF(" ");
                     }
                 }
             }
         }
         current_addr++;
     }
-    printf("\n");
+    PRINTF("\n");
 }

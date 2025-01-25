@@ -2,6 +2,20 @@
 #define BDUMP_H
 #define TABLE_SIZE 512
 #include "consts.h"
+
+#ifdef _WIN32
+#define PRINTF(msg, ...)                                                \
+    do {                                                                \
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);              \
+        char buffer[256];                                               \
+        snprintf(buffer, sizeof(buffer), msg, __VA_ARGS__);             \
+        DWORD written;                                                  \
+        WriteConsole(hConsole, buffer, strlen(buffer), &written, NULL); \
+    } while (0)
+#else
+#define PRINTF(msg, ...) printf(msg, ##__VA_ARGS__)
+#endif
+
 typedef struct
 {
     FILE *input;
