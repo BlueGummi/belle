@@ -183,11 +183,11 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s to 0x%llX%s" : " %s to %lld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%llX%s " : " %s to %lld%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf((args.print_hex ? "%s to 0x%lX%s" : " %s to %llu%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%lX%s " : " %s to %llu%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
-                    printf((args.print_hex ? "%s to 0x%lX%s" : " %s to %ld%s"), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf((args.print_hex ? "%s to 0x%lX%s " : " %s to %ld%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
