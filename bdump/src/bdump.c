@@ -10,6 +10,7 @@
 void *process_instructions(void *arg, char *filename) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
+    setvbuf(stdout, NULL, _IOFBF, 1024);
 #endif
     ThreadData *data = (ThreadData *) arg;
     jump_map_global = jump_map_create();
