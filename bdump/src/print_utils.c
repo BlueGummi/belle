@@ -182,7 +182,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
 #if defined(_WIN32)
                     printf("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
                     printf("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
@@ -195,7 +195,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
 #if defined(_WIN32)
                     printf("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
                     printf("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
@@ -204,7 +204,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
 #if defined(_WIN32)
                     printf("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
                     printf("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
