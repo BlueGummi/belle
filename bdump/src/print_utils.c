@@ -159,7 +159,7 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     bool has_jump = false;
     bool has_outgoing_jump = false;
     if (!is_directive(ins)) {
-        if (!args.only_code || args.no_jump) {
+        if (!args.only_code && !args.no_jump) {
             for (size_t i = 0; i < jumpsHere->size; i++) {
                 char *color = color_to_ansi(jumpsHere->data[i].color);
                 if (!args.colors) {
