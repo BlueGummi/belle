@@ -8,7 +8,7 @@
     do {                                                                \
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);              \
         char buffer[256];                                               \
-        snprintf(buffer, sizeof(buffer), msg, __VA_ARGS__);             \
+        snprintf(buffer, sizeof(buffer), msg, ##__VA_ARGS__);           \
         DWORD written;                                                  \
         WriteConsole(hConsole, buffer, strlen(buffer), &written, NULL); \
     } while (0)
