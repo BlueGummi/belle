@@ -26,12 +26,11 @@ typedef struct {
     char *input_files[MAX_INPUT_FILES];
     uint8_t num_files;
     bool colors;
-    uint8_t verbosity;
     bool binary;
     bool only_code;
-    bool print_hex;
     bool hex_operands;
     bool no_jump;
+    bool concat_chars;
 } CLI;
 typedef enum {
     COLOR_RED,
@@ -79,7 +78,7 @@ typedef struct {
 CLI parse_arguments(int argc, char *argv[]);
 Instruction parse_instruction(uint32_t instruction);
 void print_binary(int16_t num);
-void print_instruction(Instruction *s, JumpVector *jumpsHere);
+void print_instruction(Instruction *s, Instruction *d, JumpVector *jumpsHere);
 void print_help(char *bin);
 void *process_instructions(void *arg, char *filename);
 void print_jump_instruction(Instruction *ins, bool colors);
@@ -101,7 +100,7 @@ void print_instruction_header(size_t line, bool colors, bool is_directive);
 HashMap *jump_map_create(void);
 void print_header(char *filename);
 void print_footer(void);
-void suggest_option(const char *invalid_option, const char *valid_options[], int valid_count);
+void suggest_option(const char *invalid_option, int valid_count);
 int levenshtein_distance(const char *s1, const char *s2);
 Color get_color(int index);
 char *color_to_ansi(Color color);

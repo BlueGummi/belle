@@ -15,16 +15,17 @@ in the `bdump/` directory to build the disassembler. Then, the diassembler can b
 
 Different flags can be passed to make the disassembler **emit different output**, but none will affect how it assembles code.
 
-| Field                  | CLI                 | Variable type | Default value | Example |
-| :--------------------- | :------------------ | :------------ | :-----------: | :------ |
-| Binary                 | `file`              | String        |     `""`      | `main`  |
-| Output original binary | `-b` or `--binary`  | Boolean       |    `false`    | `-b`    |
-| Verbose output         | `-v` or `--verbose` | Boolean       |    `false`    | `-v`    |
-| Display only ASM           | `-o` or `--only-code`   | Boolean       |    `false`    | `-o`    |
-| Disable colors         | `-c` or `--colorless`  | Boolean       |    `false`    | `-c`    |
-| Output memory as hex  | `-x` or `--hex-mem`  | Boolean       |    `false`    | `-x`    |
-| Output operands as hex | `-X` or `--hex`  | Boolean       |    `false`    | `-X`    |
-| Display help           | `-h` or `--help`    | Boolean       |    `false`    | `-h`    |
+
+| Option               | Description                                         |
+|----------------------|-----------------------------------------------------|
+| `-h`, `--help`       | Show this help message and exit                     |
+| `-c`, `--colorless`  | Disable colors                                      |
+| `-j`, `--no-jump`    | Disable jump visuals                                |
+| `-o`, `--only-code`  | Print only disassembled code                        |
+| `-C`, `--concat-chars`| Concatenate characters                              |
+| `-b`, `--binary`     | Print instruction binary                            |
+| `-X`, `--hex`        | Print instruction operands in hexadecimal           |
+| `-V`, `--version`    | Print version                                       |
 
 ## Use cases
 

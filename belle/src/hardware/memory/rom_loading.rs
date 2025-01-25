@@ -5,20 +5,20 @@ impl CPU {
         let mut start_found = false;
 
         for element in binary {
-            if (element >> 9) == 1 {
+            if (element >> 9) == 0b01 {
                 // start directive
                 if start_found {
                     self.do_not_run = true;
                     return Err(EmuError::Duplicate(".start directives".to_string()));
                 }
-                self.starts_at = (element & 0b111111111) as u16;
+                self.starts_at = (element & 0b1_1111_1111) as u16;
                 start_found = true;
                 continue;
-            } else if (element >> 9) == 2 {
-                self.sp = (element & 0b111111111) as u16;
+            } else if (element >> 9) == 0b10 {
+                self.sp = (element & 0b1_1111_1111) as u16;
                 continue;
-            } else if (element >> 9) == 3 {
-                self.bp = (element & 0b111111111) as u16;
+            } else if (element >> 9) == 0b11 {
+                self.bp = (element & 0b1_1111_1111) as u16;
                 continue;
             }
             if counter + self.starts_at as usize >= MEMORY_SIZE {

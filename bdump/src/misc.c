@@ -1,5 +1,9 @@
 #include "bdump.h"
+bool in_char = false;
+bool next_in_char = false;
 bool likely_label = false;
+bool printed_addr = false;
+char global_str[512] = "";
 Color get_color(int index) {
     Color color_codes[] = {
         COLOR_RED, COLOR_GREEN, COLOR_YELLOW,

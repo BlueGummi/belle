@@ -34,7 +34,7 @@ void *process_instructions(void *arg, char *filename) {
             case RET_OP:
                 if (instruction >> 12 == RET_OP && (instruction & 0xfff) == 0)
                     break;
-                if (((instruction >> 11) & 1)== 1)
+                if (((instruction >> 11) & 1) == 1)
                     break;
                 Jump jump_data;
                 jump_data.source = current_addr;
@@ -58,10 +58,12 @@ void *process_instructions(void *arg, char *filename) {
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            uint16_t next_instruction = (data->buffer[i + 2] << 8) | data->buffer[i + 3];
             Instruction ins = parse_instruction(instruction);
+            Instruction ins2 = parse_instruction(next_instruction);
             JumpVector *jumpsHere = find_jumps_at_address(jump_map_global, current_addr);
             len = 0;
-            print_instruction(&ins, jumpsHere);
+            print_instruction(&ins, &ins2, jumpsHere);
             free_jump_vector(jumpsHere);
         }
     }

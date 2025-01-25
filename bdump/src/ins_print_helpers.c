@@ -141,6 +141,24 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
         len += 3;
     } else {
+        if (args.concat_chars) {
+            char temp[10];
+            if (ins->full_ins == '\n') {
+                strcpy(temp, "\\n");
+            } else if (ins->full_ins == '\t') {
+                strcpy(temp, "\\t");
+            } else if (ins->full_ins == '\\') {
+                strcpy(temp, "\\\\");
+            } else if (ins->full_ins >= 32 && ins->full_ins < 127) {
+                temp[0] = (char) ins->full_ins;
+                temp[1] = '\0';
+            } else {
+                strcpy(temp, "?");
+            }
+
+            strcat(global_str, temp);
+            return;
+        }
         if (!args.only_code) {
             if (colors) {
                 printf(FORMAT_STRING_ASCII_COLORED, ANSI_BLUE,

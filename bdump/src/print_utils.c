@@ -1,10 +1,22 @@
 #include "ins_print_helpers.c"
 
-void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
+void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHere) {
     bool colors = args.colors;
     char *op = match_opcode(ins);
     char str[50] = "";
     int counter = 0;
+    if (((ins->full_ins & 0xff) != 0) && ((ins->full_ins & 0xff00) >> 8 == 0)) {
+        in_char = true;
+        if (((ins2->full_ins & 0xff) != 0) && ((ins2->full_ins & 0xff00) >> 8 == 0)) {
+            next_in_char = true;
+        } else {
+            next_in_char = false;
+        }
+    } else {
+        in_char = false;
+        printed_addr = false;
+        next_in_char = false;
+    }
     if (!args.only_code) {
         for (size_t i = 0; i < jumpsHere->size; i++) {
             if (jumpsHere->data[i].destination == current_addr) {
@@ -142,16 +154,11 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
     //
     if (strcmp(op, "jz") != 0 && strcmp(op, "jo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args)
         len += strlen(str);
-    if (args.verbosity > 0 && args.only_code) {
-        if ((ins->full_ins >> 9) != 1 && (ins->full_ins >> 9) != 2 && (ins->full_ins >> 9) != 3) {
-#ifdef _WIN32
-            printf(" ; address %lld", current_addr - 1);
-#else
-            printf(" ; address %ld", current_addr - 1);
-#endif
-        } else {
-            printf(" ; no address");
+    if (in_char && args.concat_chars) {
+        if (!is_directive(ins)) {
+            current_addr++;
         }
+        return;
     }
     size_t spaces = 16 - len;
     for (size_t s = 0; s < spaces; s++)
@@ -166,17 +173,18 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                     color = ANSI_RESET;
                 }
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
-                    if (has_outgoing_jump) printf(" ");
+                    if (has_outgoing_jump)
+                        printf(" ");
                     printf("%s◀%s", color, ANSI_RESET);
-                    if (args.verbosity > 0 && likely_label) {
+                    if (likely_label) {
                         printf("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
                     }
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s from 0x%llX%s" : "%s from %lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s from 0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf((args.print_hex ? "%s from 0x%lX%s" : "%s from %llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf((args.print_hex ? "%s from 0x%lX%s" : "%s from %ld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s from 0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
                         printf(", ");
@@ -185,20 +193,20 @@ void print_instruction(Instruction *ins, JumpVector *jumpsHere) {
                 } else if (current_addr == jumpsHere->data[i].source) {
                     printf("%s▶%s", color, ANSI_RESET);
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s to 0x%llX%s " : " %s to %lld%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf((args.print_hex ? "%s to 0x%lX%s " : " %s to %llu%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #else
-                    printf((args.print_hex ? "%s to 0x%lX%s " : " %s to %ld%s "), color, jumpsHere->data[i].destination, ANSI_RESET);
+                    printf("%s to 0x%lX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #endif
                     has_outgoing_jump = true;
                 } else if (current_addr == jumpsHere->data[i].destination && has_jump) {
 #if defined(_WIN32)
-                    printf((args.print_hex ? "%s0x%llX%s" : "%s%lld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s0x%llX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #elif defined(__APPLE__)
-                    printf((args.print_hex ? "%s0x%lX%s" : "%s%llu%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #else
-                    printf((args.print_hex ? "%s0x%lX%s" : "%s%ld%s"), color, jumpsHere->data[i].source, ANSI_RESET);
+                    printf("%s0x%lX%s", color, jumpsHere->data[i].source, ANSI_RESET);
 #endif
                     if (i < jumpsHere->size - 1) {
                         printf(", ");
