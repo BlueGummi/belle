@@ -146,9 +146,9 @@ void print_header(char *filename) {
     get_last_modified_date(filename, fdate, sizeof(fdate));
     if (!args.only_code) {
         PRINT_FILENAME(args.colors,
-                       "╭───────────────────┬─────────────────╮\n"
-                       "│ %sfile%s: %s%-11s%s │ %ssize%s: %s%-9s%s │\n"
-                       "├───────────────────┴─────────────────┤\n"
+                       "╭────────────────────────────────┬───────────────────────╮\n"
+                       "│ %sfile%s: %s%-24s%s │ %ssize%s: %s%-15s%s │\n"
+                       "├────────────────────────────────┴────┬──────────────────╯\n"
                        "│ %smodified%s: %s%-25s%s │\n",
                        filename,
                        fsize,

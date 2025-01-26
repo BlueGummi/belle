@@ -1,15 +1,14 @@
-    randomloc = 250
-.ssp [0x28]  ; set stack pointer to addr 40
-.sbp [0x28]  ; set base pointer to addr 40
-.start $0x29 ; program starts at addr 41
+.ssp [0x28]  ; set stack pointer to addr 0x28
+.sbp [0x28]  ; set base pointer to addr 0x28
+.start [0x29] ; program starts at addr 0x29
     int 71   ; don't push returns
     jmp @start
 msg2:
     .asciiz "The number entered is too large."
-    .word 10
+    .word 0xA
 text:
     .asciiz "The number entered is too small."
-    .word 10
+    .word 0xA
 msg:
     .asciiz "The golden ratio is: "
 
