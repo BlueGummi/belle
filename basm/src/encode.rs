@@ -60,7 +60,10 @@ pub fn encode_instruction(
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
             "HLT" => Ok(HLT_OP), // 0
             "ADD" => Ok(ADD_OP), // 1
-            instruction if instruction.to_uppercase().starts_with('J') => {
+            instruction
+                if instruction.to_uppercase().starts_with('J')
+                    || instruction.to_uppercase().starts_with('B') =>
+            {
                 ins_type = "jump";
                 if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
                     ins_type = "call";
@@ -68,14 +71,13 @@ pub fn encode_instruction(
                     ins_type = "jwr";
                 }
                 match instruction.to_uppercase().as_str() {
-                    "JO" => Ok(JO_OP),
-                    "JNO" => Ok(JNO_OP),
+                    "BO" => Ok(BO_OP),
+                    "BNO" => Ok(BNO_OP),
                     "JMP" | "J" => Ok(JMP_OP),
-                    "JR" => Ok(JR_OP),
-                    "JZ" | "JE" => Ok(JZ_OP),
-                    "JNZ" | "JNE" => Ok(JNZ_OP),
-                    "JL" => Ok(JL_OP),
-                    "JG" => Ok(JG_OP),
+                    "BZ" | "BE" | "BEQ" => Ok(BZ_OP),
+                    "BNZ" | "BNE" => Ok(BNZ_OP),
+                    "BL" => Ok(BL_OP),
+                    "BG" => Ok(BG_OP),
                     _ => Err((line_num, "Invalid jump instruction".to_string())),
                 }
             }
@@ -100,8 +102,8 @@ pub fn encode_instruction(
                 }
                 Ok(ST_OP) // 7
             }
-            "CMP" => Ok(CMP_OP), // 10
-            "MUL" => Ok(MUL_OP), // 11
+            "CMP" => Ok(CMP_OP),   // 10
+            "NAND" => Ok(NAND_OP), // 11
             "PUSH" => {
                 ins_type = "one_arg";
                 Ok(PUSH_OP) // 12
@@ -187,7 +189,12 @@ pub fn encode_instruction(
         }
         "jwr" => {
             let raw_str = arg1
-                .ok_or_else(|| (line_num, "Missing argument for indirect jump".to_string()))?
+                .ok_or_else(|| {
+                    (
+                        line_num,
+                        "Missing argument for indirect branch/jump".to_string(),
+                    )
+                })?
                 .get_raw();
             let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
                 (

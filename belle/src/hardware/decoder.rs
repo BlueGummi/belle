@@ -3,16 +3,16 @@ use std::fmt;
 
 pub const HLT_OP: i16 = 0b0000; // we need this
 pub const ADD_OP: i16 = 0b0001; // we also need this
-pub const JO_OP: i16 = 0b0010; // maybe optional ?
+pub const BO_OP: i16 = 0b0010; // maybe optional ?
 pub const POP_OP: i16 = 0b0011; // we need this
 pub const DIV_OP: i16 = 0b0100; // we need this
 pub const RET_OP: i16 = 0b0101; // we need this
 pub const LD_OP: i16 = 0b0110; // we need this
 pub const ST_OP: i16 = 0b0111; // we need this
 pub const JMP_OP: i16 = 0b1000; // maybe optional?
-pub const JZ_OP: i16 = 0b1001; // we need this
+pub const BZ_OP: i16 = 0b1001; // we need this
 pub const CMP_OP: i16 = 0b1010; // we need this
-pub const MUL_OP: i16 = 0b1011; // we need this
+pub const NAND_OP: i16 = 0b1011; // we need this
 pub const PUSH_OP: i16 = 0b1100; // we need this
 pub const INT_OP: i16 = 0b1101; // we need this
 pub const MOV_OP: i16 = 0b1110; // we need this
@@ -32,21 +32,20 @@ pub enum Argument {
 pub enum Instruction {
     HLT,
     ADD(Argument, Argument),
-    JO(Argument),
-    JNO(Argument),
+    BO(Argument),
+    BNO(Argument),
     POP(Argument),
     DIV(Argument, Argument),
     RET,
     LD(Argument, Argument),
     ST(Argument, Argument),
     JMP(Argument),
-    JR(Argument),
-    JZ(Argument),
-    JNZ(Argument),
-    JL(Argument),
-    JG(Argument),
+    BZ(Argument),
+    BNZ(Argument),
+    BL(Argument),
+    BG(Argument),
     CMP(Argument, Argument),
-    MUL(Argument, Argument),
+    NAND(Argument, Argument),
     PUSH(Argument),
     INT(Argument),
     MOV(Argument, Argument),
@@ -73,21 +72,20 @@ impl fmt::Display for Instruction {
         match self {
             Instruction::HLT => write!(f, "HLT"),
             Instruction::ADD(arg1, arg2) => write!(f, "ADD {arg1}, {arg2}"),
-            Instruction::JO(arg) => write!(f, "JO {arg}"),
+            Instruction::BO(arg) => write!(f, "BO {arg}"),
             Instruction::POP(arg) => write!(f, "POP {arg}"),
             Instruction::DIV(arg1, arg2) => write!(f, "DIV {arg1}, {arg2}"),
             Instruction::RET => write!(f, "RET"),
             Instruction::LD(arg1, arg2) => write!(f, "LD {arg1}, {arg2}"),
             Instruction::ST(arg1, arg2) => write!(f, "ST {arg1}, {arg2}"),
             Instruction::JMP(arg) => write!(f, "JMP {arg}"),
-            Instruction::JR(arg) => write!(f, "JR {arg}"),
-            Instruction::JNZ(arg) => write!(f, "JNZ {arg}"),
-            Instruction::JL(arg) => write!(f, "JL {arg}"),
-            Instruction::JG(arg) => write!(f, "JG {arg}"),
-            Instruction::JNO(arg) => write!(f, "JNO {arg}"),
-            Instruction::JZ(arg) => write!(f, "JZ {arg}"),
+            Instruction::BNZ(arg) => write!(f, "BNZ {arg}"),
+            Instruction::BL(arg) => write!(f, "BL {arg}"),
+            Instruction::BG(arg) => write!(f, "BG {arg}"),
+            Instruction::BNO(arg) => write!(f, "BNO {arg}"),
+            Instruction::BZ(arg) => write!(f, "BZ {arg}"),
             Instruction::CMP(arg1, arg2) => write!(f, "CMP {arg1}, {arg2}"),
-            Instruction::MUL(arg1, arg2) => write!(f, "MUL {arg1}, {arg2}"),
+            Instruction::NAND(arg1, arg2) => write!(f, "NAND {arg1}, {arg2}"),
             Instruction::PUSH(arg) => write!(f, "PUSH {arg}"),
             Instruction::INT(arg) => write!(f, "INT {arg}"),
             Instruction::MOV(arg1, arg2) => write!(f, "MOV {arg1}, {arg2}"),
@@ -221,7 +219,7 @@ impl CPU {
             0
         };
         let it_is_bouncy =
-            opcode == JZ_OP || opcode == JO_OP || opcode == JMP_OP || opcode == RET_OP;
+            opcode == BZ_OP || opcode == BO_OP || opcode == JMP_OP || opcode == RET_OP;
         let indirect_bounce = (self.ir & 0b0000_0100_0000_0000) >> 10 == 1;
         let tmp = self.ir & 0b111_1111;
 
@@ -273,16 +271,16 @@ impl CPU {
         match opcode {
             HLT_OP => HLT,
             ADD_OP => ADD(Register(destination), part),
-            JO_OP => {
+            BO_OP => {
                 let dest = if ins_type == 4 {
                     RegPtr(source)
                 } else {
                     MemAddr(source)
                 };
                 if invert {
-                    JNO(dest)
+                    BNO(dest)
                 } else {
-                    JO(dest)
+                    BO(dest)
                 }
             }
             POP_OP => {
@@ -303,9 +301,9 @@ impl CPU {
                 if self.ir & 4095 == 0 {
                     RET
                 } else if invert {
-                    JG(dest)
+                    BG(dest)
                 } else {
-                    JL(dest)
+                    BL(dest)
                 }
             }
             LD_OP => {
@@ -327,26 +325,22 @@ impl CPU {
                 } else {
                     MemAddr(source)
                 };
-                if invert {
-                    JR(dest)
-                } else {
-                    JMP(dest)
-                }
+                JMP(dest)
             }
-            JZ_OP => {
+            BZ_OP => {
                 let dest = if ins_type == 4 {
                     RegPtr(source)
                 } else {
                     MemAddr(source)
                 };
                 if invert {
-                    JNZ(dest)
+                    BNZ(dest)
                 } else {
-                    JZ(dest)
+                    BZ(dest)
                 }
             }
             CMP_OP => CMP(Register(destination), part),
-            MUL_OP => MUL(Register(destination), part),
+            NAND_OP => NAND(Register(destination), part),
             PUSH_OP => PUSH(part),
             INT_OP => INT(Literal(source)),
             MOV_OP => MOV(Register(destination), part),

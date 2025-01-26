@@ -3,15 +3,13 @@ size_t current_addr = 100;
 CLI args = {0};
 uint64_t len = 0;
 void print_operation(Instruction *ins, char *op, bool colors) {
-    bool is_jump = strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0;
+    bool is_jump = strcmp(op, "bz") == 0 || strcmp(op, "bo") == 0 || strcmp(op, "jmp") == 0;
     bool invert = ins->destination >> 2 == 1;
     if (is_jump && invert) {
-        if (strcmp(op, "jz") == 0)
-            op = "jnz";
-        else if (strcmp(op, "jo") == 0)
-            op = "jno";
-        else if (strcmp(op, "jmp") == 0)
-            op = "jr";
+        if (strcmp(op, "bz") == 0)
+            op = "bnz";
+        else if (strcmp(op, "bo") == 0)
+            op = "bno";
     }
 
     if (colors) {

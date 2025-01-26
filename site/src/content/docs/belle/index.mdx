@@ -105,7 +105,7 @@ Stack overflows occur when the stack is being "`push`'d" onto without any availa
 
 Stack overflows can also occur if the stack is significantly 'higher' than the memory in which the program's instructions reside (i.e. the program sits between addresses 10-200 and the stack sits at 400-512). In this scenario, as the stack is attempting to expand into a location in memory that is beyond the amount of addresses present in memory, it will also overflow.
 
-Stack overflows often occur if the address that is pushed onto a stack from a jump instruction is not "`pop`'d" off into a register, and no return from a jump is ever called. This results in the stack continuously being "`push`'d" onto, eventually overflowing it.
+Stack overflows often occur if the address that is pushed onto a stack from a branch instruction is not "`pop`'d" off into a register, and no return from a jump is ever called. This results in the stack continuously being "`push`'d" onto, eventually overflowing it.
 
 ### 3. Stack underflows
 

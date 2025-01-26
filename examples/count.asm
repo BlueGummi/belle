@@ -7,7 +7,7 @@
 add_loop:
     pop r4
     add r5, 1
-    jo @end
+    bo @end
     jmp @add_loop
 end:
     pop r4

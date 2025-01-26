@@ -76,45 +76,36 @@ Please refer to the [encoding](../encoding) document for more information about 
         lhs := lhs + rhs
         ```
 
-## Jcc - Conditional jump
+## Bcc - Conditional Branch 
 
-#### - JZ - Jump if zero flag is set
-#### - JNZ - Jump if zero flag is not set
-#### - JO - Jump if overflow flag is set
-#### - JNO - Jump if overflow flag is not set
-#### - JL - Jump if less
-#### - JG - Jump if greater
-#### - JR - Jump if remainder flag
+#### - BZ - Branch if zero flag is set
+#### - BNZ - Branch if zero flag is not set
+#### - BO - Branch if overflow flag is set
+#### - BNO - Branch if overflow flag is not set
+#### - BL - Branch if less
+#### - BG - Branch if greater
 
-    `Jcc` instructions perform **conditional jumps**, which set the CPU's program counter to the destination specified.
+    `Bcc` instructions perform **conditional branches**, which set the CPU's program counter to the destination specified.
 
-    `JO` will only jump if the overflow flag on the CPU is set. This flag becomes set if an **arithmetic operation** (e.g. `add`, `mul`) overflows the **destination** register.
+    `BO` will only branch if the overflow flag on the CPU is set. This flag becomes set if an **arithmetic operation** (e.g. `add`) overflows the **destination** register.
 
-    `JNO` will only jump if the overflow flag is **not** set.
+    `BNO` will only branch if the overflow flag is **not** set.
 
-    `JZ` will only jump if the zero flag is set. This flag becomes set if a *compare* instruction (`cmp`) has two operands that are of the same value.
+    `BZ` will only branch if the zero flag is set. This flag becomes set if a *compare* instruction (`cmp`) has two operands that are of the same value.
 
-    `JNZ` will only jump if the zero flag is **not** set.
+    `BNZ` will only branch if the zero flag is **not** set.
 
-    `JL` will only jump if the left-hand side is smaller than the right-hand side of a `CMP` instruction, and `JG` performs the inverse. 
+    `BL` will only branch if the left-hand side is smaller than the right-hand side of a `CMP` instruction, and `BG` performs the inverse. 
 
-    `JR` will only jump if the remainder flag is set.
+    `BR` will only branch if the remainder flag is set.
 
-    When a `Jcc` instruction is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack (if the **PUSHRET** flag is enabled). This memory address is known as a *return address* and is retrieved if the jump is to be returned from. Thus, if a value is to be retrieved off the stack after `JO` or `JZ`, the return address must first be removed, or the stack and base pointers must be adjusted.
-
-    The overflow flag can be set **unconditionally** with `int 21`, **unset** with `int 22`, and **inverted** with `int 23`.
-
-    The zero flag can be set **unconditionally** with `int 11`, **unset** with `int 12`, and **inverted** with `int 13`.
-
-    As subroutines and labels in assembly **resolve to memory addresses**, `JO` and `JZ` will always jump to a memory address if the jump location is a subroutine, granted the destination is small enough to fit within `11` bits.
-
-    `JO` and `JZ` can also take a **register pointer** argument, meaning that the value in a register is interpreted as a memory address for the destination of a jump. This must be set manually, as the assembler **will not do this**.
+    When a `Bcc` instruction is performed, the memory address that it is **performed at** is "`push`ed" onto the call stack (if the **PUSHRET** flag is enabled). This memory address is known as a *return address* and is retrieved if the branch is to be returned from. Thus, if a value is to be retrieved off the stack after a `Bcc` instruction, the return address must first be removed, or the stack and base pointers must be adjusted.
 
     Using a register as the destination can be beneficial, as `r4` and `r5` are unsigned 16 bit integers, being **able to address all memory addresses**. It is also possible to pass `r6` or `r7` - the floating point registers - to this instruction.
 
-    If the condition is **not met**, the jump will **simply be skipped**, and the next instruction will be executed accordingly.
+    If the condition is **not met**, the branch will **simply be skipped**, and the next instruction will be executed accordingly.
 
-    > Note: Any jump instruction can overflow the stack if it is full
+    > Note: Any branch instruction can overflow the stack if it is full
 
     Compatible DEST types: Register pointer, memory address
 
@@ -124,23 +115,23 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     Opcode listings:
 
-    `JO` : `00100`
+    `BO` : `00100`
 
-    `JNO`: `00101`
+    `BNO`: `00101`
 
-    `JL` : `01010`
+    `BL` : `01010`
     
-    `JG` : `01011`
+    `BG` : `01011`
     
-    `JR` : `10001`
+    `BR` : `10001`
     
-    `JZ` : `10010`
+    `BZ` : `10010`
     
-    `JNZ`: `10011`
+    `BNZ`: `10011`
 
     #### Binary encoding
 
-        Instruction: `jo &r3`
+        Instruction: `bo &r3`
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
@@ -148,7 +139,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Binary encoding
 
-        Instruction: `jz [1]`
+        Instruction: `bz [1]`
 
         | Opcode   | DTB     | DEST |
         | :-----   | :------ | :--- |
@@ -156,7 +147,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
         ```go
-        if flag // dependent on jump condition
+        if flag // dependent on branch condition
             if sp > bp // adjust stack pointer
                 sp := sp + 1
             else
@@ -385,7 +376,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | JMP   | 1         | Jump | Recursion | `jmp [31] ; jump to address 31` |
+    | JMP   | 1         | Jump | Jumping | `jmp [31] ; jump to address 31` |
 
 
     #### Binary encoding
@@ -422,7 +413,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     `CMP` will set the **sign flag** if the LHS is less than the RHS (if the result is negative), and it will be unset if the LHS is **greater than** the RHS.
 
-    `CMP` can be used along with `JZ`, `JNZ`, `JL`, or `JG` to perform a **conditional jump** out of a loop after recursion occurs enough times in a loop.
+    `CMP` can be used along with `Bcc` to perform a **conditional branch** out of a loop after recursion occurs enough times in a loop.
 
     Compatible LHS argument types: Register
 
@@ -452,15 +443,11 @@ Please refer to the [encoding](../encoding) document for more information about 
         sflag := true
     ```
 
-## MUL - Multiplication
+## NAND - Not And 
 
-    `MUL` will perform **arithmetic signed floating point multiplication** (as there are floating point registers), and will cast the value to an integer if the destination is an integer register.
+    `NAND` will perform a Not And operation on two locations.
 
-    `MUL` can also be used for division if the RHS is a decimal value less than one. In particular, if it is a floating point register containing a decimal value less than one.
-
-    `MUL`, in conjunction with `ADD` and `MOV` can be used to change register values to very large numbers, thus allowing large memor y addresses to be addressed with indirect loading and storing via `ST` and `MOV`.
-
-    Similar to the other arithmetic instructions, `MUL` does not take floating point literal values.
+    Similar to the other arithmetic instructions, `NAND` does not take floating point literal values.
 
     Compatible LHS argument types: Register
 
@@ -470,12 +457,12 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     | Name | Arguments | Description | Use case | Example |
     | :--- | :-------- | :---------: | :------- | :------ |
-    | MUL  |  2        | Multiply two values | Achieving large numbers in registers | `mul r4, 3 ; multiply r4 by 3` |
+    | NAND |  2        | Any boolean operation | Performing an OR | `nand r4, 3 ; nand r4 by 3` |
 
 
     #### Binary encoding
 
-        Instruction: `mul r2, 42`
+        Instruction: `nand r2, 42`
 
         | Opcode   | LHS     | DTBs     | RHS       |
         | :-----   | :------ | :------- | :-------- |
@@ -483,7 +470,7 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
     ```go
-    lhs := lhs * rhs
+    lhs := !(lhs & rhs)
     ```
 
 ## PUSH - Push a value onto the stack
@@ -568,8 +555,8 @@ Please refer to the [encoding](../encoding) document for more information about 
 | 53 | Invert the CPU's halt on overflow property |
 | 60 | Set the stack pointer to the value in `r4` |
 | 61 | Set the base pointer to the value in `r4` |
-| 70 | Set the "Push return address" flag | 
-| 71 | Unset the "Push return address" flag |
+| 70 | Set the "Push return address" flag for branches | 
+| 71 | Unset the "Push return address" flag for branches |
 
     Flags affected: All
 

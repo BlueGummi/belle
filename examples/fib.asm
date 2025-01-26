@@ -26,13 +26,13 @@ start:
     int 8
     int 40
     cmp r0, 1
-    jz @early_exit
+    bz @early_exit
     cmp r0, 0
-    jz @early_exit
+    bz @early_exit
     cmp r0, 2
-    jz @early_exit
+    bz @early_exit
     cmp r0, 24
-    jg @early_exit2
+    bg @early_exit2
     mov r1, 0
 fib_loop:
     mov r5, 0 ; clear register 5
@@ -45,7 +45,7 @@ fib_loop:
     push r6
     push r4 ; push updated Fibonacci values back onto stack
     cmp r0, r2
-    jz @finish
+    bz @finish
     int 5
     st &r1, r5
     add r1, 1

@@ -105,45 +105,36 @@ impl CPU {
         self.pc += 1;
         Ok(())
     }
-    pub fn handle_mul(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
+    pub fn handle_nand(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let value = self.get_value(arg2)?;
 
         if let Register(n) = arg1 {
-            let new_value = match *n {
+            match *n {
                 4 => {
-                    self.uint_reg[0] = self.uint_reg[0].wrapping_mul(value as u16);
-                    self.uint_reg[0] as i64 * value as i64
+                    self.uint_reg[0] = !(self.uint_reg[0] & (value as u16));
                 }
                 5 => {
-                    self.uint_reg[1] = self.uint_reg[1].wrapping_mul(value as u16);
-                    self.uint_reg[1] as i64 * value as i64
+                    self.uint_reg[1] = !(self.uint_reg[1] & (value as u16));
                 }
                 6 => {
-                    let temp = self.float_reg[0] * value;
-                    self.float_reg[0] = temp;
-                    temp as i64
+                    let temp = !(self.float_reg[0].to_bits() & value.to_bits());
+                    self.float_reg[0] = temp as f32;
                 }
                 7 => {
-                    let temp = self.float_reg[1] * value;
-                    self.float_reg[1] = temp;
-                    temp as i64
+                    let temp = !(self.float_reg[1].to_bits() & value.to_bits());
+                    self.float_reg[1] = temp as f32;
                 }
                 n if n > 3 => {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
                     let result = if arg2.is_ptr() {
-                        self.int_reg[*n as usize].wrapping_mul(value as u16 as i16)
+                        !(self.int_reg[*n as usize] & (value as u16 as i16))
                     } else {
-                        self.int_reg[*n as usize].wrapping_mul(value as i16)
+                        !(self.int_reg[*n as usize] & (value as i16))
                     };
                     self.int_reg[*n as usize] = result;
-                    (self.int_reg[*n as usize] as i64).wrapping_mul(value as i64)
                 }
-            };
-
-            if let Err(e) = self.check_overflow(new_value, *n as u16) {
-                eprint!("{e}");
             }
         }
         self.pc += 1;

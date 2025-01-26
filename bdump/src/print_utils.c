@@ -41,11 +41,11 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         print_operation(ins, op, colors);
     }
     bool two_reg_args = (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||
-                         strcmp(op, "mul") == 0 || strcmp(op, "mov") == 0);
+                         strcmp(op, "nand") == 0 || strcmp(op, "mov") == 0);
 
     if (two_reg_args) {
         print_two_reg_args(ins, colors); // add, mov, div, etc.
-    } else if (strcmp(op, "jz") == 0 || strcmp(op, "jo") == 0 || strcmp(op, "jmp") == 0) {
+    } else if (strcmp(op, "bz") == 0 || strcmp(op, "bo") == 0 || strcmp(op, "jmp") == 0) {
         print_jump_instruction(ins, colors);
     } else if (strcmp(op, "ret") == 0) {
         if ((ins->full_ins & 0xfff) == 0) {
@@ -58,16 +58,16 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         } else {
             if ((ins->destination >> 2) == 1) {
                 if (colors) {
-                    PRINTF("%sjg %s", ANSI_BLUE, ANSI_RESET);
+                    PRINTF("%sbg %s", ANSI_BLUE, ANSI_RESET);
                 } else {
-                    PRINTF("jg ");
+                    PRINTF("bg ");
                 }
                 len += 3;
             } else if ((ins->destination >> 2) == 0) {
                 if (colors) {
-                    PRINTF("%sjl %s", ANSI_BLUE, ANSI_RESET);
+                    PRINTF("%sbl %s", ANSI_BLUE, ANSI_RESET);
                 } else {
-                    PRINTF("jl ");
+                    PRINTF("bl ");
                 }
                 len += 3;
             }
@@ -155,7 +155,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         } // Push
     } // push + pop
     //
-    if (strcmp(op, "jz") != 0 && strcmp(op, "jo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args) {
+    if (strcmp(op, "bz") != 0 && strcmp(op, "bo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args) {
         len += strlen(str);
     }
     if (in_char && args.concat_chars) {

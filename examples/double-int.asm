@@ -11,7 +11,7 @@ main:
     lea r1, @msg2
     int 8
     int 40
-    mul r0, 2
+    add r0, r0
     mov r2, r0
     lea r0, @msg2
     lea r1, @main

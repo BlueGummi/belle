@@ -30,8 +30,8 @@ void *process_instructions(void *arg, char *filename) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             switch (instruction >> 12) {
             case JMP_OP:
-            case JO_OP:
-            case JZ_OP:
+            case BO_OP:
+            case BZ_OP:
             case RET_OP:
                 if (instruction >> 12 == RET_OP && (instruction & 0xfff) == 0)
                     break;
@@ -111,8 +111,8 @@ char *match_opcode(Instruction *s) {
     case ADD_OP:
         return "add";
 
-    case JO_OP:
-        return "jo";
+    case BO_OP:
+        return "bo";
 
     case POP_OP:
         return "pop";
@@ -132,14 +132,14 @@ char *match_opcode(Instruction *s) {
     case JMP_OP:
         return "jmp";
 
-    case JZ_OP:
-        return "jz";
+    case BZ_OP:
+        return "bz";
 
     case CMP_OP:
         return "cmp";
 
-    case MUL_OP:
-        return "mul";
+    case NAND_OP:
+        return "nand";
 
     case PUSH_OP:
         return "push";

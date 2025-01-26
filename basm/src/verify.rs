@@ -45,8 +45,8 @@ pub fn verify(
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     let instructions = [
-        "ADD", "HLT", "JO", "POP", "DIV", "RET", "LD", "ST", "JMP", "JZ", "PUSH", "CMP", "MUL",
-        "INT", "MOV", "LEA", "JE", "JNE", "JNZ", "JNO", "JG", "JL",
+        "ADD", "HLT", "BO", "POP", "DIV", "RET", "LD", "ST", "JMP", "BZ", "PUSH", "CMP", "NAND",
+        "INT", "MOV", "LEA", "BE", "BNE", "BNZ", "BNO", "BG", "BL",
     ];
     let raw_token = ins.get_raw().to_uppercase();
 
@@ -85,7 +85,7 @@ fn check_instruction(
             only_two(arg1, arg2, raw_token, line_num).and_then(|_| mov_args(arg1, arg2, line_num))
         }
         "INT" => one_none(arg1, arg2, raw_token, line_num).and_then(|_| int_args(arg1, line_num)),
-        raw_token if raw_token.starts_with('j') => {
+        raw_token if raw_token.starts_with('j') || raw_token.starts_with('b') => {
             only_one(arg1, arg2, raw_token, line_num).and_then(|_| jump_args(arg1, line_num))
         }
         "PUSH" | "POP" => {
@@ -255,7 +255,8 @@ fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String
     {
         return Err((
             line_num,
-            "Jump requires DEST to be a Register pointer, Memory address, or SRCall".to_string(),
+            "Branch/jump requires DEST to be a Register pointer, Memory address, or SRCall"
+                .to_string(),
         ));
     }
     match arg1 {
