@@ -146,24 +146,24 @@ void print_header(char *filename) {
     get_last_modified_date(filename, fdate, sizeof(fdate));
     if (!args.only_code) {
         PRINT_FILENAME(args.colors,
-                       "╭────────────────────────────────┬───────────────────────╮\n"
-                       "│ %sfile%s: %s%-24s%s │ %ssize%s: %s%-15s%s │\n"
-                       "├────────────────────────────────┴────┬──────────────────╯\n"
-                       "│ %smodified%s: %s%-25s%s │\n",
+                       "╭──────────────────────────────────────────────────╮\n"
+                       "│ %sfile%s: %s%-42s%s │\n"
+                       "├───────────────────────────────┬──────────────────┤\n"
+                       "│ %smodified%s: %s%-19s%s │ %ssize%s: %s%-10s%s │\n",
                        filename,
-                       fsize,
                        fdate,
-                       ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET);
+                       fsize,
+                       ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET);
 
         if (!args.binary) {
             PRINT_HEADER(args.colors,
-                         "├──────────────┬───────┬─────────────┬╯\n"
+                         "├──────────────┬───────┬────────┴────┬─────────────╯\n"
                          "│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n"
                          "├──────────────┼───────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
         } else {
             PRINT_HEADER(args.colors,
-                         "├──────────────┬──────────────────────┴───┬─────────────╮\n"
+                         "├──────────────┬────────────────┴─────────┬────────┴────╮\n"
                          "│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n"
                          "├──────────────┼──────────────────────────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
