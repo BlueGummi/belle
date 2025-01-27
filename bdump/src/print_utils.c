@@ -45,9 +45,16 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
 
     if (two_reg_args) {
         print_two_reg_args(ins, colors); // add, mov, div, etc.
-    } else if (strcmp(op, "bz") == 0 || strcmp(op, "bo") == 0 || strcmp(op, "jmp") == 0) {
+        goto finish;
+    }
+
+    switch (ins->opcode) {
+    case BO_OP:
+    case BZ_OP:
+    case JMP_OP:
         print_jump_instruction(ins, colors);
-    } else if (strcmp(op, "ret") == 0) {
+        break;
+    case RET_OP:
         if ((ins->full_ins & 0xfff) == 0) {
             if (colors) {
                 PRINTF("%sret%s", ANSI_BLUE, ANSI_RESET);
@@ -73,16 +80,20 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
             }
             print_jump_instruction(ins, colors);
         }
-    } else if (strcmp(op, "int") == 0) {
+        break;
+    case INT_OP:
         if (colors) {
             PRINTF(FORMAT_STRING_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
         } else {
             PRINTF(FORMAT_STRING, ins->source);
         }
         snprintf(str, sizeof(str), FORMAT_STRING, ins->source);
-    } else if (strcmp(op, "hlt") == 0) {
+        break;
+    case HLT_OP:
         print_hlt_instruction(ins, colors);
-    } else if (strcmp(op, "ld") == 0 || strcmp(op, "lea") == 0) {
+        break;
+    case LD_OP:
+    case LEA_OP:
         if (colors) {
             PRINTF("%sr%d%s, ", ANSI_YELLOW, ins->destination & 7, ANSI_RESET);
         } else {
@@ -98,7 +109,8 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         char tempstr[30];
         snprintf(tempstr, sizeof(tempstr), FORMAT_STRING_MEM, ins->source);
         len += strlen(tempstr);
-    } else if (strcmp(op, "st") == 0) {
+        break;
+    case ST_OP:
         if (ins->destination >> 2 == 1) {
             if (colors) {
                 PRINTF("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0x380) >> 7,
@@ -119,7 +131,9 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
             }
             snprintf(str, sizeof(str), FORMAT_STRING_ST, ins->destination, ins->source);
         }
-    } else if (strcmp(op, "push") == 0 || strcmp(op, "pop") == 0) {
+        break;
+    case PUSH_OP:
+    case POP_OP:
         if ((ins->type == 0 && strcmp(op, "push") == 0)) {
             if (colors) {
                 PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
@@ -152,9 +166,11 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
                     snprintf(str, sizeof(str), "r%d", ins->source & 7);
                 }
             }
-        } // Push
-    } // push + pop
+        } // push + pop
+        break;
+    }
     //
+finish:
     if (strcmp(op, "bz") != 0 && strcmp(op, "bo") != 0 && strcmp(op, "jmp") != 0 && !two_reg_args) {
         len += strlen(str);
     }

@@ -552,4 +552,3 @@ fn bg_jump() {
     test_instruction!(bcpu, bg, "$120");
     assert_eq!(bcpu.pc, 120);
 }
-

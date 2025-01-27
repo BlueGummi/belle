@@ -88,7 +88,7 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
             break;
         }
         if (is_directive) {
-            PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", "XX XX");
+            PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", "XX XX  ");
             break;
         }
         char tmpstr[5];
@@ -107,22 +107,12 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
             PRINTF("  ");
         }
         if (in_char && args.concat_chars) {
-            PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", "  ... ");
-            PRINTF("│ ");
+            PRINTF(" │ ");
             return;
         }
-#ifdef _WIN32
-        snprintf(tmpstr, sizeof(tmpstr), "%*llu", 5, lineclone);
-#else
-        snprintf(tmpstr, sizeof(tmpstr), "%*lu", 5, lineclone);
-#endif
-        PRINT_COLOR_AND_VALUE(ANSI_GREEN, "%s", tmpstr);
-        PRINTF("%s ", ANSI_RESET);
-    } else {
-        PRINT_COLOR_AND_VALUE(ANSI_RED, "%s", "  XXXXX ");
     }
 
-    PRINTF("│ ");
+    PRINTF(" │ ");
 }
 
 #define PRINT_HEADER(colors, format, ...)       \
@@ -157,15 +147,15 @@ void print_header(char *filename) {
 
         if (!args.binary) {
             PRINT_HEADER(args.colors,
-                         "├──────────────┬───────┬────────┴────┬─────────────╯\n"
-                         "│   %saddress%s    │  %sbin%s  │ %sinstruction%s │\n"
-                         "├──────────────┼───────┼─────────────╯\n",
+                         "├─────────┬───────┬─────────────┼──────────────────╯\n"
+                         "│ %saddress%s │  %sbin%s  │ %sinstruction%s │\n"
+                         "├─────────┼───────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
         } else {
             PRINT_HEADER(args.colors,
-                         "├──────────────┬────────────────┴─────────┬────────┴────╮\n"
-                         "│   %saddress%s    │          %sbinary%s          │ %sinstruction%s │\n"
-                         "├──────────────┼──────────────────────────┼─────────────╯\n",
+                         "├─────────┬─────────────────────┴────┬─────────────┤\n"
+                         "│ %saddress%s │          %sbinary%s          │ %sinstruction%s │\n"
+                         "├─────────┼──────────────────────────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
         }
     }
@@ -173,9 +163,9 @@ void print_header(char *filename) {
 void print_footer(void) {
     if (!args.only_code) {
         if (!args.binary) {
-            PRINTF("╰──────────────┴───────╯\n");
+            PRINTF("╰─────────┴───────╯\n");
         } else {
-            PRINTF("╰──────────────┴──────────────────────────╯\n");
+            PRINTF("╰─────────┴──────────────────────────╯\n");
         }
     }
 }

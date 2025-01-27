@@ -24,9 +24,6 @@ pub enum Argument {
     Literal(i16),
     RegPtr(i16),
     MemPtr(i16),
-    SR(i16),
-    Flag(i16),
-    Nothing,
 }
 
 pub enum Instruction {
@@ -56,13 +53,10 @@ impl fmt::Display for Argument {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Argument::Register(val) => write!(f, "r{val}"),
-            Argument::MemAddr(val) => write!(f, "[{val}]"),
+            Argument::MemAddr(val) => write!(f, "[0x{val:X}]"),
             Argument::Literal(val) => write!(f, "{val}"),
             Argument::RegPtr(val) => write!(f, "&r{val}"),
-            Argument::MemPtr(val) => write!(f, "&{val}"),
-            Argument::SR(val) => write!(f, "SR({val})"),
-            Argument::Flag(val) => write!(f, "Flag({val})"),
-            Argument::Nothing => write!(f, "Nothing"),
+            Argument::MemPtr(val) => write!(f, "&0x{val:X}"),
         }
     }
 }
@@ -199,11 +193,6 @@ impl CPU {
                 }
                 Ok(self.memory[*n as usize].unwrap() as f32)
             }
-            _ => unreachable!(
-                "Argument types are invalid on line {} at file {} (how did you get here?)",
-                line!(),
-                file!()
-            ),
         }
     }
 

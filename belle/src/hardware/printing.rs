@@ -210,7 +210,7 @@ impl fmt::Display for CPU {
                     let mut temp = CPU::new();
                     temp.ir = *value as i16;
                     let displayed = format!(
-                        "│ {:^6}  │ {}",
+                        "│ 0x{:X^4}  │ {}",
                         index.to_string().magenta(),
                         temp.decode_instruction().to_string().green()
                     );
@@ -358,7 +358,7 @@ impl CPU {
                 let mut temp = CPU::new();
                 temp.ir = *value as i16;
                 let displayed = format!(
-                    "│ {:^6}  │ {}",
+                    "│ 0x{:X^4}  │ {}",
                     index.to_string().magenta(),
                     temp.decode_instruction().to_string().green()
                 );

@@ -119,10 +119,10 @@ Color get_color(int index);
 char *color_to_ansi(Color color);
 void get_file_size(const char *filename, char *size_str, size_t size_str_len);
 #endif
-#define FORMAT_STRING_MEMPTR (args.hex_operands ? "&0x%X" : "&%d")
-#define FORMAT_STRING_MEMPTR_COLORED (args.hex_operands ? "&%s0x%X%s" : "&%s%d%s")
-#define FORMAT_STRING_MEM_COLORED (args.hex_operands ? "[%s0x%X%s]" : "[%s%d%s]")
-#define FORMAT_STRING_MEM (args.hex_operands ? "[0x%X]" : "[%d]")
+#define FORMAT_STRING_MEMPTR "&0x%X"
+#define FORMAT_STRING_MEMPTR_COLORED "&%s0x%X%s"
+#define FORMAT_STRING_MEM_COLORED "[%s0x%X%s]"
+#define FORMAT_STRING_MEM "[0x%X]"
 #define FORMAT_STRING_COLORED (args.hex_operands ? "%s0x%X%s" : "%s%d%s")
 #define FORMAT_STRING (args.hex_operands ? "0x%X" : "%d")
 #define FORMAT_STRING_SIGNED (args.hex_operands ? "0x%X" : "-%d")
@@ -130,18 +130,18 @@ void get_file_size(const char *filename, char *size_str, size_t size_str_len);
 #define FORMAT_STRING_WORD_COLORED (args.hex_operands ? "%s.word%s %s0x%X%s" : "%s.word%s %s%d%s")
 #define FORMAT_STRING_WORD (args.hex_operands ? ".word 0x%X" : ".word %d")
 
-#define FORMAT_STRING_START (args.hex_operands ? ".start [0x%X]" : ".start [%d]")
-#define FORMAT_STRING_START_COLORED (args.hex_operands ? "%s.start%s [%s0x%X%s]" : "%s.start%s [%s%d%s]")
-#define FORMAT_STRING_SSP (args.hex_operands ? ".ssp [0x%X]" : ".ssp [%d]")
-#define FORMAT_STRING_SBP (args.hex_operands ? ".sbp [0x%X]" : ".sbp [%d]")
-#define FORMAT_STRING_SSP_COLORED (args.hex_operands ? "%s.ssp%s [%s0x%X%s]" : "%s.ssp%s [%s%d%s]")
-#define FORMAT_STRING_SBP_COLORED (args.hex_operands ? "%s.sbp%s [%s0x%X%s]" : "%s.sbp%s [%s%d%s]")
+#define FORMAT_STRING_START ".start [0x%X]"
+#define FORMAT_STRING_START_COLORED "%s.start%s [%s0x%X%s]"
+#define FORMAT_STRING_SSP ".ssp [0x%X]"
+#define FORMAT_STRING_SBP ".sbp [0x%X]"
+#define FORMAT_STRING_SSP_COLORED "%s.ssp%s [%s0x%X%s]"
+#define FORMAT_STRING_SBP_COLORED "%s.sbp%s [%s0x%X%s]"
 
 #define FORMAT_STRING_ASCII_COLORED (args.hex_operands ? "%s%s%s (%s0x%X%s)" : "%s%s%s (%s%d%s)")
 #define FORMAT_STRING_ASCII (args.hex_operands ? "%s (0x%X)" : "%s (%d)")
 
-#define FORMAT_STRING_ST_COLORED (args.hex_operands ? "[%s0x%X%s], %sr%d%s" : "[%s%d%s], %sr%d%s")
-#define FORMAT_STRING_ST (args.hex_operands ? "[0x%X], r%d" : "[%d], r%d")
+#define FORMAT_STRING_ST_COLORED "[%s0x%X%s], %sr%d%s"
+#define FORMAT_STRING_ST "[0x%X], r%d"
 #define ANSI_VARIED (args.hex_operands ? ANSI_CYAN : ANSI_GREEN)
 #define FORMAT_STRING_COLORED_SIGNED (args.hex_operands ? "%s0x%X%s" : "-%s%d%s")
 #define POSSIBLE_ANSI_BOLD (args.colors ? ANSI_BOLD : "")
