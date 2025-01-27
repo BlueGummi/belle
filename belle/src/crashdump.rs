@@ -34,7 +34,6 @@ pub fn write_crash(cpu: &CPU) {
             write_to_file(&format!("  Sign flag                : {}", cpu.sflag));
             write_to_file(&format!("  Stack pointer            : {}", cpu.sp));
             write_to_file(&format!("  Base pointer             : {}", cpu.bp));
-            write_to_file(&format!("  Instruction pointer      : {}", cpu.ip));
             write_to_file(&format!(
                 "  Disassembled Instruction : {}",
                 cpu.decode_instruction()
@@ -43,7 +42,7 @@ pub fn write_crash(cpu: &CPU) {
             write_to_file("\n------ MEMORY ------\n");
             for (index, value) in cpu.memory.iter().enumerate() {
                 if cpu.memory[index].is_some() {
-                    if index == cpu.ip as usize {
+                    if index == cpu.pc as usize {
                         write_to_file(&format!(
                             "Address {index:^6}: {:016b}: {} <---- CRASH OCCURRED HERE",
                             value.unwrap(),

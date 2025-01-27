@@ -53,10 +53,10 @@ impl fmt::Display for Argument {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Argument::Register(val) => write!(f, "r{val}"),
-            Argument::MemAddr(val) => write!(f, "[0x{val:X}]"),
+            Argument::MemAddr(val) => write!(f, "[x{val:X}]"),
             Argument::Literal(val) => write!(f, "{val}"),
             Argument::RegPtr(val) => write!(f, "&r{val}"),
-            Argument::MemPtr(val) => write!(f, "&0x{val:X}"),
+            Argument::MemPtr(val) => write!(f, "&x{val:X}"),
         }
     }
 }

@@ -29,7 +29,6 @@ pub struct ModCPU {
     pub sflag: bool,
     pub sp: u16,
     pub bp: u16,
-    pub ip: u16,
 }
 
 impl ModCPU {
@@ -55,7 +54,6 @@ impl ModCPU {
             sflag: origin.sflag,
             sp: origin.sp,
             bp: origin.bp,
-            ip: origin.ip,
         }
     }
 }
@@ -104,8 +102,6 @@ impl fmt::Display for ModCPU {
         write!(f, " {:^6} |", self.sp)?;
         write!(f, " {}:", "bp".yellow())?;
         write!(f, " {:^6} |", self.bp)?;
-        write!(f, " {}:", "ip".yellow())?;
-        writeln!(f, " {:^6} |", self.ip)?;
 
         write!(
             f,

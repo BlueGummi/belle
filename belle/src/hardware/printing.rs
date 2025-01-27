@@ -19,17 +19,15 @@ impl fmt::Display for CPU {
             let r5 = self.uint_reg[1].to_string().magenta();
             let r6 = self.float_reg[0].to_string().magenta();
             let r7 = self.float_reg[1].to_string().magenta();
-            let zf = if self.zflag { "zf".green() } else { "zf".red() };
+            let z = if self.zflag { "z".green() } else { "z".red() };
 
-            let of = if self.oflag { "of".green() } else { "of".red() };
+            let o = if self.oflag { "o".green() } else { "o".red() };
 
-            let sf = if self.sflag { "sf".green() } else { "sf".red() };
-            let pc = self.pc.to_string().blue();
-            let sp = self.sp.to_string().cyan();
-            let bp = self.bp.to_string().cyan();
-            let reg = "REG:".black().bold().on_white();
-            let flag = "FLAG:".red().bold().on_white();
-            write!(f, "│ {:14} │ {reg} │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^8} │ r7: {r7:^8} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ {flag} │ {zf} │ {of} │ {sf} │", self.decode_instruction().to_string().to_lowercase().bright_blue().bold())?;
+            let s = if self.sflag { "s".green() } else { "s".red() };
+            let pc = format!("x{:X}", self.pc).blue();
+            let sp = format!("x{:X}", self.sp).cyan();
+            let bp = format!("x{:X}", self.bp).cyan();
+            write!(f, "│ {:14} │ r0: {r0:^5} │ r1: {r1:^5} │ r2: {r2:^5} │ r3: {r3:^5} │ r4: {r4:^5} │ r5: {r5:^5} │ r6: {r6:^5} │ r7: {r7:^5} │ sp: {sp:^5} │ bp: {bp:^5} │ pc: {pc:^5} │ {z}{o}{s} │", self.decode_instruction().to_string().to_lowercase().bright_blue().bold())?;
             return Ok(());
         }
         let times = 12;
@@ -123,18 +121,16 @@ impl fmt::Display for CPU {
 
         let midpart = format!("├{}┼{}┼{}┼{}┬{}┼{}┤\n", line, line, line, line, line, line);
         let output = format!(
-            "{}: {:^6} │ {}: {:016b}    │ {}: {:^6} │\n{}│ {}: {:^6} │ {}: {:^6}",
+            "{}: 0x{} │ {}: {:016b}    │ {}: 0x{} │\n{}│ {}: 0x{} │           ",
             "pc".truecolor(252, 244, 52),
-            self.pc.to_string().bold(),
+            format!("{:4X}", self.pc).bold(),
             "ir".truecolor(252, 244, 52),
             self.ir,
             "sp".truecolor(156, 89, 209),
-            self.sp.to_string().bold(),
+            format!("{:4X}", self.sp).bold(),
             midpart,
             "bp".truecolor(156, 89, 209),
-            self.bp.to_string().bold(),
-            "ip".truecolor(156, 89, 209),
-            self.ip.to_string().bold(),
+            format!("{:4X}", self.bp).bold(),
         );
 
         write!(f, "{} │", output)?;

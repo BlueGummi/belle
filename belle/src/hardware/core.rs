@@ -24,7 +24,6 @@ pub struct CPU {
     pub hlt_on_overflow: bool,
     pub sp: u16,
     pub bp: u16,
-    pub ip: u16,
     pub backward_stack: bool,
     pub max_clk: Option<usize>,
     pub hit_max_clk: bool,
@@ -63,7 +62,6 @@ impl CPU {
             hlt_on_overflow: false,
             sp: 99,
             bp: 99,
-            ip: 0,
             backward_stack: false,
             max_clk: None,
             hit_max_clk: false,
@@ -100,7 +98,6 @@ impl CPU {
 
             match self.memory[self.pc as usize] {
                 Some(instruction) => {
-                    self.ip = self.pc;
                     self.ir = instruction as i16;
                 }
                 None => {
