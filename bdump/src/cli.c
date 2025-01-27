@@ -45,7 +45,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                     opts.no_jump = 1;
                 } else if (strcmp(argv[i], "--concat-chars") == 0) {
                     opts.concat_chars = 1;
-                } else {
+                } else if (strcmp(argv[i], "--version") == 0) {
+		    PRINTF("bdump 0.2.0\n");
+		    exit(EXIT_SUCCESS);
+		} else {
                     fputs("Error: Unknown option ", stderr);
                     fputs(argv[i], stderr);
                     fputc('\n', stderr);
@@ -78,6 +81,10 @@ CLI parse_arguments(int argc, char *argv[]) {
                     case 'C':
                         opts.concat_chars = 1;
                         break;
+		    case 'V':
+		    	PRINTF("bdump 0.2.0\n");
+		    	exit(EXIT_SUCCESS);
+			break;
                     default:
                         fputs("Error: Unknown option -", stderr);
                         fputc(argv[i][j], stderr);
