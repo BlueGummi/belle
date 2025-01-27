@@ -121,16 +121,16 @@ impl fmt::Display for CPU {
 
         let midpart = format!("├{}┼{}┼{}┼{}┬{}┼{}┤\n", line, line, line, line, line, line);
         let output = format!(
-            "{}: 0x{} │ {}: {:016b}    │ {}: 0x{} │\n{}│ {}: 0x{} │           ",
+            "{}: {:^4}   │ {}: {:016b}    │ {}: {:^4}   │\n{}│ {}: {:^4}   │           ",
             "pc".truecolor(252, 244, 52),
-            format!("{:4X}", self.pc).bold(),
+            format!("x{:X}", self.pc).bold(),
             "ir".truecolor(252, 244, 52),
             self.ir,
             "sp".truecolor(156, 89, 209),
-            format!("{:4X}", self.sp).bold(),
+            format!("x{:X}", self.sp).bold(),
             midpart,
             "bp".truecolor(156, 89, 209),
-            format!("{:4X}", self.bp).bold(),
+            format!("x{:X}", self.bp).bold(),
         );
 
         write!(f, "{} │", output)?;
@@ -206,8 +206,8 @@ impl fmt::Display for CPU {
                     let mut temp = CPU::new();
                     temp.ir = *value as i16;
                     let displayed = format!(
-                        "│ 0x{:X^4}  │ {}",
-                        index.to_string().magenta(),
+                        "│  {}  │ {}",
+                        format!("x{:04X}", index).magenta(),
                         temp.decode_instruction().to_string().green()
                     );
                     write!(f, "{displayed}")?;
@@ -295,24 +295,24 @@ impl fmt::Display for CPU {
                 } else if self.sp as usize == index && self.bp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}Stack and base pointer{}╸    │",
-                        index.to_string().magenta(),
+                        "│  {}  │    ╺{}Stack and base pointer{}╸    │",
+                        format!("x{:04X}", index).magenta(),
                         "─".repeat(18),
                         "─".repeat(17)
                     )?;
                 } else if self.sp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}────Stack pointer─────{}╸    │",
-                        index.to_string().magenta(),
+                        "│  {}  │    ╺{}────Stack pointer─────{}╸    │",
+                        format!("x{:04X}", index).magenta(),
                         "─".repeat(18),
                         "─".repeat(17)
                     )?;
                 } else if self.bp as usize == index {
                     writeln!(
                         f,
-                        "│ {:^6}  │    ╺{}─────Base pointer─────{}╸    │",
-                        index.to_string().magenta(),
+                        "│  {}  │    ╺{}─────Base pointer─────{}╸    │",
+                        format!("x{:04X}", index).magenta(),
                         "─".repeat(18),
                         "─".repeat(17)
                     )?;
@@ -354,8 +354,8 @@ impl CPU {
                 let mut temp = CPU::new();
                 temp.ir = *value as i16;
                 let displayed = format!(
-                    "│ 0x{:X^4}  │ {}",
-                    index.to_string().magenta(),
+                    "│  {}  │ {}",
+                    format!("x{:04X}", index).magenta(),
                     temp.decode_instruction().to_string().green()
                 );
                 print!("{displayed}");
@@ -439,22 +439,22 @@ impl CPU {
                 println!("│");
             } else if self.sp as usize == index && self.bp as usize == index {
                 println!(
-                    "│ {:^6}  │    ╺{}Stack and base pointer{}╸    │",
-                    index.to_string().magenta(),
+                    "│  {}  │    ╺{}Stack and base pointer{}╸    │",
+                    format!("x{:04X}", index).magenta(),
                     "─".repeat(18),
                     "─".repeat(17)
                 );
             } else if self.sp as usize == index {
                 println!(
-                    "│ {:^6}  │    ╺{}────Stack pointer─────{}╸    │",
-                    index.to_string().magenta(),
+                    "│  {}  │    ╺{}────Stack pointer─────{}╸    │",
+                    format!("x{:04X}", index).magenta(),
                     "─".repeat(18),
                     "─".repeat(17)
                 );
             } else if self.bp as usize == index {
                 println!(
-                    "│ {:^6}  │    ╺{}─────Base pointer─────{}╸    │",
-                    index.to_string().magenta(),
+                    "│  {}  │    ╺{}─────Base pointer─────{}╸    │",
+                    format!("x{:04X}", index).magenta(),
                     "─".repeat(18),
                     "─".repeat(17)
                 );
