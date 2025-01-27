@@ -21,8 +21,6 @@ const char *descriptions[] = {
 CLI parse_arguments(int argc, char *argv[]) {
     CLI opts = {0};
     opts.num_files = 0;
-    bool seen_color = false;
-
     opts.colors = 1;
     int valid_count = sizeof(valid_options) / sizeof(valid_options[0]);
 
@@ -33,7 +31,6 @@ CLI parse_arguments(int argc, char *argv[]) {
         } else if (argv[i][0] == '-') {
             if (argv[i][1] == '-') {
                 if (strcmp(argv[i], "--colorless") == 0) {
-                    seen_color = true;
                     opts.colors = 0;
                 } else if (strcmp(argv[i], "--binary") == 0) {
                     opts.binary = 1;
@@ -59,7 +56,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                 for (int j = 1; argv[i][j] != '\0'; j++) {
                     switch (argv[i][j]) {
                     case 'c':
-                        seen_color = true;
                         opts.colors = 0;
                         break;
                     case 'b':
@@ -102,9 +98,6 @@ CLI parse_arguments(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-    }
-    if (!seen_color) {
-        opts.colors = 1;
     }
     return opts;
 }

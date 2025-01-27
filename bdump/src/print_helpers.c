@@ -71,7 +71,6 @@ print_str:
     } while (0)
 
 void print_instruction_header(size_t line, bool colors, bool is_directive) {
-    size_t lineclone = line;
     if (printed_addr && in_char && args.concat_chars)
         return;
     PRINTF("│ ");
@@ -100,7 +99,6 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
     }
 
     if (!is_directive) {
-        char tmpstr[20];
         if (likely_label) {
             PRINTF("%s ●", ANSI_RESET);
         } else {

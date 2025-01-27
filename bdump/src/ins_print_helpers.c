@@ -107,7 +107,8 @@ void print_jump_instruction(Instruction *ins, bool colors) {
 
 void print_hlt_instruction(Instruction *ins, bool colors) {
     char str[40];
-    if (ins->destination == 1) {
+    switch (ins->destination) {
+    case 1:
         if (colors) {
             PRINTF(FORMAT_STRING_START_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
@@ -115,7 +116,8 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
         snprintf(str, sizeof(str), FORMAT_STRING_START, ins->full_ins & 0x1ff);
         len += strlen(str);
-    } else if (ins->destination == 2) {
+        break;
+    case 2:
         if (colors) {
             PRINTF(FORMAT_STRING_SSP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
@@ -123,7 +125,8 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
         snprintf(str, sizeof(str), FORMAT_STRING_SSP, ins->full_ins & 0x1ff);
         len += strlen(str);
-    } else if (ins->destination == 3) {
+        break;
+    case 3:
         if (colors) {
             PRINTF(FORMAT_STRING_SBP_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins & 0x1ff, ANSI_RESET);
         } else {
@@ -131,67 +134,71 @@ void print_hlt_instruction(Instruction *ins, bool colors) {
         }
         snprintf(str, sizeof(str), FORMAT_STRING_SBP, ins->full_ins & 0x1ff);
         len += strlen(str);
-    } else if (ins->full_ins == 0) {
-        if (colors) {
-            PRINTF("%shlt%s", ANSI_BLUE, ANSI_RESET);
-        } else {
-            PRINTF("hlt");
-        }
-        len += 3;
-    } else {
-        if (args.concat_chars) {
-            char temp[10];
-            if (ins->full_ins == '\n') {
-                strcpy(temp, "\\n");
-            } else if (ins->full_ins == '\t') {
-                strcpy(temp, "\\t");
-            } else if (ins->full_ins == '\\') {
-                strcpy(temp, "\\\\");
-            } else if (ins->full_ins >= 32 && ins->full_ins < 127) {
-                temp[0] = (char) ins->full_ins;
-                temp[1] = '\0';
+        break;
+    default:
+        if (ins->full_ins == 0) {
+            if (colors) {
+                PRINTF("%shlt%s", ANSI_BLUE, ANSI_RESET);
             } else {
-                strcpy(temp, "?");
+                PRINTF("hlt");
             }
+            len += 3;
+        } else {
+            if (args.concat_chars) {
+                char temp[10];
+                if (ins->full_ins == '\n') {
+                    strcpy(temp, "\\n");
+                } else if (ins->full_ins == '\t') {
+                    strcpy(temp, "\\t");
+                } else if (ins->full_ins == '\\') {
+                    strcpy(temp, "\\\\");
+                } else if (ins->full_ins >= 32 && ins->full_ins < 127) {
+                    temp[0] = (char) ins->full_ins;
+                    temp[1] = '\0';
+                } else {
+                    strcpy(temp, "?");
+                }
 
-            strcat(global_str, temp);
-            return;
-        }
-        if (!args.only_code) {
-            if (colors) {
-                PRINTF(FORMAT_STRING_ASCII_COLORED, ANSI_BLUE,
-                       (ins->full_ins == '\n'                          ? "\\n"
-                        : ins->full_ins == '\t'                        ? "\\t"
-                        : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
-                                                                       : "???"),
-                       ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
-            } else {
-                PRINTF(FORMAT_STRING_ASCII,
-                       (ins->full_ins == '\n'                          ? "\\n"
-                        : ins->full_ins == '\t'                        ? "\\t"
-                        : ins->full_ins == '\\'                        ? "\\\\"
-                        : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
-                                                                       : "???"),
-                       ins->full_ins);
+                strcat(global_str, temp);
+                return;
             }
-            snprintf(str, sizeof(str), FORMAT_STRING_ASCII,
-                     (ins->full_ins == '\n'                          ? "\\n"
-                      : ins->full_ins == '\t'                        ? "\\t"
-                      : ins->full_ins == '\\'                        ? "\\\\"
-                      : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
-                                                                     : "???"),
-                     ins->full_ins);
-            len += strlen(str);
-        } else {
-            if (colors) {
-                PRINTF(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
+            if (!args.only_code) {
+                if (colors) {
+                    PRINTF(FORMAT_STRING_ASCII_COLORED, ANSI_BLUE,
+                           (ins->full_ins == '\n'                          ? "\\n"
+                            : ins->full_ins == '\t'                        ? "\\t"
+                            : ins->full_ins == '\\'                        ? "\\\\"
+                            : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
+                                                                           : "???"),
+                           ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
+                } else {
+                    PRINTF(FORMAT_STRING_ASCII,
+                           (ins->full_ins == '\n'                          ? "\\n"
+                            : ins->full_ins == '\t'                        ? "\\t"
+                            : ins->full_ins == '\\'                        ? "\\\\"
+                            : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
+                                                                           : "???"),
+                           ins->full_ins);
+                }
+                snprintf(str, sizeof(str), FORMAT_STRING_ASCII,
+                         (ins->full_ins == '\n'                          ? "\\n"
+                          : ins->full_ins == '\t'                        ? "\\t"
+                          : ins->full_ins == '\\'                        ? "\\\\"
+                          : (ins->full_ins >= 32 && ins->full_ins < 127) ? (char[]) {(char) ins->full_ins, '\0'}
+                                                                         : "???"),
+                         ins->full_ins);
+                len += strlen(str);
             } else {
-                PRINTF(FORMAT_STRING_WORD, ins->full_ins);
+                if (colors) {
+                    PRINTF(FORMAT_STRING_WORD_COLORED, ANSI_BLUE, ANSI_RESET, ANSI_VARIED, ins->full_ins, ANSI_RESET);
+                } else {
+                    PRINTF(FORMAT_STRING_WORD, ins->full_ins);
+                }
+                snprintf(str, sizeof(str), FORMAT_STRING_WORD, ins->full_ins);
+                len += strlen(str);
             }
-            snprintf(str, sizeof(str), FORMAT_STRING_WORD, ins->full_ins);
-            len += strlen(str);
         }
+        break;
     }
 }
 

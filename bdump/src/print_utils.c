@@ -5,9 +5,9 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     char *op = match_opcode(ins);
     char str[50] = "";
     int counter = 0;
-    if (((ins->full_ins & 0xff) != 0) && ((ins->full_ins & 0xff00) >> 8 == 0)) {
+    if (((ins->full_ins & 0xff) != 0) && ((ins->full_ins & 0xff00) >> 8 == 0)) { // check upper and lower 8 bits
         in_char = true;
-        if (((ins2->full_ins & 0xff) != 0) && ((ins2->full_ins & 0xff00) >> 8 == 0)) {
+        if (((ins2->full_ins & 0xff) != 0) && ((ins2->full_ins & 0xff00) >> 8 == 0)) { // next must be a character
             next_in_char = true;
         } else {
             next_in_char = false;
@@ -37,11 +37,10 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     }
 
     // Instruction printing begins here
-    if (strcmp(op, "ret") != 0 && strcmp(op, "hlt") != 0) {
+    if (ins->opcode != RET_OP && ins->opcode != HLT_OP) {
         print_operation(ins, op, colors);
     }
-    bool two_reg_args = (strcmp(op, "add") == 0 || strcmp(op, "div") == 0 || strcmp(op, "cmp") == 0 ||
-                         strcmp(op, "nand") == 0 || strcmp(op, "mov") == 0);
+    bool two_reg_args = ins->opcode == ADD_OP || ins->opcode == DIV_OP || ins->opcode == NAND_OP || ins->opcode == MOV_OP || ins->opcode == CMP_OP;
 
     if (two_reg_args) {
         print_two_reg_args(ins, colors); // add, mov, div, etc.
