@@ -1,6 +1,5 @@
 ASM_FILES := $(wildcard *.asm)
-EXECUTABLES := $(ASM_FILES:.asm=)
-
+EXECUTABLES := $(ASM_FILES:.asm=.bin)
 
 BASM_CMD := basm
 
@@ -12,7 +11,7 @@ endif
 
 all: clean $(EXECUTABLES)
 
-%: %.asm
+%.bin: %.asm
 	$(BASM_CMD) -o $@ $<
 
 clean:
