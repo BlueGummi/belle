@@ -28,11 +28,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         } else {
             likely_label = false;
         }
-        if (!is_directive(ins)) {
-            print_instruction_header(current_addr, colors, false);
-        } else {
-            print_instruction_header(current_addr, colors, true);
-        }
+        print_instruction_header(current_addr, colors, is_directive(ins));
         print_binary(ins->full_ins);
     }
 

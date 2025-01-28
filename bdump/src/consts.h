@@ -18,7 +18,7 @@
 #include <unistd.h>
 #endif
 
-#define BUFFER_SIZE 65536
+#define BUFFER_SIZE 65536*2
 #define THREAD_COUNT 4
 
 #define CHUNK_SIZE 1024
