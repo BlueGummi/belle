@@ -3,7 +3,7 @@ title: CPU specification
 author: BlueGummi
 ---
 
-The BELLE-ISA is a 16 bit ISA, with a CPU that contains **8 General Purpose Registers**, an **instruction register**, **instruction pointer**, **stack pointer**, and **base pointer**. The integer registers are all 16-bits wide, with 4 signed registers and 2 unsigned registers. There are also two floating point registers, which both are 32 bits wide. The BELLE-ISA also has CPU flags, to manage conditional branch and jump instructions.
+The BELLE-ISA is a 16 bit ISA, with a CPU that contains **8 General Purpose Registers**, an **instruction register**, **program counter**, **stack pointer**, and **base pointer**. The integer registers are all 16-bits wide, with 4 signed registers and 2 unsigned registers. There are also two floating point registers, which both are 32 bits wide. The BELLE-ISA also has CPU flags, to manage conditional branch and jump instructions.
 
 The BELLE-ISA has 5 addressing modes.
 
@@ -41,8 +41,8 @@ Can be used to set the base pointer to the value in register 4.
 
 There is also an instruction register, that can be somewhat indirectly altered by using jump instructions, however it is not possible to write or read to or from the instruction register.
 
-## Program counter and Instruction pointer
+## Program counter 
 
-The program counter (PC) and instruction pointer (IP) are two vital parts of any CPU that allow the machine to determine the location of the next instruction in memory. The program counter contains the memory address of the next instruction, whilst the instruction pointer holds the memory address of the current instruction being executed.
+The program counter (PC) is a vital part of any CPU that allow the machine to determine the location of the next instruction in memory. The program counter contains the memory address of the next instruction.
 
-After each clock cycle, the program counter and instruction pointer are both changed depending on the current instruction. If the current instruction was a `RET` or jump instruction, the program counter is altered to point to the location of the jump or return instruction.
+After each clock cycle, the program counter is changed depending on the current instruction. If the current instruction was a `RET` or jump instruction, the program counter is altered to point to the location of the jump or return instruction.
