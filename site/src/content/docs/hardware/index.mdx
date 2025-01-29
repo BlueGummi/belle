@@ -25,6 +25,8 @@ The next two registers (4-5) are unsigned 16 bit integer registers. This means t
 
 The last two registers (6-7) are the 32-bit floating point registers.
 
+The stack pointer and program counter can be accessed with r9 and r8, respectively. They can only be used in certain instructions, and can only be changed with `POP`, and can be read with most instructions, excluding `ST` and `LD`.
+
 The BELLE-ISA also has a stack pointer and base pointer, which determine the location of the call stack. These registers cannot be directly accessed with any instruction, but
 
 ```

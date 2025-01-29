@@ -18,7 +18,7 @@ static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(0));
 pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, String)> {
     match arg {
         Some(Token::Register(num)) => {
-            if *num > 7 {
+            if *num > 9 {
                 return Err((line_num, "Invalid register number".to_string()));
             }
             Ok(*num)

@@ -199,7 +199,7 @@ impl<'a> Lexer<'a> {
         if pointer.len() > 2 {
             self.position += 1;
             if let Ok(reg) = pointer.trim()[2..].parse::<i16>() {
-                if !(0..=7).contains(&reg) {
+                if !(0..=9).contains(&reg) {
                     return Err(Error::InvalidSyntax(
                         "invalid register pointer number",
                         self.line_number,
@@ -283,7 +283,7 @@ impl<'a> Lexer<'a> {
 
         if reg.len() > 1 {
             if let Ok(reg_num) = reg[1..].parse::<i16>() {
-                if !(0..=7).contains(&reg_num) {
+                if !(0..=9).contains(&reg_num) {
                     return Err(Error::InvalidSyntax(
                         "invalid register number",
                         self.line_number,

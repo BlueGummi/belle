@@ -47,8 +47,8 @@ void print_two_reg_args(Instruction *ins) {
 
     case 3: // register indirect
     {
-        PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
-        snprintf(str, sizeof(str), "&r%d", ins->source & 7);
+        PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 0xF, ANSI_RESET);
+        snprintf(str, sizeof(str), "&r%d", ins->source & 0xF);
     } break;
 
     default:
@@ -61,8 +61,8 @@ void print_two_reg_args(Instruction *ins) {
 void print_jump_instruction(Instruction *ins) {
     char str[20];
     if (((ins->destination >> 1) & 1) == 1) {
-        PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
-        snprintf(str, sizeof(str), "&r%d", ins->source & 7);
+        PRINTF("%s&r%d%s", ANSI_YELLOW, ins->source & 0xF, ANSI_RESET);
+        snprintf(str, sizeof(str), "&r%d", ins->source & 0xF);
         len += strlen(str);
         return;
     }

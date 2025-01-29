@@ -72,7 +72,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         break;
     case LD_OP:
     case LEA_OP:
-        PRINTF("%sr%d%s, ", ANSI_YELLOW, ins->destination & 7, ANSI_RESET);
+        PRINTF("%sr%d%s, ", ANSI_YELLOW, ins->destination & 0xF, ANSI_RESET);
         snprintf(str, sizeof(str), "r%d, ", ins->destination);
 
         PRINTF(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 511, ANSI_RESET);
@@ -83,7 +83,7 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     case ST_OP:
         if (ins->destination >> 2 == 1) {
             PRINTF("%s&r%d%s, %sr%d%s", ANSI_YELLOW, (ins->full_ins & 0x380) >> 7,
-                   ANSI_RESET, ANSI_YELLOW, ins->source & 7, ANSI_RESET);
+                   ANSI_RESET, ANSI_YELLOW, ins->source & 0xF, ANSI_RESET);
             snprintf(str, sizeof(str), "&r%d, r%d", (ins->full_ins & 0x380) >> 7, ins->source & 0x7);
         } else {
             ins->source &= 0x7;
@@ -96,8 +96,8 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     case PUSH_OP:
     case POP_OP:
         if ((ins->type == 0 && strcmp(op, "push") == 0)) {
-            PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
-            snprintf(str, sizeof(str), "r%d", ins->source & 7);
+            PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 0xF, ANSI_RESET);
+            snprintf(str, sizeof(str), "r%d", ins->source & 0xF);
         } else {
             if (strcmp(op, "push") == 0) {
                 PRINTF(FORMAT_STRING_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
@@ -107,8 +107,8 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
                     PRINTF(FORMAT_STRING_MEM_COLORED, ANSI_VARIED, ins->full_ins & 2047, ANSI_RESET);
                     snprintf(str, sizeof(str), FORMAT_STRING_MEM, ins->full_ins & 2047);
                 } else {
-                    PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 7, ANSI_RESET);
-                    snprintf(str, sizeof(str), "r%d", ins->source & 7);
+                    PRINTF("%sr%d%s", ANSI_YELLOW, ins->source & 0xF, ANSI_RESET);
+                    snprintf(str, sizeof(str), "r%d", ins->source & 0xF);
                 }
             }
         } // push + pop

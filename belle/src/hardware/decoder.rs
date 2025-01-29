@@ -102,6 +102,8 @@ impl CPU {
                 5 => Ok(self.uint_reg[1] as f32),
                 6 => Ok(self.float_reg[0]),
                 7 => Ok(self.float_reg[1]),
+                8 => Ok(self.pc as f32),
+                9 => Ok(self.sp as f32),
                 n if *n > 3 => {
                     self.err = true;
                     Err(UnrecoverableError::IllegalInstruction(
@@ -150,6 +152,8 @@ impl CPU {
                     5 => self.uint_reg[1] as f32,
                     6 => self.float_reg[0],
                     7 => self.float_reg[1],
+                    8 => self.pc as f32,
+                    9 => self.sp as f32,
                     n if *n > 3 => {
                         self.err = true;
                         self.running = false;
@@ -217,7 +221,7 @@ impl CPU {
                 if it_is_bouncy {
                     if indirect_bounce {
                         ins_type = 4;
-                        self.ir & 0b111
+                        self.ir & 0b1111
                     } else {
                         self.ir & 0b11_1111_1111
                     }
@@ -231,7 +235,7 @@ impl CPU {
                 if it_is_bouncy {
                     if indirect_bounce {
                         ins_type = 4;
-                        self.ir & 0b111
+                        self.ir & 0b1111
                     } else {
                         self.ir & 0b11_1111_1111
                     }
@@ -249,13 +253,13 @@ impl CPU {
         };
 
         if let RegPtr(value) = part {
-            part = RegPtr(value & 0b111);
+            part = RegPtr(value & 0b1111);
         }
 
         if let MemPtr(value) = part {
             part = MemPtr(value & 0b111_1111);
         }
-        let invert = ((self.ir & 0b0000_1000_0000_0000) >> 11) == 1;
+        let invert = ((self.ir & 0b1000_0000_0000) >> 11) == 1;
         // println!("{:04b}", opcode);
         match opcode {
             HLT_OP => HLT,

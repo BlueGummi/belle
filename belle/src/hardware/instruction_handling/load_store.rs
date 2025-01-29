@@ -43,14 +43,14 @@ impl CPU {
             match *n {
                 4 => self.uint_reg[0] = source as u16,
                 5 => self.uint_reg[1] = source as u16,
-                6 => self.float_reg[0] = source as u16 as i16 as f32,
-                7 => self.float_reg[1] = source as u16 as i16 as f32,
+                6 => self.float_reg[0] = source as f32,
+                7 => self.float_reg[1] = source as f32,
                 n if n > 3 => return Err(self.generate_invalid_register()),
                 _ => {
                     if let Err(e) = self.check_overflow(source as i64, *n as u16) {
                         eprint!("{e}");
                     }
-                    self.int_reg[*n as usize] = source as u16 as i16;
+                    self.int_reg[*n as usize] = source as i16;
                 }
             }
             if let Err(e) = self.check_overflow(source as i64, *n as u16) {

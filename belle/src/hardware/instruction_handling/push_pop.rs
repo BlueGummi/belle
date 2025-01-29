@@ -52,6 +52,8 @@ impl CPU {
                     5 => self.uint_reg[1] = v,
                     6 => self.float_reg[0] = v as f32,
                     7 => self.float_reg[1] = v as f32,
+                    8 => self.pc = v,
+                    9 => self.sp = v,
                     n if n > 3 => return Err(self.generate_invalid_register()),
                     _ => self.int_reg[*n as usize] = v as i16,
                 }
