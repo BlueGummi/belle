@@ -97,7 +97,7 @@ void print_instruction_header(size_t line, bool is_directive) {
     PRINTF(format, __VA_ARGS__);
 
 #define PRINT_FILENAME(colors, format, filename, filesize, fdate, ...) \
-    PRINTF(format, "", "", "", filename, "", "", "", "", filesize, "", "", "", "", fdate, "");
+    PRINTF(format, __VA_ARGS__);
 
 void print_header(char *filename) {
     char fsize[15];
