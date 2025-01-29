@@ -94,14 +94,14 @@ void print_binary(int16_t num);
 void print_instruction(Instruction *s, Instruction *d, JumpVector *jumpsHere);
 void print_help(char *bin);
 void *process_instructions(void *arg, char *filename);
-void print_jump_instruction(Instruction *ins, bool colors);
-void print_hlt_instruction(Instruction *ins, bool colors);
+void print_jump_instruction(Instruction *ins);
+void print_hlt_instruction(Instruction *ins);
 bool is_directive(Instruction *ins);
-void print_two_reg_args(Instruction *ins, bool colors);
+void print_two_reg_args(Instruction *ins);
 void jump_map_insert(HashMap *map, size_t key, Jump value);
 Jump *jump_map_get(HashMap *map, size_t key);
 void free_jump_vector(JumpVector *vector);
-void print_operation(Instruction *ins, char *op, bool colors);
+void print_operation(Instruction *ins, char *op);
 void init_jump_vector(JumpVector *vector);
 JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address);
 void add_jump(JumpVector *vector, Jump jump);
@@ -109,7 +109,7 @@ void free_map(HashMap *map);
 unsigned int hash(size_t key);
 char *match_opcode(Instruction *s);
 int main(int argc, char *argv[]);
-void print_instruction_header(size_t line, bool colors, bool is_directive);
+void print_instruction_header(size_t line, bool is_directive);
 HashMap *jump_map_create(void);
 void print_header(char *filename);
 void print_footer(void);
@@ -147,3 +147,35 @@ void get_file_size(const char *filename, char *size_str, size_t size_str_len);
 #define POSSIBLE_ANSI_BOLD (args.colors ? ANSI_BOLD : "")
 #define FMTS (sign ? FORMAT_STRING_SIGNED : FORMAT_STRING)
 #define FMTSC (sign ? FORMAT_STRING_COLORED_SIGNED : FORMAT_STRING_COLORED)
+CLI args = {0};
+#define ANSI_RESET "\033[0m"
+#define ANSI_BOLD (args.colors ? "\033[1m" : "")
+#define ANSI_UNDERLINE (args.colors ? "\033[4m" : "")
+#define ANSI_BLACK (args.colors ? "\033[30m" : "")
+#define ANSI_RED (args.colors ? "\033[31m" : "")
+#define ANSI_GREEN (args.colors ? "\033[32m" : "")
+#define ANSI_YELLOW (args.colors ? "\033[33m" : "")
+#define ANSI_BLUE (args.colors ? "\033[34m" : "")
+#define ANSI_MAGENTA (args.colors ? "\033[35m" : "")
+#define ANSI_CYAN (args.colors ? "\033[36m" : "")
+#define ANSI_WHITE (args.colors ? "\033[37m" : "")
+#define ANSI_GRAY (args.colors ? "\033[90m" : "")
+#define ANSI_LIGHT_GRAY (args.colors ? "\033[37m" : "")
+#define ANSI_BG_BLACK (args.colors ? "\033[40m" : "")
+#define ANSI_BG_RED (args.colors ? "\033[41m" : "")
+#define ANSI_BG_GREEN (args.colors ? "\033[42m" : "")
+#define ANSI_BG_YELLOW (args.colors ? "\033[43m" : "")
+#define ANSI_BG_BLUE (args.colors ? "\033[44m" : "")
+#define ANSI_BG_MAGENTA (args.colors ? "\033[45m" : "")
+#define ANSI_BG_CYAN (args.colors ? "\033[46m" : "")
+#define ANSI_BG_WHITE (args.colors ? "\033[47m" : "")
+#define ANSI_BRIGHT_BLACK (args.colors ? "\033[90m" : "")
+#define ANSI_BRIGHT_RED (args.colors ? "\033[91m" : "")
+#define ANSI_BRIGHT_GREEN (args.colors ? "\033[92m" : "")
+#define ANSI_BRIGHT_YELLOW (args.colors ? "\033[93m" : "")
+#define ANSI_BRIGHT_BLUE (args.colors ? "\033[94m" : "")
+#define ANSI_BRIGHT_MAGENTA (args.colors ? "\033[95m" : "")
+#define ANSI_BRIGHT_CYAN (args.colors ? "\033[96m" : "")
+#define ANSI_BRIGHT_WHITE (args.colors ? "\033[97m" : "")
+#define ANSI_RED_CONST "\033[31m"
+#define ANSI_BOLD_CONST "\033[1m"

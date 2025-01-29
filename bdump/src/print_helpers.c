@@ -18,11 +18,7 @@ void print_binary(int16_t num) {
             PRINTF("     ");
             break;
         }
-        if (args.colors) {
-            PRINTF("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
-        } else {
-            PRINTF("%c%c", hex[i], hex[i + 1]);
-        }
+        PRINTF("%s%c%c%s", ANSI_CYAN, hex[i], hex[i + 1], ANSI_RESET);
         if (i != 2) {
             PRINTF(" ");
         }
@@ -32,18 +28,10 @@ void print_binary(int16_t num) {
             PRINTF("                   ");
             goto end;
         }
-        if (args.colors) {
-            PRINTF(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
-        } else {
-            PRINTF(" 0b");
-        }
+        PRINTF(" %s0b%s", ANSI_MAGENTA, ANSI_RESET);
 
         for (int i = 15; i >= 0; i--) {
-            if (args.colors) {
-                PRINTF("%s%d%s", ANSI_MAGENTA, (numclone >> i) & 1, ANSI_RESET);
-            } else {
-                PRINTF("%d", (numclone >> i) & 1);
-            }
+            PRINTF("%s%d%s", ANSI_MAGENTA, (numclone >> i) & 1, ANSI_RESET);
         }
     }
 end:
@@ -52,25 +40,17 @@ end:
     PRINTF(" │ ");
     return;
 print_str:
-    if (args.colors) {
-        PRINTF("%s%s%s\n", ANSI_BRIGHT_GREEN, global_str, ANSI_RESET);
-    } else {
-        PRINTF("%s\n", global_str);
-    }
+    PRINTF("%s%s%s\n", ANSI_BRIGHT_GREEN, global_str, ANSI_RESET);
 }
 
 #define PRINT_COLOR_AND_VALUE(color, format, value) \
     do {                                            \
-        if (colors) {                               \
-            PRINTF("%s", color);                    \
-        }                                           \
+        PRINTF("%s", color);                        \
         PRINTF(format, value);                      \
-        if (colors) {                               \
-            PRINTF(ANSI_RESET);                     \
-        }                                           \
+        PRINTF(ANSI_RESET);                         \
     } while (0)
 
-void print_instruction_header(size_t line, bool colors, bool is_directive) {
+void print_instruction_header(size_t line, bool is_directive) {
     if (printed_addr && in_char && args.concat_chars)
         return;
     PRINTF("│ ");
@@ -113,19 +93,11 @@ void print_instruction_header(size_t line, bool colors, bool is_directive) {
     PRINTF(" │ ");
 }
 
-#define PRINT_HEADER(colors, format, ...)       \
-    if (colors) {                               \
-        PRINTF(format, __VA_ARGS__);            \
-    } else {                                    \
-        PRINTF(format, "", "", "", "", "", ""); \
-    }
+#define PRINT_HEADER(colors, format, ...) \
+    PRINTF(format, __VA_ARGS__);
 
-#define PRINT_FILENAME(colors, format, filename, filesize, fdate, ...)                             \
-    if (colors) {                                                                                  \
-        PRINTF(format, __VA_ARGS__);                                                               \
-    } else {                                                                                       \
-        PRINTF(format, "", "", "", filename, "", "", "", "", filesize, "", "", "", "", fdate, ""); \
-    }
+#define PRINT_FILENAME(colors, format, filename, filesize, fdate, ...) \
+    PRINTF(format, "", "", "", filename, "", "", "", "", filesize, "", "", "", "", fdate, "");
 
 void print_header(char *filename) {
     char fsize[15];
