@@ -121,13 +121,6 @@ pub fn cli_argument_check() {
         );
         process::exit(1);
     }
-    if CONFIG.quiet && CONFIG.verbose {
-        eprintln!(
-            "{}",
-            EmuError::Impossible("Cannot have both debug and quiet flags".to_string())
-        );
-        process::exit(1);
-    }
     if CONFIG.compact_print && !(CONFIG.debug || CONFIG.verbose) {
         eprintln!(
             "{}",

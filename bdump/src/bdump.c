@@ -8,20 +8,24 @@
 #include "cli.c"
 
 void *process_instructions(void *arg, char *filename) {
+    char metadata[1024];
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     setvbuf(stdout, NULL, _IOFBF, 1024);
 #endif
     ThreadData *data = (ThreadData *) arg;
+    if ((data->buffer[0]) == 1) {
+        bin_version = data->buffer[1];
+    }
     jump_map_global = jump_map_create();
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
                 current_addr = instruction & 0x1ff;
-            } // First loop finds starting address
-            if ((instruction >> 8) == 1) {
-                bin_version = instruction & 0xff;
+            }
+            if (i > 0 && instruction >> 8 == 1) {
+                snprintf(metadata, sizeof(metadata), "%s%c", metadata, (char) instruction & 0xFF);
             }
         }
     }
@@ -56,7 +60,7 @@ void *process_instructions(void *arg, char *filename) {
         }
     }
 
-    print_header(filename);
+    print_header(metadata, filename);
     current_addr = current_addr_tmp;
     for (size_t i = 0; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints

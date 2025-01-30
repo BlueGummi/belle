@@ -123,6 +123,8 @@ pub fn encode_instruction(
             match s.as_str() {
                 "asciiz" => ins_type = "ascii",
                 "word" => ins_type = "word",
+                "data" => ins_type = "data",
+                "dataword" => ins_type = "dataword",
                 _ => ins_type = "label",
             }
 
@@ -237,6 +239,22 @@ pub fn encode_instruction(
         "jump" => {
             let arg_bin = argument_to_binary(arg1, line_num)?;
             Ok(Some(vec![(instruction_bin << 11) | arg_bin]))
+        }
+        "data" => {
+            if arg1.is_none() {
+                return Err((line_num, ".data argument is empty".to_string()));
+            }
+            let mut collected: Vec<i16> = Vec::new();
+            for character in arg1.unwrap().get_raw().chars() {
+                collected.push((1 << 8) | (character as i16));
+            }
+            Ok(Some(collected))
+        }        
+        "dataword" => {
+            if arg1.is_none() {
+                return Err((line_num, "DataWord argument is empty".to_string()));
+            }
+            Ok(Some(vec![(1 << 8) | arg1.unwrap().get_num()]))
         }
         _ => Err((line_num, "Instruction type not recognized".to_string())),
     }
@@ -363,7 +381,9 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             subroutine_counter += 1;
             continue;
         }
-        if !line_before_comment.trim().contains('=') {
+        if !(line_before_comment.trim().contains('=')
+            || line_before_comment.trim().starts_with(".data"))
+        {
             subroutine_counter += 1;
         }
     }

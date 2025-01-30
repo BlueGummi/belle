@@ -1,10 +1,30 @@
+use crate::config::CONFIG;
 use crate::*;
 use colored::*;
 impl CPU {
     pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
         let mut counter = 0;
         let mut start_found = false;
-
+        let mut rom_metadata = String::from("");
+        if let Some(number) = binary.first() {
+            if (number >> 8) == 1 {
+                if number & 0xFF != 2 {
+                    eprintln!(
+                        "{}: {} '{}' version does not match emulator version.",
+                        "warning".yellow(),
+                        "ROM".magenta(),
+                        CONFIG.rom.to_string().green()
+                    );
+                }
+            } else {
+                eprintln!(
+                    "{}: {} '{}' does not have version.\nmay be invalid",
+                    "warning".yellow(),
+                    "ROM".magenta(),
+                    CONFIG.rom.to_string().green()
+                );
+            }
+        }
         for element in binary {
             match element >> 9 {
                 1 => {
@@ -26,12 +46,8 @@ impl CPU {
                 }
                 _ => {
                     if (element >> 8) == 1 {
-                        if element & 0xFF != 2 {
-                            eprintln!(
-                                "{}: binary version does not match emulator version.",
-                                "warning".yellow()
-                            );
-                        }
+                        rom_metadata =
+                            format!("{}{}", rom_metadata, char::from((element & 0x7F) as u8));
                         continue;
                     }
                 }
@@ -42,6 +58,11 @@ impl CPU {
             self.memory[counter + self.starts_at as usize] = Some(*element as u16);
 
             counter += 1;
+        }
+        if CONFIG.metadata {
+            println!("======METADATA======");
+            println!("{rom_metadata}");
+            println!("====END METADATA====");
         }
         self.shift_memory()?;
         self.pc = self.starts_at;

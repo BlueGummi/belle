@@ -23,10 +23,6 @@ pub struct Cli {
     #[clap(short = 'd', long, default_value_t = false)]
     pub debug: bool,
 
-    /// Do not print errors
-    #[clap(short = 'q', long, default_value_t = false)]
-    pub quiet: bool,
-
     /// Clock delay (milliseconds)
     #[clap(short = 't', long)]
     pub time_delay: Option<u32>,
@@ -46,6 +42,10 @@ pub struct Cli {
     /// Print CPU state compactly
     #[clap(short = 'c', long, default_value_t = false)]
     pub compact_print: bool,
+
+    /// Print binary metadata
+    #[clap(short = 'm', long, default_value_t = false)]
+    pub metadata: bool,
 }
 #[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
@@ -55,12 +55,12 @@ pub fn declare_config() -> Cli {
             rom: "".to_string(),
             debug: false,
             verbose: false,
-            quiet: false,
             time_delay: None,
             pretty: false,
             write: false,
             no_print_memory: false,
             compact_print: false,
+            metadata: false,
         };
     }
     #[cfg(fuzzing)]
@@ -69,12 +69,12 @@ pub fn declare_config() -> Cli {
             rom: "".to_string(),
             debug: false,
             verbose: false,
-            quiet: false,
             time_delay: None,
             pretty: false,
             write: false,
             no_print_memory: true,
             compact_print: false,
+            metadta: false,
         };
     }
     Cli::parse()

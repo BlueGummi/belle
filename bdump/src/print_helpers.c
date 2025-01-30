@@ -96,7 +96,7 @@ void print_instruction_header(size_t line, bool is_directive) {
 #define PRINT_HEADER(colors, format, ...) \
     PRINTF(format, __VA_ARGS__);
 
-void print_header(char *filename) {
+void print_header(const char *metadata, char *filename) {
     char fsize[15];
     get_file_size(filename, fsize, sizeof(fsize));
     char fdate[30];
@@ -124,8 +124,7 @@ void print_header(char *filename) {
                "│ %sfile%s: %s%-42s%s │\n"
                "├───────────────────────────────┬──────────────────┤\n"
                "│ %smodified%s: %s%-19s%s │ %ssize%s: %s%-10s%s │\n"
-               "├───────────────────────────────┴──────────────────┤\n"
-               "│ %sbinary version%s: %s%-30s%s   │\n",
+               "│ %sbinary version%s: %s%-13s%s ╰──────────────────┤\n",
                ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_GREEN, fversion, ANSI_RESET);
 
         if (!args.binary) {

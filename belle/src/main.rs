@@ -22,13 +22,11 @@ fn main() -> io::Result<()> {
     let rom = create_rom(executable_path)?;
     let mut cpu = CPU::new();
     if let Err(e) = cpu.load_rom(&rom) {
-        if !CONFIG.quiet {
-            eprintln!("{e}");
-        }
+        eprintln!("{e}");
         process::exit(1);
     }
     if let Err(e) = cpu.run() {
-        if !CONFIG.pretty && !CONFIG.quiet && !CONFIG.compact_print {
+        if !CONFIG.pretty && !CONFIG.compact_print {
             eprintln!("{e}");
         }
         if CONFIG.write {

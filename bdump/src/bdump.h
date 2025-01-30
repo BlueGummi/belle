@@ -111,7 +111,7 @@ char *match_opcode(Instruction *s);
 int main(int argc, char *argv[]);
 void print_instruction_header(size_t line, bool is_directive);
 HashMap *jump_map_create(void);
-void print_header(char *filename);
+void print_header(const char *metadata, char *filename);
 void print_footer(void);
 void suggest_option(const char *invalid_option, int valid_count);
 int levenshtein_distance(const char *s1, const char *s2);
