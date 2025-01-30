@@ -19,11 +19,9 @@ void *process_instructions(void *arg, char *filename) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
                 current_addr = instruction & 0x1ff;
-                break;
             } // First loop finds starting address
             if ((instruction >> 8) == 1) {
                 bin_version = instruction & 0xff;
-                break;
             }
         }
     }
