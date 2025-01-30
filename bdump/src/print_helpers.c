@@ -96,34 +96,47 @@ void print_instruction_header(size_t line, bool is_directive) {
 #define PRINT_HEADER(colors, format, ...) \
     PRINTF(format, __VA_ARGS__);
 
-#define PRINT_FILENAME(colors, format, filename, filesize, fdate, ...) \
-    PRINTF(format, __VA_ARGS__);
-
 void print_header(char *filename) {
     char fsize[15];
     get_file_size(filename, fsize, sizeof(fsize));
     char fdate[30];
+    char *fversion = "unknown";
+    switch (bin_version) {
+    case 1:
+        fversion = "0.1";
+        break;
+    case 2:
+        fversion = "0.2";
+        break;
+    case 3:
+        fversion = "0.3";
+        break;
+    case 4:
+        fversion = "0.4";
+        break;
+    case 5:
+        fversion = "0.5";
+        break;
+    }
     get_last_modified_date(filename, fdate, sizeof(fdate));
     if (!args.only_code) {
-        PRINT_FILENAME(args.colors,
-                       "╭──────────────────────────────────────────────────╮\n"
-                       "│ %sfile%s: %s%-42s%s │\n"
-                       "├───────────────────────────────┬──────────────────┤\n"
-                       "│ %smodified%s: %s%-19s%s │ %ssize%s: %s%-10s%s │\n",
-                       filename,
-                       fdate,
-                       fsize,
-                       ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET);
+        PRINTF("╭──────────────────────────────────────────────────╮\n"
+               "│ %sfile%s: %s%-42s%s │\n"
+               "├───────────────────────────────┬──────────────────┤\n"
+               "│ %smodified%s: %s%-19s%s │ %ssize%s: %s%-10s%s │\n"
+               "├───────────────────────────────┴──────────────────┤\n"
+               "│ %sbinary version%s: %s%-30s%s   │\n",
+               ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_GREEN, fversion, ANSI_RESET);
 
         if (!args.binary) {
             PRINT_HEADER(args.colors,
-                         "├─────────┬───────┬─────────────┼──────────────────╯\n"
+                         "├─────────┬───────┬─────────────┬──────────────────╯\n"
                          "│ %saddress%s │  %sbin%s  │ %sinstruction%s │\n"
                          "├─────────┼───────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);
         } else {
             PRINT_HEADER(args.colors,
-                         "├─────────┬─────────────────────┴────┬─────────────┤\n"
+                         "├─────────┬──────────────────────────┬─────────────┤\n"
                          "│ %saddress%s │          %sbinary%s          │ %sinstruction%s │\n"
                          "├─────────┼──────────────────────────┼─────────────╯\n",
                          ANSI_CYAN, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_BLUE, ANSI_RESET);

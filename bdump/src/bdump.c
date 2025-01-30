@@ -21,6 +21,10 @@ void *process_instructions(void *arg, char *filename) {
                 current_addr = instruction & 0x1ff;
                 break;
             } // First loop finds starting address
+            if ((instruction >> 8) == 1) {
+                bin_version = instruction & 0xff;
+                break;
+            }
         }
     }
     int counter = 0;

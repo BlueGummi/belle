@@ -27,8 +27,12 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         } else {
             likely_label = false;
         }
-        print_instruction_header(current_addr, is_directive(ins));
-        print_binary(ins->full_ins);
+        if ((ins->full_ins >> 8) != 1) {
+            print_instruction_header(current_addr, is_directive(ins));
+            print_binary(ins->full_ins);
+        } else {
+            return;
+        }
     }
 
     // Instruction printing begins here

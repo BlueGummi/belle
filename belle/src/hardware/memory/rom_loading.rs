@@ -1,25 +1,40 @@
 use crate::*;
+use colored::*;
 impl CPU {
     pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
         let mut counter = 0;
         let mut start_found = false;
 
         for element in binary {
-            if (element >> 9) == 0b01 {
-                // start directive
-                if start_found {
-                    self.do_not_run = true;
-                    return Err(EmuError::Duplicate(".start directives".to_string()));
+            match element >> 9 {
+                1 => {
+                    if start_found {
+                        self.do_not_run = true;
+                        return Err(EmuError::Duplicate(".start directives".to_string()));
+                    }
+                    self.starts_at = (element & 0b1_1111_1111) as u16;
+                    start_found = true;
+                    continue;
                 }
-                self.starts_at = (element & 0b1_1111_1111) as u16;
-                start_found = true;
-                continue;
-            } else if (element >> 9) == 0b10 {
-                self.sp = (element & 0b1_1111_1111) as u16;
-                continue;
-            } else if (element >> 9) == 0b11 {
-                self.bp = (element & 0b1_1111_1111) as u16;
-                continue;
+                0b10 => {
+                    self.sp = (element & 0b1_1111_1111) as u16;
+                    continue;
+                }
+                0b11 => {
+                    self.bp = (element & 0b1_1111_1111) as u16;
+                    continue;
+                }
+                _ => {
+                    if (element >> 8) == 1 {
+                        if element & 0xFF != 2 {
+                            eprintln!(
+                                "{}: binary version does not match emulator version.",
+                                "warning".yellow()
+                            );
+                        }
+                        continue;
+                    }
+                }
             }
             if counter + self.starts_at as usize >= MEMORY_SIZE {
                 return Err(EmuError::MemoryOverflow());

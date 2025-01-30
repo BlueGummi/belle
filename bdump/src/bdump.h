@@ -1,6 +1,6 @@
 #ifndef BDUMP_H
 #define BDUMP_H
-#define TABLE_SIZE 512
+#define TABLE_SIZE 4096
 #include "consts.h"
 
 #ifdef _WIN32

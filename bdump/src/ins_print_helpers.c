@@ -94,7 +94,7 @@ void print_hlt_instruction(Instruction *ins) {
         if (ins->full_ins == 0) {
             PRINTF("%shlt%s", ANSI_BLUE, ANSI_RESET);
             len += 3;
-        } else {
+        } else if ((ins->full_ins >> 8) == 0) {
             if (args.concat_chars) {
                 char temp[10];
                 if (ins->full_ins == '\n') {
@@ -141,5 +141,5 @@ void print_hlt_instruction(Instruction *ins) {
 
 bool is_directive(Instruction *ins) {
     int part = ins->full_ins >> 9;
-    return (part == 1) || (part == 2) || (part == 3);
+    return (part == 1) || (part == 2) || (part == 3) || (ins->full_ins >> 8) == 1;
 }

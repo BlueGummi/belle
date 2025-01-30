@@ -155,6 +155,8 @@ fn main() -> io::Result<()> {
 
     match &CONFIG.binary {
         Some(output_file) if write_to_file => {
+            encoded_instructions.insert(0, 0x02);
+            encoded_instructions.insert(0, 0x01);
             write_encoded_instructions_to_file(output_file, &encoded_instructions)?;
         }
         _ => {
