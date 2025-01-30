@@ -8,7 +8,7 @@
 #include "cli.c"
 
 void *process_instructions(void *arg, char *filename) {
-    char metadata[1024];
+    char metadata[1024] = "\0";
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     setvbuf(stdout, NULL, _IOFBF, 1024);
@@ -25,7 +25,8 @@ void *process_instructions(void *arg, char *filename) {
                 current_addr = instruction & 0x1ff;
             }
             if (i > 0 && instruction >> 8 == 1) {
-                snprintf(metadata, sizeof(metadata), "%s%c", metadata, (char) instruction & 0xFF);
+                char inschar = (char) instruction & 0xFF;
+                strncat(metadata, &inschar, 1);
             }
         }
     }
@@ -93,7 +94,6 @@ int main(int argc, char *argv[]) {
         if (!input) {
             fputs(ANSI_RED_CONST ANSI_BOLD_CONST "Failed to open file " ANSI_RESET, stderr);
             perror(args.input_files[i]);
-            fputc('\n', stderr);
             return EXIT_FAILURE;
         }
 

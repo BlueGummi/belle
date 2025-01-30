@@ -25,7 +25,7 @@ impl CPU {
                 );
             }
         }
-        for element in binary {
+        for (index, element) in binary.into_iter().enumerate() {
             match element >> 9 {
                 1 => {
                     if start_found {
@@ -45,7 +45,7 @@ impl CPU {
                     continue;
                 }
                 _ => {
-                    if (element >> 8) == 1 {
+                    if (element >> 8) == 1 && index != 0 {
                         rom_metadata =
                             format!("{}{}", rom_metadata, char::from((element & 0x7F) as u8));
                         continue;
@@ -60,9 +60,13 @@ impl CPU {
             counter += 1;
         }
         if CONFIG.metadata {
-            println!("======METADATA======");
-            println!("{rom_metadata}");
-            println!("====END METADATA====");
+            if !rom_metadata.is_empty() {
+                println!("======METADATA======");
+                println!("{rom_metadata}");
+                println!("====END METADATA====");
+            } else {
+                println!("=====NO METADATA====");
+            }
         }
         self.shift_memory()?;
         self.pc = self.starts_at;
