@@ -352,9 +352,9 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             continue;
         }
         if line_before_comment.starts_with(".asciiz") {
-            if let Some(start) = line_before_comment.find('\"') {
-                if let Some(end) = line_before_comment[start + 1..].find('\"') {
-                    subroutine_counter += line_before_comment[start + 1..start + 1 + end].len();
+            if let Some(start) = trimmed_line.find('\"') {
+                if let Some(end) = trimmed_line[start + 1..].find('\"') {
+                    subroutine_counter += trimmed_line[start + 1..start + 1 + end].len();
                 }
             }
             continue;
