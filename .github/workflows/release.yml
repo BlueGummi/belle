@@ -38,7 +38,6 @@ jobs:
           cp target/x86_64-unknown-linux-musl/release/basm ../bin && cd ..
 
           cd bdump && make release && cp bdump ../bin && cd ..
-          cd btils && gcc -o bfmt bfmt.c -static -flto -O2 && cp bfmt ../bin && cd ..
 
           sudo apt install zip -y
           tar -czvf belle-nightly-linux-x86_64.tar.gz bin
@@ -49,7 +48,6 @@ jobs:
           sudo apt install mingw-w64 -y
 
           cd bdump && make release CC=x86_64-w64-mingw32-gcc && cp bdump.exe ../windows-bin && cd ..
-          cd btils && x86_64-w64-mingw32-gcc -o bfmt.exe bfmt.c -static -flto -O2 && cp bfmt.exe ../windows-bin && cd ..
 
           rustup target add x86_64-pc-windows-gnu
 
