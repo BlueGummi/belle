@@ -3,11 +3,11 @@ use colored::*;
 use std::io::{self, Write};
 impl BDB {
     pub fn handle_set_breakpoint(&mut self, arg: &str) {
-        if let Ok(n) = arg.trim().parse::<u16>() {
+        if let Ok(n) = u16::from_str_radix(arg.trim(), 16) {
             self.breakpoints.push(n);
             println!("Breakpoint {n} added.");
         } else {
-            eprintln!("'b' requires a numeric argument.");
+            eprintln!("'b' requires a numeric hex argument.");
         }
     }
 
@@ -244,11 +244,11 @@ impl BDB {
         }
     }
     pub fn handle_remove_breakpoint(&mut self, arg: &str) {
-        if let Ok(n) = arg.trim().parse::<u16>() {
+        if let Ok(n) = u16::from_str_radix(arg.trim(), 16) {
             self.breakpoints.retain(|&x| x != n);
             println!("Breakpoint {n} removed.");
         } else {
-            eprintln!("'br' requires a numeric argument.");
+            eprintln!("'br' requires a numeric hex argument.");
         }
     }
 }
