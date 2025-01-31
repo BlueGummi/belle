@@ -355,10 +355,10 @@ impl<'a> Lexer<'a> {
             } else {
                 return self.handle_invalid_character(&number);
             }
-        } else if let Ok(value) = self.lex_number(&number[1..]) {
+        } else if let Ok(value) = self.lex_number(&number) {
             value
         } else {
-            return self.handle_invalid_character(&number[1..]);
+            return self.handle_invalid_character(&number);
         };
 
         let stored_value = if num_value < 0 {
