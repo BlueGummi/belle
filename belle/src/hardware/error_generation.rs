@@ -157,20 +157,6 @@ impl CPU {
                 if CONFIG.verbose {
                     println!("Halting...");
                 }
-                if CONFIG.pretty {
-                    for i in 0..=3 {
-                        println!(
-                            "Register {}: {}, {:016b}, {:04x}",
-                            i, self.int_reg[i], self.int_reg[i], self.int_reg[i]
-                        );
-                    }
-                    for i in 0..=1 {
-                        println!("Uint Register {}: {}", i, self.uint_reg[i]);
-                    }
-                    for i in 0..=1 {
-                        println!("Float Register {}: {}", i, self.float_reg[i]);
-                    }
-                }
             }
             return Err(RecoverableError::Overflow(
                 self.pc,
