@@ -2,7 +2,7 @@ use crate::config::CONFIG;
 use crate::*;
 use colored::*;
 impl CPU {
-    pub fn load_rom(&mut self, binary: &Vec<i16>) -> Result<(), EmuError> {
+    pub fn load_rom(&mut self, binary: &[i16]) -> Result<(), EmuError> {
         let mut counter = 0;
         let mut start_found = false;
         let mut rom_metadata = String::from("");
@@ -25,7 +25,7 @@ impl CPU {
                 );
             }
         }
-        for (index, element) in binary.into_iter().enumerate() {
+        for (index, element) in binary.iter().enumerate() {
             match element >> 9 {
                 1 => {
                     if start_found {
@@ -61,9 +61,22 @@ impl CPU {
         }
         if CONFIG.metadata {
             if !rom_metadata.is_empty() {
-                println!("======METADATA======");
-                println!("{rom_metadata}");
-                println!("====END METADATA====");
+                let longest_length = rom_metadata
+                    .lines()
+                    .map(|line| line.len())
+                    .max()
+                    .unwrap_or(0);
+                let val = if longest_length % 2 == 0 { 5 } else { 4 };
+                println!(
+                    "╔{}╡ {} ╞{}╗",
+                    "═".repeat((longest_length / 2) - 5),
+                    "METADATA".bright_green(),
+                    "═".repeat((longest_length / 2) - val)
+                );
+                for line in rom_metadata.lines() {
+                    println!("║ {:width$} ║", line, width = longest_length);
+                }
+                println!("╚{}╝", "═".repeat(longest_length + 2));
             } else {
                 println!("=====NO METADATA====");
             }
