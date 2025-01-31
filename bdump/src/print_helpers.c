@@ -1,4 +1,7 @@
 #include "print_utils.c"
+
+#define MAX_LINES 100
+#define MAX_LENGTH 256
 void print_binary(int16_t num) {
     if (in_char && !next_in_char && args.concat_chars)
         goto print_str;
@@ -127,23 +130,51 @@ void print_header(const char *metadata, char *filename) {
                "│ %sbinary version%s: %s%-13s%s ╰──────────────────┤\n",
                ANSI_BOLD, ANSI_RESET, ANSI_GREEN, filename, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_BRIGHT_CYAN, fdate, ANSI_RESET, ANSI_BOLD, ANSI_RESET, ANSI_RED, fsize, ANSI_RESET, ANSI_MAGENTA, ANSI_RESET, ANSI_GREEN, fversion, ANSI_RESET);
         if (*metadata != '\0') {
-            PRINTF("╞═════════════════════════════╡ %sMETADATA%s ╞═════════╧════════════════════╕\n", ANSI_BRIGHT_GREEN, ANSI_RESET);
             char metadata_buffer[1024];
             strncpy(metadata_buffer, metadata, sizeof(metadata_buffer));
             metadata_buffer[sizeof(metadata_buffer) - 1] = '\0';
+            char lines[MAX_LINES][MAX_LENGTH];
+            int lineCount = 0;
+            int max_length = 0;
 
+            char *line = strtok((char *) metadata, "\n");
+            while (line != NULL) {
+                strncpy(lines[lineCount], line, MAX_LENGTH);
+                lines[lineCount][MAX_LENGTH - 1] = '\0';
+                lineCount++;
+
+                int length = strlen(line);
+                if (length > max_length) {
+                    max_length = length;
+                }
+
+                line = strtok(NULL, "\n");
+            }
+            PRINTF("╞═══════════════════════╡ %sMETADATA%s ╞═══════════════╧", ANSI_BRIGHT_GREEN, ANSI_RESET);
+            for (int i = 0; i < max_length - 49; i++) {
+                PRINTF("═");
+            }
+            PRINTF("╕\n");
             for (char *p = metadata_buffer; *p != '\0'; p++) {
                 if (*p == '\n') {
-                    PRINTF("│ %-69s │\n", " ");
+                    PRINTF("│ %*s │\n", max_length, " ");
                 } else {
                     char *start = p; // Start of the line
                     while (*p != '\n' && *p != '\0') {
                         p++;
                     }
-                    PRINTF("│ %-69.*s │\n", (int) (p - start), start);
+                    PRINTF("│ %.*s", (int) (p - start), start);
+                    for (int i = 0; i < max_length - (int) (p - start) + 1; i++) {
+                        PRINTF(" ");
+                    }
+                    PRINTF("│\n");
                 }
             }
-            PRINTF("╞═══════════════════════════╡ %sEND METADATA%s ╞═══════╤════════════════════╛\n", ANSI_BRIGHT_RED, ANSI_RESET);
+            PRINTF("╞════════════════════╡ %sEND METADATA%s ╞══════════════╤", ANSI_BRIGHT_RED, ANSI_RESET);
+            for (int i = 0; i < max_length - 49; i++) {
+                PRINTF("═");
+            }
+            PRINTF("╛\n");
         }
         if (!args.binary) {
             PRINT_HEADER(args.colors,
