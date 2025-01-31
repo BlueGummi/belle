@@ -232,14 +232,15 @@ impl CPU {
                 .build::<PistonWindow>();
 
                 let mut window = match window {
-                    Ok(win) => {
-                        win
-                    }
+                    Ok(win) => win,
                     Err(e) => {
                         return Err(WindowFail(
                             self.ir,
                             self.pc,
-                            Some(format!("Failed to create window on interrupt call 100: {}", e)),
+                            Some(format!(
+                                "Failed to create window on interrupt call 100: {}",
+                                e
+                            )),
                         ))
                     }
                 };
