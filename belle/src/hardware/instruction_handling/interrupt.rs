@@ -2,6 +2,7 @@ use crate::{config::CONFIG, *};
 use colored::*;
 use std::io::{self, Read, Write};
 extern crate piston_window;
+use crate::UnrecoverableError::*;
 use piston_window::*;
 
 use std::time::{Duration, Instant};
@@ -219,16 +220,30 @@ impl CPU {
                 }
                 let duration = Duration::new(self.uint_reg[0] as u64, 0);
                 let start_time = Instant::now();
-                let mut window: PistonWindow = WindowSettings::new(
-                    "fnaf is real",
+
+                let window = WindowSettings::new(
+                    "BELLE display",
                     [
                         WIDTH as u32 * SQUARE_SIZE as u32,
                         HEIGHT as u32 * SQUARE_SIZE as u32,
                     ],
                 )
                 .exit_on_esc(true)
-                .build()
-                .unwrap();
+                .build::<PistonWindow>();
+
+                let mut window = match window {
+                    Ok(win) => {
+                        win
+                    }
+                    Err(e) => {
+                        return Err(WindowFail(
+                            self.ir,
+                            self.pc,
+                            Some(format!("Failed to create window on interrupt call 100: {}", e)),
+                        ))
+                    }
+                };
+
                 let pixel_data: [[u16; 8]; 104] = {
                     let mut data = [[0; 8]; 104];
                     for (i, row) in data.iter_mut().enumerate() {

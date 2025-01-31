@@ -11,6 +11,7 @@ pub enum UnrecoverableError {
     StackOverflow(i16, u16, Option<String>),
     StackUnderflow(i16, u16, Option<String>),
     ReadFail(i16, u16, Option<String>),
+    WindowFail(i16, u16, Option<String>), // IR, PC, MSG
 }
 
 #[derive(Debug)]
@@ -45,6 +46,7 @@ impl UnrecoverableError {
             UnrecoverableError::StackOverflow(ir, loc, msg) => (*ir, "Stack overflow", *loc, msg),
             UnrecoverableError::StackUnderflow(ir, loc, msg) => (*ir, "Stack underflow", *loc, msg),
             UnrecoverableError::ReadFail(ir, loc, msg) => (*ir, "Read fail", *loc, msg),
+            UnrecoverableError::WindowFail(ir, loc, msg) => (*ir, "Window fail", *loc, msg),
         }
     }
 }
