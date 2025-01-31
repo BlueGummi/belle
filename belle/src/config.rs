@@ -46,6 +46,10 @@ pub struct Cli {
     /// Print binary metadata
     #[clap(short = 'm', long, default_value_t = false)]
     pub metadata: bool,
+
+    /// Print binary metadata
+    #[clap(short = 'n', long, default_value_t = false)]
+    pub no_display: bool,
 }
 #[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
@@ -61,6 +65,7 @@ pub fn declare_config() -> Cli {
             no_print_memory: false,
             compact_print: false,
             metadata: false,
+            no_display: true,
         };
     }
     #[cfg(fuzzing)]
@@ -75,6 +80,7 @@ pub fn declare_config() -> Cli {
             no_print_memory: true,
             compact_print: false,
             metadta: false,
+            no_display: true,
         };
     }
     Cli::parse()

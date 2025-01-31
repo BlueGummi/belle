@@ -125,6 +125,7 @@ pub fn encode_instruction(
                 "word" => ins_type = "word",
                 "data" => ins_type = "data",
                 "dataword" => ins_type = "dataword",
+                "pad" => ins_type = "pad",
                 _ => ins_type = "label",
             }
 
@@ -249,7 +250,17 @@ pub fn encode_instruction(
                 collected.push((1 << 8) | (character as i16));
             }
             Ok(Some(collected))
-        }        
+        }
+        "pad" => {
+            if arg1.is_none() {
+                return Err((line_num, ".pad argument is empty".to_string()));
+            }
+            let mut collected: Vec<i16> = Vec::new();
+            for _ in 0..arg1.unwrap().get_num() {
+                collected.push(0);
+            }
+            Ok(Some(collected))
+        }
         "dataword" => {
             if arg1.is_none() {
                 return Err((line_num, "DataWord argument is empty".to_string()));
@@ -344,7 +355,7 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
         .lock()
         .map_err(|_| "Failed to lock SUBROUTINE_MAP")?;
 
-    for line in lines {
+    for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty()
@@ -379,6 +390,50 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
         }
         if line_before_comment.starts_with(".word") {
             subroutine_counter += 1;
+            continue;
+        }
+
+        if line_before_comment.starts_with(".pad") {
+            let add = line_before_comment
+                .split_whitespace()
+                .nth(1)
+                .and_then(|stripped| {
+                    if let Some(value) = stripped.strip_prefix("0b") {
+                        i32::from_str_radix(value, 2)
+                            .map_err(|_| {
+                                (
+                                    index,
+                                    format!("Invalid .pad directive binary number: {}", stripped),
+                                )
+                            })
+                            .ok()
+                    } else if let Some(value) = stripped.strip_prefix("0x") {
+                        i32::from_str_radix(value, 16)
+                            .map_err(|_| {
+                                (
+                                    index,
+                                    format!(
+                                        "Invalid .pad directive hexadecimal number: {}",
+                                        stripped
+                                    ),
+                                )
+                            })
+                            .ok()
+                    } else {
+                        match stripped.parse::<i32>() {
+                            Ok(n) => Some(n),
+                            Err(_) => {
+                                let vmap = VARIABLE_MAP.lock().unwrap();
+                                if let Some(&replacement) = vmap.get(stripped.trim()) {
+                                    Some(replacement)
+                                } else {
+                                    Some(0)
+                                }
+                            }
+                        }
+                    }
+                });
+            subroutine_counter += add.unwrap() as usize;
             continue;
         }
         if !(line_before_comment.trim().contains('=')

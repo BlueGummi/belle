@@ -1,7 +1,7 @@
 use crate::{config::CONFIG, interrupt::*, Argument::*, Instruction::*, *};
 use colored::Colorize;
 use std::{thread, time::Duration};
-
+pub const VMEM_START: usize = 0x1000;
 pub const MEMORY_SIZE: usize = 65536;
 
 #[derive(Debug)]

@@ -1,6 +1,14 @@
 use crate::{config::CONFIG, *};
 use colored::*;
 use std::io::{self, Read, Write};
+extern crate piston_window;
+use piston_window::*;
+
+use std::time::{Duration, Instant};
+
+const WIDTH: usize = 128; 
+const HEIGHT: usize = 104; 
+const SQUARE_SIZE: f64 = 10.;
 
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
@@ -205,9 +213,66 @@ impl CPU {
             61 => self.bp = self.uint_reg[0],
             70 => self.pushret = true,
             71 => self.pushret = false,
-            // 10 - 20 set flags
-            // 20 - 30 unset them
-            // 30 - 40 invert them
+            100 => {
+                if CONFIG.no_display {
+                    return Ok(());
+                }
+                let duration = Duration::new(self.uint_reg[0] as u64, 0);
+                let start_time = Instant::now();
+                let mut window: PistonWindow = WindowSettings::new(
+                    "fnaf is real",
+                    [
+                        WIDTH as u32 * SQUARE_SIZE as u32,
+                        HEIGHT as u32 * SQUARE_SIZE as u32,
+                    ],
+                )
+                .exit_on_esc(true)
+                .build()
+                .unwrap();
+                let pixel_data: [[u16; 8]; 104] = {
+                    let mut data = [[0; 8]; 104];
+                    for (i, row) in data.iter_mut().enumerate() {
+                        for (j, col) in row.iter_mut().enumerate() {
+                            let index = VMEM_START + (i * 8 + j) * std::mem::size_of::<u16>();
+                            *col = self.memory.get(index).unwrap_or(&None).unwrap_or(0) as u16;
+                        }
+                    }
+                    data
+                };
+
+                while let Some(event) = window.next() {
+                    if start_time.elapsed() >= duration {
+                        break;
+                    }
+                    window.draw_2d(&event, |c, g, _| {
+                        clear([0.0, 0.0, 0.0, 1.0], g);
+
+                        for (row_index, row) in pixel_data.iter().enumerate() {
+                            for (u16_index, &u16_value) in row.iter().enumerate() {
+                                for x in 0..16 {
+                                    let is_set = (u16_value >> (15 - x)) & 1 == 1;
+                                    let color = if is_set {
+                                        [1.0, 1.0, 1.0, 1.0]
+                                    } else {
+                                        [0.0, 0.0, 0.0, 1.0]
+                                    };
+                                    rectangle(
+                                        color,
+                                        [
+                                            (u16_index * 16 + x) as f64 * SQUARE_SIZE,
+                                            row_index as f64 * SQUARE_SIZE,
+                                            SQUARE_SIZE,
+                                            SQUARE_SIZE,
+                                        ],
+                                        c.transform,
+                                        g,
+                                    );
+                                }
+                            }
+                        }
+                    });
+                }
+            }
             _ => println!(
                 "{}",
                 RecoverableError::UnknownFlag(

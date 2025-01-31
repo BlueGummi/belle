@@ -62,11 +62,6 @@ pub fn verify(
         if ins.get_raw() == "word" {
             return Ok(());
         }
-        if let Some(value) = arg1 {
-            if value.get_num() > 511 {
-                return Err((line_num, "Directive address cannot exceed 511".to_string()));
-            }
-        }
     }
     Ok(())
 }
