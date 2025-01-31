@@ -6,8 +6,8 @@ use piston_window::*;
 
 use std::time::{Duration, Instant};
 
-const WIDTH: usize = 128; 
-const HEIGHT: usize = 104; 
+const WIDTH: usize = 128;
+const HEIGHT: usize = 104;
 const SQUARE_SIZE: f64 = 10.;
 
 impl CPU {
