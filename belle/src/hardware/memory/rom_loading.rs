@@ -26,6 +26,9 @@ impl CPU {
             }
         }
         for (index, element) in binary.iter().enumerate() {
+            if index == 0 {
+                continue;
+            }
             match element >> 9 {
                 1 => {
                     if start_found {
