@@ -135,7 +135,7 @@ void print_header(const char *metadata, char *filename) {
             metadata_buffer[sizeof(metadata_buffer) - 1] = '\0';
             char lines[MAX_LINES][MAX_LENGTH];
             int lineCount = 0;
-            int max_length = 0;
+            int max_length = 49;
 
             char *line = strtok((char *) metadata, "\n");
             while (line != NULL) {

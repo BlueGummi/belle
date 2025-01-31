@@ -66,6 +66,11 @@ impl CPU {
                     .map(|line| line.len())
                     .max()
                     .unwrap_or(0);
+                let longest_length = if longest_length > 12 {
+                    longest_length
+                } else {
+                    12
+                };
                 let val = if longest_length % 2 == 0 { 5 } else { 4 };
                 println!(
                     "╔{}╡ {} ╞{}╗",
