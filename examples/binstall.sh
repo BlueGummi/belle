@@ -15,7 +15,6 @@ tar -xzf "$TAR_FILE"
 mv bin/basm "$INSTALL_DIR/basm"
 mv bin/bdump "$INSTALL_DIR/bdump"
 mv bin/belle "$INSTALL_DIR/belle"
-mv bin/bfmt "$INSTALL_DIR/bfmt"
 
 rm -rf belle-nightly
 rm "$TAR_FILE"

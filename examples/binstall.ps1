@@ -2,7 +2,7 @@ $zipUrl = "https://github.com/BlueGummi/belle/releases/download/nightly/belle-ni
 $zipFile = "$env:TEMP\belle-nightly-windows-x86_64.zip"
 $extractPath = "$env:TEMP\belle"
 $localBinPath = "$env:USERPROFILE\.local\bin"
-$exeFiles = @("belle.exe", "basm.exe", "bdump.exe", "bfmt.exe")
+$exeFiles = @("belle.exe", "basm.exe", "bdump.exe")
 
 if (-not (Test-Path $localBinPath)) {
     New-Item -ItemType Directory -Path $localBinPath
