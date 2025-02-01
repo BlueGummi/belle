@@ -20,7 +20,7 @@ const WIDTH: usize = 128;
 #[cfg(feature = "window")]
 const HEIGHT: usize = 104;
 #[cfg(feature = "window")]
-const SQUARE_SIZE: f64 = 10.;
+const SQUARE_SIZE: f64 = 7.;
 #[cfg(feature = "window")]
 const FONT_DATA: &[u8] = include_bytes!("../../../src/vga.ttf");
 impl CPU {
@@ -340,9 +340,9 @@ impl CPU {
                     window.draw_2d(&event, |c, g, _| {
                         clear([0.0, 0.0, 0.0, 1.0], g);
 
-                        let transform = c.transform.trans(50.0, 100.0);
+                        let transform = c.transform.trans(2., 17.);
                         let text_color = [1.0, 1.0, 1.0, 1.0];
-                        let font_size = 32;
+                        let font_size = 16;
 
                         if let Err(e) = text::Text::new_color(text_color, font_size).draw(
                             &stringy,
