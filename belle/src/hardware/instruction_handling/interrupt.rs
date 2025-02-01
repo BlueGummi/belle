@@ -1,14 +1,22 @@
 use crate::{config::CONFIG, *};
 use colored::*;
 use std::io::{self, Read, Write};
+
+#[cfg(feature = "window")]
 extern crate piston_window;
+#[cfg(feature = "window")]
 use crate::UnrecoverableError::*;
+#[cfg(feature = "window")]
 use piston_window::*;
 
+#[cfg(feature = "window")]
 use std::time::{Duration, Instant};
 
+#[cfg(feature = "window")]
 const WIDTH: usize = 128;
+#[cfg(feature = "window")]
 const HEIGHT: usize = 104;
+#[cfg(feature = "window")]
 const SQUARE_SIZE: f64 = 10.;
 
 impl CPU {
@@ -214,6 +222,7 @@ impl CPU {
             61 => self.bp = self.uint_reg[0],
             70 => self.pushret = true,
             71 => self.pushret = false,
+            #[cfg(feature = "window")]
             100 => {
                 if CONFIG.no_display {
                     return Ok(());

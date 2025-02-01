@@ -118,6 +118,7 @@ print_help() {
     printf "  -n, --no-spin      Disable the spinner during builds\n"
     printf "  -h, --help         Display this help message\n"
     printf "  -l, --loud         Print build outputs\n"
+    printf "  -N, --nodisplay    No display suppott\n"
     printf "\nTargets:\n"
     printf "  bdump, basm, belle, btils (default: all)\n"
     exit 0
@@ -172,9 +173,17 @@ default_build() {
             belle)
                 cd belle
                 if ! [ "$loud" ]; then
-                        cargo build --release --quiet &
+			if [ "$nodisplay" ]; then
+                        	cargo build --release --quiet &
+			else
+				cargo build -r --quiet --features "window" &
+			fi
                 else
-                        cargo build --release &
+			if [ "$nodisplay" ]; then
+                        	cargo build -rv &
+			else
+				cargo build -rv --features "window" &
+			fi
                 fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
@@ -240,6 +249,9 @@ for arg in "$@"; do
             ;;
         --loud|-l)
             loud=true
+            ;;
+        --nodisplay|-N)
+            nodisplay=true
             ;;
     esac
 done
