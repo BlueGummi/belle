@@ -31,7 +31,7 @@ jobs:
           export RUSTFLAGS="-C target-feature=+crt-static"
           rustup target add x86_64-unknown-linux-musl
 
-          cd belle && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-unknown-linux-musl --release
+          cd belle && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-unknown-linux-musl --release --features "window"
           cp target/x86_64-unknown-linux-musl/release/belle ../bin && cd ..
 
           cd basm && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-unknown-linux-musl --release
@@ -51,7 +51,7 @@ jobs:
 
           rustup target add x86_64-pc-windows-gnu
 
-          cd belle && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-pc-windows-gnu --release
+          cd belle && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-pc-windows-gnu --release --features "window"
           cp target/x86_64-pc-windows-gnu/release/belle.exe ../windows-bin && cd ..
 
           cd basm && CARGOFLAGS="--profile.release.lto = true" cargo build --target x86_64-pc-windows-gnu --release
