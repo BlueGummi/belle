@@ -298,6 +298,58 @@ impl CPU {
                     });
                 }
             }
+            #[cfg(feature = "window")]
+            101 => {
+                let duration = Duration::new(self.uint_reg[0] as u64, 0);
+                let start_time = Instant::now();
+                let starting_point = self.int_reg[0];
+                let end_point = self.int_reg[1];
+                let mut stringy = String::from("");
+                for index in starting_point..end_point {
+                    if index < 0 || index as usize >= self.memory.len() {
+                        return Err(self.generate_segfault(
+                            "Segmentation fault. Memory index out of bounds on interrupt call 8.",
+                        ));
+                    }
+
+                    if let Some(value) = self.memory[index as usize] {
+                        stringy = format!("{}{}", stringy, value as u8 as char);
+                    }
+                }
+
+                let width = WIDTH as u32 * SQUARE_SIZE as u32;
+                let height = HEIGHT as u32 * SQUARE_SIZE as u32;
+                let mut window: PistonWindow =
+                    WindowSettings::new("BELLE display", [width, height])
+                        .exit_on_esc(true)
+                        .build()
+                        .unwrap();
+
+                let mut glyphs = window.load_font("src/vga.ttf").unwrap();
+                while let Some(event) = window.next() {
+                    if start_time.elapsed() >= duration {
+                        break;
+                    }
+                    window.draw_2d(&event, |c, g, _| {
+                        clear([0.0, 0.0, 0.0, 1.0], g);
+
+                        let transform = c.transform.trans(50.0, 100.0);
+                        let text_color = [1.0, 1.0, 1.0, 1.0];
+                        let font_size = 32;
+
+                        if let Err(e) = text::Text::new_color(text_color, font_size).draw(
+                            &stringy,
+                            &mut glyphs,
+                            &c.draw_state,
+                            transform,
+                            g,
+                        ) {
+                            eprintln!("Error drawing text: {}", e);
+                        }
+                    });
+                    glyphs.factory.encoder.flush(&mut window.device);
+                }
+            }
             _ => println!(
                 "{}",
                 RecoverableError::UnknownFlag(
