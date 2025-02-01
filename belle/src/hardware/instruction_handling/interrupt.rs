@@ -10,6 +10,9 @@ use crate::UnrecoverableError::*;
 use piston_window::*;
 
 #[cfg(feature = "window")]
+use rusttype::Font;
+
+#[cfg(feature = "window")]
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "window")]
@@ -18,7 +21,8 @@ const WIDTH: usize = 128;
 const HEIGHT: usize = 104;
 #[cfg(feature = "window")]
 const SQUARE_SIZE: f64 = 10.;
-
+#[cfg(feature = "window")]
+const FONT_DATA: &[u8] = include_bytes!("../../../src/vga.ttf");
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
         if self.fuzz {
@@ -324,8 +328,11 @@ impl CPU {
                         .exit_on_esc(true)
                         .build()
                         .unwrap();
+                let texture_context = window.create_texture_context();
 
-                let mut glyphs = window.load_font("src/vga.ttf").unwrap();
+                let font = Font::try_from_bytes(FONT_DATA).expect("Failed to load font");
+                let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
+
                 while let Some(event) = window.next() {
                     if start_time.elapsed() >= duration {
                         break;

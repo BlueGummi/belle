@@ -191,6 +191,7 @@ dependencies = [
  "ctrlc",
  "once_cell",
  "piston_window",
+ "rusttype",
 ]
 
 [[package]]
