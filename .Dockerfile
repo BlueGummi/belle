@@ -4,7 +4,7 @@ WORKDIR /usr/src/belle
 
 COPY . .
 
-RUN chmod +x build.sh && ./build.sh -n
+RUN chmod +x build.sh && ./build.sh -n -N
 RUN cd btils && gcc -o bfmt bfmt.c -static && cp bfmt ../bin && cd ..
 RUN cd bdump && make release && cp bdump ../bin && cd ..
 
