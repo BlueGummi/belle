@@ -144,7 +144,7 @@ function Default-Build {
             }
             "belle" {
                 Set-Location belle
-                Start-Process -FilePath "cargo" -ArgumentList "build", "--release", "--quiet" , "--features", "window", -NoNewWindow -PassThru | ForEach-Object {
+                Start-Process -FilePath "cargo" -ArgumentList "build", "--release", "--quiet" , "--features", "window" -NoNewWindow -PassThru | ForEach-Object {
                     $PPid = $_.Id
                     Spinner $PPid "Building BELLE..."
                     Copy-Item -Path "target\release\belle.exe" -Destination "../bin" -Force
