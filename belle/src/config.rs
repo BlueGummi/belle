@@ -47,8 +47,8 @@ pub struct Cli {
     #[clap(short = 'm', long, default_value_t = false)]
     pub metadata: bool,
 
-    /// Print binary metadata
-    #[clap(short = 'n', long, default_value_t = false)]
+    /// No display
+    #[clap(short = 'N', long, default_value_t = false)]
     pub no_display: bool,
 }
 #[allow(unreachable_code)]
