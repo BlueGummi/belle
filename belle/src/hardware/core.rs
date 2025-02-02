@@ -104,7 +104,7 @@ impl CPU {
 
         let execution_handle = {
             let tx = tx.clone();
-            let mut self_clone = self.clone(); // Ensure thread-safe usage
+            let mut self_clone = self.clone();
             thread::spawn(move || {
                 while self_clone.running {
                     let mut clock = CLOCK.lock().unwrap();
@@ -129,7 +129,6 @@ impl CPU {
                             );
                             self_clone.errmsg = error_msg.only_err().to_string();
                             self_clone.running = false;
-                            eprintln!("Error: {}", self_clone.errmsg);
                             return Err(error_msg);
                         }
                     }
@@ -139,7 +138,6 @@ impl CPU {
                         self_clone.err = true;
                         self_clone.errmsg = e.only_err().to_string();
                         self_clone.running = false;
-                        eprintln!("Error: {}", self_clone.errmsg);
                         return Err(e);
                     }
 
@@ -157,8 +155,8 @@ impl CPU {
                             println!("Clock limit reached");
                         }
                     }
-                    let starting_point = 0x000;
-                    let end_point = 0xFF;
+                    let starting_point = 0xFF;
+                    let end_point = 0x200;
                     let mut stringy = String::new();
                     for index in starting_point..end_point {
                         if let Some(value) = self_clone.memory[index as usize] {
