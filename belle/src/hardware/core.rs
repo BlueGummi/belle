@@ -1,7 +1,6 @@
 use crate::{config::CONFIG, interrupt::*, Argument::*, Instruction::*, *};
 use colored::Colorize;
 use std::{thread, time::Duration};
-pub const VMEM_START: usize = 0x1000;
 pub const MEMORY_SIZE: usize = 65536;
 #[cfg(feature = "window")]
 extern crate piston_window;
@@ -141,13 +140,16 @@ impl CPU {
                     }
 
                     let start = 0xFF;
-                    let end = 0x200;
+                    let end = 0x2C7;
                     if !CONFIG.no_display {
                         let mut stringy = String::new();
                         for index in start..end {
                             if let Some(value) =
                                 self_clone.memory.get(index as usize).copied().flatten()
                             {
+                                if index % 76 == 0 {
+                                    stringy.push('\n');
+                                }
                                 stringy.push(value as u8 as char);
                             }
                         }
@@ -165,6 +167,10 @@ impl CPU {
 
         #[cfg(feature = "window")]
         if !CONFIG.no_display && !self.debugging {
+            use piston_window::{
+                clear, text, Glyphs, PistonWindow, TextureSettings, WindowSettings,
+            };
+
             let mut window: PistonWindow = WindowSettings::new(
                 "BELLE display",
                 [
@@ -182,9 +188,12 @@ impl CPU {
             let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
 
             let mut display_text = String::new();
+
             while let Some(event) = window.next() {
                 match rx.recv() {
-                    Ok(Some(new_string)) => display_text = new_string,
+                    Ok(Some(new_string)) => {
+                        display_text = new_string;
+                    }
                     Ok(None) => break,
                     Err(_) => (),
                 }
@@ -195,6 +204,7 @@ impl CPU {
                     let text_color = [1.0, 1.0, 1.0, 1.0];
                     let font_size = 16;
                     let line_height = font_size as f64 * 1.2;
+
                     for (i, line) in display_text.lines().enumerate() {
                         let transform = c.transform.trans(3.0, 17.0 + i as f64 * line_height);
                         if let Err(e) = text::Text::new_color(text_color, font_size).draw(
@@ -212,7 +222,6 @@ impl CPU {
                 glyphs.factory.encoder.flush(&mut window.device);
             }
         }
-
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
