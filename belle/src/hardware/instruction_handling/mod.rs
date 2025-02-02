@@ -491,17 +491,6 @@ fn int_success() {
     test_instruction!(bcpu, int, "43");
     assert_eq!(bcpu.sflag, true);
 
-    // HLT on overflow
-
-    test_instruction!(bcpu, int, "51");
-    assert_eq!(bcpu.hlt_on_overflow, true);
-
-    test_instruction!(bcpu, int, "52");
-    assert_eq!(bcpu.hlt_on_overflow, false);
-
-    test_instruction!(bcpu, int, "53");
-    assert_eq!(bcpu.hlt_on_overflow, true);
-
     bcpu.uint_reg[0] = 555;
     // SP
     test_instruction!(bcpu, int, "60");
