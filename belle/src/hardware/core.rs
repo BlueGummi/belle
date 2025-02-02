@@ -1,24 +1,26 @@
 use crate::{config::CONFIG, interrupt::*, Argument::*, Instruction::*, *};
+#[cfg(feature = "window")]
+use sdl2::event::Event;
+#[cfg(feature = "window")]
+use sdl2::keyboard::Keycode;
+#[cfg(feature = "window")]
+use sdl2::pixels::Color;
+
 use colored::Colorize;
 use std::{thread, time::Duration};
 pub const MEMORY_SIZE: usize = 65536;
-#[cfg(feature = "window")]
-extern crate piston_window;
-#[cfg(feature = "window")]
-use piston_window::*;
 
 #[cfg(feature = "window")]
-use rusttype::Font;
+use rusttype::*;
 
 #[cfg(feature = "window")]
-const WIDTH: usize = 128;
+const WIDTH: usize = 800;
 #[cfg(feature = "window")]
-const HEIGHT: usize = 104;
+const HEIGHT: usize = 600;
 #[cfg(feature = "window")]
-const SQUARE_SIZE: f64 = 7.;
-#[cfg(feature = "window")]
-const FONT_DATA: &[u8] = include_bytes!("../vga.ttf");
+const FONT_SIZE: usize = 16;
 
+#[cfg(feature = "window")]
 use std::sync::mpsc;
 
 #[derive(Debug, Clone)]
@@ -92,24 +94,27 @@ impl CPU {
             return Ok(());
         }
 
-        #[allow(unused)]
+        #[cfg(feature = "window")]
         let (tx, rx) = mpsc::sync_channel(1);
 
         let execution_handle = {
+            #[cfg(feature = "window")]
             let tx = tx.clone();
             let mut self_clone = self.clone();
+
+            let delay = if let Some(delay) = CONFIG.time_delay {
+                delay
+            } else {
+                0
+            };
+            let delay = delay as u64;
             thread::spawn(move || {
                 while self_clone.running {
-                    if let Some(delay) = CONFIG.time_delay {
-                        if delay != 0 {
-                            thread::sleep(Duration::from_millis(delay.into()));
-                        }
+                    if delay != 0 {
+                        thread::sleep(Duration::from_millis(delay));
                     }
-
-                    match self_clone.memory.get(self_clone.pc as usize) {
-                        Some(&Some(instruction)) => {
-                            self_clone.ir = instruction as i16;
-                        }
+                    match self_clone.memory[self_clone.pc as usize] {
+                        Some(instruction) => self_clone.ir = instruction as i16,
                         _ => {
                             self_clone.err = true;
                             let error_msg = UnrecoverableError::SegmentationFault(
@@ -121,6 +126,7 @@ impl CPU {
                             );
                             self_clone.errmsg = error_msg.only_err().to_string();
                             self_clone.running = false;
+                            #[cfg(feature = "window")]
                             let _ = tx.send(None);
                             return Err(error_msg);
                         }
@@ -131,6 +137,7 @@ impl CPU {
                         self_clone.err = true;
                         self_clone.errmsg = e.only_err().to_string();
                         self_clone.running = false;
+                        #[cfg(feature = "window")]
                         let _ = tx.send(None);
                         return Err(e);
                     }
@@ -139,13 +146,11 @@ impl CPU {
                         println!("{}", self_clone);
                     }
 
-                    let start = 0xFF;
-                    let end = 0x2C7;
                     if !CONFIG.no_display {
-                        let mut stringy = String::new();
-                        for index in start..end {
+                        let mut stringy = String::with_capacity(5000);
+                        for index in 0xFF..0x2C7 {
                             if let Some(value) =
-                                self_clone.memory.get(index as usize).copied().flatten()
+                                self_clone.memory.get(index as usize).and_then(|&x| x)
                             {
                                 if index % 76 == 0 {
                                     stringy.push('\n');
@@ -154,6 +159,7 @@ impl CPU {
                             }
                         }
 
+                        #[cfg(feature = "window")]
                         if self_clone.running {
                             let _ = tx.send(Some(stringy));
                         } else {
@@ -167,61 +173,81 @@ impl CPU {
 
         #[cfg(feature = "window")]
         if !CONFIG.no_display && !self.debugging {
-            use piston_window::{
-                clear, text, Glyphs, PistonWindow, TextureSettings, WindowSettings,
-            };
+            let sdl_context = sdl2::init().unwrap();
+            let video_subsystem = sdl_context.video().unwrap();
+            let window = video_subsystem
+                .window("BELLE display", WIDTH as u32, HEIGHT as u32)
+                .position_centered()
+                .build()
+                .unwrap();
+            let mut canvas = window.into_canvas().build().unwrap();
 
-            let mut window: PistonWindow = WindowSettings::new(
-                "BELLE display",
-                [
-                    WIDTH as u32 * SQUARE_SIZE as u32,
-                    HEIGHT as u32 * SQUARE_SIZE as u32,
-                ],
-            )
-            .exit_on_esc(true)
-            .vsync(true)
-            .build()
-            .unwrap();
-
-            let texture_context = window.create_texture_context();
-            let font = Font::try_from_bytes(FONT_DATA).expect("Failed to load font");
-            let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
+            let font_data = include_bytes!("../vga.ttf");
+            let font = Font::try_from_bytes(font_data as &[u8]).unwrap();
+            let scale = Scale::uniform(FONT_SIZE as f32);
 
             let mut display_text = String::new();
+            let mut event_pump = sdl_context.event_pump().unwrap();
 
-            while let Some(event) = window.next() {
-                match rx.recv() {
-                    Ok(Some(new_string)) => {
-                        display_text = new_string;
+            'running: loop {
+                for event in event_pump.poll_iter() {
+                    match event {
+                        Event::Quit { .. }
+                        | Event::KeyDown {
+                            keycode: Some(Keycode::Escape),
+                            ..
+                        } => break 'running,
+                        _ => {}
                     }
-                    Ok(None) => break,
-                    Err(_) => (),
                 }
 
-                window.draw_2d(&event, |c, g, _| {
-                    clear([0.0, 0.0, 0.0, 1.0], g);
+                match rx.try_recv() {
+                    Ok(Some(new_string)) => display_text = new_string,
+                    Ok(None) => break 'running,
+                    _ => {}
+                }
 
-                    let text_color = [1.0, 1.0, 1.0, 1.0];
-                    let font_size = 16;
-                    let line_height = font_size as f64 * 1.2;
+                canvas.set_draw_color(Color::RGB(0, 0, 0));
+                canvas.clear();
 
-                    for (i, line) in display_text.lines().enumerate() {
-                        let transform = c.transform.trans(3.0, 17.0 + i as f64 * line_height);
-                        if let Err(e) = text::Text::new_color(text_color, font_size).draw(
-                            line,
-                            &mut glyphs,
-                            &c.draw_state,
-                            transform,
-                            g,
-                        ) {
-                            eprintln!("Error drawing text: {}", e);
+                let mut y = 0;
+                let texture_creator = canvas.texture_creator();
+                let mut text_texture = texture_creator
+                    .create_texture_target(None, WIDTH as u32, HEIGHT as u32)
+                    .unwrap();
+                canvas
+                    .with_texture_canvas(&mut text_texture, |text_canvas| {
+                        for line in display_text.lines() {
+                            let glyphs: Vec<_> =
+                                font.layout(line, scale, point(0.0, y as f32)).collect();
+                            for glyph in glyphs {
+                                if let Some(bounding_box) = glyph.pixel_bounding_box() {
+                                    glyph.draw(|x, y, v| {
+                                        let x = x as i32 + bounding_box.min.x;
+                                        let y = y as i32 + bounding_box.min.y;
+                                        if x >= 0 && y >= 0 && x < WIDTH as i32 && y < HEIGHT as i32
+                                        {
+                                            text_canvas.set_draw_color(Color::RGB(
+                                                (v * 255.0) as u8,
+                                                (v * 255.0) as u8,
+                                                (v * 255.0) as u8,
+                                            ));
+                                            text_canvas
+                                                .draw_point(sdl2::rect::Point::new(x, y))
+                                                .unwrap();
+                                        }
+                                    });
+                                }
+                            }
+                            y += FONT_SIZE as i32;
                         }
-                    }
-                });
-
-                glyphs.factory.encoder.flush(&mut window.device);
+                    })
+                    .unwrap();
+                canvas.copy(&text_texture, None, None).unwrap();
+                canvas.present();
             }
         }
+
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
