@@ -142,19 +142,21 @@ impl CPU {
 
                     let start = 0xFF;
                     let end = 0x200;
-                    let mut stringy = String::new();
-                    for index in start..end {
-                        if let Some(value) =
-                            self_clone.memory.get(index as usize).copied().flatten()
-                        {
-                            stringy.push(value as u8 as char);
+                    if !CONFIG.no_display {
+                        let mut stringy = String::new();
+                        for index in start..end {
+                            if let Some(value) =
+                                self_clone.memory.get(index as usize).copied().flatten()
+                            {
+                                stringy.push(value as u8 as char);
+                            }
                         }
-                    }
 
-                    if self_clone.running {
-                        let _ = tx.send(Some(stringy));
-                    } else {
-                        let _ = tx.send(None);
+                        if self_clone.running {
+                            let _ = tx.send(Some(stringy));
+                        } else {
+                            let _ = tx.send(None);
+                        }
                     }
                 }
                 Ok(())
@@ -171,6 +173,7 @@ impl CPU {
                 ],
             )
             .exit_on_esc(true)
+            .vsync(true)
             .build()
             .unwrap();
 
