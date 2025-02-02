@@ -3,8 +3,26 @@ use colored::Colorize;
 use std::{thread, time::Duration};
 pub const VMEM_START: usize = 0x1000;
 pub const MEMORY_SIZE: usize = 65536;
+#[cfg(feature = "window")]
+extern crate piston_window;
+#[cfg(feature = "window")]
+use piston_window::*;
 
-#[derive(Debug)]
+#[cfg(feature = "window")]
+use rusttype::Font;
+
+#[cfg(feature = "window")]
+const WIDTH: usize = 128;
+#[cfg(feature = "window")]
+const HEIGHT: usize = 104;
+#[cfg(feature = "window")]
+const SQUARE_SIZE: f64 = 7.;
+#[cfg(feature = "window")]
+const FONT_DATA: &[u8] = include_bytes!("../vga.ttf");
+
+use std::sync::mpsc;
+
+#[derive(Debug, Clone)]
 pub struct CPU {
     pub int_reg: [i16; 4], // r0 thru r5
     pub uint_reg: [u16; 2],
@@ -81,86 +99,127 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
-        print_t();
-        while self.running {
-            if !CONFIG.debug {
-                let _ = ctrlc::set_handler(move || {
-                    println!("Halting...");
-                    std::process::exit(0);
-                });
-            }
-            let mut clock = CLOCK.lock().unwrap(); // might panic
-            *clock += 1;
-            if CONFIG.time_delay != Some(0) && CONFIG.time_delay.is_some() {
-                thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
-            }
-            std::mem::drop(clock); // clock must go bye bye so it unlocks
-
-            match self.memory[self.pc as usize] {
-                Some(instruction) => {
-                    self.ir = instruction as i16;
-                }
-                None => {
-                    self.err = true;
-                    self.errmsg = UnrecoverableError::SegmentationFault(
-                        self.ir,
-                        self.pc,
-                        Some("Segmentation fault while finding next instruction".to_string()),
-                    )
-                    .only_err()
-                    .to_string();
-
-                    self.pmem = !CONFIG.no_print_memory;
-                    print_b();
-                    if CONFIG.pretty || CONFIG.verbose {
-                        println!("{self}");
+        let (tx, rx) = mpsc::channel();
+        let execution_handle = {
+            let tx = tx.clone();
+            let mut self_clone = self.clone(); // Ensure thread-safe usage
+            thread::spawn(move || {
+                while self_clone.running {
+                    let mut clock = CLOCK.lock().unwrap();
+                    *clock += 1;
+                    if CONFIG.time_delay != Some(0) && CONFIG.time_delay.is_some() {
+                        thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
                     }
-                    return Err(UnrecoverableError::SegmentationFault(
-                        self.ir,
-                        self.pc,
-                        Some("Segmentation fault while finding next instruction".to_string()),
-                    ));
-                }
-            }
-            let parsed_ins = self.decode_instruction();
-            if let Err(e) = self.execute_instruction(&parsed_ins) {
-                self.err = true;
-                self.errmsg = e.only_err().to_string();
-                self.running = false;
+                    std::mem::drop(clock);
 
-                self.pmem = !CONFIG.no_print_memory;
-                if CONFIG.pretty || CONFIG.verbose {
-                    println!("{self}");
-                }
-                return Err(e);
-            }
-            if CONFIG.verbose && self.running {
-                // avoid printing halted twice
-                println!("{self}");
-            }
-            if !self.running {
-                break;
-            }
-            if CONFIG.debug {
-                self.record_state();
-            }
+                    match self_clone.memory[self_clone.pc as usize] {
+                        Some(instruction) => {
+                            self_clone.ir = instruction as i16;
+                        }
+                        None => {
+                            self_clone.err = true;
+                            let error_msg = UnrecoverableError::SegmentationFault(
+                                self_clone.ir,
+                                self_clone.pc,
+                                Some(
+                                    "Segmentation fault while finding next instruction".to_string(),
+                                ),
+                            );
+                            self_clone.errmsg = error_msg.only_err().to_string();
+                            self_clone.running = false;
+                            eprintln!("Error: {}", self_clone.errmsg);
+                            return Err(error_msg);
+                        }
+                    }
 
-            let clock = CLOCK.lock().unwrap();
+                    let parsed_ins = self_clone.decode_instruction();
+                    if let Err(e) = self_clone.execute_instruction(&parsed_ins) {
+                        self_clone.err = true;
+                        self_clone.errmsg = e.only_err().to_string();
+                        self_clone.running = false;
+                        eprintln!("Error: {}", self_clone.errmsg);
+                        return Err(e);
+                    }
 
-            if self.oflag && self.hlt_on_overflow {
-                self.running = false;
-            }
-
-            if let Some(v) = self.max_clk {
-                if *clock == v as u32 {
-                    self.running = false;
                     if CONFIG.verbose {
-                        println!("Clock limit reached");
+                        println!("{}", self_clone);
+                    }
+                    if self_clone.oflag && self_clone.hlt_on_overflow {
+                        self_clone.running = false;
+                    }
+
+                    if let Some(v) = self_clone.max_clk {
+                        if *CLOCK.lock().unwrap() == v as u32 {
+                            self_clone.running = false;
+
+                            println!("Clock limit reached");
+                        }
+                    }
+                    let starting_point = 0x000;
+                    let end_point = 0xFF;
+                    let mut stringy = String::new();
+                    for index in starting_point..end_point {
+                        if let Some(value) = self_clone.memory[index as usize] {
+                            stringy.push(value as u8 as char);
+                        }
+                    }
+                    if self_clone.running {
+                        let _ = tx.send(Some(stringy));
+                    } else {
+                        let _ = tx.send(None); // wham bam we are done
                     }
                 }
-            }
-        }
+                Ok(())
+            })
+        };
+        #[cfg(feature = "window")]
+        {
+            let mut window: PistonWindow = WindowSettings::new(
+                "BELLE display",
+                [
+                    WIDTH as u32 * SQUARE_SIZE as u32,
+                    HEIGHT as u32 * SQUARE_SIZE as u32,
+                ],
+            )
+            .exit_on_esc(true)
+            .build()
+            .unwrap();
 
+            let texture_context = window.create_texture_context();
+            let font = Font::try_from_bytes(FONT_DATA).expect("Failed to load font");
+            let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
+
+            let mut display_text = String::new();
+
+            while let Some(event) = window.next() {
+                match rx.try_recv() {
+                    Ok(Some(new_string)) => display_text = new_string,
+                    Ok(None) => break,
+                    Err(_) => {}
+                }
+
+                window.draw_2d(&event, |c, g, _| {
+                    clear([0.0, 0.0, 0.0, 1.0], g);
+
+                    let transform = c.transform.trans(2., 17.);
+                    let text_color = [1.0, 1.0, 1.0, 1.0];
+                    let font_size = 16;
+
+                    if let Err(e) = text::Text::new_color(text_color, font_size).draw(
+                        &display_text,
+                        &mut glyphs,
+                        &c.draw_state,
+                        transform,
+                        g,
+                    ) {
+                        eprintln!("Error drawing text: {}", e);
+                    }
+                });
+
+                glyphs.factory.encoder.flush(&mut window.device);
+            }
+
+        }
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
@@ -177,7 +236,7 @@ impl CPU {
             std::mem::drop(clock);
             self.record_state();
         }
-
+        let _ = execution_handle.join().unwrap();
         Ok(())
     }
 

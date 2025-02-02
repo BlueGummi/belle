@@ -2,28 +2,6 @@ use crate::{config::CONFIG, *};
 use colored::*;
 use std::io::{self, Read, Write};
 
-#[cfg(feature = "window")]
-extern crate piston_window;
-#[cfg(feature = "window")]
-use crate::UnrecoverableError::*;
-#[cfg(feature = "window")]
-use piston_window::*;
-
-#[cfg(feature = "window")]
-use rusttype::Font;
-
-#[cfg(feature = "window")]
-use std::time::{Duration, Instant};
-
-#[cfg(feature = "window")]
-const WIDTH: usize = 128;
-#[cfg(feature = "window")]
-const HEIGHT: usize = 104;
-#[cfg(feature = "window")]
-const SQUARE_SIZE: f64 = 7.;
-#[cfg(feature = "window")]
-const FONT_DATA: &[u8] = include_bytes!("../../../src/vga.ttf");
-
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
         if self.fuzz {
@@ -178,7 +156,7 @@ impl CPU {
                 print_t();
             }
             10 => {
-                std::thread::sleep(std::time::Duration::from_secs(1));
+                std::thread::sleep(std::time::Duration::from_secs(self.uint_reg[0] as u64));
             }
             11 => self.zflag = true,
             12 => self.zflag = false,
@@ -227,139 +205,6 @@ impl CPU {
             61 => self.bp = self.uint_reg[0],
             70 => self.pushret = true,
             71 => self.pushret = false,
-            #[cfg(feature = "window")]
-            100 => {
-                if CONFIG.no_display {
-                    return Ok(());
-                }
-                let duration = Duration::new(self.uint_reg[0] as u64, 0);
-                let start_time = Instant::now();
-
-                let window = WindowSettings::new(
-                    "BELLE display",
-                    [
-                        WIDTH as u32 * SQUARE_SIZE as u32,
-                        HEIGHT as u32 * SQUARE_SIZE as u32,
-                    ],
-                )
-                .exit_on_esc(true)
-                .build::<PistonWindow>();
-
-                let mut window = match window {
-                    Ok(win) => win,
-                    Err(e) => {
-                        return Err(WindowFail(
-                            self.ir,
-                            self.pc,
-                            Some(format!(
-                                "Failed to create window on interrupt call 100: {}",
-                                e
-                            )),
-                        ))
-                    }
-                };
-
-                let pixel_data: [[u16; 8]; 104] = {
-                    let mut data = [[0; 8]; 104];
-                    for (i, row) in data.iter_mut().enumerate() {
-                        for (j, col) in row.iter_mut().enumerate() {
-                            let index = VMEM_START + (i * 8 + j) * std::mem::size_of::<u16>();
-                            *col = self.memory.get(index).unwrap_or(&None).unwrap_or(0) as u16;
-                        }
-                    }
-                    data
-                };
-
-                while let Some(event) = window.next() {
-                    if start_time.elapsed() >= duration {
-                        break;
-                    }
-                    window.draw_2d(&event, |c, g, _| {
-                        clear([0.0, 0.0, 0.0, 1.0], g);
-
-                        for (row_index, row) in pixel_data.iter().enumerate() {
-                            for (u16_index, &u16_value) in row.iter().enumerate() {
-                                for x in 0..16 {
-                                    let is_set = (u16_value >> (15 - x)) & 1 == 1;
-                                    let color = if is_set {
-                                        [1.0, 1.0, 1.0, 1.0]
-                                    } else {
-                                        [0.0, 0.0, 0.0, 1.0]
-                                    };
-                                    rectangle(
-                                        color,
-                                        [
-                                            (u16_index * 16 + x) as f64 * SQUARE_SIZE,
-                                            row_index as f64 * SQUARE_SIZE,
-                                            SQUARE_SIZE,
-                                            SQUARE_SIZE,
-                                        ],
-                                        c.transform,
-                                        g,
-                                    );
-                                }
-                            }
-                        }
-                    });
-                }
-                window.window.hide();
-            }
-            #[cfg(feature = "window")]
-            101 => {
-                let duration = Duration::new(self.uint_reg[0] as u64, 0);
-                let start_time = Instant::now();
-                let starting_point = self.int_reg[0];
-                let end_point = self.int_reg[1];
-                let mut stringy = String::from("");
-                for index in starting_point..end_point {
-                    if index < 0 || index as usize >= self.memory.len() {
-                        return Err(self.generate_segfault(
-                            "Segmentation fault. Memory index out of bounds on interrupt call 8.",
-                        ));
-                    }
-
-                    if let Some(value) = self.memory[index as usize] {
-                        stringy = format!("{}{}", stringy, value as u8 as char);
-                    }
-                }
-
-                let width = WIDTH as u32 * SQUARE_SIZE as u32;
-                let height = HEIGHT as u32 * SQUARE_SIZE as u32;
-                let mut window: PistonWindow =
-                    WindowSettings::new("BELLE display", [width, height])
-                        .exit_on_esc(true)
-                        .build()
-                        .unwrap();
-                let texture_context = window.create_texture_context();
-
-                let font = Font::try_from_bytes(FONT_DATA).expect("Failed to load font");
-                let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
-                while let Some(event) = window.next() {
-                    if start_time.elapsed() >= duration {
-                        break;
-                    }
-
-                    window.draw_2d(&event, |c, g, _| {
-                        clear([0.0, 0.0, 0.0, 1.0], g);
-
-                        let transform = c.transform.trans(2., 17.);
-                        let text_color = [1.0, 1.0, 1.0, 1.0];
-                        let font_size = 16;
-
-                        if let Err(e) = text::Text::new_color(text_color, font_size).draw(
-                            &stringy,
-                            &mut glyphs,
-                            &c.draw_state,
-                            transform,
-                            g,
-                        ) {
-                            eprintln!("Error drawing text: {}", e);
-                        }
-                    });
-                    glyphs.factory.encoder.flush(&mut window.device);
-                }
-                window.window.hide();
-            }
             _ => println!(
                 "{}",
                 RecoverableError::UnknownFlag(
