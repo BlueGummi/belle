@@ -39,12 +39,9 @@ pub struct CPU {
     pub oflag: bool,
     pub rflag: bool,
     pub sflag: bool,
-    pub hlt_on_overflow: bool,
     pub sp: u16,
     pub bp: u16,
     pub backward_stack: bool,
-    pub max_clk: Option<usize>,
-    pub hit_max_clk: bool,
     pub do_not_run: bool,
     pub err: bool,
     pub debugging: bool,
@@ -77,12 +74,9 @@ impl CPU {
             oflag: false,
             rflag: false,
             sflag: false,
-            hlt_on_overflow: false,
             sp: 99,
             bp: 99,
             backward_stack: false,
-            max_clk: None,
-            hit_max_clk: false,
             do_not_run: false,
             err: false,
             pushret: true,
@@ -92,33 +86,32 @@ impl CPU {
             fuzz: false,
         }
     }
-
     pub fn run(&mut self) -> PossibleCrash {
-        self.has_ran = true; // for debugger
+        self.has_ran = true;
         self.running = true;
         if self.do_not_run {
             return Ok(());
         }
+
         #[allow(unused)]
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = mpsc::sync_channel(1);
 
         let execution_handle = {
             let tx = tx.clone();
             let mut self_clone = self.clone();
             thread::spawn(move || {
                 while self_clone.running {
-                    let mut clock = CLOCK.lock().unwrap();
-                    *clock += 1;
-                    if CONFIG.time_delay != Some(0) && CONFIG.time_delay.is_some() {
-                        thread::sleep(Duration::from_millis(CONFIG.time_delay.unwrap().into()));
+                    if let Some(delay) = CONFIG.time_delay {
+                        if delay != 0 {
+                            thread::sleep(Duration::from_millis(delay.into()));
+                        }
                     }
-                    std::mem::drop(clock);
 
-                    match self_clone.memory[self_clone.pc as usize] {
-                        Some(instruction) => {
+                    match self_clone.memory.get(self_clone.pc as usize) {
+                        Some(&Some(instruction)) => {
                             self_clone.ir = instruction as i16;
                         }
-                        None => {
+                        _ => {
                             self_clone.err = true;
                             let error_msg = UnrecoverableError::SegmentationFault(
                                 self_clone.ir,
@@ -129,6 +122,7 @@ impl CPU {
                             );
                             self_clone.errmsg = error_msg.only_err().to_string();
                             self_clone.running = false;
+                            let _ = tx.send(None);
                             return Err(error_msg);
                         }
                     }
@@ -138,42 +132,37 @@ impl CPU {
                         self_clone.err = true;
                         self_clone.errmsg = e.only_err().to_string();
                         self_clone.running = false;
+                        let _ = tx.send(None);
                         return Err(e);
                     }
 
                     if CONFIG.verbose {
                         println!("{}", self_clone);
                     }
-                    if self_clone.oflag && self_clone.hlt_on_overflow {
-                        self_clone.running = false;
-                    }
 
-                    if let Some(v) = self_clone.max_clk {
-                        if *CLOCK.lock().unwrap() == v as u32 {
-                            self_clone.running = false;
-
-                            println!("Clock limit reached");
-                        }
-                    }
-                    let starting_point = 0xFF;
-                    let end_point = 0x200;
+                    let start = 0xFF;
+                    let end = 0x200;
                     let mut stringy = String::new();
-                    for index in starting_point..end_point {
-                        if let Some(value) = self_clone.memory[index as usize] {
+                    for index in start..end {
+                        if let Some(value) =
+                            self_clone.memory.get(index as usize).copied().flatten()
+                        {
                             stringy.push(value as u8 as char);
                         }
                     }
+
                     if self_clone.running {
                         let _ = tx.send(Some(stringy));
                     } else {
-                        let _ = tx.send(None); // wham bam we are done
+                        let _ = tx.send(None);
                     }
                 }
                 Ok(())
             })
         };
+
         #[cfg(feature = "window")]
-        {
+        if !CONFIG.no_display && !self.debugging {
             let mut window: PistonWindow = WindowSettings::new(
                 "BELLE display",
                 [
@@ -190,35 +179,37 @@ impl CPU {
             let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
 
             let mut display_text = String::new();
-
             while let Some(event) = window.next() {
-                match rx.try_recv() {
+                match rx.recv() {
                     Ok(Some(new_string)) => display_text = new_string,
                     Ok(None) => break,
-                    Err(_) => {}
+                    Err(_) => (),
                 }
 
                 window.draw_2d(&event, |c, g, _| {
                     clear([0.0, 0.0, 0.0, 1.0], g);
 
-                    let transform = c.transform.trans(2., 17.);
                     let text_color = [1.0, 1.0, 1.0, 1.0];
                     let font_size = 16;
-
-                    if let Err(e) = text::Text::new_color(text_color, font_size).draw(
-                        &display_text,
-                        &mut glyphs,
-                        &c.draw_state,
-                        transform,
-                        g,
-                    ) {
-                        eprintln!("Error drawing text: {}", e);
+                    let line_height = font_size as f64 * 1.2;
+                    for (i, line) in display_text.lines().enumerate() {
+                        let transform = c.transform.trans(3.0, 17.0 + i as f64 * line_height);
+                        if let Err(e) = text::Text::new_color(text_color, font_size).draw(
+                            line,
+                            &mut glyphs,
+                            &c.draw_state,
+                            transform,
+                            g,
+                        ) {
+                            eprintln!("Error drawing text: {}", e);
+                        }
                     }
                 });
 
                 glyphs.factory.encoder.flush(&mut window.device);
             }
         }
+
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
@@ -230,11 +221,8 @@ impl CPU {
                 println!("{self}");
             }
             print_b();
-            let mut clock = CLOCK.lock().unwrap(); // might panic
-            *clock += 1;
-            std::mem::drop(clock);
-            self.record_state();
         }
+
         let _ = execution_handle.join().unwrap();
         Ok(())
     }

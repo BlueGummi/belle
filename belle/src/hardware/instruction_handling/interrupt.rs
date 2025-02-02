@@ -161,9 +161,6 @@ impl CPU {
             11 => self.zflag = true,
             12 => self.zflag = false,
             13 => self.zflag = !self.zflag,
-            20 => {
-                self.max_clk = Some(self.int_reg[0] as usize);
-            }
             21 => self.oflag = true,
             22 => self.oflag = false,
             23 => self.oflag = !self.oflag,
@@ -196,10 +193,6 @@ impl CPU {
             41 => self.sflag = true,
             42 => self.sflag = false,
             43 => self.sflag = !self.sflag,
-
-            51 => self.hlt_on_overflow = true,
-            52 => self.hlt_on_overflow = false,
-            53 => self.hlt_on_overflow = !self.hlt_on_overflow,
 
             60 => self.sp = self.uint_reg[0],
             61 => self.bp = self.uint_reg[0],

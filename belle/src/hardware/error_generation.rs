@@ -152,12 +152,6 @@ impl CPU {
         };
         if overflowed {
             self.oflag = true;
-            if self.hlt_on_overflow {
-                self.running = false;
-                if CONFIG.verbose {
-                    println!("Halting...");
-                }
-            }
             return Err(RecoverableError::Overflow(
                 self.pc,
                 Some("Overflowed a register.".to_string()),

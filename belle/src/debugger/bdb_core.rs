@@ -9,7 +9,6 @@ pub fn cls() {
 }
 pub struct BDB {
     pub dbgcpu: CPU,
-    pub clock: u32,
     pub breakpoints: Vec<u16>,
     pub exe: String,
 }
@@ -20,7 +19,6 @@ impl BDB {
         dbgcpu.debugging = true;
         Ok(Self {
             dbgcpu,
-            clock: 0,
             exe: executable_path.to_string(),
             breakpoints: Vec::new(),
         })
@@ -63,7 +61,6 @@ impl BDB {
                 "r" | "run" => self.handle_run(),
                 "spc" => self.handle_set_pc(arg),
                 "p" | "pmem" => self.handle_print_memory(arg),
-                "i" | "info" => self.handle_info(arg),
                 "wb" => self.handle_where_begins(),
                 "e" | "exc" => self.handle_execute(),
                 "a" => self.handle_print_all_memory(),

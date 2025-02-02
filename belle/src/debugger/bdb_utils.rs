@@ -27,15 +27,10 @@ impl BDB {
                 ("wb", "Print CPU's starting memory address"),
                 ("e", "Execute instruction"),
                 ("w", "View the state of the CPU"),
-                ("i", "Print CPU state at debugger's clock"),
                 ("b", "Set a breakpoint"),
                 ("br", "Remove a breakpoint"),
                 ("ba", "Remove all breakpoints"),
                 ("bp", "Print all breakpoints"),
-                (
-                    "im",
-                    "Print a value in memory at the clock after the CPU has run",
-                ),
             ];
 
             println!("{}", "Available commands:".blue());
@@ -54,7 +49,6 @@ impl BDB {
                 "spc" => println!("'set program counter' takes one argument to set the CPU's program counter."),
                 "p" | "pmem" => println!("'print memory' takes one argument. Prints the value at the specified memory address."),
                 "e" => println!("'execute' takes no arguments. Executes the instruction at the current program counter."),
-                "i" => println!("'info' takes one argument. Prints the CPU state at the specified clock cycle."),
                 "cls" => println!("'clear' takes no arguments. Resets the cursor to the top left of the terminal."),
                 "wb" => println!("'where begins' takes no arguments. Prints the starting memory address of the CPU."),
                 "a" => println!("'all instructions' takes no arguments. Prints all memory as instructions."),
@@ -133,20 +127,6 @@ impl BDB {
         }
     }
 
-    pub fn handle_info(&mut self, arg: &str) {
-        if !self.dbgcpu.has_ran {
-            eprintln!("{}", "CPU has not run.".red());
-            return;
-        }
-        match arg.parse::<u32>() {
-            Ok(n) => {
-                self.clock = n;
-                CPU::display_state(&self.clock);
-            }
-            Err(_) => eprintln!("Error parsing second argument."),
-        }
-    }
-
     pub fn handle_where_begins(&self) {
         if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
@@ -173,7 +153,6 @@ impl BDB {
             eprintln!("{e}");
         }
 
-        self.dbgcpu.record_state();
         self.dbgcpu.pmem = false;
         println!("{}", self.dbgcpu);
         self.dbgcpu.pmem = true;
