@@ -99,7 +99,9 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
+        #[allow(unused)]
         let (tx, rx) = mpsc::channel();
+
         let execution_handle = {
             let tx = tx.clone();
             let mut self_clone = self.clone(); // Ensure thread-safe usage
@@ -218,7 +220,6 @@ impl CPU {
 
                 glyphs.factory.encoder.flush(&mut window.device);
             }
-
         }
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
