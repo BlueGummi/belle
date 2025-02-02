@@ -23,6 +23,7 @@ const HEIGHT: usize = 104;
 const SQUARE_SIZE: f64 = 7.;
 #[cfg(feature = "window")]
 const FONT_DATA: &[u8] = include_bytes!("../../../src/vga.ttf");
+
 impl CPU {
     pub fn handle_int(&mut self, arg: &Argument) -> PossibleCrash {
         if self.fuzz {
@@ -301,6 +302,7 @@ impl CPU {
                         }
                     });
                 }
+                window.window.hide();
             }
             #[cfg(feature = "window")]
             101 => {
@@ -332,11 +334,11 @@ impl CPU {
 
                 let font = Font::try_from_bytes(FONT_DATA).expect("Failed to load font");
                 let mut glyphs = Glyphs::from_font(font, texture_context, TextureSettings::new());
-
                 while let Some(event) = window.next() {
                     if start_time.elapsed() >= duration {
                         break;
                     }
+
                     window.draw_2d(&event, |c, g, _| {
                         clear([0.0, 0.0, 0.0, 1.0], g);
 
@@ -356,6 +358,7 @@ impl CPU {
                     });
                     glyphs.factory.encoder.flush(&mut window.device);
                 }
+                window.window.hide();
             }
             _ => println!(
                 "{}",
