@@ -194,7 +194,9 @@ impl CPU {
                 print_t();
             }
             10 => {
-                std::thread::sleep(std::time::Duration::from_millis((self.uint_reg[0] as u64)*100));
+                std::thread::sleep(std::time::Duration::from_millis(
+                    (self.uint_reg[0] as u64) * 100,
+                ));
             }
             11 => self.zflag = true,
             12 => self.zflag = false,
