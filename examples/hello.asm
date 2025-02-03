@@ -1,9 +1,13 @@
-	jmp @hello_end
-hello_start:
-	.asciiz "Hello, world!"
-	.word 10
-hello_end:
-	lea r0, @hello_start
-	lea r1, @hello_end
-	int 8
-	hlt
+.start [0x0]
+    mov r4, 0x7F
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    int 10
+    .pad 247
+    .asciiz "Hello, world!"
+    .word 10
+    .asciiz "Testt"
