@@ -148,34 +148,46 @@ void get_file_size(const char *filename, char *size_str, size_t size_str_len);
 #define FMTS (sign ? FORMAT_STRING_SIGNED : FORMAT_STRING)
 #define FMTSC (sign ? FORMAT_STRING_COLORED_SIGNED : FORMAT_STRING_COLORED)
 CLI args = {0};
+
+#ifdef _WIN32
+int is_terminal() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode;
+    return GetConsoleMode(hConsole, &mode);
+}
+#else
+int is_terminal() {
+    return isatty(fileno(stdout));
+}
+#endif
 #define ANSI_RESET "\033[0m"
-#define ANSI_BOLD (args.colors ? "\033[1m" : "")
-#define ANSI_UNDERLINE (args.colors ? "\033[4m" : "")
-#define ANSI_BLACK (args.colors ? "\033[30m" : "")
-#define ANSI_RED (args.colors ? "\033[31m" : "")
-#define ANSI_GREEN (args.colors ? "\033[32m" : "")
-#define ANSI_YELLOW (args.colors ? "\033[33m" : "")
-#define ANSI_BLUE (args.colors ? "\033[34m" : "")
-#define ANSI_MAGENTA (args.colors ? "\033[35m" : "")
-#define ANSI_CYAN (args.colors ? "\033[36m" : "")
-#define ANSI_WHITE (args.colors ? "\033[37m" : "")
-#define ANSI_GRAY (args.colors ? "\033[90m" : "")
-#define ANSI_LIGHT_GRAY (args.colors ? "\033[37m" : "")
-#define ANSI_BG_BLACK (args.colors ? "\033[40m" : "")
-#define ANSI_BG_RED (args.colors ? "\033[41m" : "")
-#define ANSI_BG_GREEN (args.colors ? "\033[42m" : "")
-#define ANSI_BG_YELLOW (args.colors ? "\033[43m" : "")
-#define ANSI_BG_BLUE (args.colors ? "\033[44m" : "")
-#define ANSI_BG_MAGENTA (args.colors ? "\033[45m" : "")
-#define ANSI_BG_CYAN (args.colors ? "\033[46m" : "")
-#define ANSI_BG_WHITE (args.colors ? "\033[47m" : "")
-#define ANSI_BRIGHT_BLACK (args.colors ? "\033[90m" : "")
-#define ANSI_BRIGHT_RED (args.colors ? "\033[91m" : "")
-#define ANSI_BRIGHT_GREEN (args.colors ? "\033[92m" : "")
-#define ANSI_BRIGHT_YELLOW (args.colors ? "\033[93m" : "")
-#define ANSI_BRIGHT_BLUE (args.colors ? "\033[94m" : "")
-#define ANSI_BRIGHT_MAGENTA (args.colors ? "\033[95m" : "")
-#define ANSI_BRIGHT_CYAN (args.colors ? "\033[96m" : "")
-#define ANSI_BRIGHT_WHITE (args.colors ? "\033[97m" : "")
+#define ANSI_BOLD (args.colors && is_term ? "\033[1m" : "")
+#define ANSI_UNDERLINE (args.colors && is_term ? "\033[4m" : "")
+#define ANSI_BLACK (args.colors && is_term ? "\033[30m" : "")
+#define ANSI_RED (args.colors && is_term ? "\033[31m" : "")
+#define ANSI_GREEN (args.colors && is_term ? "\033[32m" : "")
+#define ANSI_YELLOW (args.colors && is_term ? "\033[33m" : "")
+#define ANSI_BLUE (args.colors && is_term ? "\033[34m" : "")
+#define ANSI_MAGENTA (args.colors && is_term ? "\033[35m" : "")
+#define ANSI_CYAN (args.colors && is_term ? "\033[36m" : "")
+#define ANSI_WHITE (args.colors && is_term ? "\033[37m" : "")
+#define ANSI_GRAY (args.colors && is_term ? "\033[90m" : "")
+#define ANSI_LIGHT_GRAY (args.colors && is_term ? "\033[37m" : "")
+#define ANSI_BG_BLACK (args.colors && is_term ? "\033[40m" : "")
+#define ANSI_BG_RED (args.colors && is_term ? "\033[41m" : "")
+#define ANSI_BG_GREEN (args.colors && is_term ? "\033[42m" : "")
+#define ANSI_BG_YELLOW (args.colors && is_term ? "\033[43m" : "")
+#define ANSI_BG_BLUE (args.colors && is_term ? "\033[44m" : "")
+#define ANSI_BG_MAGENTA (args.colors && is_term ? "\033[45m" : "")
+#define ANSI_BG_CYAN (args.colors && is_term ? "\033[46m" : "")
+#define ANSI_BG_WHITE (args.colors && is_term ? "\033[47m" : "")
+#define ANSI_BRIGHT_BLACK (args.colors && is_term ? "\033[90m" : "")
+#define ANSI_BRIGHT_RED (args.colors && is_term ? "\033[91m" : "")
+#define ANSI_BRIGHT_GREEN (args.colors && is_term ? "\033[92m" : "")
+#define ANSI_BRIGHT_YELLOW (args.colors && is_term ? "\033[93m" : "")
+#define ANSI_BRIGHT_BLUE (args.colors && is_term ? "\033[94m" : "")
+#define ANSI_BRIGHT_MAGENTA (args.colors && is_term ? "\033[95m" : "")
+#define ANSI_BRIGHT_CYAN (args.colors && is_term ? "\033[96m" : "")
+#define ANSI_BRIGHT_WHITE (args.colors && is_term ? "\033[97m" : "")
 #define ANSI_RED_CONST "\033[31m"
 #define ANSI_BOLD_CONST "\033[1m"

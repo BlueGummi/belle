@@ -81,6 +81,7 @@ void *process_instructions(void *arg, char *filename) {
     return NULL;
 }
 int main(int argc, char *argv[]) {
+    is_term = is_terminal();
     args = parse_arguments(argc, argv);
     if (args.num_files == 0) {
         print_help(argv[0]);

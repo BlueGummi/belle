@@ -1,4 +1,5 @@
 #include "bdump.h"
+bool is_term = true;
 int bin_version = 0;
 bool in_char = false;
 bool next_in_char = false;
