@@ -18,7 +18,7 @@ void *process_instructions(void *arg, char *filename) {
         bin_version = data->buffer[1];
     }
     jump_map_global = jump_map_create();
-    for (size_t i = 0; i < data->bytes_read; i += 2) {
+    for (size_t i = 2; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if ((instruction >> 9) == 1) {
@@ -63,9 +63,12 @@ void *process_instructions(void *arg, char *filename) {
 
     print_header(metadata, filename);
     current_addr = current_addr_tmp;
-    for (size_t i = 0; i < data->bytes_read; i += 2) {
-        if (i + 1 < data->bytes_read) { // third loop adjusts columns and prints
+    for (size_t i = 2; i < data->bytes_read; i += 2) { // start at 2 to ignore version
+        if (i + 1 < data->bytes_read) {                // third loop adjusts columns and prints
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
+            if (i > 0 && instruction >> 8 == 1) {
+                continue; // metadata
+            }
             uint16_t next_instruction = (data->buffer[i + 2] << 8) | data->buffer[i + 3];
             Instruction ins = parse_instruction(instruction);
             Instruction ins2 = parse_instruction(next_instruction);
