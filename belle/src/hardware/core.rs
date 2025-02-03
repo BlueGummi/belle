@@ -131,7 +131,7 @@ impl CPU {
                                 if (index - 0xFF) % 76 == 0 {
                                     stringy.push('\n');
                                 }
-                                if value as u8 != 10 {
+                                if value as u8 != 10 && value as u8 as char != '\t' {
                                     stringy.push(value as u8 as char);
                                 }
                             }
