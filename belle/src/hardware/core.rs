@@ -192,14 +192,14 @@ impl CPU {
 
                 buffer.iter_mut().for_each(|p| *p = 0);
                 let mut x = 0;
-                let mut y = FONT_SIZE as usize;
+                let mut y = 0;
                 for line in display_text.lines() {
                     for character in line.chars() {
                         let (metrics, bitmap) = font.rasterize(character, FONT_SIZE);
 
                         for (i, alpha) in bitmap.iter().enumerate() {
                             let px = x + (i % metrics.width);
-                            let py = y + (i / metrics.width);
+                            let py = y + (i / metrics.width) + (FONT_SIZE as usize - metrics.height);
 
                             if px < WIDTH && py < HEIGHT {
                                 let color = if *alpha > 0 {
