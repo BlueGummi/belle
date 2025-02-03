@@ -6,16 +6,36 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
     int counter = 0;
     if (((ins->full_ins & 0xff) != 0) && ((ins->full_ins & 0xff00) >> 8 == 0)) { // check upper and lower 8 bits
         in_char = true;
-        if (((ins2->full_ins & 0xff) != 0) && ((ins2->full_ins & 0xff00) >> 8 == 0)) { // next must be a character
-            next_in_char = true;
-        } else {
-            next_in_char = false;
-        }
+        next_in_char = ((ins2->full_ins & 0xff) != 0) && ((ins2->full_ins & 0xff00) >> 8 == 0);
     } else {
         in_char = false;
         printed_addr = false;
         next_in_char = false;
     }
+    if (args.concat_chars && in_char) {
+        char temp[10];
+        switch (ins->full_ins) {
+        case '\n':
+            strcpy(temp, "\\n");
+            break;
+        case '\t':
+            strcpy(temp, "\\t");
+            break;
+        case '\\':
+            strcpy(temp, "\\\\");
+            break;
+        default:
+            if (ins->full_ins >= 32 && ins->full_ins < 127) {
+                temp[0] = (char) ins->full_ins;
+                temp[1] = '\0';
+            } else {
+                strcpy(temp, "?");
+            }
+        }
+
+        strcat(global_str, temp);
+    }
+
     if (!args.only_code) {
         for (size_t i = 0; i < jumpsHere->size; i++) {
             if (jumpsHere->data[i].destination == current_addr) {

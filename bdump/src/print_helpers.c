@@ -44,6 +44,7 @@ end:
     return;
 print_str:
     PRINTF("%s%s%s\n", ANSI_BRIGHT_GREEN, global_str, ANSI_RESET);
+    strncpy(global_str, "", 512);
 }
 
 #define PRINT_COLOR_AND_VALUE(color, format, value) \
