@@ -1,24 +1,7 @@
 use crate::{config::CONFIG, interrupt::*, Argument::*, Instruction::*, *};
-#[cfg(feature = "window")]
-use sdl2::event::Event;
-#[cfg(feature = "window")]
-use sdl2::keyboard::Keycode;
-#[cfg(feature = "window")]
-use sdl2::pixels::Color;
-
 use colored::Colorize;
 use std::{thread, time::Duration};
 pub const MEMORY_SIZE: usize = 65536;
-
-#[cfg(feature = "window")]
-use rusttype::*;
-
-#[cfg(feature = "window")]
-const WIDTH: usize = 685;
-#[cfg(feature = "window")]
-const HEIGHT: usize = 480;
-#[cfg(feature = "window")]
-const FONT_SIZE: usize = 16;
 
 #[cfg(feature = "window")]
 use std::sync::mpsc;
@@ -102,11 +85,7 @@ impl CPU {
             let tx = tx.clone();
             let mut self_clone = self.clone();
 
-            let delay = if let Some(delay) = CONFIG.time_delay {
-                delay
-            } else {
-                0
-            };
+            let delay = CONFIG.time_delay.unwrap_or_default();
             let delay = delay as u64;
             thread::spawn(move || {
                 while self_clone.running {
@@ -173,32 +152,37 @@ impl CPU {
 
         #[cfg(feature = "window")]
         if !CONFIG.no_display && !self.debugging {
-            let sdl_context = sdl2::init().unwrap();
-            let video_subsystem = sdl_context.video().unwrap();
-            let window = video_subsystem
-                .window("BELLE display", WIDTH as u32, HEIGHT as u32)
-                .position_centered()
-                .build()
-                .unwrap();
-            let mut canvas = window.into_canvas().build().unwrap();
+            use fontdue::{Font, FontSettings};
+            use minifb::{Key, Window, WindowOptions};
+
+            const WIDTH: usize = 685;
+            const HEIGHT: usize = 480;
+            const FONT_SIZE: f32 = 16.0;
+
+            let mut window = Window::new(
+                "BELLE display",
+                WIDTH,
+                HEIGHT,
+                WindowOptions {
+                    resize: true,
+                    scale: minifb::Scale::X1,
+                    scale_mode: minifb::ScaleMode::AspectRatioStretch,
+                    ..WindowOptions::default()
+                },
+            )
+            .unwrap_or_else(|e| {
+                panic!("Unable to create window: {}", e);
+            });
 
             let font_data = include_bytes!("../vga.ttf");
-            let font = Font::try_from_bytes(font_data as &[u8]).unwrap();
-            let scale = Scale::uniform(FONT_SIZE as f32);
+            let font = Font::from_bytes(font_data as &[u8], FontSettings::default()).unwrap();
 
             let mut display_text = String::new();
-            let mut event_pump = sdl_context.event_pump().unwrap();
+            let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
             'running: loop {
-                for event in event_pump.poll_iter() {
-                    match event {
-                        Event::Quit { .. }
-                        | Event::KeyDown {
-                            keycode: Some(Keycode::Escape),
-                            ..
-                        } => break 'running,
-                        _ => {}
-                    }
+                if !window.is_open() || window.is_key_down(Key::Escape) {
+                    break 'running;
                 }
 
                 match rx.try_recv() {
@@ -207,44 +191,39 @@ impl CPU {
                     _ => {}
                 }
 
-                canvas.set_draw_color(Color::RGB(0, 0, 0));
-                canvas.clear();
+                buffer.iter_mut().for_each(|p| *p = 0);
 
-                let mut y = 0;
-                let texture_creator = canvas.texture_creator();
-                let mut text_texture = texture_creator
-                    .create_texture_target(None, WIDTH as u32, HEIGHT as u32)
-                    .unwrap();
-                canvas
-                    .with_texture_canvas(&mut text_texture, |text_canvas| {
-                        for line in display_text.lines() {
-                            let glyphs: Vec<_> =
-                                font.layout(line, scale, point(0.0, y as f32)).collect();
-                            for glyph in glyphs {
-                                if let Some(bounding_box) = glyph.pixel_bounding_box() {
-                                    glyph.draw(|x, y, v| {
-                                        let x = x as i32 + bounding_box.min.x;
-                                        let y = y as i32 + bounding_box.min.y;
-                                        if x >= 0 && y >= 0 && x < WIDTH as i32 && y < HEIGHT as i32
-                                        {
-                                            text_canvas.set_draw_color(Color::RGB(
-                                                (v * 255.0) as u8,
-                                                (v * 255.0) as u8,
-                                                (v * 255.0) as u8,
-                                            ));
-                                            text_canvas
-                                                .draw_point(sdl2::rect::Point::new(x, y))
-                                                .unwrap();
-                                        }
-                                    });
-                                }
+                let mut x = 0;
+                let mut y = FONT_SIZE as usize;
+                for line in display_text.lines() {
+                    for character in line.chars() {
+                        let (metrics, bitmap) = font.rasterize(character, FONT_SIZE);
+
+                        for (i, alpha) in bitmap.iter().enumerate() {
+                            let px = x + (i % metrics.width);
+                            let py = y + (i / metrics.width);
+
+                            if px < WIDTH && py < HEIGHT {
+                                let color = if *alpha > 0 {
+                                    let alpha_channel = (*alpha as u32) << 24;
+                                    let rgb_color = 0xFFFFFF; 
+                                    alpha_channel | rgb_color
+                                } else {
+                                    0 
+                                };
+
+                                buffer[py * WIDTH + px] = color;
                             }
-                            y += FONT_SIZE as i32;
                         }
-                    })
-                    .unwrap();
-                canvas.copy(&text_texture, None, None).unwrap();
-                canvas.present();
+
+                        x += metrics.advance_width as usize;
+                    }
+
+                    x = 0;
+                    y += FONT_SIZE as usize;
+                }
+
+                window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
             }
         }
 
