@@ -16,7 +16,6 @@ pub enum UnrecoverableError {
 
 #[derive(Debug)]
 pub enum RecoverableError {
-    UnknownFlag(u16, Option<String>),
     Overflow(u16, Option<String>),
     BackwardStack(u16, Option<String>),
 }
@@ -54,7 +53,6 @@ impl UnrecoverableError {
 impl RecoverableError {
     fn details(&self) -> (&str, u16, &Option<String>) {
         match self {
-            RecoverableError::UnknownFlag(loc, msg) => ("Unknown flag", *loc, msg),
             RecoverableError::Overflow(loc, msg) => ("Overflow", *loc, msg),
             RecoverableError::BackwardStack(loc, msg) => ("Backwards stack", *loc, msg),
         }
@@ -125,13 +123,6 @@ impl CPU {
             self.ir,
             self.pc,
             Some("The register number is too large.".to_string()),
-        )
-    }
-
-    pub fn generate_unknown_flag(&self, instruction: &str) -> RecoverableError {
-        RecoverableError::UnknownFlag(
-            self.pc,
-            Some(format!("Unknown flag in {instruction} instruction")),
         )
     }
 
