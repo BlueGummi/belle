@@ -18,7 +18,6 @@ pub struct CPU {
     // so we have it as an i16 variable instead
     pub starts_at: u16, // .start directive
     pub running: bool,  // running status
-    pub has_ran: bool,
     pub zflag: bool,
     pub oflag: bool,
     pub rflag: bool,
@@ -53,7 +52,6 @@ impl CPU {
             ir: 0,
             starts_at: 100,
             running: false,
-            has_ran: false,
             zflag: false,
             oflag: false,
             rflag: false,
@@ -71,7 +69,6 @@ impl CPU {
         }
     }
     pub fn run(&mut self) -> PossibleCrash {
-        self.has_ran = true;
         self.running = true;
         if self.do_not_run {
             return Ok(());
@@ -243,8 +240,6 @@ impl CPU {
     }
 
     pub fn execute_instruction(&mut self, ins: &Instruction) -> PossibleCrash {
-        self.has_ran = true; // for debugger
-
         match ins {
             HLT => self.running = false,
             ADD(arg1, arg2) => self.handle_add(arg1, arg2)?,

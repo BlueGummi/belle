@@ -78,7 +78,6 @@ impl BDB {
                 eprintln!("Consider resetting the CPU with 'rs'.");
             }
         } else {
-            self.dbgcpu.has_ran = true;
             self.dbgcpu.running = true;
             while !self.breakpoints.contains(&self.dbgcpu.pc) && self.dbgcpu.running {
                 self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
