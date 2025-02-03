@@ -26,7 +26,6 @@ jobs:
           cp -r ./examples ./bin
           mkdir macos-bin
           cp -r ./examples ./bin
-          apt install musl-gcc -y
 
           export RUSTFLAGS="-C target-feature=+crt-static"
           rustup target add x86_64-unknown-linux-musl
