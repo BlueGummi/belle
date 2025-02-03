@@ -199,7 +199,8 @@ impl CPU {
 
                         for (i, alpha) in bitmap.iter().enumerate() {
                             let px = x + (i % metrics.width);
-                            let py = y + (i / metrics.width) + (FONT_SIZE as usize - metrics.height);
+                            let py =
+                                y + (i / metrics.width) + (FONT_SIZE as usize - metrics.height);
 
                             if px < WIDTH && py < HEIGHT {
                                 let color = if *alpha > 0 {
