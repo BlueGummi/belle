@@ -131,7 +131,7 @@ impl CPU {
                             if let Some(value) =
                                 self_clone.memory.get(index as usize).and_then(|&x| x)
                             {
-                                if index % 76 == 0 {
+                                if (index - 0xFF) % 76 == 0 {
                                     stringy.push('\n');
                                 }
                                 stringy.push(value as u8 as char);
