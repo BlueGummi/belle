@@ -14,9 +14,9 @@ pub const MEMORY_SIZE: usize = 65536;
 use rusttype::*;
 
 #[cfg(feature = "window")]
-const WIDTH: usize = 800;
+const WIDTH: usize = 685;
 #[cfg(feature = "window")]
-const HEIGHT: usize = 600;
+const HEIGHT: usize = 480;
 #[cfg(feature = "window")]
 const FONT_SIZE: usize = 16;
 
@@ -148,7 +148,7 @@ impl CPU {
 
                     if !CONFIG.no_display {
                         let mut stringy = String::with_capacity(5000);
-                        for index in 0xFF..0x2C7 {
+                        for index in 0xFF..0x9C9 {
                             if let Some(value) =
                                 self_clone.memory.get(index as usize).and_then(|&x| x)
                             {
