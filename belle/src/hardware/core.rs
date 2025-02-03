@@ -140,15 +140,17 @@ impl CPU {
 
                         #[cfg(feature = "window")]
                         if self_clone.running {
-                            let _ = tx.send(Some(stringy));
+                            let _ = tx.try_send(Some(stringy)).ok();
                         } else {
-                            let _ = tx.send(None);
+                            let _ = tx.send(None).ok();
                         }
                     }
                 }
                 Ok(())
             })
         };
+        #[cfg(target_os = "linux")]
+        configure_wayland();
 
         #[cfg(feature = "window")]
         if !CONFIG.no_display && !self.debugging {
@@ -179,20 +181,20 @@ impl CPU {
 
             let mut display_text = String::new();
             let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
-
-            'running: loop {
-                if !window.is_open() || window.is_key_down(Key::Escape) {
-                    break 'running;
-                }
-
+            window.set_target_fps(60);
+            while window.is_open() && !window.is_key_down(Key::Escape) {
                 match rx.try_recv() {
-                    Ok(Some(new_string)) => display_text = new_string,
-                    Ok(None) => break 'running,
-                    _ => {}
+                    Ok(Some(new_string)) => {
+                        display_text = new_string;
+                    }
+                    Ok(None) => {
+                        break;
+                    }
+                    Err(mpsc::TryRecvError::Empty) => {}
+                    Err(mpsc::TryRecvError::Disconnected) => break,
                 }
 
                 buffer.iter_mut().for_each(|p| *p = 0);
-
                 let mut x = 0;
                 let mut y = FONT_SIZE as usize;
                 for line in display_text.lines() {
@@ -206,10 +208,10 @@ impl CPU {
                             if px < WIDTH && py < HEIGHT {
                                 let color = if *alpha > 0 {
                                     let alpha_channel = (*alpha as u32) << 24;
-                                    let rgb_color = 0xFFFFFF; 
+                                    let rgb_color = 0xFFFFFF;
                                     alpha_channel | rgb_color
                                 } else {
-                                    0 
+                                    0
                                 };
 
                                 buffer[py * WIDTH + px] = color;
@@ -226,7 +228,6 @@ impl CPU {
                 window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
             }
         }
-
         if !self.running {
             if CONFIG.verbose && !CONFIG.compact_print {
                 println!("╭────────────╮");
@@ -291,4 +292,8 @@ impl CPU {
         }
         Ok(())
     }
+}
+#[cfg(target_os = "linux")]
+fn configure_wayland() {
+    std::env::set_var("WAYLAND_DISPLAY", "wayland-0");
 }
