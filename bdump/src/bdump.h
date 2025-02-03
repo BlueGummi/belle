@@ -160,7 +160,7 @@ int is_terminal() {
     return isatty(fileno(stdout));
 }
 #endif
-#define ANSI_RESET "\033[0m"
+#define ANSI_RESET (is_term ? "\033[0m" : "")
 #define ANSI_BOLD (args.colors && is_term ? "\033[1m" : "")
 #define ANSI_UNDERLINE (args.colors && is_term ? "\033[4m" : "")
 #define ANSI_BLACK (args.colors && is_term ? "\033[30m" : "")

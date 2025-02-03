@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     for (uint8_t i = 0; i < args.num_files; i++) {
         FILE *input = fopen(args.input_files[i], "rb");
         if (!input) {
-            fputs(ANSI_RED_CONST ANSI_BOLD_CONST "Failed to open file " ANSI_RESET, stderr);
+            fputs(ANSI_RED_CONST ANSI_BOLD_CONST "Failed to open file\\033[0m", stderr);
             perror(args.input_files[i]);
             return EXIT_FAILURE;
         }
