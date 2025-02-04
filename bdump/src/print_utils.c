@@ -150,8 +150,10 @@ finish:
         return;
     }
     size_t spaces = 16 - len;
-    for (size_t s = 0; s < spaces; s++) {
-        PRINTF(" ");
+    if (!args.only_code) {
+        for (size_t s = 0; s < spaces; s++) {
+            PRINTF(" ");
+        }
     }
     bool has_jump = false;
     bool has_outgoing_jump = false;
