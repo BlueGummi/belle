@@ -261,19 +261,19 @@ impl CPU {
         }
         let invert = ((self.ir & 0b1000_0000_0000) >> 11) == 1;
         // println!("{:04b}", opcode);
+        let j_dest = if ins_type == 4 {
+            RegPtr(source)
+        } else {
+            MemAddr(source)
+        };
         match opcode {
             HLT_OP => HLT,
             ADD_OP => ADD(Register(destination), part),
             BO_OP => {
-                let dest = if ins_type == 4 {
-                    RegPtr(source)
-                } else {
-                    MemAddr(source)
-                };
                 if invert {
-                    BNO(dest)
+                    BNO(j_dest)
                 } else {
-                    BO(dest)
+                    BO(j_dest)
                 }
             }
             POP_OP => {
@@ -285,18 +285,12 @@ impl CPU {
             }
             DIV_OP => DIV(Register(destination), part),
             RET_OP => {
-                let dest = if ins_type == 4 {
-                    RegPtr(source)
-                } else {
-                    MemAddr(source)
-                };
-
                 if self.ir & 4095 == 0 {
                     RET
                 } else if invert {
-                    BG(dest)
+                    BG(j_dest)
                 } else {
-                    BL(dest)
+                    BL(j_dest)
                 }
             }
             LD_OP => {
@@ -312,24 +306,12 @@ impl CPU {
                     ST(MemAddr(part), Register(self.ir & 0b111))
                 }
             }
-            JMP_OP => {
-                let dest = if ins_type == 4 {
-                    RegPtr(source)
-                } else {
-                    MemAddr(source)
-                };
-                JMP(dest)
-            }
+            JMP_OP => JMP(j_dest),
             BZ_OP => {
-                let dest = if ins_type == 4 {
-                    RegPtr(source)
-                } else {
-                    MemAddr(source)
-                };
                 if invert {
-                    BNZ(dest)
+                    BNZ(j_dest)
                 } else {
-                    BZ(dest)
+                    BZ(j_dest)
                 }
             }
             CMP_OP => CMP(Register(destination), part),
