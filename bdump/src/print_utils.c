@@ -88,8 +88,12 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         }
         break;
     case INT_OP:
-        PRINTF(FORMAT_STRING_COLORED, ANSI_VARIED, ins->source, ANSI_RESET);
-        snprintf(str, sizeof(str), FORMAT_STRING, ins->source);
+        bool sign = (ins->source >> 7) == 1;
+
+        int8_t val = (int8_t) ins->source & 0x7f;
+
+        PRINTF(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
+        snprintf(str, sizeof(str), FORMAT_STRING, args.hex_operands ? (sign ? ins->source : val) : val);
         break;
     case HLT_OP:
         print_hlt_instruction(ins);
