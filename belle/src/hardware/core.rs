@@ -115,7 +115,6 @@ impl CPU {
 
         let execution_handle = {
             #[cfg(feature = "window")]
-            let tx = tx.clone();
             let mut self_clone = self.clone();
 
             let delay = CONFIG.time_delay.unwrap_or_default();

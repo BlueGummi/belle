@@ -1,17 +1,16 @@
 .start [0x0]
-    lea r1, @hello_end
-    int 9
-    mov r2, r0
-    lea r0, @hello
-    lea r0, @hello
-loop:
-    st &r0, r2
-    add r0, 1
-    cmp r0, r1
-    bg @end
-    jmp @loop
-end:
-    hlt
+
+    lea r0, hello
+    lea r1, hello_end
+    int 8
+    mov r4, 0x7F
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    add r4, r4
+    int 10
     .pad 244
 hello:
     .asciiz "Hello, world!"

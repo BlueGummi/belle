@@ -9,7 +9,7 @@ impl Token {
     }
 
     pub fn is_literal(&self) -> bool {
-        matches!(self, Token::Literal(_))
+        matches!(self, Token::Literal(_) | Token::Ident(_))
     }
 
     pub fn is_memory_address(&self) -> bool {
@@ -29,7 +29,7 @@ impl Token {
     }
 
     pub fn is_srcall(&self) -> bool {
-        matches!(self, Token::SRCall(_))
+        matches!(self, Token::SRCall(_) | Token::Ident(_))
     }
 
     pub fn is_valid_arg(&self) -> bool {

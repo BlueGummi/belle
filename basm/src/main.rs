@@ -7,11 +7,11 @@
 use basm::Error::*;
 use basm::*;
 use colored::Colorize;
+use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
-
 fn main() -> io::Result<()> {
     let input: &String = &CONFIG.source;
     let file = Path::new(input);
@@ -64,6 +64,19 @@ fn main() -> io::Result<()> {
         println!("{}: {}", "error".bright_red().bold(), e);
         write_to_file = false;
     }
+
+    let subroutine_lock = SUBROUTINE_MAP.lock().unwrap();
+    let variable_lock = VARIABLE_MAP.lock().unwrap();
+
+    let subroutine_keys: HashSet<_> = subroutine_lock.keys().collect();
+    let variable_keys: HashSet<_> = variable_lock.keys().collect();
+    for key in subroutine_keys.intersection(&variable_keys) {
+        eprintln!("Variable and label {} cannot have the same name.", key.to_string().yellow());
+        std::process::exit(1);
+    }
+    std::mem::drop(subroutine_lock);
+    std::mem::drop(variable_lock);
+
     let mut hlt_seen = false;
     for line in lines.into_iter() {
         let mut lexer = Lexer::new(&line, line_count);

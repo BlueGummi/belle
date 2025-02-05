@@ -45,6 +45,17 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
         }
         Some(Token::MemPointer(mem)) => Ok((1 << 7) | mem),
         Some(Token::RegPointer(reg)) => Ok((1 << 6) | reg),
+        Some(Token::Ident(ident)) => {
+            let map = SUBROUTINE_MAP.lock().unwrap();
+            let vmap = VARIABLE_MAP.lock().unwrap();
+            if let Some(&address) = map.get(ident) {
+                Ok(address as i16)
+            } else if let Some(&value) = vmap.get(ident) {
+                Ok(value as i16)
+            } else {
+                return Err((line_num, "Label/Variable not declared.".to_string()));
+            }
+        }
         _ => Ok(0),
     }
 }
