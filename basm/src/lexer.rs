@@ -38,7 +38,6 @@ impl<'a> Lexer<'a> {
                     self.position += 1;
                     self.lex_pointer(c)?;
                 }
-                '@' => self.lex_label_call(),
                 'r' | 'R' => {
                     if let Some(next) = self.chars.peek() {
                         if next.is_ascii_digit() {
@@ -52,14 +51,6 @@ impl<'a> Lexer<'a> {
                 }
                 'a'..='z' | 'A'..='Z' => {
                     self.lex_identifier(c)?;
-                }
-                '#' => {
-                    self.position += 1;
-                    self.lex_literal(c)?;
-                }
-                '$' => {
-                    self.position += 1;
-                    self.lex_memory_address(c)?;
                 }
                 '.' => {
                     self.position += 1;
@@ -162,11 +153,6 @@ impl<'a> Lexer<'a> {
                 pointer.push(self.chars.next().unwrap());
                 false
             }
-            Some(&'$') => {
-                self.position += 1;
-                pointer.push(self.chars.next().unwrap());
-                false
-            }
             Some(&'[') => {
                 self.position += 1;
                 pointer.push(self.chars.next().unwrap());
@@ -227,7 +213,7 @@ impl<'a> Lexer<'a> {
     fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
         let pointer = pointer.trim();
 
-        let pointer_trimmed = if pointer.starts_with('$') || pointer.starts_with('[') {
+        let pointer_trimmed = if pointer.starts_with('[') {
             &pointer[1..]
         } else {
             pointer
@@ -302,18 +288,6 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    fn lex_label_call(&mut self) {
-        let mut label_call = String::new();
-        while let Some(&next) = self.chars.peek() {
-            if next.is_alphanumeric() || next == '_' {
-                label_call.push(self.chars.next().unwrap());
-            } else {
-                break;
-            }
-        }
-        self.tokens.push(Token::SRCall(label_call));
-    }
-
     fn lex_identifier(&mut self, c: char) -> Result<(), Error<'a>> {
         let mut ident = String::new();
         ident.push(c);
@@ -371,8 +345,7 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
     fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
-        let variable = if input.starts_with('$') || input.starts_with('#') || input.starts_with('&')
-        {
+        let variable = if input.starts_with('#') || input.starts_with('&') {
             &input[1..]
         } else if input.starts_with('[') {
             &input[1..input.len() - 1]
@@ -381,7 +354,7 @@ impl<'a> Lexer<'a> {
         };
         let map = VARIABLE_MAP.lock().unwrap();
         if let Some(&replacement) = map.get(variable.trim()) {
-            if input.starts_with('$') || input.starts_with('[') {
+            if input.starts_with('[') {
                 self.tokens.push(Token::MemAddr(replacement as i16));
             } else if input.starts_with('#') {
                 self.tokens.push(Token::Literal(replacement as i16));
