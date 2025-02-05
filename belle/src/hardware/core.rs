@@ -4,6 +4,18 @@ use std::{thread, time::Duration};
 pub const MEMORY_SIZE: usize = 65536;
 
 #[cfg(feature = "window")]
+use fontdue::{Font, FontSettings};
+#[cfg(feature = "window")]
+use minifb::{Key, Window, WindowOptions};
+
+#[cfg(feature = "window")]
+const WIDTH: usize = 685;
+#[cfg(feature = "window")]
+const HEIGHT: usize = 480;
+#[cfg(feature = "window")]
+const FONT_SIZE: f32 = 16.0;
+
+#[cfg(feature = "window")]
 use std::sync::mpsc;
 
 #[derive(Debug, Clone)]
@@ -152,29 +164,31 @@ impl CPU {
         configure_wayland();
 
         #[cfg(feature = "window")]
-        if !CONFIG.no_display && !self.debugging {
-            use fontdue::{Font, FontSettings};
-            use minifb::{Key, Window, WindowOptions};
+        let mut can_make_window = true;
+        #[cfg(feature = "window")]
+        let window = Window::new(
+            "BELLE display",
+            WIDTH,
+            HEIGHT,
+            WindowOptions {
+                resize: true,
+                scale: minifb::Scale::X1,
+                scale_mode: minifb::ScaleMode::AspectRatioStretch,
+                ..WindowOptions::default()
+            },
+        );
+        let window = match window {
+            Ok(w) => Some(w),
+            Err(e) => {
+                eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                can_make_window = false;
+                None
+            }
+        };
 
-            const WIDTH: usize = 685;
-            const HEIGHT: usize = 480;
-            const FONT_SIZE: f32 = 16.0;
-
-            let mut window = Window::new(
-                "BELLE display",
-                WIDTH,
-                HEIGHT,
-                WindowOptions {
-                    resize: true,
-                    scale: minifb::Scale::X1,
-                    scale_mode: minifb::ScaleMode::AspectRatioStretch,
-                    ..WindowOptions::default()
-                },
-            )
-            .unwrap_or_else(|e| {
-                panic!("Unable to create window: {}", e);
-            });
-
+        #[cfg(feature = "window")]
+        if !CONFIG.no_display && !self.debugging && can_make_window {
+            let mut window = window.unwrap();
             let font_data = include_bytes!("../vga.ttf");
             let font = Font::from_bytes(font_data as &[u8], FontSettings::default()).unwrap();
 
