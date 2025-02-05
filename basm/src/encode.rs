@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 use std::sync::Mutex;
-pub static SUBROUTINE_MAP: Lazy<Mutex<HashMap<String, usize>>> =
+pub static LABEL_MAP: Lazy<Mutex<HashMap<String, usize>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, i32>>> =
@@ -25,7 +25,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
         }
         Some(Token::Literal(literal)) => Ok((1 << 8) | *literal),
         Some(Token::SRCall(sr)) => {
-            let map = SUBROUTINE_MAP.lock().unwrap();
+            let map = LABEL_MAP.lock().unwrap();
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
@@ -46,7 +46,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
         Some(Token::MemPointer(mem)) => Ok((1 << 7) | mem),
         Some(Token::RegPointer(reg)) => Ok((1 << 6) | reg),
         Some(Token::Ident(ident)) => {
-            let map = SUBROUTINE_MAP.lock().unwrap();
+            let map = LABEL_MAP.lock().unwrap();
             let vmap = VARIABLE_MAP.lock().unwrap();
             if let Some(&address) = map.get(ident) {
                 Ok(address as i16)
@@ -358,13 +358,11 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     Ok(())
 }
-pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
-    let mut subroutine_counter = *START_LOCATION
+pub fn load_labels(lines: &[String]) -> Result<(), String> {
+    let mut label_counter = *START_LOCATION
         .lock()
         .map_err(|_| "Failed to lock START_LOCATION")? as usize;
-    let mut subroutine_map = SUBROUTINE_MAP
-        .lock()
-        .map_err(|_| "Failed to lock SUBROUTINE_MAP")?;
+    let mut label_map = LABEL_MAP.lock().map_err(|_| "Failed to lock LABEL_MAP")?;
 
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
@@ -383,24 +381,24 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
             trimmed_line
         };
         if line_before_comment.trim().ends_with(':') && !line_before_comment.trim().contains(' ') {
-            let subroutine_name = line_before_comment
+            let label_name = line_before_comment
                 .trim()
                 .trim_end_matches(':')
                 .trim()
                 .to_string();
-            subroutine_map.insert(subroutine_name.trim().to_string(), subroutine_counter);
+            label_map.insert(label_name.trim().to_string(), label_counter);
             continue;
         }
         if line_before_comment.starts_with(".asciiz") {
             if let Some(start) = trimmed_line.find('\"') {
                 if let Some(end) = trimmed_line[start + 1..].find('\"') {
-                    subroutine_counter += trimmed_line[start + 1..start + 1 + end].len();
+                    label_counter += trimmed_line[start + 1..start + 1 + end].len();
                 }
             }
             continue;
         }
         if line_before_comment.starts_with(".word") {
-            subroutine_counter += 1;
+            label_counter += 1;
             continue;
         }
 
@@ -444,13 +442,13 @@ pub fn load_subroutines(lines: &[String]) -> Result<(), String> {
                         }
                     }
                 });
-            subroutine_counter += add.unwrap() as usize;
+            label_counter += add.unwrap() as usize;
             continue;
         }
         if !(line_before_comment.trim().contains('=')
             || line_before_comment.trim().starts_with(".data"))
         {
-            subroutine_counter += 1;
+            label_counter += 1;
         }
     }
 

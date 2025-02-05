@@ -38,7 +38,7 @@ impl<'a> Lexer<'a> {
                     self.position += 1;
                     self.lex_pointer(c)?;
                 }
-                '@' => self.lex_subroutine_call(),
+                '@' => self.lex_label_call(),
                 'r' | 'R' => {
                     if let Some(next) = self.chars.peek() {
                         if next.is_ascii_digit() {
@@ -302,16 +302,16 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    fn lex_subroutine_call(&mut self) {
-        let mut subroutine_call = String::new();
+    fn lex_label_call(&mut self) {
+        let mut label_call = String::new();
         while let Some(&next) = self.chars.peek() {
             if next.is_alphanumeric() || next == '_' {
-                subroutine_call.push(self.chars.next().unwrap());
+                label_call.push(self.chars.next().unwrap());
             } else {
                 break;
             }
         }
-        self.tokens.push(Token::SRCall(subroutine_call));
+        self.tokens.push(Token::SRCall(label_call));
     }
 
     fn lex_identifier(&mut self, c: char) -> Result<(), Error<'a>> {
@@ -493,8 +493,8 @@ impl<'a> Lexer<'a> {
     }
 }
 
-pub fn print_subroutine_map() {
-    let map = SUBROUTINE_MAP.lock().unwrap();
+pub fn print_label_map() {
+    let map = LABEL_MAP.lock().unwrap();
     for (name, counter) in map.iter() {
         if CONFIG.verbose {
             println!("Label: {name}, Address: {counter}");

@@ -86,7 +86,7 @@ impl Token {
             Token::RegPointer(n) => *n,
             Token::MemPointer(n) => *n,
             Token::SRCall(sr) => {
-                let map = SUBROUTINE_MAP.lock().unwrap();
+                let map = LABEL_MAP.lock().unwrap();
                 if let Some(&address) = map.get(sr) {
                     address as i16
                 } else {
