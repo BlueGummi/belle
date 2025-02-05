@@ -70,30 +70,22 @@ impl BDB {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
         }
-        if self.breakpoints.is_empty() {
-            if let Err(e) = self.dbgcpu.run() {
-                self.dbgcpu.err = true;
-                self.dbgcpu.errmsg = e.only_err();
+
+        self.dbgcpu.running = true;
+        while !self.breakpoints.contains(&self.dbgcpu.pc) && self.dbgcpu.running {
+            self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
+                value as i16
+            } else {
+                eprintln!("Nothing at PC {}", self.dbgcpu.pc);
+                break;
+            };
+            let parsed_ins = self.dbgcpu.decode_instruction();
+            if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
                 eprintln!("{e}");
-                eprintln!("Consider resetting the CPU with 'rs'.");
             }
-        } else {
-            self.dbgcpu.running = true;
-            while !self.breakpoints.contains(&self.dbgcpu.pc) && self.dbgcpu.running {
-                self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-                    value as i16
-                } else {
-                    eprintln!("Nothing at PC {}", self.dbgcpu.pc);
-                    break;
-                };
-                let parsed_ins = self.dbgcpu.decode_instruction();
-                if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
-                    eprintln!("{e}");
-                }
-            }
-            if self.breakpoints.contains(&self.dbgcpu.pc) {
-                println!("Breakpoint {} reached.", self.dbgcpu.pc);
-            }
+        }
+        if self.breakpoints.contains(&self.dbgcpu.pc) {
+            println!("Breakpoint {} reached.", self.dbgcpu.pc);
         }
     }
 
