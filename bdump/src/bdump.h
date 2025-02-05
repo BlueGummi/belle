@@ -150,13 +150,13 @@ void get_file_size(const char *filename, char *size_str, size_t size_str_len);
 CLI args = {0};
 
 #ifdef _WIN32
-int is_terminal() {
+int is_terminal(void) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode;
     return GetConsoleMode(hConsole, &mode);
 }
 #else
-int is_terminal() {
+int is_terminal(void) {
     return isatty(fileno(stdout));
 }
 #endif

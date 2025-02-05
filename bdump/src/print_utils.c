@@ -65,7 +65,8 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         print_two_reg_args(ins); // add, mov, div, etc.
         goto finish;
     }
-
+    bool sign;
+    int8_t val;
     switch (ins->opcode) {
     case BO_OP:
     case BZ_OP:
@@ -88,9 +89,9 @@ void print_instruction(Instruction *ins, Instruction *ins2, JumpVector *jumpsHer
         }
         break;
     case INT_OP:
-        bool sign = (ins->source >> 7) == 1;
+        sign = (ins->source >> 7) == 1;
 
-        int8_t val = (int8_t) ins->source & 0x7f;
+        val = (int8_t) ins->source & 0x7f;
 
         PRINTF(FMTSC, ANSI_VARIED, args.hex_operands ? (sign ? ins->source : val) : val, ANSI_RESET);
         snprintf(str, sizeof(str), FORMAT_STRING, args.hex_operands ? (sign ? ins->source : val) : val);
