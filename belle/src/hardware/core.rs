@@ -114,7 +114,6 @@ impl CPU {
         let (tx, rx) = mpsc::sync_channel(1);
 
         let execution_handle = {
-            #[cfg(feature = "window")]
             let mut self_clone = self.clone();
 
             let delay = CONFIG.time_delay.unwrap_or_default();
