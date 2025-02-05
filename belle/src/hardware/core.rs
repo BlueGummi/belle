@@ -279,9 +279,11 @@ impl CPU {
                 7 => self.float_reg[1] = value,
                 8 => self.pc = value as u16,
                 9 => self.sp = value as u16,
-                n if n > 3 => return Err(self.generate_invalid_register()),
-                n if n < 0 => return Err(self.generate_invalid_register()),
+                n if !(0..=3).contains(&n) => return Err(self.generate_invalid_register()),
                 _ => self.int_reg[*n as usize] = value as i16,
+            }
+            if let Err(e) = self.check_overflow(value as i64, *n as u16) {
+                eprint!("{e}");
             }
         }
         Ok(())

@@ -1,18 +1,9 @@
 use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_push(&mut self, arg: &Argument) -> PossibleCrash {
-        let mut val: f32 = 0.0;
-        if let Literal(l) = arg {
-            val = (*l).into();
-        }
+        let val = self.get_value(arg)?;
 
-        if let Register(_) = arg {
-            val = self.get_value(arg)?;
-        }
         if self.sp > self.bp || self.backward_stack {
-            if self.sp != self.bp {
-                println!("{}", RecoverableError::BackwardStack(self.pc, None));
-            }
             self.sp += 1;
             if self.sp as usize >= MEMORY_SIZE {
                 self.running = false;
@@ -46,25 +37,12 @@ impl CPU {
     pub fn handle_pop(&mut self, arg: &Argument) -> PossibleCrash {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
-            if let Register(n) = arg {
-                match *n {
-                    4 => self.uint_reg[0] = v,
-                    5 => self.uint_reg[1] = v,
-                    6 => self.float_reg[0] = v as f32,
-                    7 => self.float_reg[1] = v as f32,
-                    8 => self.pc = v,
-                    9 => self.sp = v,
-                    n if n > 3 => return Err(self.generate_invalid_register()),
-                    _ => self.int_reg[*n as usize] = v as i16,
-                }
-                self.set_register_value(arg, v.into())?;
+            if let Register(_) = arg {
+                self.set_register_value(arg, v as f32)?;
             } else if let MemAddr(val) = arg {
                 self.memory[*val as usize] = Some(v);
             }
             if self.sp > self.bp {
-                if self.sp != self.bp {
-                    println!("{}", RecoverableError::BackwardStack(self.pc, None));
-                }
                 self.memory[self.sp as usize] = None;
                 if self.sp != self.bp {
                     self.sp -= 1;

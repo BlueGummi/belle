@@ -104,7 +104,7 @@ impl CPU {
                 7 => Ok(self.float_reg[1]),
                 8 => Ok(self.pc as f32),
                 9 => Ok(self.sp as f32),
-                n if *n > 3 => {
+                n if *n > 3 || *n < 0 => {
                     self.err = true;
                     Err(UnrecoverableError::IllegalInstruction(
                         self.ir,
@@ -154,7 +154,7 @@ impl CPU {
                     7 => self.float_reg[1],
                     8 => self.pc as f32,
                     9 => self.sp as f32,
-                    n if *n > 3 => {
+                    n if *n > 3 || *n < 0 => {
                         self.err = true;
                         self.running = false;
                         return Err(UnrecoverableError::IllegalInstruction(

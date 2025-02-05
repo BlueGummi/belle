@@ -5,38 +5,22 @@ impl CPU {
 
         if let Register(n) = arg1 {
             let new_value = match *n {
-                4 => {
-                    self.uint_reg[0] = (self.uint_reg[0] as i16).wrapping_add(value as i16) as u16;
-                    self.uint_reg[0] as i64 + value as i64
-                }
-                5 => {
-                    self.uint_reg[1] = (self.uint_reg[1] as i16).wrapping_add(value as i16) as u16;
-                    self.uint_reg[1] as i64 + value as i64
-                }
-                6 => {
-                    self.float_reg[0] += value;
-                    (self.float_reg[0] as i64).wrapping_add(value as i64)
-                }
-                7 => {
-                    self.float_reg[1] += value;
-                    (self.float_reg[1] as i64).wrapping_add(value as i64)
-                }
-                n if n > 3 => {
+                4 => self.uint_reg[0] as f32 + value,
+                5 => self.uint_reg[1] as f32 + value,
+                6 => self.float_reg[0] + value,
+                7 => self.float_reg[1] + value,
+                n if !(0..=3).contains(&n) => {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
-                    self.int_reg[*n as usize] = if arg2.is_ptr() {
-                        self.int_reg[*n as usize].wrapping_add(value as u16 as i16)
+                    if arg2.is_ptr() {
+                        self.int_reg[*n as usize].wrapping_add(value as u16 as i16) as f32
                     } else {
-                        self.int_reg[*n as usize].wrapping_add(value as i16)
-                    };
-                    self.int_reg[*n as usize] as i64 + value as i64
+                        self.int_reg[*n as usize].wrapping_add(value as i16) as f32
+                    }
                 }
             };
-
-            if let Err(e) = self.check_overflow(new_value, *n as u16) {
-                eprint!("{e}");
-            }
+            self.set_register_value(arg1, new_value)?;
         }
         self.pc += 1;
         Ok(())
@@ -57,32 +41,21 @@ impl CPU {
             let new_value = match *n {
                 4 => {
                     self.rflag = self.uint_reg[0] as f32 % divisor != 0.0;
-                    let result = self.uint_reg[0] as i32 / divisor as i32;
-                    self.uint_reg[0] = result as u16;
-                    result as i64
+                    (self.uint_reg[0] as i32 / divisor as i32) as f32
                 }
                 5 => {
                     self.rflag = self.uint_reg[1] as f32 % divisor != 0.0;
-
-                    let result = self.uint_reg[1] as i32 / divisor as i32;
-                    self.uint_reg[1] = result as u16;
-                    result as i64
+                    (self.uint_reg[1] as i32 / divisor as i32) as f32
                 }
                 6 => {
                     self.rflag = self.float_reg[0] % divisor != 0.0;
-
-                    let result = self.float_reg[0] / divisor;
-                    self.float_reg[0] = result;
-                    result as i64
+                    self.float_reg[0] / divisor
                 }
                 7 => {
                     self.rflag = self.float_reg[1] % divisor != 0.0;
-
-                    let result = self.float_reg[1] / divisor;
-                    self.float_reg[1] = result;
-                    result as i64
+                    self.float_reg[1] / divisor
                 }
-                n if n > 3 => {
+                n if !(0..=3).contains(&n) => {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
@@ -93,14 +66,10 @@ impl CPU {
                     } else {
                         self.int_reg[*n as usize] / divisor as i16
                     };
-                    self.int_reg[*n as usize] = result;
-                    result as i64
+                    result as f32
                 }
             };
-
-            if let Err(e) = self.check_overflow(new_value, *n as u16) {
-                eprint!("{e}");
-            }
+            self.set_register_value(arg1, new_value)?;
         }
         self.pc += 1;
         Ok(())
@@ -109,33 +78,23 @@ impl CPU {
         let value = self.get_value(arg2)?;
 
         if let Register(n) = arg1 {
-            match *n {
-                4 => {
-                    self.uint_reg[0] = !(self.uint_reg[0] & (value as u16));
-                }
-                5 => {
-                    self.uint_reg[1] = !(self.uint_reg[1] & (value as u16));
-                }
-                6 => {
-                    let temp = !(self.float_reg[0].to_bits() & value.to_bits());
-                    self.float_reg[0] = temp as f32;
-                }
-                7 => {
-                    let temp = !(self.float_reg[1].to_bits() & value.to_bits());
-                    self.float_reg[1] = temp as f32;
-                }
-                n if n > 3 => {
+            let new_value = match *n {
+                4 => !(self.uint_reg[0] & (value as u16)) as f32,
+                5 => !(self.uint_reg[1] & (value as u16)) as f32,
+                6 => !(self.float_reg[0].to_bits() & value.to_bits()) as f32,
+                7 => !(self.float_reg[1].to_bits() & value.to_bits()) as f32,
+                n if !(0..=3).contains(&n) => {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
-                    let result = if arg2.is_ptr() {
-                        !(self.int_reg[*n as usize] & (value as u16 as i16))
+                    if arg2.is_ptr() {
+                        !(self.int_reg[*n as usize] & (value as u16 as i16)) as f32
                     } else {
-                        !(self.int_reg[*n as usize] & (value as i16))
-                    };
-                    self.int_reg[*n as usize] = result;
+                        !(self.int_reg[*n as usize] & (value as i16)) as f32
+                    }
                 }
-            }
+            };
+            self.set_register_value(arg1, new_value)?
         }
         self.pc += 1;
         Ok(())
@@ -143,24 +102,13 @@ impl CPU {
 
     pub fn handle_mov(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let value = self.get_value(arg2)?;
-        if let Register(n) = arg1 {
-            match *n {
-                4 => self.uint_reg[0] = value as u16,
-                5 => self.uint_reg[1] = value as u16,
-                6 => self.float_reg[0] = value,
-                7 => self.float_reg[1] = value,
-                n if n > 3 => return Err(self.generate_invalid_register()),
-                _ => {
-                    self.int_reg[*n as usize] = if arg2.is_ptr() {
-                        value as u16 as i16
-                    } else {
-                        value as i16
-                    };
-                }
-            }
-            if let Err(e) = self.check_overflow(value as i64, *n as u16) {
-                eprint!("{e}");
-            }
+        if let Register(_) = arg1 {
+            let value = if arg2.is_ptr() {
+                value as u16 as i16 as f32
+            } else {
+                value
+            };
+            self.set_register_value(arg1, value)?
         }
         self.pc += 1;
         Ok(())
