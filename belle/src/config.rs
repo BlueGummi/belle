@@ -43,10 +43,6 @@ pub struct Cli {
     #[clap(short = 'c', long, default_value_t = false)]
     pub compact_print: bool,
 
-    /// Print binary metadata
-    #[clap(short = 'm', long, default_value_t = false)]
-    pub metadata: bool,
-
     /// No display
     #[clap(short = 'N', long, default_value_t = false)]
     pub no_display: bool,
@@ -64,7 +60,6 @@ pub fn declare_config() -> Cli {
             write: false,
             no_print_memory: false,
             compact_print: false,
-            metadata: false,
             no_display: true,
         };
     }
@@ -79,7 +74,6 @@ pub fn declare_config() -> Cli {
             write: false,
             no_print_memory: true,
             compact_print: false,
-            metadta: false,
             no_display: true,
         };
     }

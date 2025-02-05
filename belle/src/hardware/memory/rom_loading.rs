@@ -62,7 +62,7 @@ impl CPU {
 
             counter += 1;
         }
-        if CONFIG.metadata {
+        if CONFIG.verbose {
             if !rom_metadata.is_empty() {
                 let longest_length = rom_metadata
                     .lines()
