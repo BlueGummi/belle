@@ -87,6 +87,30 @@ impl CPU {
         }
 
         #[cfg(feature = "window")]
+        let mut can_make_window = true;
+        #[cfg(feature = "window")]
+        let window = Window::new(
+            "BELLE display",
+            WIDTH,
+            HEIGHT,
+            WindowOptions {
+                resize: true,
+                scale: minifb::Scale::X1,
+                scale_mode: minifb::ScaleMode::AspectRatioStretch,
+                ..WindowOptions::default()
+            },
+        );
+        #[cfg(feature = "window")]
+        let window = match window {
+            Ok(w) => Some(w),
+            Err(e) => {
+                eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                can_make_window = false;
+                None
+            }
+        };
+
+        #[cfg(feature = "window")]
         let (tx, rx) = mpsc::sync_channel(1);
 
         let execution_handle = {
@@ -115,7 +139,9 @@ impl CPU {
                             self_clone.errmsg = error_msg.only_err().to_string();
                             self_clone.running = false;
                             #[cfg(feature = "window")]
-                            let _ = tx.send(None);
+                            if can_make_window {
+                                let _ = tx.send(None);
+                            }
                             return Err(error_msg);
                         }
                     }
@@ -126,7 +152,9 @@ impl CPU {
                         self_clone.errmsg = e.only_err().to_string();
                         self_clone.running = false;
                         #[cfg(feature = "window")]
-                        let _ = tx.send(None);
+                        if can_make_window {
+                            let _ = tx.send(None);
+                        }
                         return Err(e);
                     }
 
@@ -152,7 +180,7 @@ impl CPU {
                         #[cfg(feature = "window")]
                         if self_clone.running {
                             let _ = tx.try_send(Some(stringy)).ok();
-                        } else {
+                        } else if can_make_window {
                             let _ = tx.send(None).ok();
                         }
                     }
@@ -162,29 +190,6 @@ impl CPU {
         };
         #[cfg(target_os = "linux")]
         configure_wayland();
-
-        #[cfg(feature = "window")]
-        let mut can_make_window = true;
-        #[cfg(feature = "window")]
-        let window = Window::new(
-            "BELLE display",
-            WIDTH,
-            HEIGHT,
-            WindowOptions {
-                resize: true,
-                scale: minifb::Scale::X1,
-                scale_mode: minifb::ScaleMode::AspectRatioStretch,
-                ..WindowOptions::default()
-            },
-        );
-        let window = match window {
-            Ok(w) => Some(w),
-            Err(e) => {
-                eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
-                can_make_window = false;
-                None
-            }
-        };
 
         #[cfg(feature = "window")]
         if !CONFIG.no_display && !self.debugging && can_make_window {
