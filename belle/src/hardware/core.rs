@@ -155,6 +155,9 @@ impl CPU {
                         if can_make_window {
                             let _ = tx.send(None);
                         }
+                        if CONFIG.verbose {
+                            println!("{}", self_clone);
+                        }
                         return Err(e);
                     }
 
@@ -256,7 +259,9 @@ impl CPU {
             print_b();
         }
 
-        let _ = execution_handle.join().unwrap();
+        if let Err(e) = execution_handle.join().unwrap() {
+            return Err(e);
+        }
         Ok(())
     }
 
