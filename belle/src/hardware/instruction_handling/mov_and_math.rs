@@ -5,8 +5,8 @@ impl CPU {
 
         if let Register(n) = arg1 {
             let new_value = match *n {
-                4 => self.uint_reg[0] as f32 + value,
-                5 => self.uint_reg[1] as f32 + value,
+                4 => (self.uint_reg[0] as i16 + value as i16) as u16 as f32,
+                5 => (self.uint_reg[1] as i16 + value as i16) as u16 as f32,
                 6 => self.float_reg[0] + value,
                 7 => self.float_reg[1] + value,
                 n if !(0..=3).contains(&n) => {
@@ -14,8 +14,14 @@ impl CPU {
                 }
                 _ => {
                     if arg2.is_ptr() {
+                        self.oflag = self.int_reg[*n as usize]
+                            .checked_add(value as u16 as i16)
+                            .is_none();
                         self.int_reg[*n as usize].wrapping_add(value as u16 as i16) as f32
                     } else {
+                        self.oflag = self.int_reg[*n as usize]
+                            .checked_add(value as i16)
+                            .is_none();
                         self.int_reg[*n as usize].wrapping_add(value as i16) as f32
                     }
                 }
