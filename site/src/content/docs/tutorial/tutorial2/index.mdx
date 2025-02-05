@@ -19,7 +19,7 @@ Now that you've seen a little bit of assembly, let's break down the individual p
 First, let's start with line 1:
 
 ```asm
-lea r0, @hello_start
+lea r0, hello_start
 ```
 
 We can dissect this line into 3 parts.
@@ -38,7 +38,7 @@ r0
 And lastly, the right hand side is the **second operand**.
 
 ```asm
-@hello_start
+hello_start
 ```
 
 #### But what does this mean?
@@ -60,7 +60,7 @@ In this case, the memory address of a label - we will talk about what labels are
 ##### What about the next line?
 
 ```asm
-lea r1, @hello_end
+lea r1, hello_end
 ```
 
 Similar to the first line, this performs a Load Effective Address instruction to load the memory address of `hello_end` into register 1.
@@ -69,7 +69,7 @@ Similar to the first line, this performs a Load Effective Address instruction to
 
 A label is a symbolic location that is defined with `label_name:` (e.g. `fish:`)
 
-At compile/assemble time, labels are resolved to real memory addresses, and when an instruction references the address of a label (such as with `@label_name`), it is replaced with the address of the label.
+At compile/assemble time, labels are resolved to real memory addresses, and when an instruction references the address of a label (such as with `label_name`), it is replaced with the address of the label.
 
 Here, we are defining `hello_start` and `hello_end`, and the ASCII string in between them essentially says "Put a string in memory here".
 
