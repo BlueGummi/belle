@@ -119,6 +119,7 @@ impl fmt::Display for RecoverableError {
 impl CPU {
     pub fn generate_invalid_register(&mut self) -> UnrecoverableError {
         self.running = false;
+        self.err = true;
         UnrecoverableError::IllegalInstruction(
             self.ir,
             self.pc,
@@ -128,6 +129,7 @@ impl CPU {
 
     pub fn generate_divbyz(&mut self) -> UnrecoverableError {
         self.running = false;
+        self.err = true;
         UnrecoverableError::DivideByZero(
             self.ir,
             self.pc,

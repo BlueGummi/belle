@@ -105,20 +105,7 @@ impl CPU {
                 8 => Ok(self.pc as f32),
                 9 => Ok(self.sp as f32),
                 n if *n > 3 || *n < 0 => {
-                    self.err = true;
-                    Err(UnrecoverableError::IllegalInstruction(
-                        self.ir,
-                        self.pc,
-                        Some("Illegal register".to_string()),
-                    ))
-                }
-                n if *n < 0 => {
-                    self.err = true;
-                    Err(UnrecoverableError::IllegalInstruction(
-                        self.ir,
-                        self.pc,
-                        Some("Illegal register".to_string()),
-                    ))
+                    return Err(self.generate_invalid_register());
                 }
 
                 _ => Ok(self.int_reg[*n as usize] as f32),
@@ -155,22 +142,7 @@ impl CPU {
                     8 => self.pc as f32,
                     9 => self.sp as f32,
                     n if *n > 3 || *n < 0 => {
-                        self.err = true;
-                        self.running = false;
-                        return Err(UnrecoverableError::IllegalInstruction(
-                            self.ir,
-                            self.pc,
-                            Some("Illegal register pointer".to_string()),
-                        ));
-                    }
-                    n if *n < 0 => {
-                        self.err = true;
-                        self.running = false;
-                        return Err(UnrecoverableError::IllegalInstruction(
-                            self.ir,
-                            self.pc,
-                            Some("Illegal register pointer".to_string()),
-                        ));
+                        return Err(self.generate_invalid_register());
                     }
                     _ => self.int_reg[*n as usize] as f32,
                 };
