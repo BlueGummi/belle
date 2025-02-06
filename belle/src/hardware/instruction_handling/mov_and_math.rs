@@ -5,8 +5,8 @@ impl CPU {
 
         if let Register(n) = arg1 {
             let new_value = match *n {
-                4 => (self.uint_reg[0] as i16 + value as i16) as u16 as f32,
-                5 => (self.uint_reg[1] as i16 + value as i16) as u16 as f32,
+                4 => (self.uint_reg[0] as i32 + value as i32) as f32,
+                5 => (self.uint_reg[1] as i32 + value as i32) as f32,
                 6 => self.float_reg[0] + value,
                 7 => self.float_reg[1] + value,
                 n if !(0..=3).contains(&n) => {
