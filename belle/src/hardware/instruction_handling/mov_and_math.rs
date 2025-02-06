@@ -5,8 +5,20 @@ impl CPU {
 
         if let Register(n) = arg1 {
             let new_value = match *n {
-                4 => (self.uint_reg[0] as i32 + value as i32) as f32,
-                5 => (self.uint_reg[1] as i32 + value as i32) as f32,
+                4 => {
+                    self.oflag = ((self.uint_reg[0]).checked_add(value as u16)).is_none();
+                    self.uint_reg[0] =
+                        ((self.uint_reg[0] as i32).wrapping_add(value as i32)) as u16;
+                    self.pc += 1;
+                    return Ok(());
+                }
+                5 => {
+                    self.oflag = ((self.uint_reg[1]).checked_add(value as u16)).is_none();
+                    self.uint_reg[1] =
+                        ((self.uint_reg[1] as i32).wrapping_add(value as i32)) as u16;
+                    self.pc += 1;
+                    return Ok(());
+                }
                 6 => self.float_reg[0] + value,
                 7 => self.float_reg[1] + value,
                 n if !(0..=3).contains(&n) => {
