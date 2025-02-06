@@ -40,7 +40,7 @@ impl CPU {
             ));
         };
         if let Register(_) = arg1 {
-            self.set_register_value(arg1, source as f32)?;
+            self.set_register_value(arg1, source as f64)?;
         }
         self.pc += 1;
         Ok(())
@@ -48,7 +48,7 @@ impl CPU {
     pub fn handle_ld(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let source = self.get_value(arg2)?;
         if let Register(_) = arg1 {
-            self.set_register_value(arg1, source)?;
+            self.set_register_value(arg1, source as f64)?;
         }
         self.pc += 1;
         Ok(())

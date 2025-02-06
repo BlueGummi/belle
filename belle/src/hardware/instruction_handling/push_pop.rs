@@ -38,7 +38,7 @@ impl CPU {
         let temp: i32 = self.sp.into();
         if let Some(v) = self.memory[temp as usize] {
             if let Register(_) = arg {
-                self.set_register_value(arg, v as f32)?;
+                self.set_register_value(arg, v as f64)?;
             } else if let MemAddr(val) = arg {
                 self.memory[*val as usize] = Some(v);
             }

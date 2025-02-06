@@ -292,7 +292,7 @@ impl CPU {
         }
         Ok(())
     }
-    pub fn set_register_value(&mut self, arg: &Argument, value: f32) -> PossibleCrash {
+    pub fn set_register_value(&mut self, arg: &Argument, value: f64) -> PossibleCrash {
         if let Register(n) = arg {
             if let Err(e) = self.check_overflow(value as i64, *n as u16) {
                 eprint!("{e}");
@@ -301,8 +301,8 @@ impl CPU {
             match *n {
                 4 => self.uint_reg[0] = value as u16,
                 5 => self.uint_reg[1] = value as u16,
-                6 => self.float_reg[0] = value,
-                7 => self.float_reg[1] = value,
+                6 => self.float_reg[0] = value as f32,
+                7 => self.float_reg[1] = value as f32,
                 8 => self.pc = value as u16,
                 9 => self.sp = value as u16,
                 n if !(0..=3).contains(&n) => return Err(self.generate_invalid_register()),

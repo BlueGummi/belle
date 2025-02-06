@@ -38,7 +38,7 @@ impl CPU {
                     }
                 }
             };
-            self.set_register_value(arg1, new_value)?;
+            self.set_register_value(arg1, new_value as f64)?;
         }
         self.pc += 1;
         Ok(())
@@ -93,7 +93,7 @@ impl CPU {
                     result as f32
                 }
             };
-            self.set_register_value(arg1, new_value)?;
+            self.set_register_value(arg1, new_value as f64)?;
         }
         self.pc += 1;
         Ok(())
@@ -118,7 +118,7 @@ impl CPU {
                     }
                 }
             };
-            self.set_register_value(arg1, new_value)?
+            self.set_register_value(arg1, new_value as f64)?
         }
         self.pc += 1;
         Ok(())
@@ -132,7 +132,7 @@ impl CPU {
             } else {
                 value
             };
-            self.set_register_value(arg1, value)?
+            self.set_register_value(arg1, value as f64)?
         }
         self.pc += 1;
         Ok(())
