@@ -58,12 +58,18 @@ impl CPU {
         if let Register(n) = arg1 {
             let new_value = match *n {
                 4 => {
-                    self.rflag = self.uint_reg[0] as f32 % divisor != 0.0;
-                    (self.uint_reg[0] as i32 / divisor as i32) as f32
+                    self.oflag = ((self.uint_reg[0]).checked_div(divisor as u16)).is_none();
+                    self.uint_reg[0] =
+                        ((self.uint_reg[0] as i32).wrapping_div(divisor as i32)) as u16;
+                    self.pc += 1;
+                    return Ok(());
                 }
                 5 => {
-                    self.rflag = self.uint_reg[1] as f32 % divisor != 0.0;
-                    (self.uint_reg[1] as i32 / divisor as i32) as f32
+                    self.oflag = ((self.uint_reg[1]).checked_div(divisor as u16)).is_none();
+                    self.uint_reg[1] =
+                        ((self.uint_reg[1] as i32).wrapping_div(divisor as i32)) as u16;
+                    self.pc += 1;
+                    return Ok(());
                 }
                 6 => {
                     self.rflag = self.float_reg[0] % divisor != 0.0;
