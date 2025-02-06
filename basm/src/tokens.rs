@@ -93,6 +93,17 @@ impl Token {
                     0
                 }
             }
+            Token::Ident(ident) => {
+                let map = LABEL_MAP.lock().unwrap();
+                let vmap = VARIABLE_MAP.lock().unwrap();
+                if let Some(&address) = map.get(ident) {
+                    address as i16
+                } else if let Some(&value) = vmap.get(ident) {
+                    value as i16
+                } else {
+                    0
+                }
+            }
             _ => -1,
         }
     }
