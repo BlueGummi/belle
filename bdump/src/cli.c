@@ -149,12 +149,14 @@ void print_help(char *bin) { // bin is the name of the bin program
 void suggest_option(const char *invalid_option, int valid_count) {
     int min_distance = 3;
     char *suggestions[MAX_SUGGESTIONS];
+    int suggestion_indices[MAX_SUGGESTIONS] = {0};
     int suggestion_count = 0;
 
     for (int i = 0; i < valid_count; i++) {
         int distance = levenshtein_distance(invalid_option, valid_options[i]);
         if (distance < min_distance && suggestion_count < MAX_SUGGESTIONS) {
             suggestions[suggestion_count++] = (char *) valid_options[i];
+            suggestion_indices[suggestion_count] = i;
         }
     }
 
@@ -166,7 +168,7 @@ void suggest_option(const char *invalid_option, int valid_count) {
             fputs(": ", stderr);
             fputs(ANSI_BOLD, stderr);
             fputs(ANSI_YELLOW, stderr);
-            fputs(descriptions[i], stderr);
+            fputs(descriptions[suggestion_indices[i + 1]/2], stderr);
             fputs(ANSI_RESET, stderr);
             fputc('\n', stderr);
         }
