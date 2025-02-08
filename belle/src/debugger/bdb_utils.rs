@@ -94,7 +94,7 @@ impl BDB {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
         }
-        if let Ok(n) = arg.trim().parse::<u16>() {
+        if let Ok(n) = parse_number::<u16>(arg.trim()) {
             self.dbgcpu.pc = n;
             println!("Program counter set to {n}.");
         } else {
@@ -103,7 +103,7 @@ impl BDB {
     }
 
     pub fn handle_print_memory(&mut self, arg: &str) {
-        if let Ok(n) = arg.parse::<usize>() {
+        if let Ok(n) = parse_number::<usize>(arg.trim()) {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
@@ -174,7 +174,7 @@ impl BDB {
     }
 
     pub fn handle_poke(&mut self, arg: &str) {
-        if let Ok(n) = arg.parse::<usize>() {
+        if let Ok(n) = parse_number::<usize>(arg) {
             if let Some(memvalue) = self.dbgcpu.memory[n] {
                 println!("Value in memory: {memvalue:016b} ({memvalue})");
                 let oldvalue = self.dbgcpu.ir;
@@ -184,7 +184,7 @@ impl BDB {
             } else {
                 println!("This memory address is empty.\n");
             }
-            println!("Enter a new value");
+            println!("Enter a new value, binary or decimal");
             let mut buffer = String::new();
             io::stdout().flush().unwrap();
             if let Err(e) = io::stdin().read_line(&mut buffer) {
@@ -195,19 +195,9 @@ impl BDB {
                 println!("Empty input");
                 return;
             }
-
-            if buffer.trim().starts_with("0b") {
-                if let Ok(val) = u32::from_str_radix(&buffer.trim()[2..], 2) {
-                    println!("Value in memory address {n} set to {val:016b}");
-                    self.dbgcpu.memory[n] = Some(val as u16);
-                } else {
-                    println!("Input could not be parsed to binary");
-                }
-            } else if let Ok(v) = buffer.trim().parse::<u16>() {
-                println!("Value in memory address {n} set to {v}");
-                self.dbgcpu.memory[n] = Some(v);
-            } else {
-                println!("Could not parse a valid integer from input.");
+            match parse_number::<u16>(&buffer) {
+                Ok(v) => self.dbgcpu.memory[n] = Some(v),
+                Err(e) => eprintln!("{e}"),
             }
         } else {
             eprintln!("'pk' requires a numeric argument.");
@@ -220,5 +210,35 @@ impl BDB {
         } else {
             eprintln!("'br' requires a numeric hex argument.");
         }
+    }
+}
+use std::num::ParseIntError;
+use std::str::FromStr;
+
+trait FromStrRadix: FromStr<Err = ParseIntError> {
+    fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError>
+    where
+        Self: Sized;
+}
+
+macro_rules! impl_from_str_radix {
+    ($($t:ty),*) => {
+        $(impl FromStrRadix for $t {
+            fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError> {
+                <$t>::from_str_radix(src, radix)
+            }
+        })*
+    };
+}
+
+impl_from_str_radix!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
+
+fn parse_number<T: FromStrRadix>(input: &str) -> Result<T, ParseIntError> {
+    if let Some(v) = input.strip_prefix("0x") {
+        T::from_str_radix(v, 16)
+    } else if let Some(v) = input.strip_prefix("0b") {
+        T::from_str_radix(v, 2)
+    } else {
+        input.parse::<T>()
     }
 }

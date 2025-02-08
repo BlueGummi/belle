@@ -70,7 +70,7 @@ fn main() -> io::Result<()> {
 
     let label_keys: HashSet<_> = label_lock.keys().collect();
     let variable_keys: HashSet<_> = variable_lock.keys().collect();
-    for key in label_keys.intersection(&variable_keys) {
+    if let Some(key) = label_keys.intersection(&variable_keys).next() {
         eprintln!(
             "Variable and label {} cannot have the same name.",
             key.to_string().yellow()

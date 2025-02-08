@@ -266,10 +266,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((line_num, ".pad argument is empty".to_string()));
             }
-            let mut collected: Vec<i16> = Vec::new();
-            for _ in 0..arg1.unwrap().get_num() {
-                collected.push(0);
-            }
+            let collected: Vec<i16> = vec![0; arg1.unwrap().get_num() as usize];
             Ok(Some(collected))
         }
         "dataword" => {
@@ -285,7 +282,7 @@ pub fn encode_instruction(
 pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
     let mut start_number: Option<i32> = None;
 
-    for (index, line) in lines.iter().enumerate() {
+    for line in lines {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty() || trimmed_line.starts_with(';') {
@@ -307,39 +304,10 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
                 } else {
                     stripped
                 };
-                if let Some(value) = stripped.strip_prefix("0b") {
-                    i32::from_str_radix(value, 2)
-                        .map_err(|_| {
-                            (
-                                index,
-                                format!("Invalid .start directive binary number: {}", stripped),
-                            )
-                        })
-                        .ok()
-                } else if let Some(value) = stripped.strip_prefix("0x") {
-                    i32::from_str_radix(value, 16)
-                        .map_err(|_| {
-                            (
-                                index,
-                                format!(
-                                    "Invalid .start directive hexadecimal number: {}",
-                                    stripped
-                                ),
-                            )
-                        })
-                        .ok()
+                if let Ok(v) = parse_number::<i32>(stripped) {
+                    Some(v)
                 } else {
-                    match stripped.parse::<i32>() {
-                        Ok(n) => Some(n),
-                        Err(_) => {
-                            let vmap = VARIABLE_MAP.lock().unwrap();
-                            if let Some(&replacement) = vmap.get(stripped.trim()) {
-                                Some(replacement)
-                            } else {
-                                None
-                            }
-                        }
-                    }
+                    None
                 }
             });
         }
@@ -364,7 +332,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
         .map_err(|_| "Failed to lock START_LOCATION")? as usize;
     let mut label_map = LABEL_MAP.lock().map_err(|_| "Failed to lock LABEL_MAP")?;
 
-    for (index, line) in lines.iter().enumerate() {
+    for line in lines {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty()
@@ -403,46 +371,14 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
         }
 
         if line_before_comment.starts_with(".pad") {
-            let add = line_before_comment
-                .split_whitespace()
-                .nth(1)
-                .and_then(|stripped| {
-                    if let Some(value) = stripped.strip_prefix("0b") {
-                        i32::from_str_radix(value, 2)
-                            .map_err(|_| {
-                                (
-                                    index,
-                                    format!("Invalid .pad directive binary number: {}", stripped),
-                                )
-                            })
-                            .ok()
-                    } else if let Some(value) = stripped.strip_prefix("0x") {
-                        i32::from_str_radix(value, 16)
-                            .map_err(|_| {
-                                (
-                                    index,
-                                    format!(
-                                        "Invalid .pad directive hexadecimal number: {}",
-                                        stripped
-                                    ),
-                                )
-                            })
-                            .ok()
-                    } else {
-                        match stripped.parse::<i32>() {
-                            Ok(n) => Some(n),
-                            Err(_) => {
-                                let vmap = VARIABLE_MAP.lock().unwrap();
-                                if let Some(&replacement) = vmap.get(stripped.trim()) {
-                                    Some(replacement)
-                                } else {
-                                    Some(0)
-                                }
-                            }
-                        }
-                    }
-                });
-            label_counter += add.unwrap() as usize;
+            let add = line_before_comment.split_whitespace().nth(1).unwrap_or("0");
+            let add = if let Ok(v) = parse_number::<usize>(add) {
+                v
+            } else {
+                return Err(String::from("Could not parse variable value"));
+            };
+
+            label_counter += add;
             continue;
         }
         if !(line_before_comment.trim().contains('=')
@@ -476,26 +412,11 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
             let variable_name = line_before_comment[..eq_index].trim();
             let variable_value = line_before_comment[eq_index + 1..].trim();
 
-            let parsed_value = if let Some(stripped) = variable_value.strip_prefix("0b") {
-                i32::from_str_radix(stripped, 2)
-                    .map_err(|_| (index, format!("Invalid binary number: {}", variable_value)))?
-            } else if let Some(stripped) = variable_value.strip_prefix("0x") {
-                i32::from_str_radix(stripped, 16).map_err(|_| {
-                    (
-                        index,
-                        format!("Invalid hexadecimal number: {}", variable_value),
-                    )
-                })?
+            if let Ok(val) = parse_number::<i32>(variable_value) {
+                variable_map.insert(variable_name.to_string(), val);
             } else {
-                variable_value.parse::<i32>().map_err(|_| {
-                    (
-                        index,
-                        format!("Invalid variable assignment: {}", line_before_comment),
-                    )
-                })?
-            };
-
-            variable_map.insert(variable_name.to_string(), parsed_value);
+                return Err((index, String::from("Could not parse variable value")));
+            }
         }
     }
 
@@ -539,4 +460,34 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
         io::ErrorKind::UnexpectedEof,
         "Line not found",
     ))
+}
+use std::num::ParseIntError;
+use std::str::FromStr;
+
+trait FromStrRadix: FromStr<Err = ParseIntError> {
+    fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError>
+    where
+        Self: Sized;
+}
+
+macro_rules! impl_from_str_radix {
+    ($($t:ty),*) => {
+        $(impl FromStrRadix for $t {
+            fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError> {
+                <$t>::from_str_radix(src, radix)
+            }
+        })*
+    };
+}
+
+impl_from_str_radix!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
+
+fn parse_number<T: FromStrRadix>(input: &str) -> Result<T, ParseIntError> {
+    if let Some(v) = input.strip_prefix("0x") {
+        T::from_str_radix(v, 16)
+    } else if let Some(v) = input.strip_prefix("0b") {
+        T::from_str_radix(v, 2)
+    } else {
+        input.parse::<T>()
+    }
 }

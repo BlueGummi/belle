@@ -213,8 +213,8 @@ impl<'a> Lexer<'a> {
     fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
         let pointer = pointer.trim();
 
-        let pointer_trimmed = if pointer.starts_with('[') {
-            &pointer[1..]
+        let pointer_trimmed = if let Some(v) = pointer.strip_prefix('[') {
+            v
         } else {
             pointer
         };

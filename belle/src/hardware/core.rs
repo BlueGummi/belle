@@ -261,9 +261,7 @@ impl CPU {
             print_b();
         }
 
-        if let Err(e) = execution_handle.join().unwrap() {
-            return Err(e);
-        }
+        execution_handle.join().unwrap()?;
         Ok(())
     }
 

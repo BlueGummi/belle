@@ -104,9 +104,7 @@ impl CPU {
                 7 => Ok(self.float_reg[1]),
                 8 => Ok(self.pc as f32),
                 9 => Ok(self.sp as f32),
-                n if *n > 3 || *n < 0 => {
-                    return Err(self.generate_invalid_register());
-                }
+                n if *n > 3 || *n < 0 => Err(self.generate_invalid_register()),
 
                 _ => Ok(self.int_reg[*n as usize] as f32),
             },
