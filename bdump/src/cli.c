@@ -168,7 +168,7 @@ void suggest_option(const char *invalid_option, int valid_count) {
             fputs(": ", stderr);
             fputs(ANSI_BOLD, stderr);
             fputs(ANSI_YELLOW, stderr);
-            fputs(descriptions[suggestion_indices[i + 1]/2], stderr);
+            fputs(descriptions[suggestion_indices[i + 1] / 2], stderr);
             fputs(ANSI_RESET, stderr);
             fputc('\n', stderr);
         }

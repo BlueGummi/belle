@@ -6,6 +6,11 @@ unsigned int hash(size_t key) {
 size_t max_columns = 0;
 HashMap *jump_map_create(void) {
     HashMap *map = malloc(sizeof(HashMap));
+    if (map == NULL) {
+        perror("Hashmap creation memory allocation failed");
+        PRINT_LINE_AND_FILE;
+        exit(EXIT_FAILURE);
+    }
     for (int i = 0; i < TABLE_SIZE; i++) {
         map->table[i] = NULL;
     }
@@ -15,6 +20,11 @@ HashMap *jump_map_create(void) {
 void jump_map_insert(HashMap *map, size_t key, Jump value) {
     unsigned int index = hash(key);
     Node *newNode = malloc(sizeof(Node));
+    if (newNode == NULL) {
+        perror("Node creation during hashmap insertion memory allocation failed");
+        PRINT_LINE_AND_FILE;
+        exit(EXIT_FAILURE);
+    }
     newNode->key = key;
     newNode->value = value;
     newNode->next = map->table[index];
@@ -55,6 +65,11 @@ void init_jump_vector(JumpVector *vector) {
     vector->size = 0;
     vector->capacity = 4;
     vector->data = malloc(vector->capacity * sizeof(Jump));
+    if (vector->data == NULL) {
+        perror("Vector initialization data memory allocation failed");
+        PRINT_LINE_AND_FILE;
+        exit(EXIT_FAILURE);
+    }
 }
 
 void add_jump(JumpVector *vector, Jump jump) {
@@ -62,7 +77,8 @@ void add_jump(JumpVector *vector, Jump jump) {
         vector->capacity *= 2;
         vector->data = realloc(vector->data, vector->capacity * sizeof(Jump));
         if (vector->data == NULL) {
-            perror("Memory allocation failed\n");
+            perror("Vector insertion memory allocation failed");
+            PRINT_LINE_AND_FILE;
             exit(EXIT_FAILURE);
         }
     }
@@ -79,8 +95,9 @@ void free_jump_vector(JumpVector *vector) {
 JumpVector *find_jumps_at_address(HashMap *jump_map, uint64_t address) {
     JumpVector *jump_vector = malloc(sizeof(JumpVector));
     if (jump_vector == NULL) {
-        perror("Memory allocation failed for JumpVector\n");
-        return NULL;
+        perror("Vector address search memory allocation failed");
+        PRINT_LINE_AND_FILE;
+        exit(EXIT_FAILURE);
     }
     init_jump_vector(jump_vector);
 

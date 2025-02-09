@@ -1,5 +1,3 @@
-#ifndef BDUMP_H
-#define BDUMP_H
 #define TABLE_SIZE 4096
 #include "consts.h"
 
@@ -118,7 +116,9 @@ int levenshtein_distance(const char *s1, const char *s2);
 Color get_color(int index);
 char *color_to_ansi(Color color);
 void get_file_size(const char *filename, char *size_str, size_t size_str_len);
-#endif
+
+#define STRINGIFY(x) #x
+#define PRINT_LINE_AND_FILE printf(" on line %d in file %s\n", __LINE__, __FILE__)
 #define FORMAT_STRING_MEMPTR "&0x%X"
 #define FORMAT_STRING_MEMPTR_COLORED "&%s0x%X%s"
 #define FORMAT_STRING_MEM_COLORED "[%s0x%X%s]"
