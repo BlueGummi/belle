@@ -35,11 +35,11 @@ hello:
     .word 10
     .asciiz " oyhdmNMMMMMMMNdyooydmddddhhhhyhNd.                                        "
     .word 10
-    .asciiz "  :oyhhdNNMMMMMMMNNNmmdddhhhhhyymMh                                        "
+    .asciiz "  :oyhhdNNMMMMMMMNNNmmdddhhhhhyymMh          Powered by                    "
     .word 10
     .asciiz "    .:+sydNMMMMMNNNmmmdddhhhhhhmMmy                                        "
     .word 10
-    .asciiz "       /mMMMMMMNNNmmmdddhhhhhmMNhs:                                        "
+    .asciiz "       /mMMMMMMNNNmmmdddhhhhhmMNhs:         Gentoo Linux!!                 "
     .word 10
     .asciiz "    `oNMMMMMMMNNNmmmddddhhdmMNhs+`                                         "
     .word 10
