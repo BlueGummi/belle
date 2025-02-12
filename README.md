@@ -6,7 +6,7 @@
 
 All documentation is available on [the website for this project](https://bluegummi.github.io/belle) 
 
-## A [PDF](https://github.com/BlueGummi/belle/blob/master/BELLE-ISA_Manual_v1.pdf) is also available
+## A [PDF](https://github.com/BlueGummi/belle/blob/master/BELLE-ISA_Manual_v2.pdf) is also available
 
 ## Quickstart
 
