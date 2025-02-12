@@ -4,13 +4,12 @@
  *
  * This code is licensed under the BSD 3-Clause License.
  */
-use basm::Error::*;
 use basm::*;
 use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
-use std::io::{self, BufRead, Write};
+use std::io;
 use std::path::Path;
 fn main() -> io::Result<()> {
     let input: &String = &CONFIG.source;
@@ -138,9 +137,7 @@ fn main() -> io::Result<()> {
                                 }
                             }
                         }
-                        Ok(None) => {
-                            continue;
-                        }
+                        Ok(None) => (),
                         Err((line_num, err_msg)) => {
                             write_to_file = false;
                             println!("{}: {}", "error".bright_red().bold(), err_msg);
@@ -171,6 +168,9 @@ fn main() -> io::Result<()> {
 
     match &CONFIG.binary {
         Some(output_file) if write_to_file => {
+            let start_bin = 0b0010_0000_0000 | *START_LOCATION.lock().unwrap();
+            encoded_instructions.insert(0, (start_bin & 0xff) as u8);
+            encoded_instructions.insert(0, ((start_bin & 0xff00) >> 8) as u8);
             encoded_instructions.insert(0, 0x02);
             encoded_instructions.insert(0, 0x01);
             write_encoded_instructions_to_file(output_file, &encoded_instructions)?;
@@ -180,86 +180,4 @@ fn main() -> io::Result<()> {
         }
     }
     Ok(())
-}
-
-fn process_includes(input: &String) -> io::Result<Vec<String>> {
-    let mut included_lines = Vec::new();
-    let file = File::open(input)?;
-    let reader = io::BufReader::new(file);
-
-    for line in reader.lines() {
-        let content = match line {
-            Ok(content) => content,
-            Err(e) => {
-                eprintln!(
-                    "{}",
-                    LineLessError(format!("error while reading from file: {e}").as_str())
-                );
-                return Err(e);
-            }
-        };
-
-        let trimmed_content = content.trim();
-
-        if trimmed_content.starts_with("#include") {
-            let start_quote = trimmed_content.find('"');
-            let end_quote = trimmed_content.rfind('"');
-
-            if let (Some(start), Some(end)) = (start_quote, end_quote) {
-                if start < end {
-                    let include_file = &trimmed_content[start + 1..end];
-                    if let Ok(included) = read_include_file(include_file) {
-                        included_lines.extend(included);
-                    } else {
-                        eprintln!(
-                            "{}",
-                            LineLessError(
-                                format!("could not read included file: {include_file}").as_str()
-                            )
-                        );
-                        return Err(io::Error::new(io::ErrorKind::Other, "Include file error"));
-                    }
-                }
-            }
-            continue;
-        }
-
-        included_lines.push(content);
-    }
-
-    Ok(included_lines)
-}
-fn read_include_file(file_name: &str) -> io::Result<Vec<String>> {
-    let mut included_lines = Vec::new();
-    let reader = io::BufReader::new(File::open(file_name)?);
-
-    for line in reader.lines() {
-        match line {
-            Ok(content) => included_lines.push(content),
-            Err(e) => {
-                eprintln!(
-                    "{}",
-                    LineLessError(format!("error while reading from include file: {e}").as_str())
-                );
-                return Err(e);
-            }
-        }
-    }
-    Ok(included_lines)
-}
-fn write_encoded_instructions_to_file(
-    filename: &str,
-    encoded_instructions: &[u8],
-) -> io::Result<()> {
-    if CONFIG.verbose {
-        println!("{}", "Wrote to file.".green());
-    }
-    let mut file = File::create(filename)?;
-    file.write_all(encoded_instructions)?;
-    Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    // no tests
 }

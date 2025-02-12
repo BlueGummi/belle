@@ -4,7 +4,6 @@ use colored::*;
 impl CPU {
     pub fn load_rom(&mut self, binary: &[i16]) -> Result<(), EmuError> {
         let mut counter = 0;
-        let mut start_found = false;
         let mut rom_metadata = String::from("");
         if let Some(number) = binary.first() {
             if (number >> 8) == 1 {
@@ -25,35 +24,16 @@ impl CPU {
                 );
             }
         }
+        if let Some(val) = binary.get(1) {
+            self.starts_at = (val & 0b1_1111_1111) as u16;
+        }
         for (index, element) in binary.iter().enumerate() {
-            if index == 0 {
+            if index == 0 || index == 1 {
                 continue;
             }
-            match element >> 9 {
-                1 => {
-                    if start_found {
-                        self.do_not_run = true;
-                        return Err(EmuError::Duplicate(".start directives".to_string()));
-                    }
-                    self.starts_at = (element & 0b1_1111_1111) as u16;
-                    start_found = true;
-                    continue;
-                }
-                0b10 => {
-                    self.sp = (element & 0b1_1111_1111) as u16;
-                    continue;
-                }
-                0b11 => {
-                    self.bp = (element & 0b1_1111_1111) as u16;
-                    continue;
-                }
-                _ => {
-                    if (element >> 8) == 1 && index != 0 {
-                        rom_metadata =
-                            format!("{}{}", rom_metadata, char::from((element & 0x7F) as u8));
-                        continue;
-                    }
-                }
+            if (element >> 8) == 1 && index != 0 {
+                rom_metadata = format!("{}{}", rom_metadata, char::from((element & 0x7F) as u8));
+                continue;
             }
             if counter + self.starts_at as usize >= MEMORY_SIZE {
                 return Err(EmuError::MemoryOverflow());

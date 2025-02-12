@@ -1,6 +1,4 @@
 .start [0]
-.ssp [128]
-.sbp [128]
     jmp main
 msg1:
 .asciiz "Enter a number. This will return double of it: "

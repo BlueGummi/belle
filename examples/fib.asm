@@ -5,8 +5,6 @@ newline = 10
     .dataword 10
     .dataword 10
     .data "This code is licensed under the BSD 3-Clause License."
-.ssp [0x28]  ; set stack pointer to addr 0x28
-.sbp [0x28]  ; set base pointer to addr 0x28
 .start [0x29] ; program starts at addr 0x29
     int 71   ; don't push returns
     jmp start
