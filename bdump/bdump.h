@@ -32,7 +32,7 @@ bool in_char = false;
 bool next_in_char = false;
 bool likely_label = false;
 bool printed_addr = false;
-char global_str[512] = "";
+char global_str[65536] = "";
 
 #ifdef _WIN32
 char buffer[1024];
