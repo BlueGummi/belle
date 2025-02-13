@@ -46,7 +46,7 @@ typedef struct Node {
 } Node;
 
 typedef struct {
-    Node *table[TABLE_SIZE];
+    Node **table;
 } HashMap;
 
 typedef struct {

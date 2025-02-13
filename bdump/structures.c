@@ -12,6 +12,7 @@ HashMap *jump_map_create(void) {
         PRINT_LINE_AND_FILE;
         exit(EXIT_FAILURE);
     }
+    map->table = malloc(sizeof(Node *) * TABLE_SIZE);
     for (int i = 0; i < TABLE_SIZE; i++) {
         map->table[i] = NULL;
     }
@@ -20,16 +21,16 @@ HashMap *jump_map_create(void) {
 
 void jump_map_insert(HashMap *map, size_t key, Jump value) {
     unsigned int index = hash(key);
-    Node *newNode = malloc(sizeof(Node));
-    if (newNode == NULL) {
+    Node *new_node = malloc(sizeof(Node));
+    if (new_node == NULL) {
         perror("Node creation during hashmap insertion memory allocation failed");
         PRINT_LINE_AND_FILE;
         exit(EXIT_FAILURE);
     }
-    newNode->key = key;
-    newNode->value = value;
-    newNode->next = map->table[index];
-    map->table[index] = newNode;
+    new_node->key = key;
+    new_node->value = value;
+    new_node->next = map->table[index];
+    map->table[index] = new_node;
 }
 void free_node(Node *node) {
     if (node == NULL) {
