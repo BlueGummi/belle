@@ -59,6 +59,7 @@ void free_map(HashMap *map) {
             current = current->next;
             free(temp);
         }
+        free(current);
     }
     free(map);
 }
