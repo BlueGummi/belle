@@ -104,7 +104,9 @@ impl CPU {
         let window = match window {
             Ok(w) => Some(w),
             Err(e) => {
-                eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                if !CONFIG.no_display {
+                    eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                }
                 can_make_window = false;
                 None
             }
