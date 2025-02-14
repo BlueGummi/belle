@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -flto -O2 -Wpedantic -Wunused -lm -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-command-line-argument
+CFLAGS = -Wall -Wextra -flto -O2 -Wpedantic -Wunused -lm -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-command-line-argument -g
 SRCDIR = bdump
 OBJ = bdump.o # print_utils.o # math_functions.o
 TARGET = bdump

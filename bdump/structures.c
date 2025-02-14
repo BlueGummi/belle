@@ -61,6 +61,7 @@ void free_map(HashMap *map) {
         }
         free(current);
     }
+    free(map->table);
     free(map);
 }
 
