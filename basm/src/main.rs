@@ -181,12 +181,14 @@ fn main() {
     }
 
     if !hlt_seen {
-        println!(
-            "{}: {} {}",
-            "warning".yellow(),
-            "no HLT instruction present in".bold(),
-            CONFIG.source.green()
-        );
+        if error_count == 0 {
+            println!(
+                "{}: {} {}",
+                "warning".yellow(),
+                "no HLT instruction present in".bold(),
+                CONFIG.source.green()
+            );
+        }
     }
 
     print_label_map();
@@ -204,11 +206,20 @@ fn main() {
         }
         _ => {
             if error_count > 0 {
-                eprintln!(
-                    "{} {}",
-                    error_count.to_string().bold(),
-                    "errors generated.".bright_red()
-                );
+                eprintln!("{}", "compilation unsuccessful".bold());
+                if error_count != 1 {
+                    eprintln!(
+                        "{} {}.",
+                        error_count.to_string().bold(),
+                        "errors generated".bright_red()
+                    );
+                } else {
+                    eprintln!(
+                        "{} {}.",
+                        error_count.to_string().bold(),
+                        "error generated".bright_red()
+                    );
+                }
             }
             std::process::exit(1);
         }

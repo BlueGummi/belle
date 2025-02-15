@@ -37,7 +37,10 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             } else if let Some(&value) = vmap.get(ident) {
                 Ok(value as i16)
             } else {
-                return Err((line_num, "Label/Variable not declared.".to_string()));
+                return Err((
+                    line_num,
+                    format!("label/variable \"{}\" not declared.", ident.magenta()),
+                ));
             }
         }
         _ => Ok(0),

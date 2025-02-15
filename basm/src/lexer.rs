@@ -222,7 +222,7 @@ impl<'a> Lexer<'a> {
                         format!("register indirect {} is invalid", reg.to_string().magenta()),
                         self.line_number,
                         Some(self.position),
-                        Some(format!("valid registers are {}", "r0-r7".magenta())),
+                        Some(format!("valid registers are {}", "r0-r9".magenta())),
                     ));
                 }
                 self.tokens.push(Token::RegPointer(reg));
@@ -234,7 +234,7 @@ impl<'a> Lexer<'a> {
                     ),
                     self.line_number,
                     Some(self.position),
-                    Some(format!("valid registers are {}", "r0-r7".magenta())),
+                    Some(format!("valid registers are {}", "r0-r9".magenta())),
                 ));
             }
         } else {
@@ -242,7 +242,7 @@ impl<'a> Lexer<'a> {
                 format!("register indirect {} must have a number", pointer.magenta()),
                 self.line_number,
                 Some(self.position),
-                Some(format!("valid registers are {}", "r0-r7".magenta())),
+                Some(format!("valid registers are {}", "r0-r9".magenta())),
             ));
         }
     }
@@ -299,7 +299,7 @@ impl<'a> Lexer<'a> {
                     "register must have a value after 'r'",
                     self.line_number,
                     Some(self.position),
-                    Some(format!("valid registers are {}", "r0-r7".magenta())),
+                    Some(format!("valid registers are {}", "r0-r9".magenta())),
                 ));
             }
         }
@@ -320,7 +320,7 @@ impl<'a> Lexer<'a> {
                         format!("register number {} invalid", reg_num),
                         self.line_number,
                         Some(self.position),
-                        Some(format!("valid registers are {}", "r0-r7".magenta())),
+                        Some(format!("valid registers are {}", "r0-r9".magenta())),
                     ));
                 }
                 self.tokens.push(Token::Register(reg_num));
@@ -329,7 +329,7 @@ impl<'a> Lexer<'a> {
                     format!("register {} invalid", reg),
                     self.line_number,
                     Some(self.position),
-                    Some(format!("valid registers are {}", "r0-r7".magenta())),
+                    Some(format!("valid registers are {}", "r0-r9".magenta())),
                 ));
             }
         }
