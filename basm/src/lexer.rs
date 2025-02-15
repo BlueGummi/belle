@@ -88,7 +88,7 @@ impl<'a> Lexer<'a> {
                 _ => {
                     self.position += 1;
                     self.errors.push(UnknownCharacter(
-                        c.to_string(),
+                        format!("character '{}' not recognized", c),
                         self.line_number,
                         Some(self.position),
                     ));
@@ -111,7 +111,7 @@ impl<'a> Lexer<'a> {
                 '\'' => {
                     if ascii_char.is_empty() {
                         self.errors.push(Error::InvalidSyntax(
-                            "ASCII value is empty",
+                            "ASCII character is empty, try a correct ASCII character like 'a",
                             self.line_number,
                             Some(self.position),
                         ));
@@ -119,7 +119,7 @@ impl<'a> Lexer<'a> {
 
                     if ascii_char.len() > 1 {
                         self.errors.push(Error::InvalidSyntax(
-                            "ASCII value has more than one character",
+                            "ASCII character has more than one character, try a correct ASCII character like 'a",
                             self.line_number,
                             Some(self.position),
                         ));
@@ -133,7 +133,7 @@ impl<'a> Lexer<'a> {
             }
         }
         self.errors.push(Error::InvalidSyntax(
-            "ASCII value is missing closing quote",
+            "ASCII character is missing closing quote, try a correct ASCII character like 'a'",
             self.line_number,
             Some(self.position),
         ));
@@ -197,7 +197,7 @@ impl<'a> Lexer<'a> {
             if let Ok(reg) = pointer.trim()[2..].parse::<i16>() {
                 if !(0..=9).contains(&reg) {
                     self.errors.push(Error::InvalidSyntax(
-                        "invalid register pointer number",
+                        "register indirect value is invalid, valid registers are r0-r7",
                         self.line_number,
                         Some(self.position),
                     ));
@@ -205,14 +205,14 @@ impl<'a> Lexer<'a> {
                 self.tokens.push(Token::RegPointer(reg));
             } else {
                 self.errors.push(InvalidSyntax(
-                    "invalid register number",
+                    "register number is invalid, valid registers are r0-r7",
                     self.line_number,
                     Some(self.position),
                 ));
             }
         } else {
             self.errors.push(InvalidSyntax(
-                "register must have a number",
+                "register must have a number, valid registers are r0-r7",
                 self.line_number,
                 Some(self.position),
             ));
@@ -240,7 +240,7 @@ impl<'a> Lexer<'a> {
             }
         } else {
             self.errors.push(Error::InvalidSyntax(
-                "memory must have a number",
+                "memory indirect must have a number, valid addresses are 0x0-0xFFFF",
                 self.line_number,
                 Some(self.position),
             ));
@@ -260,7 +260,7 @@ impl<'a> Lexer<'a> {
                 reg.push(self.chars.next().unwrap());
             } else if !c.is_alphanumeric() {
                 self.errors.push(Error::ExpectedArgument(
-                    "expected alphanumeric argument after 'r'",
+                    "register must have a value after 'r', valid registers are r0-r7",
                     self.line_number,
                     Some(self.position),
                 ));
@@ -280,7 +280,7 @@ impl<'a> Lexer<'a> {
             if let Ok(reg_num) = reg[1..].parse::<i16>() {
                 if !(0..=9).contains(&reg_num) {
                     self.errors.push(Error::InvalidSyntax(
-                        "invalid register number",
+                        "register number invalid, valid registers are r0-r7",
                         self.line_number,
                         Some(self.position),
                     ));
@@ -288,7 +288,7 @@ impl<'a> Lexer<'a> {
                 self.tokens.push(Token::Register(reg_num));
             } else {
                 self.errors.push(Error::InvalidSyntax(
-                    "invalid register number",
+                    "register number invalid, valid registers are r0-r7",
                     self.line_number,
                     Some(self.position),
                 ));
@@ -373,7 +373,7 @@ impl<'a> Lexer<'a> {
             }
         } else {
             self.errors.push(Error::InvalidSyntax(
-                "Invalid character or value",
+                "could not find variable with given name",
                 self.line_number,
                 Some(self.position),
             ));
@@ -392,7 +392,7 @@ impl<'a> Lexer<'a> {
                     break;
                 } else {
                     self.errors.push(InvalidSyntax(
-                        "expected a closing \"",
+                        "expected a closing \" in ASCII string, e.g. \"ascii string\"",
                         self.line_number,
                         Some(self.position),
                     ));
@@ -413,8 +413,9 @@ impl<'a> Lexer<'a> {
                     addr.push(self.chars.next().unwrap());
                     break;
                 } else {
+                    self.position -= 1;
                     self.errors.push(InvalidSyntax(
-                        "expected closing bracket or digit",
+                        "expected closing bracket for this memory address, e.g. [0xff]",
                         self.line_number,
                         Some(self.position),
                     ));
@@ -430,7 +431,7 @@ impl<'a> Lexer<'a> {
                 self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
                 self.errors.push(InvalidSyntax(
-                    "Error parsing integer: {}",
+                    "could not parse address value, valid addresses are [0x0] - [0xffff]",
                     self.line_number,
                     Some(self.position),
                 ));
@@ -454,7 +455,7 @@ impl<'a> Lexer<'a> {
                 self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
                 self.errors.push(InvalidSyntax(
-                    "Error parsing integer",
+                    "could not parse address value, valid addresses are [0x0] - [0xffff]",
                     self.line_number,
                     Some(self.position),
                 ));

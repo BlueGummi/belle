@@ -9,9 +9,8 @@ use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
-use std::io;
 use std::path::Path;
-fn main() -> io::Result<()> {
+fn main() {
     let input: &String = &CONFIG.source;
     let file = Path::new(input);
 
@@ -35,7 +34,10 @@ fn main() -> io::Result<()> {
         }
     }
 
-    let lines = process_includes(input)?;
+    let lines = match process_includes(input) {
+        Ok(v) => v,
+        Err(_) => std::process::exit(1),
+    };
 
     let lines: Vec<String> = lines.iter().map(|line| line.trim().to_string()).collect();
 
@@ -51,12 +53,16 @@ fn main() -> io::Result<()> {
     let mut write_to_file: bool = true;
     if let Err((l, m)) = process_variables(&lines) {
         println!("{}: {}", "error".bright_red().bold(), m);
-        print_line(l + 1)?;
+        if let Err(e2) = print_line(l + 1) {
+            println!("{}: {}", "error".bright_red().bold(), e2);
+        }
         write_to_file = false;
     }
     if let Err((l, e)) = process_start(&lines) {
         println!("{}: {}", "error".bright_red().bold(), e);
-        print_line(l + 1)?;
+        if let Err(e2) = print_line(l + 1) {
+            println!("{}: {}", "error".bright_red().bold(), e2);
+        }
         write_to_file = false;
     }
     if let Err(e) = load_labels(&lines) {
@@ -130,7 +136,9 @@ fn main() -> io::Result<()> {
                             {
                                 write_to_file = false;
                                 println!("{}: {}", "error".bright_red().bold(), err_msg);
-                                print_line(lineee)?;
+                                if let Err(e) = print_line(lineee) {
+                                    println!("{}: {}", "error".bright_red().bold(), e);
+                                }
                             } else {
                                 for encoded in vector {
                                     encoded_instructions.extend(&encoded.to_be_bytes());
@@ -141,7 +149,9 @@ fn main() -> io::Result<()> {
                         Err((line_num, err_msg)) => {
                             write_to_file = false;
                             println!("{}: {}", "error".bright_red().bold(), err_msg);
-                            print_line(line_num)?;
+                            if let Err(e) = print_line(line_num) {
+                                println!("{}: {}", "error".bright_red().bold(), e);
+                            }
                         }
                     }
                 }
@@ -174,11 +184,12 @@ fn main() -> io::Result<()> {
             encoded_instructions.insert(0, ((start_bin & 0xff00) >> 8) as u8);
             encoded_instructions.insert(0, 0x02);
             encoded_instructions.insert(0, 0x01);
-            write_encoded_instructions_to_file(output_file, &encoded_instructions)?;
+            if let Err(e) = write_encoded_instructions_to_file(output_file, &encoded_instructions) {
+                println!("{}: {}", "error".bright_red().bold(), e);
+            }
         }
         _ => {
             std::process::exit(1);
         }
     }
-    Ok(())
 }
