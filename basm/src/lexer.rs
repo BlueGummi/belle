@@ -26,11 +26,9 @@ impl<'a> Lexer<'a> {
             match c {
                 ' ' | ']' => {
                     self.position += 1;
-                    continue;
                 }
                 '\t' => {
                     self.position += 3;
-                    continue;
                 }
                 '\n' => self.tokens.push(Token::NewLine),
                 ',' => {
@@ -47,9 +45,11 @@ impl<'a> Lexer<'a> {
                         if next.is_ascii_digit() {
                             self.lex_register(c);
                         } else {
+                            self.position += 1;
                             self.lex_identifier(c);
                         }
                     } else {
+                        self.position += 1;
                         self.lex_identifier(c);
                     }
                 }
@@ -66,9 +66,11 @@ impl<'a> Lexer<'a> {
                     self.lex_ascii();
                 }
                 '-' => {
+                    self.position += 1;
                     self.lex_literal(c);
                 }
                 '0'..='9' => {
+                    self.position += 1;
                     self.lex_literal(c);
                 }
                 '[' => {
@@ -80,6 +82,7 @@ impl<'a> Lexer<'a> {
                     self.lex_asciiz(c);
                 }
                 '=' => {
+                    self.position += 1;
                     self.tokens.push(Token::EqualSign);
                 }
                 _ => {
@@ -174,11 +177,11 @@ impl<'a> Lexer<'a> {
 
         while let Some(&next) = self.chars.peek() {
             if next.is_alphanumeric() {
-                self.position += 1;
                 pointer.push(self.chars.next().unwrap());
             } else {
                 break;
             }
+            self.position += 1;
         }
 
         if is_reg {
@@ -270,6 +273,7 @@ impl<'a> Lexer<'a> {
             } else {
                 break;
             }
+            self.position += 1;
         }
 
         if reg.len() > 1 {
@@ -297,14 +301,15 @@ impl<'a> Lexer<'a> {
         ident.push(c);
         while let Some(&next) = self.chars.peek() {
             if next.is_alphanumeric() || next == '_' {
+                self.position += 1;
                 ident.push(self.chars.next().unwrap());
             } else {
                 break;
             }
-            self.position += 1;
         }
         if let Some(&next) = self.chars.peek() {
             if next == ':' {
+                self.position += 1;
                 self.chars.next();
                 return;
             }
@@ -316,12 +321,14 @@ impl<'a> Lexer<'a> {
         let mut number = c.to_string();
         if let Some(&next) = self.chars.peek() {
             if next == '-' {
+                self.position += 1;
                 number.push(self.chars.next().unwrap());
             }
         }
 
         while let Some(&next) = self.chars.peek() {
             if next.is_ascii_digit() || next.is_alphanumeric() || next == '_' {
+                self.position += 1;
                 number.push(self.chars.next().unwrap());
             } else {
                 break;
@@ -390,6 +397,7 @@ impl<'a> Lexer<'a> {
                         Some(self.position),
                     ));
                 }
+                self.position += 1;
             }
         }
     }
@@ -411,6 +419,7 @@ impl<'a> Lexer<'a> {
                     ));
                     return;
                 }
+                self.position += 1;
             }
 
             if addr.len() < 3 || self.lex_number(&addr[1..addr.len() - 1]).is_err() {
@@ -433,6 +442,7 @@ impl<'a> Lexer<'a> {
                 } else {
                     break;
                 }
+                self.position += 1;
             }
 
             if self.lex_number(&addr[1..]).is_err() {
@@ -460,6 +470,7 @@ impl<'a> Lexer<'a> {
             } else {
                 break;
             }
+            self.position += 1;
         }
         self.tokens.push(Token::Directive(directive));
     }

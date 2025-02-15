@@ -145,8 +145,6 @@ fn main() -> io::Result<()> {
                         }
                     }
                 }
-
-                line_count += 1;
             }
             Err(err) => {
                 for error in err {
@@ -155,6 +153,7 @@ fn main() -> io::Result<()> {
                 write_to_file = false;
             }
         }
+        line_count += 1;
     }
 
     if !hlt_seen {
