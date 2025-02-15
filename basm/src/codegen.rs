@@ -39,7 +39,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             } else {
                 return Err((
                     line_num,
-                    format!("label/variable \"{}\" not declared.", ident.magenta()),
+                    format!("label/variable \"{}\" not declared", ident.magenta()),
                 ));
             }
         }

@@ -180,15 +180,13 @@ fn main() {
         line_count += 1;
     }
 
-    if !hlt_seen {
-        if error_count == 0 {
-            println!(
-                "{}: {} {}",
-                "warning".yellow(),
-                "no HLT instruction present in".bold(),
-                CONFIG.source.green()
-            );
-        }
+    if !hlt_seen && error_count == 0 {
+        println!(
+            "{}: {} {}",
+            "warning".yellow(),
+            "no HLT instruction present in".bold(),
+            CONFIG.source.green()
+        );
     }
 
     print_label_map();

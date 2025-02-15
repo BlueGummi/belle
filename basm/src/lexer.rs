@@ -397,7 +397,18 @@ impl<'a> Lexer<'a> {
         let variable = if input.starts_with('#') || input.starts_with('&') {
             &input[1..]
         } else if input.starts_with('[') {
-            &input[1..input.len() - 1]
+            if input.len() - 1 > 1 {
+                &input[1..input.len() - 1]
+            } else {
+                self.errors.push(Error::InvalidSyntax(
+                    format!("variable couldn't be parsed \"{}\"", input.trim().magenta()),
+                    self.line_number,
+                    Some(self.position),
+                    None,
+                ));
+
+                return;
+            }
         } else {
             input
         };

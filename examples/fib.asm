@@ -10,7 +10,7 @@ newline = 10
     jmp start
 msg2:
     .asciiz "The number entered is too large."
-    .word newline
+    .word [newline]
 text:
     .asciiz "The number entered is too small."
     .word newline
