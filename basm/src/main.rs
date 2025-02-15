@@ -41,13 +41,6 @@ fn main() {
 
     let lines: Vec<String> = lines.iter().map(|line| line.trim().to_string()).collect();
 
-    if CONFIG.verbose {
-        println!("{}", "Processing lines:".blue());
-        for (index, line) in lines.iter().enumerate() {
-            println!("{}: {}", index + 1, line.green());
-        }
-    }
-
     let mut encoded_instructions = Vec::new();
     let mut line_count = 1;
     let mut write_to_file: bool = true;
@@ -82,7 +75,7 @@ fn main() {
     let variable_keys: HashSet<_> = variable_lock.keys().collect();
     if let Some(key) = label_keys.intersection(&variable_keys).next() {
         eprintln!(
-            "Variable and label {} cannot have the same name.",
+            "variable and label {} cannot have the same name.",
             key.to_string().yellow()
         );
         std::process::exit(1);
@@ -105,6 +98,12 @@ fn main() {
         }
         match lexer.lex() {
             Ok(tokens) => {
+                if CONFIG.verbose {
+                    println!("\n{}: {line}", "raw line".green());
+                    for token in tokens {
+                        println!("{}: {token}", "token".cyan());
+                    }
+                }
                 if tokens.is_empty() {
                     line_count += 1;
                     continue;

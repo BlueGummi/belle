@@ -5,7 +5,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
     match arg {
         Some(Token::Register(num)) => {
             if *num > 9 {
-                return Err((line_num, "Invalid register number".to_string()));
+                return Err((line_num, "invalid register number".to_string()));
             }
             Ok(*num)
         }
@@ -15,7 +15,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
-                Err((line_num, format!("Label \"{}\" does not exist", sr)))
+                Err((line_num, format!("label \"{}\" does not exist", sr)))
             }
         }
         Some(Token::MemAddr(n)) => Ok(*n),
@@ -23,7 +23,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             let label_val: i16 = match keyword.as_str() {
                 "start" => 1,
                 "asciiz" | "word" => 0,
-                _ => return Err((line_num, "Directive not recognized".to_string())),
+                _ => return Err((line_num, "directive not recognized".to_string())),
             };
             Ok(label_val)
         }
@@ -76,7 +76,7 @@ pub fn encode_instruction(
                     "BNZ" | "BNE" => Ok(BNZ_OP),
                     "BL" => Ok(BL_OP),
                     "BG" => Ok(BG_OP),
-                    _ => Err((line_num, "Invalid jump instruction".to_string())),
+                    _ => Err((line_num, "invalid jump instruction".to_string())),
                 }
             }
             "POP" => {
@@ -117,7 +117,7 @@ pub fn encode_instruction(
             "MOV" => Ok(MOV_OP), // 14
             _ => Err((
                 line_num,
-                format!("Instruction \"{}\" not recognized", instruction.magenta()),
+                format!("instruction \"{}\" not recognized", instruction.magenta()),
             )),
         },
         Token::Directive(s) => {
@@ -162,7 +162,7 @@ pub fn encode_instruction(
         }
         "popmem" => {
             let arg_bin = arg1
-                .ok_or_else(|| (line_num, "Missing argument for POP".to_string()))?
+                .ok_or_else(|| (line_num, "missing argument for POP".to_string()))?
                 .get_num();
             Ok(Some(vec![instruction_bin << 12 | 1 << 11 | arg_bin]))
         }
@@ -175,12 +175,12 @@ pub fn encode_instruction(
         }
         "sti" => {
             let raw = arg1
-                .ok_or_else(|| (line_num, "Missing argument for STI".to_string()))?
+                .ok_or_else(|| (line_num, "missing argument for STI".to_string()))?
                 .get_raw();
             let parsed_int = raw
                 .trim()
                 .parse::<i16>()
-                .map_err(|_| (line_num, "Failed to parse integer".to_string()))?;
+                .map_err(|_| (line_num, "failed to parse integer".to_string()))?;
             Ok(Some(vec![
                 (instruction_bin << 12)
                     | (1 << 11)
@@ -210,7 +210,7 @@ pub fn encode_instruction(
             if address > 1023 {
                 return Err((
                     line_num,
-                    "Label memory address too large on instruction on line".to_string(),
+                    "label memory address too large on instruction on line".to_string(),
                 ));
             }
             Ok(Some(vec![(instruction_bin << 11) | address]))
@@ -220,14 +220,14 @@ pub fn encode_instruction(
                 .ok_or_else(|| {
                     (
                         line_num,
-                        "Missing argument for indirect branch/jump".to_string(),
+                        "missing argument for indirect branch/jump".to_string(),
                     )
                 })?
                 .get_raw();
             let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
                 (
                     line_num,
-                    "Failed to parse integer for indirect jump".to_string(),
+                    "failed to parse integer for indirect jump".to_string(),
                 )
             })?;
             Ok(Some(vec![
@@ -238,7 +238,7 @@ pub fn encode_instruction(
         }
         "ascii" => {
             if arg1.is_none() {
-                return Err((line_num, "Asciiz argument is empty".to_string()));
+                return Err((line_num, "asciiz argument is empty".to_string()));
             }
             let mut collected: Vec<i16> = Vec::new();
             for character in arg1.unwrap().get_raw().chars() {
@@ -248,7 +248,7 @@ pub fn encode_instruction(
         }
         "word" => {
             if arg1.is_none() {
-                return Err((line_num, "Word argument is empty".to_string()));
+                return Err((line_num, "word argument is empty".to_string()));
             }
             Ok(Some(vec![arg1.unwrap().get_num()]))
         }
@@ -285,10 +285,10 @@ pub fn encode_instruction(
         }
         "dataword" => {
             if arg1.is_none() {
-                return Err((line_num, "DataWord argument is empty".to_string()));
+                return Err((line_num, "dataword argument is empty".to_string()));
             }
             Ok(Some(vec![(1 << 8) | arg1.unwrap().get_num()]))
         }
-        _ => Err((line_num, "Instruction type not recognized".to_string())),
+        _ => Err((line_num, "instruction type not recognized".to_string())),
     }
 }

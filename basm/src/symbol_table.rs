@@ -53,13 +53,13 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
         if val > 511 {
             return Err((
                 start_line,
-                String::from("Start location must not exceed 511"),
+                String::from("start location must not exceed 511"),
             ));
         }
     }
     let mut start_location = START_LOCATION
         .lock()
-        .map_err(|_| (0, "Failed to lock START_LOCATION".to_string()))?;
+        .map_err(|_| (0, "failed to lock START_LOCATION".to_string()))?;
 
     *start_location = start_number.unwrap_or(100);
 
@@ -68,8 +68,8 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 pub fn load_labels(lines: &[String]) -> Result<(), String> {
     let mut label_counter = *START_LOCATION
         .lock()
-        .map_err(|_| "Failed to lock START_LOCATION")? as usize;
-    let mut label_map = LABEL_MAP.lock().map_err(|_| "Failed to lock LABEL_MAP")?;
+        .map_err(|_| "failed to lock START_LOCATION")? as usize;
+    let mut label_map = LABEL_MAP.lock().map_err(|_| "failed to lock LABEL_MAP")?;
 
     for line in lines {
         let trimmed_line = line.trim();
@@ -112,7 +112,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
             let add = if let Ok(v) = parse_number::<usize>(add) {
                 v
             } else {
-                return Err(String::from("Could not parse variable value"));
+                return Err(String::from("could not parse variable value"));
             };
 
             label_counter += add;
@@ -130,7 +130,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
 pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
     let mut variable_map = VARIABLE_MAP
         .lock()
-        .map_err(|_| (0, "Failed to lock VARIABLE_MAP".to_string()))?;
+        .map_err(|_| (0, "failed to lock VARIABLE_MAP".to_string()))?;
 
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
@@ -152,7 +152,7 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
             if let Ok(val) = parse_number::<i32>(variable_value) {
                 variable_map.insert(variable_name.to_string(), val);
             } else {
-                return Err((index, String::from("Could not parse variable value")));
+                return Err((index, String::from("could not parse variable value")));
             }
         }
     }
@@ -162,7 +162,7 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
 pub fn update_memory_counter() -> Result<(), String> {
     let mut counter = MEMORY_COUNTER
         .lock()
-        .map_err(|_| "Failed to lock MEMORY_COUNTER")?;
+        .map_err(|_| "failed to lock MEMORY_COUNTER")?;
     *counter += 1;
     Ok(())
 }
@@ -192,17 +192,17 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
                     return Ok(());
                 }
                 Err(e) => {
-                    eprintln!("Error reading line: {}", e);
+                    eprintln!("error reading line: {}", e);
                     return Err(e);
                 }
             }
         }
     }
 
-    eprintln!("Line number {} is out of bounds.", line_number);
+    eprintln!("line number {} is out of bounds.", line_number);
     Err(io::Error::new(
         io::ErrorKind::UnexpectedEof,
-        "Line not found",
+        "line not found",
     ))
 }
 use std::num::ParseIntError;

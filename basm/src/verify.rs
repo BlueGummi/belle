@@ -153,19 +153,19 @@ fn ld_args(
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "Instruction requires LHS to be a Register".to_string(),
+            "instruction requires LHS to be a Register".to_string(),
         ));
     }
     if !arg2.is_some_and(|tok| tok.is_memory_address() || tok.is_srcall()) {
         return Err((
             line_num,
-            "Instruction requires RHS to be a Memory address".to_string(),
+            "instruction requires RHS to be a Memory address".to_string(),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "Instruction LHS register must be 7 or less".to_string(),
+            "instruction LHS register must be 7 or less".to_string(),
         ));
     }
     if arg2.unwrap().get_num() > 511 {
@@ -184,19 +184,19 @@ fn st_args(
     {
         return Err((
             line_num,
-            "Instruction requires LHS to be a Register pointer or Memory address".to_string(),
+            "instruction requires LHS to be a Register pointer or Memory address".to_string(),
         ));
     }
     if !arg2.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "Instruction requires RHS to be a Register".to_string(),
+            "instruction requires RHS to be a Register".to_string(),
         ));
     }
     if arg2.unwrap().is_regorptr() && arg2.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "Instruction Register must be 7 or less".to_string(),
+            "instruction Register must be 7 or less".to_string(),
         ));
     }
     if arg1.unwrap().get_num() > 255 {
@@ -213,13 +213,13 @@ fn mov_args(
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "Instruction requires LHS to be a Register".to_string(),
+            "instruction requires LHS to be a Register".to_string(),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "Instruction requires LHS register to be 7 or less".to_string(),
+            "instruction requires LHS register to be 7 or less".to_string(),
         ));
     }
 
@@ -229,12 +229,12 @@ fn mov_args(
             || tok.is_register_pointer()
             || tok.is_memory_address_pointer()
     }) {
-        return Err((line_num, "Instruction requires RHS to be a Register, literal, register pointer, or memory address pointer".to_string()));
+        return Err((line_num, "instruction requires RHS to be a Register, literal, register pointer, or memory address pointer".to_string()));
     }
     if arg2.unwrap().is_regorptr() && arg2.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "Instruction requires RHS register to be 9 or less".to_string(),
+            "instruction requires RHS register to be 9 or less".to_string(),
         ));
     }
     match arg2 {
@@ -258,7 +258,7 @@ fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)
     if !arg1.is_some_and(|tok| tok.is_literal()) {
         return Err((
             line_num,
-            "Instruction requires SRC to be a Literal".to_string(),
+            "instruction requires SRC to be a Literal".to_string(),
         ));
     }
     if arg1.unwrap().get_num() > 2047 || arg1.unwrap().get_num() < -1 {
@@ -271,13 +271,13 @@ fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String
     if !arg1.is_some_and(|tok| tok.is_memory_address() || tok.is_register() || tok.is_literal()) {
         return Err((
             line_num,
-            "Instruction requires SRC to be a Register or Literal or Memory address".to_string(),
+            "instruction requires SRC to be a Register or Literal or Memory address".to_string(),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "Instruction requires RHS register to be 9 or less".to_string(),
+            "instruction requires RHS register to be 9 or less".to_string(),
         ));
     }
     match arg1 {
@@ -297,14 +297,14 @@ fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String
     {
         return Err((
             line_num,
-            "Instruction requires DEST to be a Register pointer, Memory address, or SRCall"
+            "instruction requires DEST to be a Register pointer, Memory address, or SRCall"
                 .to_string(),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "Instruction requires RHS register to be 9 or less".to_string(),
+            "instruction requires RHS register to be 9 or less".to_string(),
         ));
     }
     match arg1 {

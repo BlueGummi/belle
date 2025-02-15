@@ -30,7 +30,7 @@ pub fn write_encoded_instructions_to_file(
     encoded_instructions: &[u8],
 ) -> io::Result<()> {
     if CONFIG.verbose {
-        println!("{}", "Wrote to file.".green());
+        println!("{}", "wrote to file.".green());
     }
     let mut file = File::create(filename)?;
     file.write_all(encoded_instructions)?;
