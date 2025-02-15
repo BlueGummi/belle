@@ -440,19 +440,21 @@ impl<'a> Lexer<'a> {
                     ascii_string.push(self.chars.next().unwrap());
                 } else if next == '\"' {
                     self.tokens.push(Token::Asciiz(ascii_string));
-                    break;
-                } else {
-                    self.errors.push(InvalidSyntax(
-                        String::from("expected a closing \" in ASCII string"),
-                        self.line_number,
-                        Some(self.position),
-                        Some(format!(
-                            "add a closing quote in {}, e.g. \"ascii\"",
-                            ascii_string
-                        )),
-                    ));
+                    return;
                 }
+
                 self.position += 1;
+            }
+            if ascii_string.trim() != "\"" && !ascii_string.is_empty() {
+                self.errors.push(InvalidSyntax(
+                    String::from("expected a closing \" in ASCII string"),
+                    self.line_number,
+                    Some(self.position),
+                    Some(format!(
+                        "add a closing quote in {}, e.g. \"ascii\"",
+                        ascii_string
+                    )),
+                ));
             }
         }
     }
