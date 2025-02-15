@@ -13,7 +13,7 @@ use std::path::Path;
 fn main() {
     let input: &String = &CONFIG.source;
     let file = Path::new(input);
-
+    let mut error_count = 0;
     if input.is_empty() {
         eprintln!("{}", Error::LineLessError("no input files"));
         std::process::exit(1);
@@ -52,21 +52,26 @@ fn main() {
     let mut line_count = 1;
     let mut write_to_file: bool = true;
     if let Err((l, m)) = process_variables(&lines) {
-        println!("{}: {}", "error".bright_red().bold(), m);
+        println!("{}: {}", "error".underline().bright_red().bold(), m);
+        error_count += 1;
         if let Err(e2) = print_line(l + 1) {
-            println!("{}: {}", "error".bright_red().bold(), e2);
+            println!("{}: {}", "error".underline().bright_red().bold(), e2);
+            error_count += 1;
         }
         write_to_file = false;
     }
     if let Err((l, e)) = process_start(&lines) {
-        println!("{}: {}", "error".bright_red().bold(), e);
+        println!("{}: {}", "error".underline().bright_red().bold(), e);
+        error_count += 1;
         if let Err(e2) = print_line(l + 1) {
-            println!("{}: {}", "error".bright_red().bold(), e2);
+            println!("{}: {}", "error".underline().bright_red().bold(), e2);
+            error_count += 1;
         }
         write_to_file = false;
     }
     if let Err(e) = load_labels(&lines) {
-        println!("{}: {}", "error".bright_red().bold(), e);
+        println!("{}: {}", "error".underline().bright_red().bold(), e);
+        error_count += 1;
         write_to_file = false;
     }
 
@@ -135,9 +140,15 @@ fn main() {
                                 verify(ins, operand1, operand2, line_count)
                             {
                                 write_to_file = false;
-                                println!("{}: {}", "error".bright_red().bold(), err_msg);
+                                println!(
+                                    "{}: {}",
+                                    "error".underline().bright_red().bold(),
+                                    err_msg
+                                );
+                                error_count += 1;
                                 if let Err(e) = print_line(lineee) {
-                                    println!("{}: {}", "error".bright_red().bold(), e);
+                                    println!("{}: {}", "error".underline().bright_red().bold(), e);
+                                    error_count += 1;
                                 }
                             } else {
                                 for encoded in vector {
@@ -148,9 +159,11 @@ fn main() {
                         Ok(None) => (),
                         Err((line_num, err_msg)) => {
                             write_to_file = false;
-                            println!("{}: {}", "error".bright_red().bold(), err_msg);
+                            println!("{}: {}", "error".underline().bright_red().bold(), err_msg);
+                            error_count += 1;
                             if let Err(e) = print_line(line_num) {
-                                println!("{}: {}", "error".bright_red().bold(), e);
+                                println!("{}: {}", "error".underline().bright_red().bold(), e);
+                                error_count += 1;
                             }
                         }
                     }
@@ -159,6 +172,7 @@ fn main() {
             Err(err) => {
                 for error in err {
                     println!("{error}");
+                    error_count += 1;
                 }
                 write_to_file = false;
             }
@@ -185,10 +199,17 @@ fn main() {
             encoded_instructions.insert(0, 0x02);
             encoded_instructions.insert(0, 0x01);
             if let Err(e) = write_encoded_instructions_to_file(output_file, &encoded_instructions) {
-                println!("{}: {}", "error".bright_red().bold(), e);
+                println!("{}: {}", "error".underline().bright_red().bold(), e);
             }
         }
         _ => {
+            if error_count > 0 {
+                eprintln!(
+                    "{} {}",
+                    error_count.to_string().bold(),
+                    "errors generated.".bright_red()
+                );
+            }
             std::process::exit(1);
         }
     }

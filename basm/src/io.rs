@@ -20,52 +20,9 @@ pub fn process_includes(input: &String) -> io::Result<Vec<String>> {
             }
         };
 
-        let trimmed_content = content.trim();
-
-        if trimmed_content.starts_with("#include") {
-            let start_quote = trimmed_content.find('"');
-            let end_quote = trimmed_content.rfind('"');
-
-            if let (Some(start), Some(end)) = (start_quote, end_quote) {
-                if start < end {
-                    let include_file = &trimmed_content[start + 1..end];
-                    if let Ok(included) = read_include_file(include_file) {
-                        included_lines.extend(included);
-                    } else {
-                        eprintln!(
-                            "{}",
-                            LineLessError(
-                                format!("could not read included file: {include_file}").as_str()
-                            )
-                        );
-                        return Err(io::Error::new(io::ErrorKind::Other, "Include file error"));
-                    }
-                }
-            }
-            continue;
-        }
-
         included_lines.push(content);
     }
 
-    Ok(included_lines)
-}
-fn read_include_file(file_name: &str) -> io::Result<Vec<String>> {
-    let mut included_lines = Vec::new();
-    let reader = io::BufReader::new(File::open(file_name)?);
-
-    for line in reader.lines() {
-        match line {
-            Ok(content) => included_lines.push(content),
-            Err(e) => {
-                eprintln!(
-                    "{}",
-                    LineLessError(format!("error while reading from include file: {e}").as_str())
-                );
-                return Err(e);
-            }
-        }
-    }
     Ok(included_lines)
 }
 pub fn write_encoded_instructions_to_file(

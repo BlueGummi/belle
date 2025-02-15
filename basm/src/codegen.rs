@@ -1,4 +1,5 @@
 use crate::*;
+use colored::*;
 
 pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, String)> {
     match arg {
@@ -111,7 +112,10 @@ pub fn encode_instruction(
                 Ok(LEA_OP)
             }
             "MOV" => Ok(MOV_OP), // 14
-            _ => Err((line_num, "Instruction not recognized".to_string())),
+            _ => Err((
+                line_num,
+                format!("Instruction \"{}\" not recognized", instruction.magenta()),
+            )),
         },
         Token::Directive(s) => {
             match s.as_str() {
@@ -125,7 +129,27 @@ pub fn encode_instruction(
 
             Ok(HLT_OP)
         }
-        _ => Err((line_num, "Invalid instruction type".to_string())),
+        _ => {
+            let inst = match ins {
+                Token::EqualSign => "equals".to_string(),
+                Token::Ident(_) => "identifier".to_string(),
+                Token::Register(_) => "register".to_string(),
+                Token::Comma => "comma".to_string(),
+                Token::Literal(_) => "literal".to_string(),
+                Token::NewLine => "newline".to_string(),
+                Token::Eol => "eol".to_string(),
+                Token::SRCall(_) => "label reference".to_string(),
+                Token::MemAddr(_) => "memory address".to_string(),
+                Token::Directive(_) => "directive".to_string(),
+                Token::RegPointer(_) => "register indirect".to_string(),
+                Token::MemPointer(_) => "memory indirect".to_string(),
+                Token::Asciiz(_) => "ascii string".to_string(),
+            };
+            return Err((
+                line_num,
+                format!("expected ident, found {}", inst.bright_green()),
+            ));
+        }
     }?;
 
     match ins_type.trim().to_lowercase().as_str() {

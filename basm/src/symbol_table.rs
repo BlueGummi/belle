@@ -173,10 +173,17 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
             match line {
                 Ok(content) => {
                     println!(
-                        "{:^6} {} {}\n",
+                        "{}{:^6} {} {}",
+                        "│".bright_red(),
                         (current_line + 1).to_string().blue(),
                         "|".blue(),
-                        content
+                        content.trim()
+                    );
+                    println!(
+                        "{}{}{}\n",
+                        "╰".bright_red(),
+                        "─".repeat(content.trim().len() + 8).bright_red(),
+                        "╸".bright_red()
                     );
                     return Ok(());
                 }
