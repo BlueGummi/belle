@@ -16,8 +16,8 @@ pub static MEMORY_COUNTER: Lazy<Mutex<usize>> = Lazy::new(|| Mutex::new(0));
 pub static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(100));
 pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
     let mut start_number: Option<i32> = None;
-
-    for line in lines {
+    let mut start_line = 1;
+    for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty() || trimmed_line.starts_with(';') {
@@ -31,6 +31,7 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
         };
 
         if line_before_comment.starts_with(".start") {
+            start_line = index;
             start_number = line_before_comment.split_whitespace().nth(1).and_then(|s| {
                 let stripped = s.strip_prefix('$').unwrap_or(s);
                 let stripped = s.strip_prefix('[').unwrap_or(stripped);
@@ -50,7 +51,10 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     if let Some(val) = start_number {
         if val > 511 {
-            return Err((0, String::from("Start location must not exceed 511")));
+            return Err((
+                start_line,
+                String::from("Start location must not exceed 511"),
+            ));
         }
     }
     let mut start_location = START_LOCATION
