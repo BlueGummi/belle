@@ -124,7 +124,17 @@ impl<'a> Lexer<'a> {
                             Some(self.position),
                         ));
                     }
-                    let ascii_value = ascii_char.chars().next().unwrap() as i16;
+                    let ascii_value = match ascii_char.chars().next() {
+                        Some(v) => v as i16,
+                        None => {
+                            self.errors.push(Error::InvalidSyntax(
+                            "ASCII character has more than one character, try a correct ASCII character like 'a",
+                            self.line_number,
+                            Some(self.position),
+                        ));
+                            return;
+                        }
+                    };
                     self.tokens.push(Token::Literal(ascii_value));
                 }
                 _ => {
