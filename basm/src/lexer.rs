@@ -447,12 +447,12 @@ impl<'a> Lexer<'a> {
             }
             if ascii_string.trim() != "\"" && !ascii_string.is_empty() {
                 self.errors.push(InvalidSyntax(
-                    String::from("expected a closing \" in ASCII string"),
+                    format!("expected a closing {} in ASCII string", "\"".magenta()),
                     self.line_number,
                     Some(self.position),
                     Some(format!(
-                        "add a closing quote in {}, e.g. \"ascii\"",
-                        ascii_string
+                        "add a closing quote in \"{}\", e.g. \"ascii\"",
+                        ascii_string.magenta()
                     )),
                 ));
             }
