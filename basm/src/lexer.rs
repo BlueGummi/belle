@@ -406,6 +406,7 @@ impl<'a> Lexer<'a> {
 
         if addr == "[" {
             while let Some(&next) = self.chars.peek() {
+                self.position += 1;
                 if next.is_alphanumeric() {
                     addr.push(self.chars.next().unwrap());
                 } else if next == ']' {
@@ -419,7 +420,6 @@ impl<'a> Lexer<'a> {
                     ));
                     return;
                 }
-                self.position += 1;
             }
 
             if addr.len() < 3 || self.lex_number(&addr[1..addr.len() - 1]).is_err() {
@@ -438,11 +438,11 @@ impl<'a> Lexer<'a> {
         } else {
             while let Some(&next) = self.chars.peek() {
                 if next.is_alphanumeric() || next == '_' {
+                    self.position += 1;
                     addr.push(self.chars.next().unwrap());
                 } else {
                     break;
                 }
-                self.position += 1;
             }
 
             if self.lex_number(&addr[1..]).is_err() {
