@@ -74,7 +74,7 @@ impl fmt::Display for Error<'_> {
         }
         if let Some(place) = location {
             let spaces = " ".repeat({ *place } + 7);
-            writeln!(f, "{}{}", spaces, "^^".red().bold())?;
+            writeln!(f, "{}{}", spaces, "^".red().bold())?;
         }
 
         Ok(())

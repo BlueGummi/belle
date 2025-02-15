@@ -6,6 +6,7 @@ pub struct Lexer<'a> {
     pub line_number: usize,
     pub tokens: Vec<Token>,
     pub chars: std::iter::Peekable<std::str::Chars<'a>>,
+    pub errors: Vec<Error<'a>>,
 }
 
 impl<'a> Lexer<'a> {
@@ -16,14 +17,17 @@ impl<'a> Lexer<'a> {
             line_number,
             tokens: Vec::new(),
             chars: line.chars().peekable(),
+            errors: Vec::new(),
         }
     }
 
-    pub fn lex(&mut self) -> Result<&Vec<Token>, Error<'a>> {
+    pub fn lex(&mut self) -> Result<&Vec<Token>, &Vec<Error<'a>>> {
         while let Some(c) = self.chars.next() {
-            self.position += 1;
             match c {
-                ' ' | ']' => continue,
+                ' ' | ']' => {
+                    self.position += 1;
+                    continue;
+                }
                 '\t' => {
                     self.position += 3;
                     continue;
@@ -36,49 +40,51 @@ impl<'a> Lexer<'a> {
                 ';' => break,
                 '&' => {
                     self.position += 1;
-                    self.lex_pointer(c)?;
+                    self.lex_pointer(c);
                 }
                 'r' | 'R' => {
                     if let Some(next) = self.chars.peek() {
                         if next.is_ascii_digit() {
-                            self.lex_register(c)?;
+                            self.lex_register(c);
                         } else {
-                            self.lex_identifier(c)?;
+                            self.lex_identifier(c);
                         }
                     } else {
-                        self.lex_identifier(c)?;
+                        self.lex_identifier(c);
                     }
                 }
                 'a'..='z' | 'A'..='Z' => {
-                    self.lex_identifier(c)?;
+                    self.position += 1;
+                    self.lex_identifier(c);
                 }
                 '.' => {
                     self.position += 1;
-                    self.lex_directive()?;
+                    self.lex_directive();
                 }
                 '\'' => {
                     self.position += 1;
-                    self.lex_ascii()?;
+                    self.lex_ascii();
                 }
                 '-' => {
-                    self.lex_literal(c)?;
+                    self.lex_literal(c);
                 }
                 '0'..='9' => {
-                    self.lex_literal(c)?;
+                    self.lex_literal(c);
                 }
                 '[' => {
                     self.position += 1;
-                    self.lex_memory_address(c)?;
+                    self.lex_memory_address(c);
                 }
                 '\"' => {
                     self.position += 1;
-                    self.lex_asciiz(c)?;
+                    self.lex_asciiz(c);
                 }
                 '=' => {
                     self.tokens.push(Token::EqualSign);
                 }
                 _ => {
-                    return Err(UnknownCharacter(
+                    self.position += 1;
+                    self.errors.push(UnknownCharacter(
                         c.to_string(),
                         self.line_number,
                         Some(self.position),
@@ -86,11 +92,13 @@ impl<'a> Lexer<'a> {
                 }
             }
         }
-
+        if !self.errors.is_empty() {
+            return Err(&self.errors);
+        }
         Ok(&self.tokens)
     }
 
-    fn lex_ascii(&mut self) -> Result<(), Error<'a>> {
+    fn lex_ascii(&mut self) {
         let mut ascii_char = String::new();
 
         for next_char in self.chars.by_ref() {
@@ -99,7 +107,7 @@ impl<'a> Lexer<'a> {
             match next_char {
                 '\'' => {
                     if ascii_char.is_empty() {
-                        return Err(Error::InvalidSyntax(
+                        self.errors.push(Error::InvalidSyntax(
                             "ASCII value is empty",
                             self.line_number,
                             Some(self.position),
@@ -107,7 +115,7 @@ impl<'a> Lexer<'a> {
                     }
 
                     if ascii_char.len() > 1 {
-                        return Err(Error::InvalidSyntax(
+                        self.errors.push(Error::InvalidSyntax(
                             "ASCII value has more than one character",
                             self.line_number,
                             Some(self.position),
@@ -115,18 +123,17 @@ impl<'a> Lexer<'a> {
                     }
                     let ascii_value = ascii_char.chars().next().unwrap() as i16;
                     self.tokens.push(Token::Literal(ascii_value));
-                    return Ok(());
                 }
                 _ => {
                     ascii_char.push(next_char);
                 }
             }
         }
-        Err(Error::InvalidSyntax(
+        self.errors.push(Error::InvalidSyntax(
             "ASCII value is missing closing quote",
             self.line_number,
             Some(self.position),
-        ))
+        ));
     }
     fn lex_number(&self, complete_number: &str) -> Result<i32, String> {
         let complete_number = complete_number.trim();
@@ -138,7 +145,7 @@ impl<'a> Lexer<'a> {
             complete_number.parse::<i32>().map_err(|e| e.to_string())
         }
     }
-    fn lex_pointer(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_pointer(&mut self, c: char) {
         let mut pointer = String::new();
         pointer.push(c);
 
@@ -167,6 +174,7 @@ impl<'a> Lexer<'a> {
 
         while let Some(&next) = self.chars.peek() {
             if next.is_alphanumeric() {
+                self.position += 1;
                 pointer.push(self.chars.next().unwrap());
             } else {
                 break;
@@ -174,19 +182,18 @@ impl<'a> Lexer<'a> {
         }
 
         if is_reg {
-            self.handle_register(pointer)?;
+            self.handle_register(pointer);
         } else {
-            self.handle_memory(pointer[1..].to_string())?;
+            self.handle_memory(pointer[1..].to_string());
         }
-        Ok(())
     }
 
-    fn handle_register(&mut self, pointer: String) -> Result<(), Error<'a>> {
+    fn handle_register(&mut self, pointer: String) {
         if pointer.len() > 2 {
             self.position += 1;
             if let Ok(reg) = pointer.trim()[2..].parse::<i16>() {
                 if !(0..=9).contains(&reg) {
-                    return Err(Error::InvalidSyntax(
+                    self.errors.push(Error::InvalidSyntax(
                         "invalid register pointer number",
                         self.line_number,
                         Some(self.position),
@@ -194,23 +201,22 @@ impl<'a> Lexer<'a> {
                 }
                 self.tokens.push(Token::RegPointer(reg));
             } else {
-                return Err(InvalidSyntax(
+                self.errors.push(InvalidSyntax(
                     "invalid register number",
                     self.line_number,
                     Some(self.position),
                 ));
             }
         } else {
-            return Err(InvalidSyntax(
+            self.errors.push(InvalidSyntax(
                 "register must have a number",
                 self.line_number,
                 Some(self.position),
             ));
         }
-        Ok(())
     }
 
-    fn handle_memory(&mut self, pointer: String) -> Result<(), Error<'a>> {
+    fn handle_memory(&mut self, pointer: String) {
         let pointer = pointer.trim();
 
         let pointer_trimmed = if let Some(v) = pointer.strip_prefix('[') {
@@ -227,31 +233,30 @@ impl<'a> Lexer<'a> {
             if let Ok(mem) = self.lex_number(pointer_trimmed) {
                 self.tokens.push(Token::MemPointer(mem as i16));
             } else {
-                return self.handle_invalid_character(pointer_trimmed);
+                self.handle_invalid_character(pointer_trimmed)
             }
         } else {
-            return Err(Error::InvalidSyntax(
+            self.errors.push(Error::InvalidSyntax(
                 "memory must have a number",
                 self.line_number,
                 Some(self.position),
             ));
         }
-        Ok(())
     }
 
-    fn lex_register(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_register(&mut self, c: char) {
         let mut reg = String::new();
 
         let remaining_chars: String = self.chars.clone().collect();
         if remaining_chars.eq_ignore_ascii_case("ret") {
-            return Ok(());
+            return;
         }
         reg.push(c);
         if let Some(&next) = self.chars.peek() {
             if next == 'r' || next == 'R' {
                 reg.push(self.chars.next().unwrap());
             } else if !c.is_alphanumeric() {
-                return Err(Error::ExpectedArgument(
+                self.errors.push(Error::ExpectedArgument(
                     "expected alphanumeric argument after 'r'",
                     self.line_number,
                     Some(self.position),
@@ -270,7 +275,7 @@ impl<'a> Lexer<'a> {
         if reg.len() > 1 {
             if let Ok(reg_num) = reg[1..].parse::<i16>() {
                 if !(0..=9).contains(&reg_num) {
-                    return Err(Error::InvalidSyntax(
+                    self.errors.push(Error::InvalidSyntax(
                         "invalid register number",
                         self.line_number,
                         Some(self.position),
@@ -278,17 +283,16 @@ impl<'a> Lexer<'a> {
                 }
                 self.tokens.push(Token::Register(reg_num));
             } else {
-                return Err(Error::InvalidSyntax(
+                self.errors.push(Error::InvalidSyntax(
                     "invalid register number",
                     self.line_number,
                     Some(self.position),
                 ));
             }
         }
-        Ok(())
     }
 
-    fn lex_identifier(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_identifier(&mut self, c: char) {
         let mut ident = String::new();
         ident.push(c);
         while let Some(&next) = self.chars.peek() {
@@ -297,18 +301,18 @@ impl<'a> Lexer<'a> {
             } else {
                 break;
             }
+            self.position += 1;
         }
         if let Some(&next) = self.chars.peek() {
             if next == ':' {
                 self.chars.next();
-                return Ok(());
+                return;
             }
         }
         self.tokens.push(Token::Ident(ident));
-        Ok(())
     }
 
-    fn lex_literal(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_literal(&mut self, c: char) {
         let mut number = c.to_string();
         if let Some(&next) = self.chars.peek() {
             if next == '-' {
@@ -342,9 +346,8 @@ impl<'a> Lexer<'a> {
             num_value as i16
         };
         self.tokens.push(Token::Literal(stored_value));
-        Ok(())
     }
-    fn handle_invalid_character(&mut self, input: &str) -> Result<(), Error<'a>> {
+    fn handle_invalid_character(&mut self, input: &str) {
         let variable = if input.starts_with('#') || input.starts_with('&') {
             &input[1..]
         } else if input.starts_with('[') {
@@ -361,17 +364,16 @@ impl<'a> Lexer<'a> {
             } else if input.starts_with('&') {
                 self.tokens.push(Token::MemPointer(replacement as i16));
             }
-            Ok(())
         } else {
-            Err(Error::InvalidSyntax(
+            self.errors.push(Error::InvalidSyntax(
                 "Invalid character or value",
                 self.line_number,
                 Some(self.position),
-            ))
+            ));
         }
     }
 
-    fn lex_asciiz(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_asciiz(&mut self, c: char) {
         let mut ascii_string = c.to_string();
         if ascii_string == "\"" {
             ascii_string = String::new();
@@ -382,7 +384,7 @@ impl<'a> Lexer<'a> {
                     self.tokens.push(Token::Asciiz(ascii_string));
                     break;
                 } else {
-                    return Err(InvalidSyntax(
+                    self.errors.push(InvalidSyntax(
                         "expected a closing \"",
                         self.line_number,
                         Some(self.position),
@@ -390,9 +392,8 @@ impl<'a> Lexer<'a> {
                 }
             }
         }
-        Ok(())
     }
-    fn lex_memory_address(&mut self, c: char) -> Result<(), Error<'a>> {
+    fn lex_memory_address(&mut self, c: char) {
         let mut addr = c.to_string();
 
         if addr == "[" {
@@ -403,11 +404,12 @@ impl<'a> Lexer<'a> {
                     addr.push(self.chars.next().unwrap());
                     break;
                 } else {
-                    return Err(InvalidSyntax(
+                    self.errors.push(InvalidSyntax(
                         "expected closing bracket or digit",
                         self.line_number,
                         Some(self.position),
                     ));
+                    return;
                 }
             }
 
@@ -418,7 +420,7 @@ impl<'a> Lexer<'a> {
             if let Ok(address) = addr_val {
                 self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
-                return Err(InvalidSyntax(
+                self.errors.push(InvalidSyntax(
                     "Error parsing integer: {}",
                     self.line_number,
                     Some(self.position),
@@ -441,18 +443,16 @@ impl<'a> Lexer<'a> {
             if let Ok(address) = addr_val {
                 self.tokens.push(Token::MemAddr(address as i16));
             } else if addr_val.is_err() {
-                return Err(InvalidSyntax(
+                self.errors.push(InvalidSyntax(
                     "Error parsing integer",
                     self.line_number,
                     Some(self.position),
                 ));
             }
         }
-
-        Ok(())
     }
 
-    fn lex_directive(&mut self) -> Result<(), Error<'a>> {
+    fn lex_directive(&mut self) {
         let mut directive = String::new();
         while let Some(&next) = self.chars.peek() {
             if next.is_alphanumeric() || next == '_' {
@@ -462,7 +462,6 @@ impl<'a> Lexer<'a> {
             }
         }
         self.tokens.push(Token::Directive(directive));
-        Ok(())
     }
 }
 

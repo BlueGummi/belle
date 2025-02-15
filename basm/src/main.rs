@@ -149,7 +149,9 @@ fn main() -> io::Result<()> {
                 line_count += 1;
             }
             Err(err) => {
-                println!("{err}");
+                for error in err {
+                    println!("{error}");
+                }
                 write_to_file = false;
             }
         }
