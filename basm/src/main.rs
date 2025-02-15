@@ -51,12 +51,12 @@ fn main() -> io::Result<()> {
     let mut write_to_file: bool = true;
     if let Err((l, m)) = process_variables(&lines) {
         println!("{}: {}", "error".bright_red().bold(), m);
-        print_line(l)?;
+        print_line(l + 1)?;
         write_to_file = false;
     }
     if let Err((l, e)) = process_start(&lines) {
         println!("{}: {}", "error".bright_red().bold(), e);
-        print_line(l)?;
+        print_line(l + 1)?;
         write_to_file = false;
     }
     if let Err(e) = load_labels(&lines) {
