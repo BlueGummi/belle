@@ -1,11 +1,17 @@
 use crate::*;
 use colored::*;
-
-pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, String)> {
+type TempErr = (String, String);
+pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, TempErr)> {
     match arg {
         Some(Token::Register(num)) => {
             if *num > 9 {
-                return Err((line_num, "invalid register number".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        format!("invalid register number {num}"),
+                        format!("valid registers are {}", "r0-r9".magenta()),
+                    ),
+                ));
             }
             Ok(*num)
         }
@@ -15,7 +21,23 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
-                Err((line_num, format!("label \"{}\" does not exist", sr)))
+                let similars = find_closest_matches(&map, sr);
+                let mut founds = String::from("");
+                for element in similars {
+                    if !founds.is_empty() {
+                        founds = format!("{founds}, ");
+                    }
+                    founds = format!("{founds}{}", element.green());
+                }
+                founds = if founds.is_empty() {
+                    String::from("no similar labels or variable names found")
+                } else {
+                    format!("similar labels exist: {founds}")
+                };
+                Err((
+                    line_num,
+                    (format!("label \"{}\" does not exist", sr.magenta()), founds),
+                ))
             }
         }
         Some(Token::MemAddr(n)) => Ok(*n),
@@ -23,7 +45,12 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             let label_val: i16 = match keyword.as_str() {
                 "start" => 1,
                 "asciiz" | "word" => 0,
-                _ => return Err((line_num, "directive not recognized".to_string())),
+                _ => {
+                    return Err((
+                        line_num,
+                        ("directive not recognized".to_string(), "".to_string()),
+                    ))
+                }
             };
             Ok(label_val)
         }
@@ -37,9 +64,41 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             } else if let Some(&value) = vmap.get(ident) {
                 Ok(value as i16)
             } else {
+                let similars = find_closest_matches(&map, ident);
+                let mut founds = String::from("");
+                for element in similars {
+                    if !founds.is_empty() {
+                        founds = format!("{founds}, ");
+                    }
+                    founds = format!("{founds}{}", element.green());
+                }
+                founds = if founds.is_empty() {
+                    String::from("no similar labels exist")
+                } else {
+                    format!("similar labels exist: {founds}")
+                };
+                let mut total_founds = founds;
+                let similars = find_closest_matches_i32(&vmap, ident);
+                let mut founds = String::from("");
+                for element in similars {
+                    if !founds.is_empty() {
+                        founds = format!("{founds}, ");
+                    }
+                    founds = format!("{founds}{}", element.green());
+                }
+                founds = if founds.is_empty() {
+                    String::from("no similar variables exist")
+                } else {
+                    format!("similar variables exist: {founds}")
+                };
+                total_founds = format!("{}, {}", total_founds, founds);
+
                 return Err((
                     line_num,
-                    format!("label/variable \"{}\" not declared", ident.magenta()),
+                    (
+                        format!("label/variable \"{}\" not declared", ident.magenta(),),
+                        total_founds,
+                    ),
                 ));
             }
         }
@@ -52,7 +111,7 @@ pub fn encode_instruction(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
-) -> Result<Option<Vec<i16>>, (usize, String)> {
+) -> Result<Option<Vec<i16>>, (usize, TempErr)> {
     let mut ins_type = "default";
     let instruction_bin = match ins {
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
@@ -76,7 +135,38 @@ pub fn encode_instruction(
                     "BNZ" | "BNE" => Ok(BNZ_OP),
                     "BL" => Ok(BL_OP),
                     "BG" => Ok(BG_OP),
-                    _ => Err((line_num, "invalid jump instruction".to_string())),
+                    _ => {
+                        let instructions = [
+                            "BO", "BNO", "JMP", "J", "BZ", "BE", "BEQ", "BNZ", "BNE", "BL", "BG",
+                        ];
+                        let mut matches: Vec<(String, usize)> = instructions
+                            .iter()
+                            .map(|instructions| {
+                                (
+                                    instructions.to_string(),
+                                    levenshtein_distance(
+                                        instruction.to_uppercase().as_str(),
+                                        instructions,
+                                    ),
+                                )
+                            })
+                            .filter(|(_, dist)| *dist <= 2)
+                            .collect();
+                        matches.sort_by_key(|&(_, dist)| dist);
+
+                        let closest_matches: Vec<String> =
+                            matches.into_iter().map(|(word, _)| word).collect();
+                        let result = if closest_matches.is_empty() {
+                            "no similar branch/jumps".to_string()
+                        } else {
+                            format!(
+                                "maybe you meant: {}",
+                                format!("{}", closest_matches.join(", ").green())
+                            )
+                        };
+
+                        return Err((line_num, ("invalid jump instruction".to_string(), result)));
+                    }
                 }
             }
             "POP" => {
@@ -115,10 +205,42 @@ pub fn encode_instruction(
                 Ok(LEA_OP)
             }
             "MOV" => Ok(MOV_OP), // 14
-            _ => Err((
-                line_num,
-                format!("instruction \"{}\" not recognized", instruction.magenta()),
-            )),
+            _ => {
+                let instructions = [
+                    "ADD", "HLT", "BO", "POP", "DIV", "RET", "LD", "ST", "JMP", "BZ", "PUSH",
+                    "CMP", "NAND", "INT", "MOV", "LEA", "BE", "BNE", "BNZ", "BNO", "BG", "BL",
+                ];
+                let mut matches: Vec<(String, usize)> = instructions
+                    .iter()
+                    .map(|instructions| {
+                        (
+                            instructions.to_string(),
+                            levenshtein_distance(instruction.to_uppercase().as_str(), instructions),
+                        )
+                    })
+                    .filter(|(_, dist)| *dist <= 2)
+                    .collect();
+                matches.sort_by_key(|&(_, dist)| dist);
+
+                let closest_matches: Vec<String> =
+                    matches.into_iter().map(|(word, _)| word).collect();
+                let result = if closest_matches.is_empty() {
+                    "no similar instructions".to_string()
+                } else {
+                    format!(
+                        "maybe you meant: {}",
+                        format!("{}", closest_matches.join(", ").green())
+                    )
+                };
+
+                return Err((
+                    line_num,
+                    (
+                        format!("instruction \"{}\" not recognized", instruction.magenta(),),
+                        result,
+                    ),
+                ));
+            }
         },
         Token::Directive(s) => {
             match s.as_str() {
@@ -150,7 +272,10 @@ pub fn encode_instruction(
             };
             return Err((
                 line_num,
-                format!("expected ident, found {}", inst.bright_green()),
+                (
+                    format!("expected ident, found {}", inst.bright_green()),
+                    "please provide a directive or identifier".to_string(),
+                ),
             ));
         }
     }?;
@@ -162,7 +287,15 @@ pub fn encode_instruction(
         }
         "popmem" => {
             let arg_bin = arg1
-                .ok_or_else(|| (line_num, "missing argument for POP".to_string()))?
+                .ok_or_else(|| {
+                    (
+                        line_num,
+                        (
+                            "missing argument for POP".to_string(),
+                            "please provide a memory address or register argument".to_string(),
+                        ),
+                    )
+                })?
                 .get_num();
             Ok(Some(vec![instruction_bin << 12 | 1 << 11 | arg_bin]))
         }
@@ -175,12 +308,25 @@ pub fn encode_instruction(
         }
         "sti" => {
             let raw = arg1
-                .ok_or_else(|| (line_num, "missing argument for STI".to_string()))?
+                .ok_or_else(|| {
+                    (
+                        line_num,
+                        (
+                            "missing argument for store indirect".to_string(),
+                            "provide a memory address LHS and register indirect RHS".to_string(),
+                        ),
+                    )
+                })?
                 .get_raw();
-            let parsed_int = raw
-                .trim()
-                .parse::<i16>()
-                .map_err(|_| (line_num, "failed to parse integer".to_string()))?;
+            let parsed_int = raw.trim().parse::<i16>().map_err(|_| {
+                (
+                    line_num,
+                    (
+                        "failed to parse integer".to_string(),
+                        "please provide a proper integer".to_string(),
+                    ),
+                )
+            })?;
             Ok(Some(vec![
                 (instruction_bin << 12)
                     | (1 << 11)
@@ -210,7 +356,10 @@ pub fn encode_instruction(
             if address > 1023 {
                 return Err((
                     line_num,
-                    "label memory address too large on instruction on line".to_string(),
+                    (
+                        "label memory address too large on instruction on line".to_string(),
+                        "".to_string(),
+                    ),
                 ));
             }
             Ok(Some(vec![(instruction_bin << 11) | address]))
@@ -220,14 +369,20 @@ pub fn encode_instruction(
                 .ok_or_else(|| {
                     (
                         line_num,
-                        "missing argument for indirect branch/jump".to_string(),
+                        (
+                            "missing argument for indirect branch/jump".to_string(),
+                            "please provide a register indirect argument".to_string(),
+                        ),
                     )
                 })?
                 .get_raw();
             let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
                 (
                     line_num,
-                    "failed to parse integer for indirect jump".to_string(),
+                    (
+                        "failed to parse integer for indirect jump".to_string(),
+                        "please provide a register indirect argument".to_string(),
+                    ),
                 )
             })?;
             Ok(Some(vec![
@@ -238,7 +393,13 @@ pub fn encode_instruction(
         }
         "ascii" => {
             if arg1.is_none() {
-                return Err((line_num, "asciiz argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        "asciiz argument is empty".to_string(),
+                        "please provide an ASCII string argument".to_string(),
+                    ),
+                ));
             }
             let mut collected: Vec<i16> = Vec::new();
             for character in arg1.unwrap().get_raw().chars() {
@@ -248,13 +409,25 @@ pub fn encode_instruction(
         }
         "word" => {
             if arg1.is_none() {
-                return Err((line_num, "word argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        "word argument is empty".to_string(),
+                        "please provide a 16-bit argument".to_string(),
+                    ),
+                ));
             }
             Ok(Some(vec![arg1.unwrap().get_num()]))
         }
         "ld" => {
             if arg1.is_none() || arg2.is_none() {
-                return Err((line_num, "LEA/LD argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        "LEA/LD argument is empty".to_string(),
+                        "please provide a register LHS and address RHS".to_string(),
+                    ),
+                ));
             }
             let arg2_bin = argument_to_binary(arg2, line_num)?;
             let arg1_bin = argument_to_binary(arg1, line_num)?;
@@ -268,7 +441,13 @@ pub fn encode_instruction(
         }
         "data" => {
             if arg1.is_none() {
-                return Err((line_num, ".data argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        ".data argument is empty".to_string(),
+                        "please provide an ASCII string argument".to_string(),
+                    ),
+                ));
             }
             let mut collected: Vec<i16> = Vec::new();
             for character in arg1.unwrap().get_raw().chars() {
@@ -278,17 +457,29 @@ pub fn encode_instruction(
         }
         "pad" => {
             if arg1.is_none() {
-                return Err((line_num, ".pad argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        ".pad argument is empty".to_string(),
+                        "please provide an argument".to_string(),
+                    ),
+                ));
             }
             let collected: Vec<i16> = vec![0; arg1.unwrap().get_num() as usize];
             Ok(Some(collected))
         }
         "dataword" => {
             if arg1.is_none() {
-                return Err((line_num, "dataword argument is empty".to_string()));
+                return Err((
+                    line_num,
+                    (
+                        "dataword argument is empty".to_string(),
+                        "please provide a 16-bit argument".to_string(),
+                    ),
+                ));
             }
             Ok(Some(vec![(1 << 8) | arg1.unwrap().get_num()]))
         }
-        _ => Err((line_num, "instruction type not recognized".to_string())),
+        _ => unsafe { std::hint::unreachable_unchecked() },
     }
 }

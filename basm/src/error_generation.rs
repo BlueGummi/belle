@@ -74,8 +74,8 @@ impl fmt::Display for Error<'_> {
             .enumerate()
         {
             if current_line + 1 == line_number {
-                let line_content = line.unwrap();
-                let mut line_content = line_content.trim().to_string();
+                let line_content_original = line.unwrap();
+                let mut line_content = line_content_original.trim().to_string();
                 let mut in_quotes = false;
                 let mut comment_index = None;
 
@@ -93,18 +93,33 @@ impl fmt::Display for Error<'_> {
                     let comment_part = &line_content[index..];
                     line_content = format!("{}{}", code_part, comment_part.dimmed());
                 }
-
+                let spaces = line_content_original
+                    .chars()
+                    .take_while(|&c| c == ' ')
+                    .count();
                 if let Some(place) = location {
                     let place = *place - 2;
+                    let left_char = if self.get_tip().is_empty() {
+                        "╰"
+                    } else {
+                        "│"
+                    };
                     if place < line_content.len() {
                         let before = &line_content[..place];
                         let error_char = &line_content[place..place + 1];
                         let after = &line_content[place + 1..];
-
+                        writeln!(
+                            f,
+                            "{} {}:{}:{}",
+                            "├─".bright_red(),
+                            CONFIG.source.green(),
+                            line_number,
+                            place + spaces + 1
+                        )?;
                         writeln!(
                             f,
                             "{}{:^6} {} {}{}{}",
-                            "│".bright_red(),
+                            left_char.bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             before,
@@ -114,8 +129,15 @@ impl fmt::Display for Error<'_> {
                     } else {
                         writeln!(
                             f,
+                            "{} {}:{}",
+                            "├─".bright_red(),
+                            CONFIG.source.green(),
+                            line_number
+                        )?;
+                        writeln!(
+                            f,
                             "{}{:^6} {} {}",
-                            "│".bright_red(),
+                            left_char.bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             line_content
@@ -125,18 +147,18 @@ impl fmt::Display for Error<'_> {
             }
         }
         let left_char = if self.get_tip().is_empty() {
-            "╰"
+            " "
         } else {
-            "├"
+            "│"
         };
         if let Some(place) = location {
-            let spaces = "─".repeat({ *place } + 7).bright_red();
+            let spaces = " ".repeat({ *place } + 6).bright_red();
             writeln!(
                 f,
                 "{}{}{}",
                 left_char.to_string().bright_red(),
                 spaces,
-                "^".red().bold()
+                "^^^".red().bold()
             )?;
         }
         if !self.get_tip().is_empty() {

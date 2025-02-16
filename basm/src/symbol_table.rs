@@ -190,7 +190,12 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
                         printed_line = trimmed_content[..pos].trim().to_string();
                         comment_part = trimmed_content[pos..].trim().to_string();
                     }
-
+                    println!(
+                        "{} {}:{}",
+                        "├─".bright_red(),
+                        CONFIG.source.green(),
+                        line_number
+                    );
                     println!(
                         "{}{:^6} {} {} {}",
                         "│".bright_red(),
@@ -198,12 +203,6 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
                         "|".blue(),
                         printed_line,
                         comment_part.dimmed()
-                    );
-                    println!(
-                        "{}{}{}",
-                        "╰".bright_red(),
-                        "─".repeat(printed_line.len() + 8).bright_red(),
-                        "╸".bright_red()
                     );
                     return Ok(());
                 }
@@ -251,4 +250,62 @@ fn parse_number<T: FromStrRadix>(input: &str) -> Result<T, ParseIntError> {
     } else {
         input.parse::<T>()
     }
+}
+
+pub fn levenshtein_distance(s1: &str, s2: &str) -> usize {
+    let len_s1 = s1.len();
+    let len_s2 = s2.len();
+
+    if len_s1 == 0 {
+        return len_s2;
+    }
+    if len_s2 == 0 {
+        return len_s1;
+    }
+
+    let mut dp = vec![vec![0; len_s2 + 1]; len_s1 + 1];
+
+    for i in 0..=len_s1 {
+        dp[i][0] = i;
+    }
+    for j in 0..=len_s2 {
+        dp[0][j] = j;
+    }
+
+    for (i, c1) in s1.chars().enumerate() {
+        for (j, c2) in s2.chars().enumerate() {
+            let cost = if c1 == c2 { 0 } else { 1 };
+
+            dp[i + 1][j + 1] = *[dp[i][j + 1] + 1, dp[i + 1][j] + 1, dp[i][j] + cost]
+                .iter()
+                .min()
+                .unwrap();
+        }
+    }
+
+    dp[len_s1][len_s2]
+}
+
+pub fn find_closest_matches(map: &HashMap<String, usize>, query: &str) -> Vec<String> {
+    let mut matches: Vec<(String, usize)> = map
+        .keys()
+        .map(|key| (key.clone(), levenshtein_distance(query, key)))
+        .filter(|(_, dist)| *dist <= 2)
+        .collect();
+
+    matches.sort_by_key(|&(_, dist)| dist);
+
+    matches.into_iter().map(|(key, _)| key).collect()
+}
+
+pub fn find_closest_matches_i32(map: &HashMap<String, i32>, query: &str) -> Vec<String> {
+    let mut matches: Vec<(String, usize)> = map
+        .keys()
+        .map(|key| (key.clone(), levenshtein_distance(query, key)))
+        .filter(|(_, dist)| *dist <= 2)
+        .collect();
+
+    matches.sort_by_key(|&(_, dist)| dist);
+
+    matches.into_iter().map(|(key, _)| key).collect()
 }
