@@ -175,6 +175,8 @@ fn main() {
                                     "help".yellow(),
                                     tip
                                 );
+                            } else {
+                                println!("\n");
                             }
                         }
                     }
