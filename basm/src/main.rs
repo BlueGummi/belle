@@ -44,12 +44,31 @@ fn main() {
     let mut encoded_instructions = Vec::new();
     let mut line_count = 1;
     let mut write_to_file: bool = true;
-    if let Err((l, m)) = process_variables(&lines) {
+    if let Err((l, o, m, tip)) = process_variables(&lines) {
+        // this will do a chain
         println!("{}: {}", "error".underline().bright_red().bold(), m);
         error_count += 1;
-        if let Err(e2) = print_line(l + 1, false, true) {
+        if let Err(e2) = print_line(l + 1, !tip.is_empty(), true) {
             println!("{}: {}", "error".underline().bright_red().bold(), e2);
             error_count += 1;
+        }
+        if !tip.is_empty() {
+            println!(
+                "{}\n{}{} {}: {} {}",
+                "│".bright_red(),
+                "╰".bright_red(),
+                ">".yellow(),
+                "help".yellow(),
+                "╮".bright_red(),
+                tip
+            );
+        }
+        if let Some(v) = o {
+            print!("         {}{}", "╰".bright_red(), ">".yellow());
+            if let Err(e2) = print_line(v + 1, false, false) {
+                println!("{}: {}", "error".underline().bright_red().bold(), e2);
+                error_count += 1;
+            }
         }
         println!();
         write_to_file = false;
@@ -65,6 +84,7 @@ fn main() {
         write_to_file = false;
     }
     if let Err((l, o, e, tip)) = load_labels(&lines) {
+        // this also chains
         println!("{}: {}", "error".underline().bright_red().bold(), e);
         error_count += 1;
         if let Err(e2) = print_line(l + 1, !tip.is_empty(), true) {

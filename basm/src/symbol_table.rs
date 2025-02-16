@@ -141,11 +141,9 @@ pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String
 
     Ok(())
 }
-pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
-    let mut variable_map = VARIABLE_MAP
-        .lock()
-        .map_err(|_| (0, "failed to lock VARIABLE_MAP".to_string()))?;
-
+pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, String, String)> {
+    let mut variable_map = VARIABLE_MAP.lock().unwrap();
+    let mut variable_map_temp: HashMap<String, usize> = HashMap::new();
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
@@ -164,9 +162,29 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, String)> {
             let variable_value = line_before_comment[eq_index + 1..].trim();
 
             if let Ok(val) = parse_number::<i32>(variable_value) {
+                if let Some(u) = variable_map_temp.get(variable_name) {
+                    return Err((
+                        index,
+                        Some(*u),
+                        format!(
+                            "duplicate declaration of variable \"{}\"",
+                            variable_name.trim()
+                        ),
+                        format!(
+                            "previous variable found on line {}",
+                            (u + 1).to_string().magenta()
+                        ),
+                    ));
+                }
+                variable_map_temp.insert(variable_name.to_string(), index);
                 variable_map.insert(variable_name.to_string(), val);
             } else {
-                return Err((index, String::from("could not parse variable value")));
+                return Err((
+                    index,
+                    None,
+                    String::from("could not parse variable value"),
+                    String::from(""),
+                ));
             }
         }
     }
