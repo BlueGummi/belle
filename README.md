@@ -9,10 +9,6 @@ All documentation is available on [the website for this project](https://bluegum
 ## A [PDF](https://github.com/BlueGummi/belle/blob/master/BELLE-ISA_Manual_v2.pdf) is also available
 > Note: The PDF may be somewhat technical
 
-### NEW: Friendly compile-time errors in the assembler!
-
-![friendly error](https://github.com/BlueGummi/belle/blob/master/basm/arrows.png)
-
 ## Quickstart
 
 On **x86 Linux** systems, run
@@ -45,6 +41,10 @@ irm ('https://raw.githubusercontent.com/BlueGummi/belle/refs/heads/master/exampl
 ```
 
 The binaries can be run by calling `basm`, `belle`, or `bdump`.
+
+### NEW: Friendly compile-time errors in the assembler!
+
+![friendly error](https://github.com/BlueGummi/belle/blob/master/basm/arrows.png)
 
 ## [Further documentation](https://bluegummi.github.io/belle)
 
