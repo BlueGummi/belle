@@ -61,10 +61,11 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     Ok(())
 }
-pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String, String)> {
+pub fn load_labels(lines: &[String]) -> Result<(), Vec<(usize, Option<usize>, String, String)>> {
     let mut label_counter = *START_LOCATION.lock().unwrap() as usize;
     let mut label_map = LABEL_MAP.lock().unwrap();
     let mut temp_label_map: HashMap<String, (usize, usize)> = HashMap::new();
+    let mut errors: Vec<(usize, Option<usize>, String, String)> = Vec::new();
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
@@ -86,7 +87,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String
                 .trim()
                 .to_string();
             if let Some((_, l)) = temp_label_map.get(&label_name) {
-                return Err((
+                errors.push((
                     index,
                     Some(*l),
                     format!(
@@ -98,6 +99,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String
                         (l + 1).to_string().magenta()
                     ),
                 ));
+                continue;
             }
             temp_label_map.insert(label_name.to_string(), (label_counter, index));
             label_map.insert(label_name, label_counter);
@@ -121,12 +123,13 @@ pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String
             let add = if let Ok(v) = parse_number::<usize>(add) {
                 v
             } else {
-                return Err((
+                errors.push((
                     index,
                     None,
                     String::from("could not parse .pad directive"),
                     String::from("valid values require hexadecimal, decimal, or binary strings"),
                 ));
+                0
             };
 
             label_counter += add;
@@ -139,11 +142,17 @@ pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String
         }
     }
 
+    if !errors.is_empty() {
+        return Err(errors);
+    }
     Ok(())
 }
-pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, String, String)> {
+pub fn process_variables(
+    lines: &[String],
+) -> Result<(), Vec<(usize, Option<usize>, String, String)>> {
     let mut variable_map = VARIABLE_MAP.lock().unwrap();
     let mut variable_map_temp: HashMap<String, usize> = HashMap::new();
+    let mut errors: Vec<(usize, Option<usize>, String, String)> = Vec::new();
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
@@ -163,7 +172,7 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, 
 
             if let Ok(val) = parse_number::<i32>(variable_value) {
                 if let Some(u) = variable_map_temp.get(variable_name) {
-                    return Err((
+                    errors.push((
                         index,
                         Some(*u),
                         format!(
@@ -175,11 +184,12 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, 
                             (u + 1).to_string().magenta()
                         ),
                     ));
+                    continue;
                 }
                 variable_map_temp.insert(variable_name.to_string(), index);
                 variable_map.insert(variable_name.to_string(), val);
             } else {
-                return Err((
+                errors.push((
                     index,
                     None,
                     String::from("could not parse variable value"),
@@ -187,6 +197,9 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, 
                 ));
             }
         }
+    }
+    if !errors.is_empty() {
+        return Err(errors);
     }
 
     Ok(())
