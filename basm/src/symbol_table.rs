@@ -287,11 +287,11 @@ pub fn levenshtein_distance(s1: &str, s2: &str) -> usize {
     dp[len_s1][len_s2]
 }
 
-pub fn find_closest_matches(map: &HashMap<String, usize>, query: &str) -> Vec<String> {
+pub fn find_closest_matches(map: &HashMap<String, usize>, query: &str, v: usize) -> Vec<String> {
     let mut matches: Vec<(String, usize)> = map
         .keys()
         .map(|key| (key.clone(), levenshtein_distance(query, key)))
-        .filter(|(_, dist)| *dist <= 2)
+        .filter(|(_, dist)| *dist <= v)
         .collect();
 
     matches.sort_by_key(|&(_, dist)| dist);

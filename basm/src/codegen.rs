@@ -21,7 +21,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             if let Some(&address) = map.get(sr) {
                 Ok(address as i16)
             } else {
-                let similars = find_closest_matches(&map, sr);
+                let similars = find_closest_matches(&map, sr, 2);
                 let mut founds = String::from("");
                 for element in similars {
                     if !founds.is_empty() {
@@ -64,7 +64,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
             } else if let Some(&value) = vmap.get(ident) {
                 Ok(value as i16)
             } else {
-                let similars = find_closest_matches(&map, ident);
+                let similars = find_closest_matches(&map, ident, 2);
                 let mut founds = String::from("");
                 for element in similars {
                     if !founds.is_empty() {
@@ -154,7 +154,7 @@ pub fn encode_instruction(
                                     ),
                                 )
                             })
-                            .filter(|(_, dist)| *dist <= 2)
+                            .filter(|(_, dist)| *dist <= 1)
                             .collect();
                         matches.sort_by_key(|&(_, dist)| dist);
 
