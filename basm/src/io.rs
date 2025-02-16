@@ -75,7 +75,7 @@ pub fn print_line(line_number: usize, print_help: bool, print_header: bool) -> i
                         "{}{:^6} {} {} {}",
                         line_prefix.bright_red(),
                         (current_line + 1).to_string().blue(),
-                        "|".blue(),
+                        "│".blue(),
                         printed_line,
                         comment_part.dimmed()
                     );

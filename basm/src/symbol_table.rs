@@ -291,6 +291,7 @@ pub fn find_closest_matches(
         .collect();
 
     matches.sort_by_key(|&(_, _, dist)| dist);
+    matches.sort_by_key(|&(first, _, _)| first);
 
     matches
         .into_iter()
@@ -310,6 +311,7 @@ pub fn find_closest_matches_i32(
         .collect();
 
     matches.sort_by_key(|&(_, _, dist)| dist);
+    matches.sort_by_key(|&(first, _, _)| first);
 
     matches
         .into_iter()

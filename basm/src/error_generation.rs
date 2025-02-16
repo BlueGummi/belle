@@ -127,7 +127,7 @@ impl fmt::Display for Error<'_> {
                             "{}{:^6} {} {}{}{}",
                             second_line_char.bright_red(),
                             line_number.to_string().blue(),
-                            "|".blue(),
+                            "│".blue(),
                             before,
                             error_char.bright_red().bold(),
                             after
@@ -146,7 +146,7 @@ impl fmt::Display for Error<'_> {
                             "{}{:^6} {} {}",
                             second_line_char.bright_red(),
                             line_number.to_string().blue(),
-                            "|".blue(),
+                            "│".blue(),
                             line_content
                         )?;
                     }
