@@ -192,7 +192,9 @@ impl<'a> Lexer<'a> {
             }
             _ => {
                 self.position += 1;
-                pointer.push(self.chars.next().unwrap());
+                if let Some(p) = self.chars.next() {
+                    pointer.push(p);
+                }
                 false
             }
         };
