@@ -88,23 +88,25 @@ pub fn argument_to_binary(
                 } else {
                     format!("similar labels exist: {founds}")
                 };
-                let mut total_founds = founds;
+                let mut total_founds = founds.clone();
                 let similars = find_closest_matches_i32(&vmap, ident, 2);
-                let mut founds = String::from("");
+                let mut found_variables = String::from("");
                 for (line, element) in similars {
                     found_lines.push(line + 1);
-                    if !founds.is_empty() {
-                        founds = format!("{founds}, ");
+                    if !found_variables.is_empty() {
+                        found_variables = format!("{found_variables}, ");
                     }
-                    founds = format!("{founds}{}:{}", element.green(), line + 1);
+                    found_variables = format!("{found_variables}{}:{}", element.green(), line + 1);
                 }
-                founds = if founds.is_empty() {
+                found_variables = if found_variables.is_empty() {
                     String::from("")
                 } else {
-                    format!("similar variables exist: {founds}")
+                    format!("similar variables exist: {found_variables}")
                 };
-                total_founds = if !founds.is_empty() {
+                total_founds = if !founds.is_empty() && !found_variables.is_empty() {
                     format!("{}, {}", total_founds, founds)
+                } else if founds.is_empty() && !found_variables.is_empty() {
+                    found_variables
                 } else {
                     total_founds
                 };
