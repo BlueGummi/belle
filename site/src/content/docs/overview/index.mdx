@@ -19,8 +19,6 @@ The **BELLE-ISA**, also colloquially known as **"ISABELLE"**, is the instruction
 
 The instructions are all fixed to **16-bits** in length, being able to change CPU flags, memory, registers, and other components of the emulator with the use of **pseudo-instructions**.
 
-The opcodes are all fixed to **4 bits**, which reside in the **first 4** bits of any given instruction. Instructions can take anywhere between **0 to 2** arguments, and are formatted `Instruction Destination, Source` for 2 argument instructions, `Instruction Location` for 1 argument instructions, and simply `Instruction` for instructions that **do not take any arguments**.
-
 ## Instruction count
 
 There are **16** total instructions in the **BELLE-ISA**, however, each instruction **can take arguments of different types**. For example, the `mov` instruction can take a **literal value**, **pointer**, **memory address**, or **register** for the right-hand side of the instruction, and the conditional `jump` instructions can all take either a memory address or a register pointer.
