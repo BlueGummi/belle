@@ -2,14 +2,17 @@ use colored::*;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Mutex;
-pub static LABEL_MAP: Lazy<Mutex<HashMap<String, usize>>> =
+pub static LABEL_MAP: Lazy<Mutex<HashMap<String, (usize, usize)>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, i32>>> =
+pub static VARIABLE_MAP: Lazy<Mutex<HashMap<String, (usize, i32)>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static MEMORY_COUNTER: Lazy<Mutex<usize>> = Lazy::new(|| Mutex::new(0));
 pub static START_LOCATION: Lazy<Mutex<i32>> = Lazy::new(|| Mutex::new(100));
+
+type SymbolTableResult = Result<(), Vec<(usize, Option<usize>, String, String)>>;
+
 pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
     let mut start_number: Option<i32> = None;
     let mut start_line = 1;
@@ -61,7 +64,7 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     Ok(())
 }
-pub fn load_labels(lines: &[String]) -> Result<(), Vec<(usize, Option<usize>, String, String)>> {
+pub fn load_labels(lines: &[String]) -> SymbolTableResult {
     let mut label_counter = *START_LOCATION.lock().unwrap() as usize;
     let mut label_map = LABEL_MAP.lock().unwrap();
     let mut temp_label_map: HashMap<String, (usize, usize)> = HashMap::new();
@@ -95,14 +98,14 @@ pub fn load_labels(lines: &[String]) -> Result<(), Vec<(usize, Option<usize>, St
                         label_name.trim().magenta(),
                     ),
                     format!(
-                        "previous label found on line {}",
+                        "previous declaration found on line {}",
                         (l + 1).to_string().magenta()
                     ),
                 ));
                 continue;
             }
             temp_label_map.insert(label_name.to_string(), (label_counter, index));
-            label_map.insert(label_name, label_counter);
+            label_map.insert(label_name, (index, label_counter));
             continue;
         }
         if line_before_comment.starts_with(".asciiz") {
@@ -147,9 +150,7 @@ pub fn load_labels(lines: &[String]) -> Result<(), Vec<(usize, Option<usize>, St
     }
     Ok(())
 }
-pub fn process_variables(
-    lines: &[String],
-) -> Result<(), Vec<(usize, Option<usize>, String, String)>> {
+pub fn process_variables(lines: &[String]) -> SymbolTableResult {
     let mut variable_map = VARIABLE_MAP.lock().unwrap();
     let mut variable_map_temp: HashMap<String, usize> = HashMap::new();
     let mut errors: Vec<(usize, Option<usize>, String, String)> = Vec::new();
@@ -180,14 +181,14 @@ pub fn process_variables(
                             variable_name.trim().magenta()
                         ),
                         format!(
-                            "previous variable found on line {}",
+                            "previous declaration found on line {}",
                             (u + 1).to_string().magenta()
                         ),
                     ));
                     continue;
                 }
                 variable_map_temp.insert(variable_name.to_string(), index);
-                variable_map.insert(variable_name.to_string(), val);
+                variable_map.insert(variable_name.to_string(), (index, val));
             } else {
                 errors.push((
                     index,
@@ -278,26 +279,40 @@ pub fn levenshtein_distance(s1: &str, s2: &str) -> usize {
     dp[len_s1][len_s2]
 }
 
-pub fn find_closest_matches(map: &HashMap<String, usize>, query: &str, v: usize) -> Vec<String> {
-    let mut matches: Vec<(String, usize)> = map
-        .keys()
-        .map(|key| (key.clone(), levenshtein_distance(query, key)))
-        .filter(|(_, dist)| *dist <= v)
+pub fn find_closest_matches(
+    map: &HashMap<String, (usize, usize)>,
+    query: &str,
+    v: usize,
+) -> Vec<(usize, String)> {
+    let mut matches: Vec<(usize, String, usize)> = map
+        .iter()
+        .map(|(key, &(first, _))| (first, key.clone(), levenshtein_distance(query, key)))
+        .filter(|&(_, _, dist)| dist <= v)
         .collect();
 
-    matches.sort_by_key(|&(_, dist)| dist);
+    matches.sort_by_key(|&(_, _, dist)| dist);
 
-    matches.into_iter().map(|(key, _)| key).collect()
+    matches
+        .into_iter()
+        .map(|(first, key, _)| (first, key))
+        .collect()
 }
 
-pub fn find_closest_matches_i32(map: &HashMap<String, i32>, query: &str) -> Vec<String> {
-    let mut matches: Vec<(String, usize)> = map
-        .keys()
-        .map(|key| (key.clone(), levenshtein_distance(query, key)))
-        .filter(|(_, dist)| *dist <= 2)
+pub fn find_closest_matches_i32(
+    map: &HashMap<String, (usize, i32)>,
+    query: &str,
+    v: usize,
+) -> Vec<(usize, String)> {
+    let mut matches: Vec<(usize, String, usize)> = map
+        .iter()
+        .map(|(key, &(first, _))| (first, key.clone(), levenshtein_distance(query, key)))
+        .filter(|&(_, _, dist)| dist <= v)
         .collect();
 
-    matches.sort_by_key(|&(_, dist)| dist);
+    matches.sort_by_key(|&(_, _, dist)| dist);
 
-    matches.into_iter().map(|(key, _)| key).collect()
+    matches
+        .into_iter()
+        .map(|(first, key, _)| (first, key))
+        .collect()
 }

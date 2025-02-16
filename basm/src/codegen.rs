@@ -1,12 +1,17 @@
 use crate::*;
 use colored::*;
 type TempErr = (String, String);
-pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (usize, TempErr)> {
+type CodeGenResult = Result<Option<Vec<i16>>, (usize, Option<Vec<usize>>, TempErr)>;
+pub fn argument_to_binary(
+    arg: Option<&Token>,
+    line_num: usize,
+) -> Result<i16, (usize, Option<Vec<usize>>, TempErr)> {
     match arg {
         Some(Token::Register(num)) => {
             if *num > 9 {
                 return Err((
                     line_num,
+                    None,
                     (
                         format!("invalid register number {num}"),
                         format!("valid registers are {}", "r0-r9".magenta()),
@@ -18,16 +23,18 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
         Some(Token::Literal(literal)) => Ok((1 << 8) | *literal),
         Some(Token::SRCall(sr)) => {
             let map = LABEL_MAP.lock().unwrap();
-            if let Some(&address) = map.get(sr) {
-                Ok(address as i16)
+            if let Some((_, address)) = map.get(sr) {
+                Ok(*address as i16)
             } else {
                 let similars = find_closest_matches(&map, sr, 2);
                 let mut founds = String::from("");
-                for element in similars {
+                let mut found_lines: Vec<usize> = Vec::new();
+                for (line, element) in similars {
+                    found_lines.push(line + 1);
                     if !founds.is_empty() {
                         founds = format!("{founds}, ");
                     }
-                    founds = format!("{founds}{}", element.green());
+                    founds = format!("{founds}{}:{}", element.green(), line + 1);
                 }
                 founds = if founds.is_empty() {
                     String::from("")
@@ -36,6 +43,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                 };
                 Err((
                     line_num,
+                    Some(found_lines),
                     (format!("label \"{}\" does not exist", sr.magenta()), founds),
                 ))
             }
@@ -48,6 +56,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                 _ => {
                     return Err((
                         line_num,
+                        None,
                         ("directive not recognized".to_string(), "".to_string()),
                     ))
                 }
@@ -59,18 +68,20 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
         Some(Token::Ident(ident)) => {
             let map = LABEL_MAP.lock().unwrap();
             let vmap = VARIABLE_MAP.lock().unwrap();
-            if let Some(&address) = map.get(ident) {
-                Ok(address as i16)
-            } else if let Some(&value) = vmap.get(ident) {
-                Ok(value as i16)
+            if let Some((_, address)) = map.get(ident) {
+                Ok(*address as i16)
+            } else if let Some((_, value)) = vmap.get(ident) {
+                Ok(*value as i16)
             } else {
                 let similars = find_closest_matches(&map, ident, 2);
                 let mut founds = String::from("");
-                for element in similars {
+                let mut found_lines: Vec<usize> = Vec::new();
+                for (line, element) in similars {
+                    found_lines.push(line + 1);
                     if !founds.is_empty() {
                         founds = format!("{founds}, ");
                     }
-                    founds = format!("{founds}{}", element.green());
+                    founds = format!("{founds}{}:{}", element.green(), line + 1);
                 }
                 founds = if founds.is_empty() {
                     String::from("")
@@ -78,13 +89,14 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                     format!("similar labels exist: {founds}")
                 };
                 let mut total_founds = founds;
-                let similars = find_closest_matches_i32(&vmap, ident);
+                let similars = find_closest_matches_i32(&vmap, ident, 2);
                 let mut founds = String::from("");
-                for element in similars {
+                for (line, element) in similars {
+                    found_lines.push(line + 1);
                     if !founds.is_empty() {
                         founds = format!("{founds}, ");
                     }
-                    founds = format!("{founds}{}", element.green());
+                    founds = format!("{founds}{}:{}", element.green(), line + 1);
                 }
                 founds = if founds.is_empty() {
                     String::from("")
@@ -99,6 +111,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
 
                 return Err((
                     line_num,
+                    Some(found_lines),
                     (
                         format!("label/variable \"{}\" not declared", ident.magenta(),),
                         total_founds,
@@ -115,7 +128,7 @@ pub fn encode_instruction(
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
-) -> Result<Option<Vec<i16>>, (usize, TempErr)> {
+) -> CodeGenResult {
     let mut ins_type = "default";
     let instruction_bin = match ins {
         Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
@@ -168,6 +181,7 @@ pub fn encode_instruction(
 
                         return Err((
                             line_num,
+                            None,
                             (
                                 format!(
                                     "invalid jump/branch instruction \"{}\"",
@@ -242,6 +256,7 @@ pub fn encode_instruction(
 
                 return Err((
                     line_num,
+                    None,
                     (
                         format!("instruction \"{}\" not recognized", instruction.magenta(),),
                         result,
@@ -279,6 +294,7 @@ pub fn encode_instruction(
             };
             return Err((
                 line_num,
+                None,
                 (
                     format!("expected ident, found {}", inst.bright_green()),
                     "please provide a directive or identifier".to_string(),
@@ -297,6 +313,7 @@ pub fn encode_instruction(
                 .ok_or_else(|| {
                     (
                         line_num,
+                        None,
                         (
                             "missing argument for POP".to_string(),
                             "please provide a memory address or register argument".to_string(),
@@ -318,6 +335,7 @@ pub fn encode_instruction(
                 .ok_or_else(|| {
                     (
                         line_num,
+                        None,
                         (
                             "missing argument for store indirect".to_string(),
                             "provide a memory address LHS and register indirect RHS".to_string(),
@@ -328,6 +346,7 @@ pub fn encode_instruction(
             let parsed_int = raw.trim().parse::<i16>().map_err(|_| {
                 (
                     line_num,
+                    None,
                     (
                         "failed to parse integer".to_string(),
                         "please provide a proper integer".to_string(),
@@ -363,6 +382,7 @@ pub fn encode_instruction(
             if address > 1023 {
                 return Err((
                     line_num,
+                    None,
                     (
                         "label memory address too large on instruction on line".to_string(),
                         "".to_string(),
@@ -376,6 +396,7 @@ pub fn encode_instruction(
                 .ok_or_else(|| {
                     (
                         line_num,
+                        None,
                         (
                             "missing argument for indirect branch/jump".to_string(),
                             "please provide a register indirect argument".to_string(),
@@ -386,6 +407,7 @@ pub fn encode_instruction(
             let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
                 (
                     line_num,
+                    None,
                     (
                         "failed to parse integer for indirect jump".to_string(),
                         "please provide a register indirect argument".to_string(),
@@ -402,6 +424,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         "asciiz argument is empty".to_string(),
                         "please provide an ASCII string argument".to_string(),
@@ -418,6 +441,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         "word argument is empty".to_string(),
                         "please provide a 16-bit argument".to_string(),
@@ -430,6 +454,7 @@ pub fn encode_instruction(
             if arg1.is_none() || arg2.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         "LEA/LD argument is empty".to_string(),
                         "please provide a register LHS and address RHS".to_string(),
@@ -450,6 +475,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         ".data argument is empty".to_string(),
                         "please provide an ASCII string argument".to_string(),
@@ -466,6 +492,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         ".pad argument is empty".to_string(),
                         "please provide an argument".to_string(),
@@ -479,6 +506,7 @@ pub fn encode_instruction(
             if arg1.is_none() {
                 return Err((
                     line_num,
+                    None,
                     (
                         "dataword argument is empty".to_string(),
                         "please provide a 16-bit argument".to_string(),

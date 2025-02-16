@@ -415,7 +415,8 @@ impl<'a> Lexer<'a> {
             input
         };
         let map = VARIABLE_MAP.lock().unwrap();
-        if let Some(&replacement) = map.get(variable.trim()) {
+        if let Some((_, replacement)) = map.get(variable.trim()) {
+            let replacement = *replacement;
             if input.starts_with('[') {
                 self.tokens.push(Token::MemAddr(replacement as i16));
             } else if input.starts_with('#') {
@@ -546,13 +547,13 @@ impl<'a> Lexer<'a> {
 
 pub fn print_label_map() {
     let map = LABEL_MAP.lock().unwrap();
-    for (name, counter) in map.iter() {
+    for (name, (_, counter)) in map.iter() {
         if CONFIG.verbose {
             println!("Label: {name}, Address: {counter}");
         }
     }
     let vmap = VARIABLE_MAP.lock().unwrap();
-    for (name, counter) in vmap.iter() {
+    for (name, (_, counter)) in vmap.iter() {
         if CONFIG.verbose {
             println!("Variable: {name}, Value: {counter}");
         }

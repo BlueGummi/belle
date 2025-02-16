@@ -87,8 +87,8 @@ impl Token {
             Token::MemPointer(n) => *n,
             Token::SRCall(sr) => {
                 let map = LABEL_MAP.lock().unwrap();
-                if let Some(&address) = map.get(sr) {
-                    address as i16
+                if let Some((_, address)) = map.get(sr) {
+                    *address as i16
                 } else {
                     0
                 }
@@ -96,10 +96,10 @@ impl Token {
             Token::Ident(ident) => {
                 let map = LABEL_MAP.lock().unwrap();
                 let vmap = VARIABLE_MAP.lock().unwrap();
-                if let Some(&address) = map.get(ident) {
-                    address as i16
-                } else if let Some(&value) = vmap.get(ident) {
-                    value as i16
+                if let Some((_, address)) = map.get(ident) {
+                    *address as i16
+                } else if let Some((_, value)) = vmap.get(ident) {
+                    *value as i16
                 } else {
                     0
                 }
