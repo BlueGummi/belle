@@ -168,7 +168,8 @@ fn main() {
                             }
                             if !tip.is_empty() {
                                 println!(
-                                    "{}{} {}: {}\n",
+                                    "{}\n{}{} {}: {}\n",
+                                    "│".bright_red(),
                                     "╰".bright_red(),
                                     "▶".yellow(),
                                     "help".yellow(),
