@@ -30,7 +30,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                     founds = format!("{founds}{}", element.green());
                 }
                 founds = if founds.is_empty() {
-                    String::from("no similar labels or variable names found")
+                    String::from("no similar names found")
                 } else {
                     format!("similar labels exist: {founds}")
                 };
@@ -87,11 +87,15 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                     founds = format!("{founds}{}", element.green());
                 }
                 founds = if founds.is_empty() {
-                    String::from("no similar variables exist")
+                    String::from("")
                 } else {
                     format!("similar variables exist: {founds}")
                 };
-                total_founds = format!("{}, {}", total_founds, founds);
+                total_founds = if !founds.is_empty() {
+                    format!("{}, {}", total_founds, founds)
+                } else {
+                    total_founds
+                };
 
                 return Err((
                     line_num,

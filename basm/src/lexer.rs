@@ -450,10 +450,7 @@ impl<'a> Lexer<'a> {
                     format!("expected a closing {} in ASCII string", "\"".magenta()),
                     self.line_number,
                     Some(self.position),
-                    Some(format!(
-                        "add a closing quote in \"{}\", e.g. \"ascii\"",
-                        ascii_string.magenta()
-                    )),
+                    None,
                 ));
             }
         }

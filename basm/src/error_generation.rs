@@ -99,11 +99,6 @@ impl fmt::Display for Error<'_> {
                     .count();
                 if let Some(place) = location {
                     let place = *place - 2;
-                    let left_char = if self.get_tip().is_empty() {
-                        "╰"
-                    } else {
-                        "│"
-                    };
                     if place < line_content.len() {
                         let before = &line_content[..place];
                         let error_char = &line_content[place..place + 1];
@@ -119,7 +114,7 @@ impl fmt::Display for Error<'_> {
                         writeln!(
                             f,
                             "{}{:^6} {} {}{}{}",
-                            left_char.bright_red(),
+                            "│".bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             before,
@@ -137,7 +132,7 @@ impl fmt::Display for Error<'_> {
                         writeln!(
                             f,
                             "{}{:^6} {} {}",
-                            left_char.bright_red(),
+                            "│".bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             line_content
