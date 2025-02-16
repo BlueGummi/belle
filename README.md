@@ -7,6 +7,11 @@
 All documentation is available on [the website for this project](https://bluegummi.github.io/belle) 
 
 ## A [PDF](https://github.com/BlueGummi/belle/blob/master/BELLE-ISA_Manual_v2.pdf) is also available
+    > Note: The PDF may be somewhat technical
+
+### NEW: Friendly compile-time errors in the assembler!
+
+![friendly error](https://github.com/BlueGummi/belle/blob/master/basm/arrows.png)
 
 ## Quickstart
 
