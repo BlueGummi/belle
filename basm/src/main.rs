@@ -171,7 +171,7 @@ fn main() {
                                     "{}\n{}{} {}: {}\n",
                                     "│".bright_red(),
                                     "╰".bright_red(),
-                                    "▶".yellow(),
+                                    ">".yellow(),
                                     "help".yellow(),
                                     tip
                                 );
