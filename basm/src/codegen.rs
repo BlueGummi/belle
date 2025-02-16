@@ -166,7 +166,7 @@ pub fn encode_instruction(
                             format!("maybe you meant: {}", closest_matches.join(", ").green())
                         };
 
-                        return Err((line_num, ("invalid jump instruction".to_string(), result)));
+                        return Err((line_num, (format!("invalid jump/branch instruction \"{}\"", instruction.magenta()), result)));
                     }
                 }
             }
