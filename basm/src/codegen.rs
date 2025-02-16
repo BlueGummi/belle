@@ -30,7 +30,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                     founds = format!("{founds}{}", element.green());
                 }
                 founds = if founds.is_empty() {
-                    String::from("no similar names found")
+                    String::from("")
                 } else {
                     format!("similar labels exist: {founds}")
                 };
@@ -73,7 +73,7 @@ pub fn argument_to_binary(arg: Option<&Token>, line_num: usize) -> Result<i16, (
                     founds = format!("{founds}{}", element.green());
                 }
                 founds = if founds.is_empty() {
-                    String::from("no similar labels exist")
+                    String::from("")
                 } else {
                     format!("similar labels exist: {founds}")
                 };
@@ -161,7 +161,7 @@ pub fn encode_instruction(
                         let closest_matches: Vec<String> =
                             matches.into_iter().map(|(word, _)| word).collect();
                         let result = if closest_matches.is_empty() {
-                            "no similar branch/jumps".to_string()
+                            "".to_string()
                         } else {
                             format!("maybe you meant: {}", closest_matches.join(", ").green())
                         };
