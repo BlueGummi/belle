@@ -120,8 +120,8 @@ fn main() {
     let variable_keys: HashSet<_> = variable_lock.keys().collect();
     if let Some(key) = label_keys.intersection(&variable_keys).next() {
         eprintln!(
-            "variable and label {} cannot have the same name.",
-            key.to_string().yellow()
+            "variable and label \"{}\" cannot have the same name.",
+            key.to_string().magenta()
         );
         std::process::exit(1);
     }
