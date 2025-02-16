@@ -154,7 +154,7 @@ pub fn encode_instruction(
                                     ),
                                 )
                             })
-                            .filter(|(_, dist)| *dist <= 1)
+                            .filter(|(_, dist)| *dist <= 0)
                             .collect();
                         matches.sort_by_key(|&(_, dist)| dist);
 
