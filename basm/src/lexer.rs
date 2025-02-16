@@ -317,7 +317,7 @@ impl<'a> Lexer<'a> {
             if let Ok(reg_num) = reg[1..].parse::<i16>() {
                 if !(0..=9).contains(&reg_num) {
                     self.errors.push(Error::InvalidSyntax(
-                        format!("register number {} invalid", reg_num),
+                        format!("register number {} invalid", reg_num.to_string().magenta()),
                         self.line_number,
                         Some(self.position),
                         Some(format!("valid registers are {}", "r0-r9".magenta())),

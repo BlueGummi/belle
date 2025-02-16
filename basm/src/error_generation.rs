@@ -75,7 +75,25 @@ impl fmt::Display for Error<'_> {
         {
             if current_line + 1 == line_number {
                 let line_content = line.unwrap();
-                let line_content = line_content.trim();
+                let mut line_content = line_content.trim().to_string();
+                let mut in_quotes = false;
+                let mut comment_index = None;
+
+                for (i, c) in line_content.chars().enumerate() {
+                    if c == '"' {
+                        in_quotes = !in_quotes;
+                    } else if c == ';' && !in_quotes {
+                        comment_index = Some(i);
+                        break;
+                    }
+                }
+
+                if let Some(index) = comment_index {
+                    let code_part = &line_content[..index];
+                    let comment_part = &line_content[index..];
+                    line_content = format!("{}{}", code_part, comment_part.dimmed());
+                }
+
                 if let Some(place) = location {
                     let place = *place - 2;
                     if place < line_content.len() {

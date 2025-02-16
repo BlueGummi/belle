@@ -176,17 +176,33 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
         if current_line + 1 == line_number {
             match line {
                 Ok(content) => {
+                    let trimmed_content = content.trim();
+                    let mut printed_line = trimmed_content.to_string();
+                    let mut comment_part = "".to_string();
+
+                    let mut in_quotes = false;
+                    if let Some(pos) = trimmed_content.find(|c| {
+                        if c == '"' {
+                            in_quotes = !in_quotes;
+                        }
+                        c == ';' && !in_quotes
+                    }) {
+                        printed_line = trimmed_content[..pos].trim().to_string();
+                        comment_part = trimmed_content[pos..].trim().to_string();
+                    }
+
                     println!(
-                        "{}{:^6} {} {}",
+                        "{}{:^6} {} {} {}",
                         "│".bright_red(),
                         (current_line + 1).to_string().blue(),
                         "|".blue(),
-                        content.trim()
+                        printed_line,
+                        comment_part.dimmed()
                     );
                     println!(
-                        "{}{}{}\n",
+                        "{}{}{}",
                         "╰".bright_red(),
-                        "─".repeat(content.trim().len() + 8).bright_red(),
+                        "─".repeat(printed_line.len() + 8).bright_red(),
                         "╸".bright_red()
                     );
                     return Ok(());
@@ -205,6 +221,7 @@ pub fn print_line(line_number: usize) -> io::Result<()> {
         "line not found",
     ))
 }
+
 use std::num::ParseIntError;
 use std::str::FromStr;
 
