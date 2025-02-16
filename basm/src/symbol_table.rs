@@ -1,10 +1,6 @@
-use crate::*;
 use colored::*;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
 use std::sync::Mutex;
 pub static LABEL_MAP: Lazy<Mutex<HashMap<String, usize>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -65,13 +61,11 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     Ok(())
 }
-pub fn load_labels(lines: &[String]) -> Result<(), String> {
-    let mut label_counter = *START_LOCATION
-        .lock()
-        .map_err(|_| "failed to lock START_LOCATION")? as usize;
-    let mut label_map = LABEL_MAP.lock().map_err(|_| "failed to lock LABEL_MAP")?;
-
-    for line in lines {
+pub fn load_labels(lines: &[String]) -> Result<(), (usize, Option<usize>, String, String)> {
+    let mut label_counter = *START_LOCATION.lock().unwrap() as usize;
+    let mut label_map = LABEL_MAP.lock().unwrap();
+    let mut temp_label_map: HashMap<String, (usize, usize)> = HashMap::new();
+    for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
         if trimmed_line.is_empty()
@@ -91,7 +85,22 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
                 .trim_end_matches(':')
                 .trim()
                 .to_string();
-            label_map.insert(label_name.trim().to_string(), label_counter);
+            if let Some((_, l)) = temp_label_map.get(&label_name) {
+                return Err((
+                    index,
+                    Some(*l),
+                    format!(
+                        "duplicate declaration of label \"{}\"",
+                        label_name.trim().magenta(),
+                    ),
+                    format!(
+                        "previous label found on line {}",
+                        (l + 1).to_string().magenta()
+                    ),
+                ));
+            }
+            temp_label_map.insert(label_name.to_string(), (label_counter, index));
+            label_map.insert(label_name, label_counter);
             continue;
         }
         if line_before_comment.starts_with(".asciiz") {
@@ -112,7 +121,12 @@ pub fn load_labels(lines: &[String]) -> Result<(), String> {
             let add = if let Ok(v) = parse_number::<usize>(add) {
                 v
             } else {
-                return Err(String::from("could not parse variable value"));
+                return Err((
+                    index,
+                    None,
+                    String::from("could not parse .pad directive"),
+                    String::from("valid values require hexadecimal, decimal, or binary strings"),
+                ));
             };
 
             label_counter += add;
@@ -165,60 +179,6 @@ pub fn update_memory_counter() -> Result<(), String> {
         .map_err(|_| "failed to lock MEMORY_COUNTER")?;
     *counter += 1;
     Ok(())
-}
-
-pub fn print_line(line_number: usize) -> io::Result<()> {
-    let path = Path::new(&CONFIG.source);
-    let file = File::open(path)?;
-    let reader = io::BufReader::new(file);
-
-    for (current_line, line) in reader.lines().enumerate() {
-        if current_line + 1 == line_number {
-            match line {
-                Ok(content) => {
-                    let trimmed_content = content.trim();
-                    let mut printed_line = trimmed_content.to_string();
-                    let mut comment_part = "".to_string();
-
-                    let mut in_quotes = false;
-                    if let Some(pos) = trimmed_content.find(|c| {
-                        if c == '"' {
-                            in_quotes = !in_quotes;
-                        }
-                        c == ';' && !in_quotes
-                    }) {
-                        printed_line = trimmed_content[..pos].trim().to_string();
-                        comment_part = trimmed_content[pos..].trim().to_string();
-                    }
-                    println!(
-                        "{} {}:{}",
-                        "├─".bright_red(),
-                        CONFIG.source.green(),
-                        line_number
-                    );
-                    println!(
-                        "{}{:^6} {} {} {}",
-                        "│".bright_red(),
-                        (current_line + 1).to_string().blue(),
-                        "|".blue(),
-                        printed_line,
-                        comment_part.dimmed()
-                    );
-                    return Ok(());
-                }
-                Err(e) => {
-                    eprintln!("error reading line: {}", e);
-                    return Err(e);
-                }
-            }
-        }
-    }
-
-    eprintln!("line number {} is out of bounds.", line_number);
-    Err(io::Error::new(
-        io::ErrorKind::UnexpectedEof,
-        "line not found",
-    ))
 }
 
 use std::num::ParseIntError;

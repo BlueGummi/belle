@@ -99,14 +99,25 @@ impl fmt::Display for Error<'_> {
                     .count();
                 if let Some(place) = location {
                     let place = *place - 2;
+                    let left = if self.get_tip().is_empty() {
+                        "╰"
+                    } else {
+                        "├"
+                    };
+                    let second_line_char = if self.get_tip().is_empty() {
+                        " "
+                    } else {
+                        "│"
+                    };
                     if place < line_content.len() {
                         let before = &line_content[..place];
                         let error_char = &line_content[place..place + 1];
                         let after = &line_content[place + 1..];
                         writeln!(
                             f,
-                            "{} {}:{}:{}",
-                            "├─".bright_red(),
+                            "{}{} {}:{}:{}",
+                            left.bright_red(),
+                            "─".bright_red(),
                             CONFIG.source.green(),
                             line_number,
                             place + spaces + 1
@@ -114,7 +125,7 @@ impl fmt::Display for Error<'_> {
                         writeln!(
                             f,
                             "{}{:^6} {} {}{}{}",
-                            "│".bright_red(),
+                            second_line_char.bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             before,
@@ -124,15 +135,16 @@ impl fmt::Display for Error<'_> {
                     } else {
                         writeln!(
                             f,
-                            "{} {}:{}",
-                            "├─".bright_red(),
+                            "{}{} {}:{}",
+                            left.bright_red(),
+                            "─".bright_red(),
                             CONFIG.source.green(),
                             line_number
                         )?;
                         writeln!(
                             f,
                             "{}{:^6} {} {}",
-                            "│".bright_red(),
+                            second_line_char.bright_red(),
                             line_number.to_string().blue(),
                             "|".blue(),
                             line_content
@@ -161,7 +173,7 @@ impl fmt::Display for Error<'_> {
                 f,
                 "{}{} {}: {}",
                 "╰".bright_red(),
-                "▶".yellow(),
+                ">".yellow(),
                 "help".yellow(),
                 self.get_tip()
             )?;

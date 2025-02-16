@@ -47,7 +47,7 @@ fn main() {
     if let Err((l, m)) = process_variables(&lines) {
         println!("{}: {}", "error".underline().bright_red().bold(), m);
         error_count += 1;
-        if let Err(e2) = print_line(l + 1) {
+        if let Err(e2) = print_line(l + 1, false, true) {
             println!("{}: {}", "error".underline().bright_red().bold(), e2);
             error_count += 1;
         }
@@ -57,16 +57,39 @@ fn main() {
     if let Err((l, e)) = process_start(&lines) {
         println!("{}: {}", "error".underline().bright_red().bold(), e);
         error_count += 1;
-        if let Err(e2) = print_line(l + 1) {
+        if let Err(e2) = print_line(l + 1, false, true) {
             println!("{}: {}", "error".underline().bright_red().bold(), e2);
             error_count += 1;
         }
         println!();
         write_to_file = false;
     }
-    if let Err(e) = load_labels(&lines) {
+    if let Err((l, o, e, tip)) = load_labels(&lines) {
         println!("{}: {}", "error".underline().bright_red().bold(), e);
         error_count += 1;
+        if let Err(e2) = print_line(l + 1, !tip.is_empty(), true) {
+            println!("{}: {}", "error".underline().bright_red().bold(), e2);
+            error_count += 1;
+        }
+        if !tip.is_empty() {
+            println!(
+                "{}\n{}{} {}: {} {}",
+                "│".bright_red(),
+                "╰".bright_red(),
+                ">".yellow(),
+                "help".yellow(),
+                "╮".bright_red(),
+                tip
+            );
+        }
+        if let Some(v) = o {
+            print!("         {}{}", "╰".bright_red(), ">".yellow());
+            if let Err(e2) = print_line(v + 1, false, false) {
+                println!("{}: {}", "error".underline().bright_red().bold(), e2);
+                error_count += 1;
+            }
+        }
+        println!();
         write_to_file = false;
     }
 
@@ -147,7 +170,7 @@ fn main() {
                                     err_msg
                                 );
                                 error_count += 1;
-                                if let Err(e) = print_line(lineee) {
+                                if let Err(e) = print_line(lineee, false, true) {
                                     println!("{}: {}", "error".underline().bright_red().bold(), e);
                                     error_count += 1;
                                 }
@@ -162,7 +185,7 @@ fn main() {
                             write_to_file = false;
                             println!("{}: {}", "error".underline().bright_red().bold(), err_msg);
                             error_count += 1;
-                            if let Err(e) = print_line(line_num) {
+                            if let Err(e) = print_line(line_num, !tip.is_empty(), true) {
                                 println!("{}: {}", "error".underline().bright_red().bold(), e);
                                 error_count += 1;
                             }
@@ -171,7 +194,7 @@ fn main() {
                                     "{}\n{}{} {}: {}\n",
                                     "│".bright_red(),
                                     "╰".bright_red(),
-                                    "▶".yellow(),
+                                    ">".yellow(),
                                     "help".yellow(),
                                     tip
                                 );
