@@ -159,10 +159,7 @@ pub fn encode_instruction(
                         let result = if closest_matches.is_empty() {
                             "no similar branch/jumps".to_string()
                         } else {
-                            format!(
-                                "maybe you meant: {}",
-                                format!("{}", closest_matches.join(", ").green())
-                            )
+                            format!("maybe you meant: {}", closest_matches.join(", ").green())
                         };
 
                         return Err((line_num, ("invalid jump instruction".to_string(), result)));
@@ -227,10 +224,7 @@ pub fn encode_instruction(
                 let result = if closest_matches.is_empty() {
                     "no similar instructions".to_string()
                 } else {
-                    format!(
-                        "maybe you meant: {}",
-                        format!("{}", closest_matches.join(", ").green())
-                    )
+                    format!("maybe you meant: {}", closest_matches.join(", ").green())
                 };
 
                 return Err((

@@ -252,6 +252,7 @@ fn parse_number<T: FromStrRadix>(input: &str) -> Result<T, ParseIntError> {
     }
 }
 
+#[allow(clippy::needless_range_loop)]
 pub fn levenshtein_distance(s1: &str, s2: &str) -> usize {
     let len_s1 = s1.len();
     let len_s2 = s2.len();
