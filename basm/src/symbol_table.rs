@@ -168,7 +168,7 @@ pub fn process_variables(lines: &[String]) -> Result<(), (usize, Option<usize>, 
                         Some(*u),
                         format!(
                             "duplicate declaration of variable \"{}\"",
-                            variable_name.trim()
+                            variable_name.trim().magenta()
                         ),
                         format!(
                             "previous variable found on line {}",
