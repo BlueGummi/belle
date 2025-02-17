@@ -1,4 +1,5 @@
 use crate::Token;
+use colored::*;
 
 static MMAFAIL: &str = "memory address or address of label too large";
 static LITFAIL: &str = "literal value too large";
@@ -16,11 +17,11 @@ impl Token {
         matches!(self, Token::MemAddr(_))
     }
 
-    pub fn is_memory_address_pointer(&self) -> bool {
+    pub fn is_memory_address_indirect(&self) -> bool {
         matches!(self, Token::MemPointer(_))
     }
 
-    pub fn is_register_pointer(&self) -> bool {
+    pub fn is_register_indirect(&self) -> bool {
         matches!(self, Token::RegPointer(_))
     }
 
@@ -37,8 +38,8 @@ impl Token {
             || self.is_literal()
             || self.is_srcall()
             || self.is_memory_address()
-            || self.is_memory_address_pointer()
-            || self.is_register_pointer()
+            || self.is_memory_address_indirect()
+            || self.is_register_indirect()
     }
 }
 
@@ -73,79 +74,90 @@ fn check_instruction(
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     match raw_token {
-        "HLT" | "RET" => only_none(arg1, arg2, raw_token, line_num),
-        "LD" | "LEA" => {
-            only_two(arg1, arg2, raw_token, line_num).and_then(|_| ld_args(arg1, arg2, line_num))
-        }
-        "ST" => {
-            only_two(arg1, arg2, raw_token, line_num).and_then(|_| st_args(arg1, arg2, line_num))
-        }
-        "MOV" | "MUL" | "DIV" | "ADD" | "CMP" => {
-            only_two(arg1, arg2, raw_token, line_num).and_then(|_| mov_args(arg1, arg2, line_num))
-        }
-        "INT" => one_none(arg1, arg2, raw_token, line_num).and_then(|_| int_args(arg1, line_num)),
+        "HLT" | "RET" => only_none(raw_token, arg1, arg2, line_num),
+        "LD" | "LEA" => only_two(raw_token, arg1, arg2, line_num)
+            .and_then(|_| ld_args(raw_token, arg1, arg2, line_num)),
+        "ST" => only_two(raw_token, arg1, arg2, line_num)
+            .and_then(|_| st_args(raw_token, arg1, arg2, line_num)),
+        "MOV" | "MUL" | "DIV" | "ADD" | "CMP" => only_two(raw_token, arg1, arg2, line_num)
+            .and_then(|_| mov_args(raw_token, arg1, arg2, line_num)),
+        "INT" => one_none(raw_token, arg1, arg2, line_num)
+            .and_then(|_| int_args(raw_token, arg1, line_num)),
         raw_token if raw_token.starts_with('j') || raw_token.starts_with('b') => {
-            only_one(arg1, arg2, raw_token, line_num).and_then(|_| jump_args(arg1, line_num))
+            only_one(raw_token, arg1, arg2, line_num)
+                .and_then(|_| jump_args(raw_token, arg1, line_num))
         }
-        "PUSH" | "POP" => {
-            only_one(arg1, arg2, raw_token, line_num).and_then(|_| push_args(arg1, line_num))
-        }
+        "PUSH" | "POP" => only_one(raw_token, arg1, arg2, line_num)
+            .and_then(|_| push_args(raw_token, arg1, line_num)),
         _ => Ok(()),
     }
 }
 
 fn only_none(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    instruction: &str,
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     if arg1.is_some() || arg2.is_some() {
-        return Err((line_num, format!("{} requires no arguments", instruction)));
+        return Err((
+            line_num,
+            format!("{} requires no arguments", instruction.purple().bold(),),
+        ));
     }
     Ok(())
 }
 
 fn only_two(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    instruction: &str,
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     if arg1.is_none() || arg2.is_none() {
-        return Err((line_num, format!("{} requires two arguments", instruction)));
+        return Err((
+            line_num,
+            format!("{} requires two arguments", instruction.purple().bold(),),
+        ));
     }
     Ok(())
 }
 
 fn one_none(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    instruction: &str,
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     if arg1.is_some() && arg2.is_some() {
         return Err((
             line_num,
-            format!("{} requires one or no arguments", instruction),
+            format!(
+                "{} requires one or no arguments",
+                instruction.purple().bold(),
+            ),
         ));
     }
     Ok(())
 }
 
 fn only_one(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
-    instruction: &str,
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     if arg1.is_none() || arg2.is_some() {
-        return Err((line_num, format!("{} requires one argument", instruction)));
+        return Err((
+            line_num,
+            format!("{} requires one argument", instruction.purple().bold(),),
+        ));
     }
     Ok(())
 }
 
 fn ld_args(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
@@ -153,19 +165,31 @@ fn ld_args(
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "instruction requires LHS to be a Register".to_string(),
+            format!(
+                "{} requires {} to be a register",
+                instruction.purple().bold(),
+                "LHS".magenta()
+            ),
         ));
     }
     if !arg2.is_some_and(|tok| tok.is_memory_address() || tok.is_srcall()) {
         return Err((
             line_num,
-            "instruction requires RHS to be a Memory address".to_string(),
+            format!(
+                "{} requires {} to be a memory address",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "instruction LHS register must be 7 or less".to_string(),
+            format!(
+                "{} {} register must be 7 or less",
+                instruction.purple().bold(),
+                "LHS".magenta()
+            ),
         ));
     }
     if arg2.unwrap().get_num() > 511 {
@@ -175,28 +199,41 @@ fn ld_args(
 }
 
 fn st_args(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
 ) -> Result<(), (usize, String)> {
     if !arg1
-        .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
+        .is_some_and(|tok| tok.is_register_indirect() || tok.is_memory_address() || tok.is_srcall())
     {
         return Err((
             line_num,
-            "instruction requires LHS to be a Register pointer or Memory address".to_string(),
+            format!(
+                "{} requires {} to be a register indirect or memory address",
+                instruction.purple().bold(),
+                "LHS".magenta()
+            ),
         ));
     }
     if !arg2.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "instruction requires RHS to be a Register".to_string(),
+            format!(
+                "{} requires {} to be a register",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     if arg2.unwrap().is_regorptr() && arg2.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "instruction Register must be 7 or less".to_string(),
+            format!(
+                "{} {} register must be 7 or less",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     if arg1.unwrap().get_num() > 255 {
@@ -206,6 +243,7 @@ fn st_args(
 }
 
 fn mov_args(
+    instruction: &str,
     arg1: Option<&Token>,
     arg2: Option<&Token>,
     line_num: usize,
@@ -213,34 +251,46 @@ fn mov_args(
     if !arg1.is_some_and(|tok| tok.is_register()) {
         return Err((
             line_num,
-            "instruction requires LHS to be a Register".to_string(),
+            format!(
+                "{} requires {} to be a register",
+                instruction.purple().bold(),
+                "LHS".magenta()
+            ),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 7 {
         return Err((
             line_num,
-            "instruction requires LHS register to be 7 or less".to_string(),
+            format!(
+                "{} {} register must be 7 or less",
+                instruction.purple().bold(),
+                "LHS".magenta()
+            ),
         ));
     }
 
     if !arg2.is_some_and(|tok| {
         tok.is_register()
             || tok.is_literal()
-            || tok.is_register_pointer()
-            || tok.is_memory_address_pointer()
+            || tok.is_register_indirect()
+            || tok.is_memory_address_indirect()
     }) {
-        return Err((line_num, "instruction requires RHS to be a Register, literal, register pointer, or memory address pointer".to_string()));
+        return Err((line_num, format!("{} requires {} to be a register, literal, register indirect, or memory address indirect", instruction.purple().bold(), "RHS".magenta())));
     }
     if arg2.unwrap().is_regorptr() && arg2.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "instruction requires RHS register to be 9 or less".to_string(),
+            format!(
+                "{} {} register must be 9 or less",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     match arg2 {
         Some(tok) => {
             if tok.get_num() > 511 {
-                if !tok.is_memory_address_pointer() {
+                if !tok.is_memory_address_indirect() {
                     return Err((line_num, LITFAIL.to_string()));
                 } else {
                     return Err((line_num, MMAFAIL.to_string()));
@@ -254,11 +304,19 @@ fn mov_args(
     Ok(())
 }
 
-fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
+fn int_args(
+    instruction: &str,
+    arg1: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_literal()) {
         return Err((
             line_num,
-            "instruction requires SRC to be a Literal".to_string(),
+            format!(
+                "{} requires {} to be a Literal",
+                instruction.purple().bold(),
+                "SRC".magenta()
+            ),
         ));
     }
     if arg1.unwrap().get_num() > 2047 || arg1.unwrap().get_num() < -1 {
@@ -267,17 +325,29 @@ fn int_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)
     Ok(())
 }
 
-fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
+fn push_args(
+    instruction: &str,
+    arg1: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1.is_some_and(|tok| tok.is_memory_address() || tok.is_register() || tok.is_literal()) {
         return Err((
             line_num,
-            "instruction requires SRC to be a Register or Literal or Memory address".to_string(),
+            format!(
+                "{} requires {} to be a register or literal or memory address",
+                instruction.purple().bold(),
+                "SRC".magenta()
+            ),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "instruction requires RHS register to be 9 or less".to_string(),
+            format!(
+                "{} {} register must be 9 or less",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     match arg1 {
@@ -291,20 +361,31 @@ fn push_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String
     Ok(())
 }
 
-fn jump_args(arg1: Option<&Token>, line_num: usize) -> Result<(), (usize, String)> {
+fn jump_args(
+    instruction: &str,
+    arg1: Option<&Token>,
+    line_num: usize,
+) -> Result<(), (usize, String)> {
     if !arg1
-        .is_some_and(|tok| tok.is_register_pointer() || tok.is_memory_address() || tok.is_srcall())
+        .is_some_and(|tok| tok.is_register_indirect() || tok.is_memory_address() || tok.is_srcall())
     {
         return Err((
             line_num,
-            "instruction requires DEST to be a Register pointer, Memory address, or SRCall"
-                .to_string(),
+            format!(
+                "{} requires {} to be a register indirect, memory address, or SRCall",
+                instruction.purple().bold(),
+                "DEST".magenta()
+            ),
         ));
     }
     if arg1.unwrap().is_regorptr() && arg1.unwrap().get_num() > 9 {
         return Err((
             line_num,
-            "instruction requires RHS register to be 9 or less".to_string(),
+            format!(
+                "{} {} register must be 9 or less",
+                instruction.purple().bold(),
+                "RHS".magenta()
+            ),
         ));
     }
     match arg1 {

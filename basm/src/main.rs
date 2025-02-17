@@ -198,6 +198,7 @@ fn main() {
                                     println!("{}: {}", "error".underline().bright_red().bold(), e);
                                     error_count += 1;
                                 }
+                                println!();
                             } else {
                                 for encoded in vector {
                                     encoded_instructions.extend(&encoded.to_be_bytes());
