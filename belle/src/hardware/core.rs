@@ -89,28 +89,37 @@ impl CPU {
         #[cfg(feature = "window")]
         let mut can_make_window = true;
         #[cfg(feature = "window")]
-        let window = Window::new(
-            "BELLE display",
-            WIDTH,
-            HEIGHT,
-            WindowOptions {
-                resize: true,
-                scale: minifb::Scale::X1,
-                scale_mode: minifb::ScaleMode::AspectRatioStretch,
-                ..WindowOptions::default()
-            },
-        );
+        let mut window_attempt = None;
         #[cfg(feature = "window")]
-        let window = match window {
-            Ok(w) => Some(w),
-            Err(e) => {
-                if !CONFIG.no_display {
-                    eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+        if !CONFIG.no_display {
+            window_attempt = Some(Window::new(
+                "BELLE display",
+                WIDTH,
+                HEIGHT,
+                WindowOptions {
+                    resize: true,
+                    scale: minifb::Scale::X1,
+                    scale_mode: minifb::ScaleMode::AspectRatioStretch,
+                    ..WindowOptions::default()
+                },
+            ));
+        }
+        #[cfg(feature = "window")]
+        let mut window = None;
+        #[cfg(feature = "window")]
+        if !CONFIG.no_display {
+            window = match window_attempt {
+                Some(Ok(w)) => Some(w),
+                Some(Err(e)) => {
+                    if !CONFIG.no_display {
+                        eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                    }
+                    can_make_window = false;
+                    None
                 }
-                can_make_window = false;
-                None
-            }
-        };
+                None => None,
+            };
+        }
 
         #[cfg(feature = "window")]
         let (tx, rx) = mpsc::sync_channel(1);
