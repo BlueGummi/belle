@@ -144,6 +144,7 @@ impl<'a> Lexer<'a> {
                         }
                     };
                     self.tokens.push(Token::Literal(ascii_value));
+                    return;
                 }
                 _ => {
                     ascii_char.push(next_char);
