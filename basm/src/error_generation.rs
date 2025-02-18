@@ -93,12 +93,7 @@ impl fmt::Display for Error<'_> {
                     let comment_part = &line_content[index..];
                     line_content = format!("{}{}", code_part, comment_part.dimmed());
                 }
-                let spaces = line_content_original
-                    .chars()
-                    .take_while(|&c| c == ' ')
-                    .count();
-                if let Some(place) = location {
-                    let place = *place - 2;
+                if location.is_some() {
                     let left = if self.get_tip().is_empty() {
                         "╰"
                     } else {
@@ -109,47 +104,23 @@ impl fmt::Display for Error<'_> {
                     } else {
                         "│"
                     };
-                    if place < line_content.len() {
-                        let before = &line_content[..place];
-                        let error_char = &line_content[place..place + 1];
-                        let after = &line_content[place + 1..];
-                        writeln!(
-                            f,
-                            "{}{} {}:{}:{}",
-                            left.bright_red(),
-                            "─".bright_red(),
-                            CONFIG.source.green(),
-                            line_number,
-                            place + spaces + 1
-                        )?;
-                        writeln!(
-                            f,
-                            "{}{:^6} {} {}{}{}",
-                            second_line_char.bright_red(),
-                            line_number.to_string().blue(),
-                            "│".blue(),
-                            before,
-                            error_char.bright_red().bold(),
-                            after
-                        )?;
-                    } else {
-                        writeln!(
-                            f,
-                            "{}{} {}:{}",
-                            left.bright_red(),
-                            "─".bright_red(),
-                            CONFIG.source.green(),
-                            line_number
-                        )?;
-                        writeln!(
-                            f,
-                            "{}{:^6} {} {}",
-                            second_line_char.bright_red(),
-                            line_number.to_string().blue(),
-                            "│".blue(),
-                            line_content
-                        )?;
-                    }
+
+                    writeln!(
+                        f,
+                        "{}{} {}:{}",
+                        left.bright_red(),
+                        "─".bright_red(),
+                        CONFIG.source.green(),
+                        line_number
+                    )?;
+                    writeln!(
+                        f,
+                        "{}{:^6} {} {}",
+                        second_line_char.bright_red(),
+                        line_number.to_string().blue(),
+                        "│".blue(),
+                        line_content
+                    )?;
                 }
             }
         }

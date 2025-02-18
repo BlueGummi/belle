@@ -150,11 +150,11 @@ pub fn load_labels(lines: &[String]) -> SymbolTableResult {
     }
     Ok(())
 }
-
 pub fn process_variables(lines: &[String]) -> SymbolTableResult {
     let mut variable_map = VARIABLE_MAP.lock().unwrap();
     let mut variable_map_temp: HashMap<String, usize> = HashMap::new();
     let mut errors: Vec<(usize, Option<usize>, String, String)> = Vec::new();
+
     for (index, line) in lines.iter().enumerate() {
         let trimmed_line = line.trim();
 
@@ -162,15 +162,20 @@ pub fn process_variables(lines: &[String]) -> SymbolTableResult {
             continue;
         }
 
-        let line_before_comment = if trimmed_line.contains(';') {
-            trimmed_line.split(';').next().unwrap_or(trimmed_line)
-        } else {
-            trimmed_line
-        };
+        let mut printed_line = trimmed_line.to_string();
+        let mut in_quotes = false;
+        if let Some(pos) = trimmed_line.find(|c| {
+            if c == '"' {
+                in_quotes = !in_quotes;
+            }
+            c == ';' && !in_quotes
+        }) {
+            printed_line = trimmed_line[..pos].trim().to_string();
+        }
 
-        if let Some(eq_index) = line_before_comment.find('=') {
-            let variable_name = line_before_comment[..eq_index].trim();
-            let variable_value = line_before_comment[eq_index + 1..].trim();
+        if let Some(eq_index) = printed_line.find('=') {
+            let variable_name = printed_line[..eq_index].trim();
+            let variable_value = printed_line[eq_index + 1..].trim();
 
             if let Ok(val) = parse_number::<i32>(variable_value) {
                 if let Some(u) = variable_map_temp.get(variable_name) {
@@ -200,12 +205,14 @@ pub fn process_variables(lines: &[String]) -> SymbolTableResult {
             }
         }
     }
+
     if !errors.is_empty() {
         return Err(errors);
     }
 
     Ok(())
 }
+
 pub fn update_memory_counter() -> Result<(), String> {
     let mut counter = MEMORY_COUNTER
         .lock()

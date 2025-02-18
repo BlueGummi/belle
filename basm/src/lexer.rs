@@ -201,7 +201,7 @@ impl<'a> Lexer<'a> {
         };
 
         while let Some(&next) = self.chars.peek() {
-            if next.is_alphanumeric() {
+            if next.is_alphanumeric() || next == '_' {
                 pointer.push(self.chars.next().unwrap());
             } else {
                 break;
@@ -369,7 +369,7 @@ impl<'a> Lexer<'a> {
         }
 
         while let Some(&next) = self.chars.peek() {
-            if next.is_ascii_digit() || next.is_alphanumeric() || next == '_' {
+            if next.is_alphanumeric() || next == '_' {
                 self.position += 1;
                 number.push(self.chars.next().unwrap());
             } else {
@@ -465,7 +465,7 @@ impl<'a> Lexer<'a> {
         if addr == "[" {
             while let Some(&next) = self.chars.peek() {
                 self.position += 1;
-                if next.is_alphanumeric() {
+                if next.is_alphanumeric() || next == '_' {
                     addr.push(self.chars.next().unwrap());
                 } else if next == ']' {
                     addr.push(self.chars.next().unwrap());
