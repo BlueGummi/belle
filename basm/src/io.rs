@@ -37,9 +37,16 @@ pub fn write_encoded_instructions_to_file(
     file.write_all(encoded_instructions)?;
     Ok(())
 }
-pub fn print_line(line_number: usize, print_help: bool, print_header: bool) -> io::Result<()> {
+pub fn print_line(line_number: usize, print_help: bool, print_header: bool) {
     let path = Path::new(&CONFIG.source);
-    let file = File::open(path)?;
+    let file = File::open(path);
+    let file = match file {
+        Err(e) => {
+            eprintln!("{}: {e}", "error".bright_red());
+            std::process::exit(1);
+        }
+        Ok(v) => v,
+    };
     let reader = io::BufReader::new(file);
 
     for (current_line, line) in reader.lines().enumerate() {
@@ -79,19 +86,14 @@ pub fn print_line(line_number: usize, print_help: bool, print_header: bool) -> i
                         printed_line,
                         comment_part.dimmed()
                     );
-                    return Ok(());
+                    return;
                 }
                 Err(e) => {
                     eprintln!("error reading line: {}", e);
-                    return Err(e);
                 }
             }
         }
     }
 
     eprintln!("line number {} is out of bounds.", line_number);
-    Err(io::Error::new(
-        io::ErrorKind::UnexpectedEof,
-        "line not found",
-    ))
 }

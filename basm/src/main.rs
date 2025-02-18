@@ -49,10 +49,7 @@ fn main() {
         for (l, o, m, tip) in vec {
             println!("{}: {}", "error".underline().bright_red().bold(), m);
             error_count += 1;
-            if let Err(e2) = print_line(l + 1, !tip.is_empty(), true) {
-                println!("{}: {}", "error".underline().bright_red().bold(), e2);
-                error_count += 1;
-            }
+            print_line(l + 1, !tip.is_empty(), true);
             if !tip.is_empty() {
                 println!(
                     "{}\n{}{} {}: {} {}",
@@ -66,10 +63,7 @@ fn main() {
             }
             if let Some(v) = o {
                 print!("         {}{}", "╰".bright_red(), ">".yellow());
-                if let Err(e2) = print_line(v + 1, false, false) {
-                    println!("{}: {}", "error".underline().bright_red().bold(), e2);
-                    error_count += 1;
-                }
+                print_line(v + 1, false, false);
             }
             println!();
         }
@@ -78,10 +72,7 @@ fn main() {
     if let Err((l, e)) = process_start(&lines) {
         println!("{}: {}", "error".underline().bright_red().bold(), e);
         error_count += 1;
-        if let Err(e2) = print_line(l + 1, false, true) {
-            println!("{}: {}", "error".underline().bright_red().bold(), e2);
-            error_count += 1;
-        }
+        print_line(l + 1, false, true);
         println!();
         write_to_file = false;
     }
@@ -90,10 +81,7 @@ fn main() {
         for (l, o, e, tip) in vec {
             println!("{}: {}", "error".underline().bright_red().bold(), e);
             error_count += 1;
-            if let Err(e2) = print_line(l + 1, !tip.is_empty(), true) {
-                println!("{}: {}", "error".underline().bright_red().bold(), e2);
-                error_count += 1;
-            }
+            print_line(l + 1, !tip.is_empty(), true);
             if !tip.is_empty() {
                 println!(
                     "{}\n{}{} {}: {} {}",
@@ -107,10 +95,7 @@ fn main() {
             }
             if let Some(v) = o {
                 print!("         {}{}", "╰".bright_red(), ">".yellow());
-                if let Err(e2) = print_line(v + 1, false, false) {
-                    println!("{}: {}", "error".underline().bright_red().bold(), e2);
-                    error_count += 1;
-                }
+                print_line(v + 1, false, false);
             }
             println!();
         }
@@ -194,10 +179,7 @@ fn main() {
                                     err_msg
                                 );
                                 error_count += 1;
-                                if let Err(e) = print_line(lineee, false, true) {
-                                    println!("{}: {}", "error".underline().bright_red().bold(), e);
-                                    error_count += 1;
-                                }
+                                print_line(lineee, false, true);
                                 println!();
                             } else {
                                 for encoded in vector {
@@ -208,12 +190,13 @@ fn main() {
                         Ok(None) => (),
                         Err((line_num, offending_lines, (err_msg, tip))) => {
                             write_to_file = false;
-                            println!("{}: {}", "error".underline().bright_red().bold(), err_msg);
+                            println!(
+                                "{}: {}",
+                                "error".underline().bright_red().bold(),
+                                err_msg
+                            );
                             error_count += 1;
-                            if let Err(e) = print_line(line_num, !tip.is_empty(), true) {
-                                println!("{}: {}", "error".underline().bright_red().bold(), e);
-                                error_count += 1;
-                            }
+                            print_line(line_num, !tip.is_empty(), true);
                             if !tip.is_empty() {
                                 let left_char = if offending_lines.is_none() {
                                     ""
@@ -237,14 +220,7 @@ fn main() {
                                     } else {
                                         print!("         {}{}", "├".bright_red(), ">".yellow());
                                     }
-                                    if let Err(e) = print_line(*location, false, false) {
-                                        println!(
-                                            "{}: {}",
-                                            "error".underline().bright_red().bold(),
-                                            e
-                                        );
-                                        error_count += 1;
-                                    }
+                                    print_line(*location, false, false);
                                 }
                             }
                             println!();
