@@ -144,7 +144,7 @@ impl fmt::Display for Error<'_> {
                 f,
                 "{}{} {}: {}",
                 "╰".bright_red(),
-                ">".yellow(),
+                "►".yellow(),
                 "help".yellow(),
                 self.get_tip()
             )?;

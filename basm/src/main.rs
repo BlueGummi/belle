@@ -55,14 +55,14 @@ fn main() {
                     "{}\n{}{} {}: {} {}",
                     "│".bright_red(),
                     "╰".bright_red(),
-                    ">".yellow(),
+                    "►".yellow(),
                     "help".yellow(),
                     "╮".bright_red(),
                     tip
                 );
             }
             if let Some(v) = o {
-                print!("         {}{}", "╰".bright_red(), ">".yellow());
+                print!("         {}{}", "╰".bright_red(), "►".yellow());
                 print_line(v + 1, false, false);
             }
             println!();
@@ -87,14 +87,14 @@ fn main() {
                     "{}\n{}{} {}: {} {}",
                     "│".bright_red(),
                     "╰".bright_red(),
-                    ">".yellow(),
+                    "►".yellow(),
                     "help".yellow(),
                     "╮".bright_red(),
                     tip
                 );
             }
             if let Some(v) = o {
-                print!("         {}{}", "╰".bright_red(), ">".yellow());
+                print!("         {}{}", "╰".bright_red(), "►".yellow());
                 print_line(v + 1, false, false);
             }
             println!();
@@ -190,11 +190,7 @@ fn main() {
                         Ok(None) => (),
                         Err((line_num, offending_lines, (err_msg, tip))) => {
                             write_to_file = false;
-                            println!(
-                                "{}: {}",
-                                "error".underline().bright_red().bold(),
-                                err_msg
-                            );
+                            println!("{}: {}", "error".underline().bright_red().bold(), err_msg);
                             error_count += 1;
                             print_line(line_num, !tip.is_empty(), true);
                             if !tip.is_empty() {
@@ -207,7 +203,7 @@ fn main() {
                                     "{}\n{}{} {}:{} {}",
                                     "│".bright_red(),
                                     "╰".bright_red(),
-                                    ">".yellow(),
+                                    "►".yellow(),
                                     "help".yellow(),
                                     left_char.bright_red(),
                                     tip
@@ -216,9 +212,9 @@ fn main() {
                             if let Some(offending_lines) = offending_lines {
                                 for (index, location) in offending_lines.iter().enumerate() {
                                     if index == offending_lines.len() - 1 {
-                                        print!("         {}{}", "╰".bright_red(), ">".yellow());
+                                        print!("         {}{}", "╰".bright_red(), "►".yellow());
                                     } else {
-                                        print!("         {}{}", "├".bright_red(), ">".yellow());
+                                        print!("         {}{}", "├".bright_red(), "►".yellow());
                                     }
                                     print_line(*location, false, false);
                                 }
