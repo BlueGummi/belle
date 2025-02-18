@@ -64,43 +64,42 @@ pub fn process_start(lines: &[String]) -> Result<(), (usize, String)> {
 
     Ok(())
 }
+
 pub fn load_labels(lines: &[String]) -> SymbolTableResult {
     let mut label_counter = *START_LOCATION.lock().unwrap() as usize;
     let mut label_map = LABEL_MAP.lock().unwrap();
     let mut temp_label_map: HashMap<String, (usize, usize)> = HashMap::new();
     let mut errors: Vec<(usize, Option<usize>, String, String)> = Vec::new();
-    for (index, line) in lines.iter().enumerate() {
-        let trimmed_line = line.trim();
 
-        if trimmed_line.is_empty()
-            || trimmed_line.starts_with(';')
-            || trimmed_line.starts_with(".start")
+    for (index, line) in lines.iter().enumerate() {
+        let trimmed_content = line.trim();
+        let mut in_quotes = false;
+        let mut line_before_comment = trimmed_content.to_string();
+
+        if let Some(pos) = trimmed_content.find(|c| {
+            if c == '"' {
+                in_quotes = !in_quotes;
+            }
+            c == ';' && !in_quotes
+        }) {
+            line_before_comment = trimmed_content[..pos].trim().to_string();
+        }
+
+        if line_before_comment.is_empty()
+            || trimmed_content.starts_with(';')
+            || line_before_comment.starts_with(".start")
         {
             continue;
         }
-        let line_before_comment = if trimmed_line.contains(';') {
-            trimmed_line.split(';').next().unwrap_or(trimmed_line)
-        } else {
-            trimmed_line
-        };
-        if line_before_comment.trim().ends_with(':') && !line_before_comment.trim().contains(' ') {
-            let label_name = line_before_comment
-                .trim()
-                .trim_end_matches(':')
-                .trim()
-                .to_string();
+
+        if line_before_comment.ends_with(':') && !line_before_comment.contains(' ') {
+            let label_name = line_before_comment.trim_end_matches(':').trim().to_string();
             if let Some((_, l)) = temp_label_map.get(&label_name) {
                 errors.push((
                     index,
                     Some(*l),
-                    format!(
-                        "duplicate declaration of label \"{}\"",
-                        label_name.trim().magenta(),
-                    ),
-                    format!(
-                        "previous declaration found on line {}",
-                        (l + 1).to_string().magenta()
-                    ),
+                    format!("duplicate declaration of label \"{}\"", label_name),
+                    format!("previous declaration found on line {}", (l + 1)),
                 ));
                 continue;
             }
@@ -108,14 +107,16 @@ pub fn load_labels(lines: &[String]) -> SymbolTableResult {
             label_map.insert(label_name, (index, label_counter));
             continue;
         }
+
         if line_before_comment.starts_with(".asciiz") {
-            if let Some(start) = trimmed_line.find('\"') {
-                if let Some(end) = trimmed_line[start + 1..].find('\"') {
-                    label_counter += trimmed_line[start + 1..start + 1 + end].len();
+            if let Some(start) = trimmed_content.find('"') {
+                if let Some(end) = trimmed_content[start + 1..].find('"') {
+                    label_counter += trimmed_content[start + 1..start + 1 + end].len();
                 }
             }
             continue;
         }
+
         if line_before_comment.starts_with(".word") {
             label_counter += 1;
             continue;
@@ -138,9 +139,8 @@ pub fn load_labels(lines: &[String]) -> SymbolTableResult {
             label_counter += add;
             continue;
         }
-        if !(line_before_comment.trim().contains('=')
-            || line_before_comment.trim().starts_with(".data"))
-        {
+
+        if !(line_before_comment.contains('=') || line_before_comment.starts_with(".data")) {
             label_counter += 1;
         }
     }
@@ -150,6 +150,7 @@ pub fn load_labels(lines: &[String]) -> SymbolTableResult {
     }
     Ok(())
 }
+
 pub fn process_variables(lines: &[String]) -> SymbolTableResult {
     let mut variable_map = VARIABLE_MAP.lock().unwrap();
     let mut variable_map_temp: HashMap<String, usize> = HashMap::new();
