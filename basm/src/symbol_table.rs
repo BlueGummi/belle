@@ -193,6 +193,18 @@ pub fn process_variables(lines: &[String]) -> SymbolTableResult {
                     ));
                     continue;
                 }
+                if variable_name.contains(' ') {
+                    errors.push((
+                        index,
+                        None,
+                        format!(
+                            "variable name \"{}\" cannot contain space",
+                            variable_name.trim().magenta()
+                        ),
+                        String::from(""),
+                    ));
+                    continue;
+                }
                 variable_map_temp.insert(variable_name.to_string(), index);
                 variable_map.insert(variable_name.to_string(), (index, val));
             } else {
