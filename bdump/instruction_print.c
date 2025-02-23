@@ -280,7 +280,7 @@ finish:
                 if (current_addr == jumpsHere->data[i].destination && !has_jump) {
                     if (has_outgoing_jump)
                         PRINTF(" ");
-                    PRINTF("%s◀%s", color, ANSI_RESET);
+                    PRINTF("%s<%s", color, ANSI_RESET);
                     if (likely_label) {
                         PRINTF("%s [ LIKELY LABEL ]%s", POSSIBLE_ANSI_BOLD, ANSI_RESET);
                     }
@@ -296,7 +296,7 @@ finish:
                     }
                     has_jump = true;
                 } else if (current_addr == jumpsHere->data[i].source) {
-                    PRINTF("%s▶%s", color, ANSI_RESET);
+                    PRINTF("%s>%s", color, ANSI_RESET);
 #if defined(_WIN32)
                     PRINTF("%s to 0x%llX%s ", color, jumpsHere->data[i].destination, ANSI_RESET);
 #elif defined(__APPLE__)
