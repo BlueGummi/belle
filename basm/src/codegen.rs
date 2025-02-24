@@ -1,522 +1,379 @@
 use crate::*;
 use colored::*;
-type TempErr = (String, String);
-type CodeGenResult = Result<Option<Vec<i16>>, (usize, Option<Vec<usize>>, TempErr)>;
-pub fn argument_to_binary(
-    arg: Option<&Token>,
-    line_num: usize,
-) -> Result<i16, (usize, Option<Vec<usize>>, TempErr)> {
-    match arg {
-        Some(Token::Register(num)) => {
-            if *num > 9 {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        format!("invalid register number {num}"),
-                        format!("valid registers are {}", "r0-r9".magenta()),
-                    ),
-                ));
-            }
-            Ok(*num)
-        }
-        Some(Token::Literal(literal)) => Ok((1 << 8) | *literal),
-        Some(Token::SRCall(sr)) => {
-            let map = LABEL_MAP.lock().unwrap();
-            if let Some((_, address)) = map.get(sr) {
-                Ok(*address as i16)
-            } else {
-                let similars = find_closest_matches(&map, sr, 2);
-                let mut founds = String::from("");
-                let mut found_lines: Vec<usize> = Vec::new();
-                for (line, element) in similars {
-                    found_lines.push(line + 1);
-                    if !founds.is_empty() {
-                        founds = format!("{founds}, ");
-                    }
-                    founds = format!("{founds}{}:{}", element.green(), line + 1);
-                }
-                founds = if founds.is_empty() {
-                    String::from("")
-                } else {
-                    format!("similar labels exist: {founds}")
-                };
-                Err((
-                    line_num,
-                    Some(found_lines),
-                    (format!("label \"{}\" does not exist", sr.magenta()), founds),
-                ))
-            }
-        }
-        Some(Token::MemAddr(n)) => Ok(*n),
-        Some(Token::Directive(keyword)) => {
-            let label_val: i16 = match keyword.as_str() {
-                "start" => 1,
-                "asciiz" | "word" => 0,
-                _ => {
-                    return Err((
-                        line_num,
-                        None,
-                        ("directive not recognized".to_string(), "".to_string()),
-                    ))
-                }
-            };
-            Ok(label_val)
-        }
-        Some(Token::MemPointer(mem)) => Ok((1 << 7) | mem),
-        Some(Token::RegPointer(reg)) => Ok((1 << 6) | reg),
-        Some(Token::Ident(ident)) => {
-            let map = LABEL_MAP.lock().unwrap();
-            let vmap = VARIABLE_MAP.lock().unwrap();
-            if let Some((_, address)) = map.get(ident) {
-                Ok(*address as i16)
-            } else if let Some((_, value)) = vmap.get(ident) {
-                Ok(*value as i16)
-            } else {
-                let similars = find_closest_matches(&map, ident, 2);
-                let mut founds = String::from("");
-                let mut found_lines: Vec<usize> = Vec::new();
-                for (line, element) in similars {
-                    found_lines.push(line + 1);
-                    if !founds.is_empty() {
-                        founds = format!("{founds}, ");
-                    }
-                    founds = format!("{founds}{}:{}", element.green(), line + 1);
-                }
-                founds = if founds.is_empty() {
-                    String::from("")
-                } else {
-                    format!("similar labels exist: {founds}")
-                };
-                let mut total_founds = founds.clone();
-                let similars = find_closest_matches_i32(&vmap, ident, 2);
-                let mut found_variables = String::from("");
-                for (line, element) in similars {
-                    found_lines.push(line + 1);
-                    if !found_variables.is_empty() {
-                        found_variables = format!("{found_variables}, ");
-                    }
-                    found_variables = format!("{found_variables}{}:{}", element.green(), line + 1);
-                }
-                found_variables = if found_variables.is_empty() {
-                    String::from("")
-                } else {
-                    format!("similar variables exist: {found_variables}")
-                };
-                total_founds = if !founds.is_empty() && !found_variables.is_empty() {
-                    format!("{}, {}", total_founds, founds)
-                } else if founds.is_empty() && !found_variables.is_empty() {
-                    found_variables
-                } else {
-                    total_founds
-                };
+pub const HLT_OP: i16 = 0b0000;
+pub const ADD_OP: i16 = 0b0001;
+pub const BO_OP: i16 = 0b00100;
+pub const BNO_OP: i16 = 0b00101;
+pub const POP_OP: i16 = 0b0011;
+pub const DIV_OP: i16 = 0b0100;
+pub const RET_OP: i16 = 0b0101;
+pub const BL_OP: i16 = 0b01010;
+pub const BG_OP: i16 = 0b01011;
+pub const LD_OP: i16 = 0b0110;
+pub const ST_OP: i16 = 0b0111;
+pub const JMP_OP: i16 = 0b10000;
+pub const BZ_OP: i16 = 0b10010;
+pub const BNZ_OP: i16 = 0b10011;
+pub const CMP_OP: i16 = 0b1010;
+pub const NAND_OP: i16 = 0b1011;
+pub const PUSH_OP: i16 = 0b1100;
+pub const INT_OP: i16 = 0b1101;
+pub const MOV_OP: i16 = 0b1110;
+pub const LEA_OP: i16 = 0b1111;
 
-                return Err((
-                    line_num,
-                    Some(found_lines),
-                    (
-                        format!("label/variable \"{}\" not declared", ident.magenta(),),
-                        total_founds,
-                    ),
-                ));
+const HLT_TYPE: u8 = 0;
+const MOV_TYPE: u8 = 1;
+const B_TYPE: u8 = 2;
+const POP_TYPE: u8 = 3;
+const LD_TYPE: u8 = 4;
+const ST_TYPE: u8 = 5;
+const MOV_TYPE_ONE: u8 = 6;
+type CodeGenError = ParserError;
+use std::ops::Range;
+
+pub fn encode(
+    ins: (&String, &TokenKind, &Range<usize>),
+    fname: &String,
+    next_ins: Option<&(String, TokenKind, Range<usize>)>,
+) -> Result<Vec<i16>, CodeGenError> {
+    let mut encoded_tokens = Vec::new();
+    match &ins.1 {
+        TokenKind::Instruction(ins) => {
+            let (opcode, ins_class) = match ins.name.to_lowercase().as_str() {
+                // all instructions should be valid when this is reached, as it is validated in
+                // validator/validator_ins.rs. therefore, it is fine to use MOV_TYPE for PUSH and INT
+                // because the argument types and counts are validated.
+                //
+                //
+                // But, I do need to check labels as they are not detected in previous instances
+                //
+                // I should also allow it to reference CONSTs too, and see if it is talking about a label
+                // or a CONST (check labels first)
+                //
+                // ^^^^ I need to validate that there are no duplicate names across symbol tabels for
+                // labels and constants
+                "hlt" => (HLT_OP, HLT_TYPE),
+                "add" => (ADD_OP, MOV_TYPE),
+                "bo" => (BO_OP, B_TYPE),
+                "bno" => (BNO_OP, B_TYPE),
+                "pop" => (POP_OP, POP_TYPE),
+                "div" => (DIV_OP, MOV_TYPE),
+                "ret" => (RET_OP, HLT_TYPE),
+                "bl" => (BL_OP, B_TYPE),
+                "bg" => (BG_OP, B_TYPE),
+                "ld" => (LD_OP, LD_TYPE),
+                "st" => (ST_OP, ST_TYPE),
+                "jmp" => (JMP_OP, B_TYPE),
+                "bz" => (BZ_OP, B_TYPE),
+                "bnz" => (BNZ_OP, B_TYPE),
+                "cmp" => (CMP_OP, MOV_TYPE),
+                "nand" => (NAND_OP, MOV_TYPE),
+                "push" => (PUSH_OP, MOV_TYPE_ONE),
+                "int" => (INT_OP, MOV_TYPE_ONE),
+                "mov" => (MOV_OP, MOV_TYPE),
+                "lea" => (LEA_OP, LD_TYPE),
+                _ => gen_ice!(
+                    "INSTRUCTION MATCH FAILED: {} WAS NOT RECOGNIZED.",
+                    ins.name.to_uppercase().magenta()
+                ),
+            };
+            match encode_instruction(fname, &opcode, &ins_class, &ins.operands) {
+                Ok(v) => encoded_tokens.push(v),
+                Err(e) => return Err(e),
             }
         }
-        _ => Ok(0),
+        TokenKind::Directive(name) => match name.to_lowercase().as_str() {
+            "asciiz" => {
+                if let Some((_, TokenKind::StringLit(_), _)) = next_ins {
+                    for letter in next_ins.unwrap().1.get_str().chars() {
+                        encoded_tokens.push(letter as i16);
+                    }
+                } else {
+                    return Err(CodeGenError {
+                        file: fname.to_string(),
+                        help: None,
+                        input: read_file(fname),
+                        message: String::from(
+                            "ASCIIZ directive must be succeeded by string literal",
+                        ),
+                        start_pos: ins.2.start,
+                        last_pos: ins.2.end,
+                    });
+                }
+            }
+            "word" => {
+                encoded_tokens.push(next_ins.unwrap().1.get_value() as i16);
+            }
+            "start" => (),
+            _ => gen_ice!("DIRECTIVE MATCH FAILED: {name} NOT RECOGNIZED"),
+        },
+        _ => {}
     }
+
+    Ok(encoded_tokens)
 }
 
-pub fn encode_instruction(
-    ins: &Token,
-    arg1: Option<&Token>,
-    arg2: Option<&Token>,
-    line_num: usize,
-) -> CodeGenResult {
-    let mut ins_type = "default";
-    let instruction_bin = match ins {
-        Token::Ident(ref instruction) => match instruction.to_uppercase().as_str() {
-            "HLT" => Ok(HLT_OP), // 0
-            "ADD" => Ok(ADD_OP), // 1
-            instruction
-                if instruction.to_uppercase().starts_with('J')
-                    || instruction.to_uppercase().starts_with('B') =>
-            {
-                ins_type = "jump";
-                if let Some(&Token::SRCall(_)) = arg1.or(arg2) {
-                    ins_type = "call";
-                } else if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
-                    ins_type = "jwr";
-                }
-                match instruction.to_uppercase().as_str() {
-                    "BO" => Ok(BO_OP),
-                    "BNO" => Ok(BNO_OP),
-                    "JMP" | "J" => Ok(JMP_OP),
-                    "BZ" | "BE" | "BEQ" => Ok(BZ_OP),
-                    "BNZ" | "BNE" => Ok(BNZ_OP),
-                    "BL" => Ok(BL_OP),
-                    "BG" => Ok(BG_OP),
-                    _ => {
-                        let instructions = [
-                            "BO", "BNO", "JMP", "J", "BZ", "BE", "BEQ", "BNZ", "BNE", "BL", "BG",
-                        ];
-                        let mut matches: Vec<(String, usize)> = instructions
-                            .iter()
-                            .map(|instructions| {
-                                (
-                                    instructions.to_string(),
-                                    levenshtein_distance(
-                                        instruction.to_uppercase().as_str(),
-                                        instructions,
-                                    ),
-                                )
-                            })
-                            .filter(|(_, dist)| *dist <= 1)
-                            .collect();
-                        matches.sort_by_key(|&(_, dist)| dist);
-
-                        let closest_matches: Vec<String> =
-                            matches.into_iter().map(|(word, _)| word).collect();
-                        let result = if closest_matches.is_empty() {
-                            "".to_string()
+use crate::InstructionArgument::*;
+fn encode_instruction(
+    fname: &String,
+    opcode: &i16,
+    class: &u8,
+    args: &[(InstructionArgument, std::ops::Range<usize>)],
+) -> Result<i16, CodeGenError> {
+    let lhs = args.first();
+    let rhs = args.get(1);
+    let mut encoded;
+    let l_map = LABEL_MAP.lock().unwrap();
+    match *class {
+        HLT_TYPE => {
+            encoded = opcode << 12;
+        }
+        MOV_TYPE => {
+            encoded = opcode << 12;
+            if let Some((Reg(r), _)) = lhs {
+                encoded |= (*r as i16) << 9;
+            } else {
+                gen_ice!("CANNOT RETRIEVE REGISTER OPERAND FROM MOV TYPE INS");
+            }
+            if let Some((arg, f)) = rhs {
+                match arg {
+                    Reg(r) => encoded |= *r as i16,
+                    IReg(r) => encoded = encoded | (1 << 6) | (*r as i16),
+                    Mem(m) => {
+                        if let Some(v) = m.data.first() {
+                            encoded = encoded | (1 << 7) | (v.0.get_value() as i16);
                         } else {
-                            format!("maybe you meant: {}", closest_matches.join(", ").green())
-                        };
-
-                        return Err((
-                            line_num,
-                            None,
-                            (
-                                format!(
-                                    "invalid jump/branch instruction \"{}\"",
-                                    instruction.magenta()
+                            return Err(CodeGenError {
+                                file: fname.to_string(),
+                                help: None,
+                                input: read_file(fname),
+                                message: String::from(
+                                    "MOV type instruction appears to have empty memory",
                                 ),
-                                result,
-                            ),
-                        ));
+                                start_pos: f.start,
+                                last_pos: f.end,
+                            });
+                        }
+                    }
+                    Imm(_) => encoded = encoded | (1 << 8) | arg.get_imm(),
+                    _ => gen_ice!("MOV TYPE INSTRUCTION HAS EMPTY/INVALID RHS"),
+                }
+            }
+        }
+        B_TYPE => {
+            encoded = opcode << 11;
+            match &lhs.unwrap().0 {
+                // safe to unwrap - checked earlier
+                Ident(i) => {
+                    if let Some((name, span, value)) = l_map.get(i) {
+                        if *value >= 1024 {
+                            return Err(CodeGenError {
+                                file: name.to_string(),
+                                help: None,
+                                input: read_file(name),
+                                message: format!(
+                                    "the address of label \"{i}\" cannot fit within 10 bits"
+                                ),
+                                start_pos: span.start,
+                                last_pos: span.end,
+                            });
+                        } else {
+                            encoded |= *value as i16;
+                        }
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: format!("cannot find label \"{i}\""),
+                            start_pos: args.get(1).unwrap().1.start,
+                            last_pos: args.get(1).unwrap().1.end,
+                        });
                     }
                 }
-            }
-            "POP" => {
-                ins_type = "one_arg";
-                if let Some(&Token::MemAddr(_)) = arg1 {
-                    ins_type = "popmem";
+                Mem(m) => {
+                    if let Some(v) = m.data.first() {
+                        encoded |= v.0.get_value() as i16; // value limits are checked earlier
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: String::from("Branch instruction memory appears empty"),
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
+                        });
+                    }
                 }
-                Ok(POP_OP) // 3
-            }
-            "DIV" => Ok(DIV_OP),        // 4
-            "RET" | "ET" => Ok(RET_OP), // 5
-            "LD" => {
-                ins_type = "ld";
-                Ok(LD_OP) // 6
-            }
-            "ST" => {
-                if let Some(&Token::RegPointer(_)) = arg1.or(arg2) {
-                    ins_type = "sti";
-                } else {
-                    ins_type = "st";
+                IReg(r) => {
+                    encoded = encoded | (1 << 10) | (*r as i16);
                 }
-                Ok(ST_OP) // 7
+                _ => gen_ice!("BRANCH INSTRUCTION HAS INVALID LHS"),
             }
-            "CMP" => Ok(CMP_OP),   // 10
-            "NAND" => Ok(NAND_OP), // 11
-            "PUSH" => {
-                ins_type = "one_arg";
-                Ok(PUSH_OP) // 12
-            }
-            "INT" => {
-                ins_type = "one_arg";
-                Ok(INT_OP) // 13
-            }
-            "LEA" => {
-                ins_type = "ld";
-                Ok(LEA_OP)
-            }
-            "MOV" => Ok(MOV_OP), // 14
-            _ => {
-                let instructions = [
-                    "ADD", "HLT", "BO", "POP", "DIV", "RET", "LD", "ST", "JMP", "BZ", "PUSH",
-                    "CMP", "NAND", "INT", "MOV", "LEA", "BE", "BNE", "BNZ", "BNO", "BG", "BL",
-                ];
-                let mut matches: Vec<(String, usize)> = instructions
-                    .iter()
-                    .map(|instructions| {
-                        (
-                            instructions.to_string(),
-                            levenshtein_distance(instruction.to_uppercase().as_str(), instructions),
-                        )
-                    })
-                    .filter(|(_, dist)| *dist <= 2)
-                    .collect();
-                matches.sort_by_key(|&(_, dist)| dist);
+        }
+        POP_TYPE => {
+            encoded = opcode << 12;
+            match &lhs.unwrap().0 {
+                Ident(i) => {
+                    if let Some((name, span, value)) = l_map.get(i) {
+                        if *value >= 2048 {
+                            return Err(CodeGenError {
+                                file: name.to_string(),
+                                help: None,
+                                input: read_file(name),
+                                message: format!(
+                                    "the address of label \"{i}\" cannot fit within 11 bits"
+                                ),
+                                start_pos: span.start,
+                                last_pos: span.end,
+                            });
+                        } else {
+                            encoded = encoded | (1 << 11) | (*value as i16);
+                        }
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: format!("cannot find label \"{i}\""),
+                            start_pos: args.get(1).unwrap().1.start,
+                            last_pos: args.get(1).unwrap().1.end,
+                        });
+                    }
+                }
 
-                let closest_matches: Vec<String> =
-                    matches.into_iter().map(|(word, _)| word).collect();
-                let result = if closest_matches.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("maybe you meant: {}", closest_matches.join(", ").green())
-                };
+                Mem(m) => {
+                    if let Some(v) = m.data.first() {
+                        encoded = encoded | (1 << 11) | v.0.get_value() as i16;
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: String::from("POP instruction memory appears empty"),
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
+                        });
+                    }
+                }
 
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        format!("instruction \"{}\" not recognized", instruction.magenta(),),
-                        result,
-                    ),
-                ));
+                Reg(r) => encoded |= *r as i16,
+                _ => {
+                    gen_ice!("POP INSTRUCTION HAS INVALID LHS - THIS SHOULD'VE BEEN CAUGHT EARLIER")
+                }
             }
-        },
-        Token::Directive(s) => {
-            match s.as_str() {
-                "asciiz" => ins_type = "ascii",
-                "word" => ins_type = "word",
-                "data" => ins_type = "data",
-                "dataword" => ins_type = "dataword",
-                "pad" => ins_type = "pad",
-                _ => ins_type = "directive",
-            }
-
-            Ok(HLT_OP)
         }
-        _ => {
-            let inst = match ins {
-                Token::EqualSign => "equals".to_string(),
-                Token::Ident(_) => "identifier".to_string(),
-                Token::Register(_) => "register".to_string(),
-                Token::Comma => "comma".to_string(),
-                Token::Literal(_) => "literal".to_string(),
-                Token::NewLine => "newline".to_string(),
-                Token::Eol => "eol".to_string(),
-                Token::SRCall(_) => "label reference".to_string(),
-                Token::MemAddr(_) => "memory address".to_string(),
-                Token::Directive(_) => "directive".to_string(),
-                Token::RegPointer(_) => "register indirect".to_string(),
-                Token::MemPointer(_) => "memory indirect".to_string(),
-                Token::Asciiz(_) => "ascii string".to_string(),
-            };
-            return Err((
-                line_num,
-                None,
-                (
-                    format!("expected ident, found {}", inst.bright_green()),
-                    "please provide a directive or identifier".to_string(),
-                ),
-            ));
-        }
-    }?;
-
-    match ins_type.trim().to_lowercase().as_str() {
-        "one_arg" => {
-            let arg_bin = argument_to_binary(arg1, line_num)?;
-            Ok(Some(vec![(instruction_bin << 12) | arg_bin]))
-        }
-        "popmem" => {
-            let arg_bin = arg1
-                .ok_or_else(|| {
-                    (
-                        line_num,
-                        None,
-                        (
-                            "missing argument for POP".to_string(),
-                            "please provide a memory address or register argument".to_string(),
-                        ),
-                    )
-                })?
-                .get_num();
-            Ok(Some(vec![instruction_bin << 12 | 1 << 11 | arg_bin]))
-        }
-        "st" => {
-            let arg1_bin = argument_to_binary(arg1, line_num)?;
-            let arg2_bin = argument_to_binary(arg2, line_num)?;
-            Ok(Some(vec![
-                (instruction_bin << 12) | (arg1_bin << 3) | arg2_bin,
-            ]))
-        }
-        "sti" => {
-            let raw = arg1
-                .ok_or_else(|| {
-                    (
-                        line_num,
-                        None,
-                        (
-                            "missing argument for store indirect".to_string(),
-                            "provide a memory address LHS and register indirect RHS".to_string(),
-                        ),
-                    )
-                })?
-                .get_raw();
-            let parsed_int = raw.trim().parse::<i16>().map_err(|_| {
-                (
-                    line_num,
-                    None,
-                    (
-                        "failed to parse integer".to_string(),
-                        "please provide a proper integer".to_string(),
-                    ),
-                )
-            })?;
-            Ok(Some(vec![
-                (instruction_bin << 12)
-                    | (1 << 11)
-                    | (argument_to_binary(Some(&Token::Register(parsed_int)), line_num)? << 7)
-                    | argument_to_binary(arg2, line_num)?,
-            ]))
-        }
-        "directive" => {
-            let arg_bin = argument_to_binary(Some(ins), line_num)?;
-            if arg_bin != 1 {
-                Ok(Some(vec![
-                    (instruction_bin << 12) | (arg_bin << 9) | argument_to_binary(arg1, line_num)?,
-                ]))
+        LD_TYPE => {
+            encoded = opcode << 12;
+            if let Some((Reg(r), _)) = lhs {
+                encoded |= (*r as i16) << 9;
             } else {
-                Ok(None)
+                gen_ice!("LD INSTRUCTION LHS DOES NOT APPEAR TO BE REGISTER");
+            }
+            match &rhs.unwrap().0 {
+                Ident(i) => {
+                    if let Some((name, span, value)) = l_map.get(i) {
+                        if *value >= 512 {
+                            return Err(CodeGenError {
+                                file: name.to_string(),
+                                help: None,
+                                input: read_file(name),
+                                message: format!(
+                                    "the address of label \"{i}\" cannot fit within 9 bits"
+                                ),
+                                start_pos: span.start,
+                                last_pos: span.end,
+                            });
+                        } else {
+                            encoded |= *value as i16;
+                        }
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: format!("cannot find label \"{i}\""),
+                            start_pos: args.get(1).unwrap().1.start,
+                            last_pos: args.get(1).unwrap().1.end,
+                        });
+                    }
+                }
+
+                Mem(m) => {
+                    if let Some(v) = m.data.first() {
+                        encoded |= v.0.get_value() as i16;
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: String::from("LD/LEA instruction memory appears empty"),
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
+                        });
+                    }
+                }
+                _ => gen_ice!(
+                    "LEA/LD INSTRUCTION HAS INVALID RHS - THIS SHOULD'VE BEEN CAUGHT EARLIER"
+                ),
             }
         }
-        "default" => {
-            let arg1_bin = argument_to_binary(arg1, line_num)?;
-            let arg2_bin = argument_to_binary(arg2, line_num)?;
-            Ok(Some(vec![
-                (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
-            ]))
-        }
-        "call" => {
-            let address = argument_to_binary(arg1, line_num)?;
-            if address > 1023 {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        "label memory address too large on instruction on line".to_string(),
-                        "".to_string(),
-                    ),
-                ));
+        MOV_TYPE_ONE => {
+            encoded = opcode << 12;
+            match &lhs.unwrap().0 {
+                Imm(_) => encoded = encoded | (1 << 8) | lhs.unwrap().0.get_imm(),
+                Reg(r) => encoded = encoded | *r as i16,
+                _ => gen_ice!("MOV TYPE ONE DID NOT HAVE ARG"),
             }
-            Ok(Some(vec![(instruction_bin << 11) | address]))
         }
-        "jwr" => {
-            let raw_str = arg1
-                .ok_or_else(|| {
-                    (
-                        line_num,
-                        None,
-                        (
-                            "missing argument for indirect branch/jump".to_string(),
-                            "please provide a register indirect argument".to_string(),
-                        ),
-                    )
-                })?
-                .get_raw();
-            let parsed_int = raw_str.trim().parse::<i16>().map_err(|_| {
-                (
-                    line_num,
-                    None,
-                    (
-                        "failed to parse integer for indirect jump".to_string(),
-                        "please provide a register indirect argument".to_string(),
-                    ),
-                )
-            })?;
-            Ok(Some(vec![
-                (instruction_bin << 11)
-                    | 1 << 10
-                    | argument_to_binary(Some(&Token::Register(parsed_int)), line_num)?,
-            ]))
-        }
-        "ascii" => {
-            if arg1.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        "asciiz argument is empty".to_string(),
-                        "please provide an ASCII string argument".to_string(),
-                    ),
-                ));
+        ST_TYPE => {
+            encoded = opcode << 12;
+            match &lhs.unwrap().0 {
+                Ident(i) => {
+                    if let Some((name, span, value)) = l_map.get(i) {
+                        if *value >= 256 {
+                            return Err(CodeGenError {
+                                file: name.to_string(),
+                                help: None,
+                                input: read_file(name),
+                                message: format!(
+                                    "the address of label \"{i}\" cannot fit within 8 bits"
+                                ),
+                                start_pos: span.start,
+                                last_pos: span.end,
+                            });
+                        } else {
+                            encoded |= (*value as i16) << 3;
+                        }
+                    } else {
+                        return Err(CodeGenError {
+                            file: fname.to_string(),
+                            help: None,
+                            input: read_file(fname),
+                            message: format!("cannot find label \"{i}\""),
+                            start_pos: args.get(1).unwrap().1.start,
+                            last_pos: args.get(1).unwrap().1.end,
+                        });
+                    }
+                }
+
+                Mem(m) => {
+                    encoded |= (m.data.first().unwrap().0.get_value() as i16) << 3;
+                }
+
+                IReg(r) => {
+                    encoded = encoded | (1 << 11) | ((*r as i16) << 7);
+                }
+                _ => {
+                    gen_ice!("ST INSTRUCTION HAS INVALID LHS - THIS SHOULD'VE BEEN CAUGHT EARLIER")
+                }
             }
-            let mut collected: Vec<i16> = Vec::new();
-            for character in arg1.unwrap().get_raw().chars() {
-                collected.push(character as i16);
+            match &rhs.unwrap().0 {
+                Reg(r) => encoded = encoded | (*r as i16),
+                _ => panic!(),
             }
-            Ok(Some(collected))
         }
-        "word" => {
-            if arg1.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        "word argument is empty".to_string(),
-                        "please provide a 16-bit argument".to_string(),
-                    ),
-                ));
-            }
-            Ok(Some(vec![arg1.unwrap().get_num()]))
-        }
-        "ld" => {
-            if arg1.is_none() || arg2.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        "LEA/LD argument is empty".to_string(),
-                        "please provide a register LHS and address RHS".to_string(),
-                    ),
-                ));
-            }
-            let arg2_bin = argument_to_binary(arg2, line_num)?;
-            let arg1_bin = argument_to_binary(arg1, line_num)?;
-            Ok(Some(vec![
-                (instruction_bin << 12) | (arg1_bin << 9) | arg2_bin,
-            ]))
-        }
-        "jump" => {
-            let arg_bin = argument_to_binary(arg1, line_num)?;
-            Ok(Some(vec![(instruction_bin << 11) | arg_bin]))
-        }
-        "data" => {
-            if arg1.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        ".data argument is empty".to_string(),
-                        "please provide an ASCII string argument".to_string(),
-                    ),
-                ));
-            }
-            let mut collected: Vec<i16> = Vec::new();
-            for character in arg1.unwrap().get_raw().chars() {
-                collected.push((1 << 8) | (character as i16));
-            }
-            Ok(Some(collected))
-        }
-        "pad" => {
-            if arg1.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        ".pad argument is empty".to_string(),
-                        "please provide an argument".to_string(),
-                    ),
-                ));
-            }
-            let collected: Vec<i16> = vec![0; arg1.unwrap().get_num() as usize];
-            Ok(Some(collected))
-        }
-        "dataword" => {
-            if arg1.is_none() {
-                return Err((
-                    line_num,
-                    None,
-                    (
-                        "dataword argument is empty".to_string(),
-                        "please provide a 16-bit argument".to_string(),
-                    ),
-                ));
-            }
-            Ok(Some(vec![(1 << 8) | arg1.unwrap().get_num()]))
-        }
-        _ => unsafe { std::hint::unreachable_unchecked() },
+        _ => gen_ice!("INVALID INSTRUCTION TYPE IN CODEGEN"),
     }
+    Ok(encoded)
 }

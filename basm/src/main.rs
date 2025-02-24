@@ -1,280 +1,103 @@
-/*
- * Copyright (c) 2024 BlueGummi
- * All rights reserved.
- *
- * This code is licensed under the BSD 3-Clause License.
- */
 use basm::*;
-use colored::Colorize;
-use std::collections::HashSet;
-use std::fs;
+use colored::*;
 use std::fs::File;
-use std::path::Path;
+use std::io::{self, Write};
+use std::ops::Range;
+
 fn main() {
-    let input: &String = &CONFIG.source;
-    let file = Path::new(input);
+    let input_string = read_file(&CONFIG.source);
+
+    let file = &CONFIG.source;
     let mut error_count = 0;
-    if input.is_empty() {
-        eprintln!("{}", Error::LineLessError("no input files"));
-        std::process::exit(1);
+
+    if CONFIG.verbose {
+        print_msg!("RAW INPUT");
+        println!("{input_string}");
     }
 
-    if File::open(file).is_err() {
-        eprintln!(
-            "{}",
-            Error::LineLessError(format!("file {} does not exist", input).as_str())
-        );
-        std::process::exit(1);
-    }
-    if let Ok(metadata) = fs::metadata(input) {
-        if metadata.is_dir() {
-            let error_message = format!("{} is a directory", input);
-            eprintln!("{}", Error::LineLessError(&error_message));
-            std::process::exit(1);
-        }
-    }
-
-    let lines = match process_includes(input) {
-        Ok(v) => v,
-        Err(_) => std::process::exit(1),
+    let mut parser = match create_parser(file, &input_string, &mut error_count) {
+        Some(parser) => parser,
+        None => std::process::exit(1),
     };
+    print_errc!(error_count);
 
-    let lines: Vec<String> = lines.iter().map(|line| line.trim().to_string()).collect();
+    let mut toks = match parse_tokens(&mut parser, &input_string, &mut error_count) {
+        Some(tokens) => tokens,
+        None => std::process::exit(1),
+    };
+    print_errc!(error_count);
 
-    let mut encoded_instructions = Vec::new();
-    let mut line_count = 1;
-    let mut write_to_file: bool = true;
-    if let Err(vec) = process_variables(&lines) {
-        // this will do a chain
-        for (l, o, m, tip) in vec {
-            println!("{}: {}", "error".underline().bright_red().bold(), m);
-            error_count += 1;
-            print_line(l + 1, !tip.is_empty(), true);
-            if !tip.is_empty() {
-                println!(
-                    "{}\n{}{} {}: {} {}",
-                    "│".bright_red(),
-                    "╰".bright_red(),
-                    "►".yellow(),
-                    "help".yellow(),
-                    "╮".bright_red(),
-                    tip
-                );
-            }
-            if let Some(v) = o {
-                print!("         {}{}", "╰".bright_red(), "►".yellow());
-                print_line(v + 1, false, false);
-            }
-            println!();
+    process_includes(&mut toks, &mut error_count);
+
+    process_macros(&mut toks, &mut error_count);
+
+    process_start(&mut toks, &mut error_count);
+
+    if CONFIG.verbose {
+        print_msg!("COMPLETE TOKENS");
+        for (_, f, _) in &toks {
+            println!("{f}");
         }
-        write_to_file = false;
     }
-    if let Err((l, e)) = process_start(&lines) {
-        println!("{}: {}", "error".underline().bright_red().bold(), e);
-        error_count += 1;
-        print_line(l + 1, false, true);
-        println!();
-        write_to_file = false;
-    }
-    if let Err(vec) = load_labels(&lines) {
-        // this also chains
-        for (l, o, e, tip) in vec {
-            println!("{}: {}", "error".underline().bright_red().bold(), e);
-            error_count += 1;
-            print_line(l + 1, !tip.is_empty(), true);
-            if !tip.is_empty() {
-                println!(
-                    "{}\n{}{} {}: {} {}",
-                    "│".bright_red(),
-                    "╰".bright_red(),
-                    ">".yellow(),
-                    "help".yellow(),
-                    "╮".bright_red(),
-                    tip
-                );
-            }
-            if let Some(v) = o {
-                print!("         {}{}", "╰".bright_red(), ">".yellow());
-                print_line(v + 1, false, false);
-            }
-            println!();
-        }
-        write_to_file = false;
-    }
-
-    let label_lock = LABEL_MAP.lock().unwrap();
-    let variable_lock = VARIABLE_MAP.lock().unwrap();
-
-    let label_keys: HashSet<_> = label_lock.keys().collect();
-    let variable_keys: HashSet<_> = variable_lock.keys().collect();
-    if let Some(key) = label_keys.intersection(&variable_keys).next() {
-        eprintln!(
-            "variable and label \"{}\" cannot have the same name.",
-            key.to_string().magenta()
-        );
-        std::process::exit(1);
-    }
-    std::mem::drop(label_lock);
-    std::mem::drop(variable_lock);
-
-    let mut hlt_seen = false;
-    for line in lines.into_iter() {
-        let mut lexer = Lexer::new(&line, line_count);
-        let line_before_comment = if line.trim().contains(';') {
-            line.trim().split(';').next().unwrap_or(&line)
-        } else {
-            line.trim()
-        };
-        if line_before_comment.contains('=') {
-            lexer.line_number += 1;
-            line_count += 1;
-            continue;
-        }
-        match lexer.lex() {
-            Ok(tokens) => {
-                if CONFIG.verbose {
-                    println!("\n{}: {line}", "raw line".green());
-                    for token in tokens {
-                        println!("{}: {token}", "token".cyan());
-                    }
-                }
-                if tokens.is_empty() {
-                    line_count += 1;
-                    continue;
-                }
-
-                let instruction = tokens.first();
-                let operand1 = tokens.get(1);
-                let operand2 = {
-                    if let Some(Token::Comma) = tokens.get(2) {
-                        tokens.get(3)
-                    } else {
-                        tokens.get(2)
-                    }
-                };
-
-                for token in tokens {
-                    if let Token::Ident(_) = token {
-                        if token.get_raw().to_lowercase() == "hlt" {
-                            hlt_seen = true;
-                        }
-                    }
-                }
-                if tokens.contains(&Token::EqualSign) {
-                    continue;
-                }
-                if let Some(ins) = instruction {
-                    let encoded_instruction =
-                        encode_instruction(ins, operand1, operand2, line_count);
-
-                    match encoded_instruction {
-                        Ok(Some(vector)) => {
-                            if let Err((lineee, err_msg)) =
-                                verify(ins, operand1, operand2, line_count)
-                            {
-                                write_to_file = false;
-                                println!(
-                                    "{}: {}",
-                                    "error".underline().bright_red().bold(),
-                                    err_msg
-                                );
-                                error_count += 1;
-                                print_line(lineee, false, true);
-                                println!();
-                            } else {
-                                for encoded in vector {
-                                    encoded_instructions.extend(&encoded.to_be_bytes());
-                                }
-                            }
-                        }
-                        Ok(None) => (),
-                        Err((line_num, offending_lines, (err_msg, tip))) => {
-                            write_to_file = false;
-                            println!("{}: {}", "error".underline().bright_red().bold(), err_msg);
-                            error_count += 1;
-                            print_line(line_num, !tip.is_empty(), true);
-                            if !tip.is_empty() {
-                                let left_char = if offending_lines.is_none() {
-                                    ""
-                                } else {
-                                    " ╮"
-                                };
-                                println!(
-                                    "{}\n{}{} {}:{} {}",
-                                    "│".bright_red(),
-                                    "╰".bright_red(),
-                                    "►".yellow(),
-                                    "help".yellow(),
-                                    left_char.bright_red(),
-                                    tip
-                                );
-                            }
-                            if let Some(offending_lines) = offending_lines {
-                                for (index, location) in offending_lines.iter().enumerate() {
-                                    if index == offending_lines.len() - 1 {
-                                        print!("         {}{}", "╰".bright_red(), "►".yellow());
-                                    } else {
-                                        print!("         {}{}", "├".bright_red(), "►".yellow());
-                                    }
-                                    print_line(*location, false, false);
-                                }
-                            }
-                            println!();
-                        }
-                    }
-                }
-            }
-            Err(err) => {
-                for error in err {
-                    println!("{error}");
-                    error_count += 1;
-                }
-                write_to_file = false;
+    print_errc!(error_count);
+    let l_map = LABEL_MAP.lock().unwrap();
+    std::mem::drop(l_map);
+    print_errc!(error_count);
+    let toks: Vec<(String, TokenKind, Range<usize>)> = toks
+        .clone()
+        .into_iter()
+        .filter(|(_, x, _)| !matches!(x, TokenKind::Newline))
+        .collect();
+    // Code should be valid when this point is reached
+    // we can insert panics (maybe?) to reduce code
+    let mut binary = Vec::new();
+    let mut ind = 0;
+    #[allow(clippy::explicit_counter_loop)]
+    for (fname, tok, span) in &toks {
+        // we should only have instructions at this point
+        match encode((fname, tok, span), fname, toks.get(ind + 1)) {
+            Ok(value) => binary.extend(value),
+            Err(e) => {
+                println!("{e}");
+                error_count += 1;
+                print_errc!(error_count);
             }
         }
-        line_count += 1;
+        ind += 1;
     }
-
-    if !hlt_seen && error_count == 0 {
-        println!(
-            "{}: {} {}",
-            "warning".yellow(),
-            "no HLT instruction present in".bold(),
-            CONFIG.source.green()
-        );
-    }
-
-    print_label_map();
-
+    print_errc!(error_count);
     match &CONFIG.binary {
-        Some(output_file) if write_to_file => {
+        Some(path) => {
+            let mut bytes: Vec<u8> = Vec::new();
+            for value in &binary {
+                bytes.extend_from_slice(&value.to_be_bytes());
+            }
+
             let start_bin = *START_LOCATION.lock().unwrap();
-            encoded_instructions.insert(0, (start_bin & 0xff) as u8);
-            encoded_instructions.insert(0, ((start_bin & 0xff00) >> 8) as u8);
-            encoded_instructions.insert(0, 0x02);
-            encoded_instructions.insert(0, 0x01);
-            if let Err(e) = write_encoded_instructions_to_file(output_file, &encoded_instructions) {
-                println!("{}: {}", "error".underline().bright_red().bold(), e);
+            bytes.insert(0, (start_bin & 0xff) as u8);
+            bytes.insert(0, ((start_bin & 0xff00) >> 8) as u8);
+            bytes.insert(0, 0x02);
+            bytes.insert(0, 0x01);
+            match write_bytes_to_file(path, &bytes) {
+                Ok(()) => (),
+                Err(e) => {
+                    eprintln!("{}: {e}", "error writing to output".bright_red());
+                    error_count += 1;
+                    print_errc!(error_count);
+                }
             }
         }
         _ => {
-            if error_count > 0 {
-                eprintln!("{}", "compilation unsuccessful".bold());
-                if error_count != 1 {
-                    eprintln!(
-                        "{} {}.",
-                        error_count.to_string().bold(),
-                        "errors generated".bright_red()
-                    );
-                } else {
-                    eprintln!(
-                        "{} {}.",
-                        error_count.to_string().bold(),
-                        "error generated".bright_red()
-                    );
-                }
-            }
-            std::process::exit(1);
+            gen_ice!("BINARY APPEARS EMPTY - SHOULD BE SET TO `a.out` BY DEFAULT");
         }
     }
+}
+
+pub fn write_bytes_to_file(filename: &str, encoded_instructions: &[u8]) -> io::Result<()> {
+    if CONFIG.verbose {
+        println!("{}", "wrote to file.".green());
+    }
+    let mut file = File::create(filename)?;
+    file.write_all(encoded_instructions)?;
+    Ok(())
 }

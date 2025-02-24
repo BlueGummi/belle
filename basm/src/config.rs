@@ -6,7 +6,7 @@ pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
 /// Command line arguments
 #[derive(Parser, Debug)]
 #[command(name = "basm")]
-#[command(version = "0.2.0")]
+#[command(version = "0.5.0")]
 #[command(author = "gummi")]
 #[command(about = "The assembler for BELLE", long_about = None)]
 pub struct Args {
@@ -21,10 +21,6 @@ pub struct Args {
     /// Verbose output
     #[clap(short = 'v', long, default_value_t = false)]
     pub verbose: bool,
-
-    /// Display tips (may improve errors)
-    #[clap(short = 't', long, default_value_t = true)]
-    pub tips: bool,
 }
 
 pub fn declare_config() -> Args {
@@ -36,6 +32,5 @@ pub fn declare_config() -> Args {
         source: cli.source,
         binary: Some(binary),
         verbose: cli.verbose,
-        tips: cli.tips,
     }
 }

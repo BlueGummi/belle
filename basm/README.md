@@ -1,24 +1,15 @@
-# basm - The assembler for BELLE
+# examples - Example programs to be assembled and run under BELLE
 
-### This document is a short overview of the assembler. For further documentation, visit [docs/basm.md](https://github.com/BlueGummi/belle/blob/master/docs/basm.md)
+## Programs
 
+fib.asm - Fibonacci to the unsigned 16 bit integer limit and golden ratio
 
-## Quickstart
+spiral.asm - Increments then decrements a register and prints out if it is increasing or decreasing, used for benchmarking
 
-```cargo build --release```
+hello.asm - "Hello, world!" program
 
-To assemble source code, execute this.
+waste_time.asm - Repeatedly executes NOP instructions
 
-```cargo run --release -- -o main main.asm```
+game.asm - Unfinished "game" that would take inputs from the user
 
-Different flags can be passed to make the assembler emit different output, but none will affect how it assembles code.
-
-
-| Field          | CLI                 | Variable type | Default value | Example    |
-| :------------- | :------------------ | :------------ | :-----------: | :--------- |
-| Source code    | `file.asm`          | String        | `""`          | `main.asm` |
-| Output binary  | `-o` or `--output`  | String        | `"a.out"`     | `-o main`  |
-| Verbose output | `-v` or `--verbose` | Boolean       | `false`       | `-v`       |
-| Debug output   | `-d` or `--debug`   | Boolean       | `false`       | `-d`       |
-| Display tips   | `-t` or `--tips`    | Boolean       | `false`       | `-t`       |
-| Display help   | `-h` or `--help`    | Boolean       | `false`       | `-h`       |
+count.asm - Count to the unsigned 16 bit integer limit and print to stdout
