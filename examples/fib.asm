@@ -67,9 +67,8 @@ early_exit2:
     lea r0, msg2
     lea r1, text
     pe!()
-
-    macro_rules! pe(arg: reg) {
+;            (P)rint and (E)xit
+macro_rules! pe() {
     int 8
     hlt
-    mov r0, %arg
 }
