@@ -1,7 +1,5 @@
 .start [0x0]
     jmp start
-label:
-    .word hello_start
 start:
     lea r0, [0xff] 
     lea r1, [0xff]

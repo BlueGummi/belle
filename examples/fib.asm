@@ -1,19 +1,13 @@
-newline = 10
-    .data "Copyright (c) 2025 BlueGummi"
-    .dataword 10
-    .data "All rights reserved"
-    .dataword 10
-    .dataword 10
-    .data "This code is licensed under the BSD 3-Clause License."
+const newline = 10
 .start [0x29] ; program starts at addr 0x29
     int 71   ; don't push returns
     jmp start
 msg2:
     .asciiz "The number entered is too large."
-    .word [newline]
+    .word (newline)
 text:
     .asciiz "The number entered is too small."
-    .word newline
+    .word (newline)
 msg:
     .asciiz "The golden ratio is: "
 

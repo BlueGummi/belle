@@ -101,6 +101,22 @@ pub fn encode(
                     });
                 }
             }
+            "pad" => {
+                if let Some((_, TokenKind::IntLit(num), _)) = next_ins {
+                    for _ in 0..=(*num) {
+                        encoded_tokens.push(0);
+                    }
+                } else {
+                    return Err(CodeGenError {
+                        file: fname.to_string(),
+                        help: None,
+                        input: read_file(fname),
+                        message: String::from("PAD directive must be succeeded by integer literal"),
+                        start_pos: ins.2.start,
+                        last_pos: ins.2.end,
+                    });
+                }
+            }
             "word" => {
                 encoded_tokens.push(next_ins.unwrap().1.get_value() as i16);
             }
