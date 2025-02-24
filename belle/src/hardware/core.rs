@@ -204,6 +204,8 @@ impl CPU {
                 Ok(())
             })
         };
+        
+        #[cfg(target_os = "linux")]
         configure_wayland();
 
         #[cfg(feature = "window")]
