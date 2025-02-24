@@ -25,7 +25,7 @@ impl CPU {
             }
         }
         if let Some(val) = binary.get(1) {
-            self.starts_at = (val & 0b1_1111_1111) as u16;
+            self.starts_at = *val as u16;
         }
         for (index, element) in binary.iter().enumerate() {
             if index == 0 || index == 1 {

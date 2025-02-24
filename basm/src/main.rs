@@ -87,14 +87,14 @@ fn main() {
                     "{}\n{}{} {}: {} {}",
                     "│".bright_red(),
                     "╰".bright_red(),
-                    "►".yellow(),
+                    ">".yellow(),
                     "help".yellow(),
                     "╮".bright_red(),
                     tip
                 );
             }
             if let Some(v) = o {
-                print!("         {}{}", "╰".bright_red(), "►".yellow());
+                print!("         {}{}", "╰".bright_red(), ">".yellow());
                 print_line(v + 1, false, false);
             }
             println!();
@@ -248,7 +248,7 @@ fn main() {
 
     match &CONFIG.binary {
         Some(output_file) if write_to_file => {
-            let start_bin = 0b0010_0000_0000 | *START_LOCATION.lock().unwrap();
+            let start_bin = *START_LOCATION.lock().unwrap();
             encoded_instructions.insert(0, (start_bin & 0xff) as u8);
             encoded_instructions.insert(0, ((start_bin & 0xff00) >> 8) as u8);
             encoded_instructions.insert(0, 0x02);

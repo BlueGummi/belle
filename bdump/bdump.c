@@ -21,12 +21,8 @@ void *process_instructions(void *arg, char *filename) {
         printf("%sBinary appears invalid.%s\n", ANSI_RED, ANSI_RESET);
         exit(1);
     }
-    if (data->buffer[0] == 1) {
-        bin_version = data->buffer[1];
-    }
-    if (data->buffer[2] == 2) {
-        current_addr = ((data->buffer[2] & 0x1) << 1) | (data->buffer[3]);
-    }
+    bin_version = data->buffer[1];
+    current_addr = (data->buffer[2] << 8) | (data->buffer[3]);
     jump_map_global = jump_map_create();
     for (size_t i = 4; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
@@ -39,7 +35,7 @@ void *process_instructions(void *arg, char *filename) {
     }
     int counter = 0;
     size_t current_addr_tmp = current_addr;
-    for (size_t i = 0; i < data->bytes_read; i += 2) { // second loop finds jumps
+    for (size_t i = 4; i < data->bytes_read; i += 2) { // second loop finds jumps
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             switch (instruction >> 12) {
