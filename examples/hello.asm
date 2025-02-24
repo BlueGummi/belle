@@ -21,38 +21,21 @@ start:
     int 10
     .pad 235
 hello:
-    .asciiz "         -/oyddmdhs+:.                                                     "
-    .word 10
-    .asciiz "     -odNMMMMMMMMNNmhy+-`                                                  "
-    .word 10
-    .asciiz "   -yNMMMMMMMMMMMNNNmmdhy+-                                                "
-    .word 10
-    .asciiz " omMMMMMMMMMMMNhhyyyohmdddhhhdo`                                           "
-    .word 10
-    .asciiz ".ydMMMMMMMMMMdhs++so/smdddhhhhdm+`                                         "
-    .word 10
-    .asciiz " oyhdmNMMMMMMMNdyooydmddddhhhhyhNd.                                        "
-    .word 10
-    .asciiz "  :oyhhdNNMMMMMMMNNNmmdddhhhhhyymMh          Powered by                    "
-    .word 10
-    .asciiz "    .:+sydNMMMMMNNNmmmdddhhhhhhmMmy                                        "
-    .word 10
-    .asciiz "       /mMMMMMMNNNmmmdddhhhhhmMNhs:         Gentoo Linux!!                 "
-    .word 10
-    .asciiz "    `oNMMMMMMMNNNmmmddddhhdmMNhs+`                                         "
-    .word 10
-    .asciiz "  `sNMMMMMMMMNNNmmmdddddmNMmhs/.                                           "
-    .word 10
-    .asciiz " /NMMMMMMMMNNNNmmmdddmNMNdso:`                                             "
-    .word 10
-    .asciiz "+MMMMMMMNNNNNmmmmdmNMNdso/-                                                "
-    .word 10
-    .asciiz "yMMNNNNNNNmmmmmNNMmhs+/-`                                                  "
-    .word 10
-    .asciiz "/hMMNNNNNNNNMNdhs++/-`                                                     "
-    .word 10
-    .asciiz "`/ohdmmddhys+++/:.`                                                        "
-    .word 10
-    .asciiz " `-//////:--.                                                              "
-    .word 10
+    .asciiz "         -/oyddmdhs+:.                                                     \n"
+    .asciiz "     -odNMMMMMMMMNNmhy+-`                                                  \n"
+    .asciiz "   -yNMMMMMMMMMMMNNNmmdhy+-                                                \n"
+    .asciiz " omMMMMMMMMMMMNhhyyyohmdddhhhdo`                                           \n"
+    .asciiz ".ydMMMMMMMMMMdhs++so/smdddhhhhdm+`                                         \n"
+    .asciiz " oyhdmNMMMMMMMNdyooydmddddhhhhyhNd.                                        \n"
+    .asciiz "  :oyhhdNNMMMMMMMNNNmmdddhhhhhyymMh          Powered by                    \n"
+    .asciiz "    .:+sydNMMMMMNNNmmmdddhhhhhhmMmy                                        \n"
+    .asciiz "       /mMMMMMMNNNmmmdddhhhhhmMNhs:         Gentoo Linux!!                 \n"
+    .asciiz "    `oNMMMMMMMNNNmmmddddhhdmMNhs+`                                         \n"
+    .asciiz "  `sNMMMMMMMMNNNmmmdddddmNMmhs/.                                           \n"
+    .asciiz " /NMMMMMMMMNNNNmmmdddmNMNdso:`                                             \n"
+    .asciiz "+MMMMMMMNNNNNmmmmdmNMNdso/-                                                \n"
+    .asciiz "yMMNNNNNNNmmmmmNNMmhs+/-`                                                  \n"
+    .asciiz "/hMMNNNNNNNNMNdhs++/-`                                                     \n"
+    .asciiz "`/ohdmmddhys+++/:.`                                                        \n"
+    .asciiz " `-//////:--.                                                              \n"
 hello_end:

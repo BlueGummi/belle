@@ -37,6 +37,7 @@ pub fn process_macros(
         if let MacroCall(call) = element {
             in_call = true;
             mac_call_data = Vec::new();
+            mac_call_data.push((MacroCall(call.to_string()), span.clone()));
             if let Some(v) = mac_map.get(call) {
                 curr_mac = Some(v);
             } else {
@@ -62,8 +63,8 @@ pub fn process_macros(
                     }
                     Err(errors) => {
                         for e in errors {
-                            *error_count += 1;
                             println!("{e}\n");
+                            *error_count += 1;
                         }
                     }
                 }

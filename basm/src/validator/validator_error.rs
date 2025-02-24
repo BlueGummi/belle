@@ -9,7 +9,7 @@ pub struct MacroValidatorError {
     pub err_input: String,
     pub err_message: String,
     pub help: Option<String>,
-    pub orig_input: String,
+    pub orig_input: String,               // data for original macro loc
     pub orig_pos: std::ops::Range<usize>, // macro call spot
     pub mac: MacroContent,
 }
@@ -20,8 +20,9 @@ impl fmt::Display for MacroValidatorError {
         let e_pos = if let Some((_, _, v)) = self.mac.parameters.last() {
             v.end
         } else {
-            0
+            self.mac.name.1.end
         };
+
         let m_pos = s_pos..e_pos;
         if self.orig_pos.start >= self.orig_input.len()
             || self.orig_pos.end > self.orig_input.len()
@@ -50,14 +51,14 @@ impl fmt::Display for MacroValidatorError {
         )?;
         write!(f, "{}", "╮".bright_red())?;
         print_err_and_line(
-            f,
-            9,
+            f, // fmter
+            9, // spaces
             (
-                "",
-                self.err_input.to_string(),
-                format!(" in expansion of macro `{}`", self.mac.name.0),
-                &self.help,
-                self.mac.file.to_string(),
+                "",                                                      // prelude msg
+                read_file(&self.mac.file),                               // error str
+                format!(" in expansion of macro `{}`", self.mac.name.0), // hint
+                &self.help,                                              // help
+                self.mac.file.to_string(),                               // filename
                 m_pos,
             ),
             self.err_input.lines().collect(),

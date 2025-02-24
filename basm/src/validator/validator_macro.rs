@@ -13,10 +13,14 @@ impl MacroContent {
         // okay... here, I need to check first if the token types of the input
         // match the tokens inside of the macro.
         // what I can do, is I can iterate through the input tokens, and iterate through the arguments
+
         let mut parsed_toks = Vec::new();
         let mut argument_indices = Vec::new();
         let mut errs = Vec::new();
         for (index, (token, span)) in toks.iter().enumerate() {
+            if index == 0 {
+                continue;
+            }
             // this loop will clean up the toks and parse it into types
             let data = match token {
                 token if token.is_reg() => Some(ArgumentType::Reg),
@@ -36,7 +40,7 @@ impl MacroContent {
                         orig_pos: span.clone(),
                         mac: self.clone(),
                     });
-                    break;
+                    return Err(errs);
                 }
             };
             if let Some(v) = data {
@@ -48,17 +52,22 @@ impl MacroContent {
         for (_, arg, e) in &self.parameters {
             current_args.push((arg.arg_type.clone(), e));
         }
-        let f = if let Some((_, s)) = parsed_toks.first() {
-            s
+        let f = if let Some((_, s)) = toks.first() {
+            s.clone()
         } else {
-            &&(0..0)
+            0..0
         };
         if parsed_toks.len() != self.parameters.len() {
+            let word = if self.parameters.len() == 1 {
+                "argument"
+            } else {
+                "arguments"
+            };
             errs.push(MacroValidatorError {
                 err_file: err_file.to_string(),
                 err_input: self.full_data.to_string(),
                 err_message: format!(
-                    "expected {} arguments, found {}",
+                    "expected {} {word}, found {}",
                     self.parameters.len(),
                     parsed_toks.len()
                 ),
@@ -67,8 +76,9 @@ impl MacroContent {
                 orig_pos: f.clone().clone(),
                 mac: self.clone(),
             });
+            return Err(errs);
         }
-        for (index, (_, arg, span)) in self.parameters.iter().enumerate() {
+        for (index, (_, arg, _)) in self.parameters.iter().enumerate() {
             if let Some((d, _)) = parsed_toks.get(index) {
                 if *d == arg.arg_type {
                     continue;
@@ -82,7 +92,7 @@ impl MacroContent {
                         orig_pos: parsed_toks.get(index - 1).unwrap().1.clone(),
                         mac: self.clone(),
                     });
-                    break;
+                    return Err(errs);
                 }
             } else {
                 errs.push(MacroValidatorError {
@@ -91,10 +101,10 @@ impl MacroContent {
                     err_message: String::from("an incorrect number of arguments were supplied"),
                     help: None, // borrow checker is yappin
                     orig_input: orig_data.to_string(),
-                    orig_pos: span.clone(),
+                    orig_pos: f.clone(),
                     mac: self.clone(),
                 });
-                break;
+                return Err(errs);
             }
         } // we need a hashmap of type ident names, TokenKind to record arguments
         if !errs.is_empty() {
@@ -114,6 +124,9 @@ impl MacroContent {
                 }
             }
         }
+
+        // whenever the err input and orig input are the same, it is because the error cannot
+        // occur across files
         let mut new_elems = Vec::new();
         for (element, span) in &self.body {
             if let TokenKind::MacroIdent(name) = element {
@@ -122,14 +135,14 @@ impl MacroContent {
                     continue;
                 } else {
                     errs.push(MacroValidatorError {
-                        err_file: err_file.to_string(),
-                        err_input: self.full_data.to_string(),
+                        err_file: self.file.to_string(),
+                        err_input: read_file(&self.file.to_string()),
                         err_message: format!(
-                            "{} was not an argument supplied in the macro",
+                            "{} was not an argument supplied in the macro parameters",
                             name.magenta()
                         ),
                         help: None, // borrow checker is yappin
-                        orig_input: orig_data.to_string(),
+                        orig_input: read_file(&self.file.to_string()),
                         orig_pos: span.clone(),
                         mac: self.clone(),
                     });
@@ -143,14 +156,14 @@ impl MacroContent {
                             continue;
                         } else {
                             errs.push(MacroValidatorError {
-                                err_file: err_file.to_string(),
-                                err_input: self.full_data.to_string(),
+                                err_file: self.file.to_string(),
+                                err_input: read_file(&self.file.to_string()),
                                 err_message: format!(
-                                    "{} was not an argument supplied in the macro",
+                                    "{} was not an argument supplied in the macro parameters",
                                     name.magenta()
                                 ),
                                 help: None, // borrow checker is yappin
-                                orig_input: orig_data.to_string(),
+                                orig_input: read_file(&self.file.to_string()),
                                 orig_pos: place.clone(),
                                 mac: self.clone(),
                             });
@@ -165,11 +178,12 @@ impl MacroContent {
                 };
                 if let Err(e) = reconstruct.is_valid() {
                     errs.push(MacroValidatorError {
-                        err_file: err_file.to_string(),
-                        err_input: self.full_data.to_string(),
+                        err_file: self.file.to_string(),
+                        err_input: read_file(&self.file.to_string()), // these are dup'd as it is
                         err_message: e,
                         help: None,
-                        orig_input: orig_data.to_string(),
+                        orig_input: read_file(&self.file.to_string()), // these are dup'd as it is
+                        // something in the macro
                         orig_pos: span.clone(),
                         mac: self.clone(),
                     });

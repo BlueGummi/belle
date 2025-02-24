@@ -3,11 +3,9 @@ const newline = 10
     int 71   ; don't push returns
     jmp start
 msg2:
-    .asciiz "The number entered is too large."
-    .word (newline)
+    .asciiz "The number entered is too large.\n"
 text:
-    .asciiz "The number entered is too small."
-    .word (newline)
+    .asciiz "The number entered is too small.\n"
 msg:
     .asciiz "The golden ratio is: "
 
@@ -64,10 +62,14 @@ finish:
 early_exit:
     lea r0, text
     lea r1, msg
-    int 8
-    hlt
+    pe!()
 early_exit2:
     lea r0, msg2
     lea r1, text
+    pe!()
+
+    macro_rules! pe(arg: reg) {
     int 8
     hlt
+    mov r0, %arg
+}
