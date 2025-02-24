@@ -1,15 +1,14 @@
-# examples - Example programs to be assembled and run under BELLE
+# basm - The assembler for BELLE
 
-## Programs
 
-fib.asm - Fibonacci to the unsigned 16 bit integer limit and golden ratio
+## Quickstart
 
-spiral.asm - Increments then decrements a register and prints out if it is increasing or decreasing, used for benchmarking
+`cargo build --release`
 
-hello.asm - "Hello, world!" program
+### CLI
 
-waste_time.asm - Repeatedly executes NOP instructions
-
-game.asm - Unfinished "game" that would take inputs from the user
-
-count.asm - Count to the unsigned 16 bit integer limit and print to stdout
+| Field | CLI | Variable Type | Default Value | Example |
+| :---  | :-- | :------------ | :------------ | :------ |
+| Source code | `<file>` | String | `<none>` | `main.asm` |
+| Binary output | `-o <file>` | String | `a.out` | `main.bin` |
+| Verbose output | `-v` or `--verbose` | Boolean | `false` | `-v` |
