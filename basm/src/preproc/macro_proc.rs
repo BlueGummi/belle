@@ -1,11 +1,9 @@
 use crate::*;
 use colored::*;
 use std::collections::HashMap;
+use std::ops::Range;
 
-pub fn process_macros(
-    toks: &mut Vec<(String, TokenKind, std::ops::Range<usize>)>,
-    error_count: &mut i32,
-) {
+pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_count: &mut i32) {
     let mut mac_locs = Vec::new();
     for (index, (_fname, element, _)) in toks.iter().enumerate() {
         if let Macro(data) = element {
@@ -26,8 +24,7 @@ pub fn process_macros(
     let mut in_call = false;
     let mut curr_mac = None;
 
-    let mut expanded_loc_map: HashMap<usize, Vec<(TokenKind, std::ops::Range<usize>)>> =
-        HashMap::new();
+    let mut expanded_loc_map: HashMap<usize, Vec<(TokenKind, Range<usize>)>> = HashMap::new();
     let mut expanded_indices = Vec::new();
 
     let mac_map = MACRO_MAP.lock().unwrap();

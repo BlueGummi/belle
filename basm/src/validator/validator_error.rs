@@ -1,6 +1,7 @@
 use crate::*;
 use colored::*;
 use std::fmt;
+use std::ops::Range;
 use term_size::dimensions;
 
 #[derive(Debug, Clone)]
@@ -9,8 +10,8 @@ pub struct MacroValidatorError {
     pub err_input: String,
     pub err_message: String,
     pub help: Option<String>,
-    pub orig_input: String,               // data for original macro loc
-    pub orig_pos: std::ops::Range<usize>, // macro call spot
+    pub orig_input: String,     // data for original macro loc
+    pub orig_pos: Range<usize>, // macro call spot
     pub mac: MacroContent,
 }
 
@@ -69,14 +70,7 @@ impl fmt::Display for MacroValidatorError {
 pub fn print_err_and_line(
     f: &mut fmt::Formatter<'_>,
     indents: usize,
-    data: (
-        &str,
-        String,
-        String,
-        &Option<String>,
-        String,
-        std::ops::Range<usize>,
-    ),
+    data: (&str, String, String, &Option<String>, String, Range<usize>),
     lines: Vec<&str>,
 ) -> fmt::Result {
     let (title, text, msg, help, file, pos) = data;

@@ -2,11 +2,9 @@ use crate::*;
 use colored::*;
 use std::fs::File;
 use std::io::Read;
+use std::ops::Range;
 
-pub fn process_includes(
-    toks: &mut Vec<(String, TokenKind, std::ops::Range<usize>)>,
-    error_count: &mut i32,
-) {
+pub fn process_includes(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_count: &mut i32) {
     loop {
         let mut included_toks = Vec::new();
         let mut index = 0;

@@ -1,6 +1,7 @@
 use crate::*;
 use colored::*;
 use std::collections::HashMap;
+use std::ops::Range;
 
 #[allow(suspicious_double_ref_op)]
 impl MacroContent {
@@ -8,8 +9,8 @@ impl MacroContent {
         &self,
         err_file: String,
         orig_data: String,
-        toks: Vec<(TokenKind, std::ops::Range<usize>)>, // incoming macro args
-    ) -> Result<Vec<(TokenKind, std::ops::Range<usize>)>, Vec<MacroValidatorError>> {
+        toks: Vec<(TokenKind, Range<usize>)>, // incoming macro args
+    ) -> Result<Vec<(TokenKind, Range<usize>)>, Vec<MacroValidatorError>> {
         // okay... here, I need to check first if the token types of the input
         // match the tokens inside of the macro.
         // what I can do, is I can iterate through the input tokens, and iterate through the arguments
@@ -180,11 +181,11 @@ impl MacroContent {
                     errs.push(MacroValidatorError {
                         err_file: self.file.to_string(),
                         err_input: read_file(&self.file.to_string()), // these are dup'd as it is
-                        err_message: e,
+                        err_message: e.1,
                         help: None,
                         orig_input: read_file(&self.file.to_string()), // these are dup'd as it is
                         // something in the macro
-                        orig_pos: span.clone(),
+                        orig_pos: e.0.unwrap_or_else(|| span.clone()),
                         mac: self.clone(),
                     });
                 }

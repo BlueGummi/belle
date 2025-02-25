@@ -1,6 +1,6 @@
 use crate::*;
-
-type PassResult = Result<Vec<(Result<TokenKind, ()>, std::ops::Range<usize>)>, Vec<ParserError>>;
+use std::ops::Range;
+type PassResult = Result<Vec<(Result<TokenKind, ()>, Range<usize>)>, Vec<ParserError>>;
 impl<'a> Parser<'a> {
     pub fn first_pass(
         file: String,

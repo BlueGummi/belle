@@ -1,10 +1,10 @@
 use crate::*;
 use serde::Serialize;
-
+use std::ops::Range;
 #[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct MemAddr {
     pub indirect: bool,
-    pub data: Vec<(TokenKind, std::ops::Range<usize>)>,
+    pub data: Vec<(TokenKind, Range<usize>)>,
 }
 
 impl MemAddr {
@@ -17,9 +17,9 @@ impl MemAddr {
 pub struct MacroContent {
     pub full_data: String,
     pub file: String,
-    pub name: (String, std::ops::Range<usize>),
-    pub parameters: Vec<(String, FullArgument, std::ops::Range<usize>)>,
-    pub body: Vec<(TokenKind, std::ops::Range<usize>)>,
+    pub name: (String, Range<usize>),
+    pub parameters: Vec<(String, FullArgument, Range<usize>)>,
+    pub body: Vec<(TokenKind, Range<usize>)>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Clone)]
@@ -53,5 +53,5 @@ pub enum InstructionArgument {
 pub struct InstructionData {
     pub expanded: bool,
     pub name: String,
-    pub operands: Vec<(InstructionArgument, std::ops::Range<usize>)>,
+    pub operands: Vec<(InstructionArgument, Range<usize>)>,
 }

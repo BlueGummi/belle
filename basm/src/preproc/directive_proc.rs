@@ -1,8 +1,7 @@
 use crate::*;
-pub fn process_start(
-    toks: &mut Vec<(String, TokenKind, std::ops::Range<usize>)>,
-    error_count: &mut i32,
-) {
+use std::ops::Range;
+
+pub fn process_start(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_count: &mut i32) {
     use crate::TokenKind::*;
     let mut toks_iter = toks.clone().into_iter().peekable();
     let mut start_addr = 100;
@@ -71,7 +70,7 @@ pub fn process_start(
 }
 
 fn process_directives(
-    toks: &mut [(String, TokenKind, std::ops::Range<usize>)],
+    toks: &mut [(String, TokenKind, Range<usize>)],
     error_count: &mut i32,
     start_addr: i64,
 ) {

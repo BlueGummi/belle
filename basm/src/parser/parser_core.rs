@@ -1,11 +1,10 @@
 use crate::*;
 use logos::Logos;
 use std::iter::Peekable;
+use std::ops::Range;
 use std::vec::IntoIter;
-
-type ParsingLexer = Peekable<IntoIter<(Result<TokenKind, ()>, std::ops::Range<usize>)>>;
-type ParserResult<'a> =
-    Result<Vec<(String, TokenKind, std::ops::Range<usize>)>, &'a Vec<ParserError>>;
+type ParsingLexer = Peekable<IntoIter<(Result<TokenKind, ()>, Range<usize>)>>;
+type ParserResult<'a> = Result<Vec<(String, TokenKind, Range<usize>)>, &'a Vec<ParserError>>;
 pub struct Parser<'a> {
     pub file: String,
     pub lexer: ParsingLexer,
@@ -99,7 +98,7 @@ pub fn parse_tokens(
     parser: &mut Parser,
     _input_string: &str,
     error_count: &mut i32,
-) -> Option<Vec<(String, TokenKind, std::ops::Range<usize>)>> {
+) -> Option<Vec<(String, TokenKind, Range<usize>)>> {
     match parser.parse() {
         Ok(tokens) => {
             if CONFIG.verbose {

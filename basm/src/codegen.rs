@@ -142,7 +142,7 @@ fn encode_instruction(
     fname: &String,
     opcode: &i16,
     class: &u8,
-    args: &[(InstructionArgument, std::ops::Range<usize>)],
+    args: &[(InstructionArgument, Range<usize>)],
 ) -> Result<i16, CodeGenError> {
     let lhs = args.first();
     let rhs = args.get(1);
