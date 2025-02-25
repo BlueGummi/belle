@@ -36,7 +36,7 @@ pub fn parse_primary(
                 } else {
                     Err(ParserError {
                         file: file.to_string(),
-                        help: None,
+                        help: Some(String::from("close this parenthesis")),
                         input: input.to_string(),
                         message: "unmatched parenthesis".to_string(),
                         start_pos: last_loc.start,
@@ -55,7 +55,7 @@ pub fn parse_primary(
                         file: file.to_string(),
                         help: None,
                         input: input.to_string(),
-                        message: format!("constant with name {val} not found"), 
+                        message: format!("constant with name {val} not found"),
                         start_pos: last_loc.start,
                         last_pos: last_loc.end,
                     })
@@ -63,7 +63,9 @@ pub fn parse_primary(
             }
             Ok(v) => Err(ParserError {
                 file: file.to_string(),
-                help: None,
+                help: Some(String::from(
+                    "valid expressions allow operators and constant names",
+                )),
                 input: input.to_string(),
                 message: format!("unexpected {v} in expression"),
                 start_pos: last_loc.start,
@@ -71,9 +73,11 @@ pub fn parse_primary(
             }),
             _ => Err(ParserError {
                 file: file.to_string(),
-                help: None,
+                help: Some(String::from("there is likely an invalid character")),
                 input: input.to_string(),
-                message: String::from("reached an error while parsing expression\n      maybe the expression is invalid?"),
+                message: String::from(
+                    "reached an error while parsing expression\nmaybe the expression is invalid?",
+                ),
                 start_pos: last_loc.start,
                 last_pos: last_loc.end,
             }),
@@ -81,7 +85,9 @@ pub fn parse_primary(
     } else {
         Err(ParserError {
             file: file.to_string(),
-            help: None,
+            help: Some(String::from(
+                "could not continue iterating over tokens here",
+            )),
             input: input.to_string(),
             message: "unexpected end of expression".to_string(),
             start_pos: last_loc.start,
@@ -132,9 +138,11 @@ pub fn parse_expression_after_left_paren(
         Some((Err(_), span)) => {
             return Err(ParserError {
                 file: file.to_string(),
-                help: None,
+                help: Some(String::from(
+                    "valid characters are math symbols and constant names",
+                )),
                 input: input.to_string(),
-                message: String::from("invalid token in expression"),
+                message: String::from("invalid character in expression"),
                 start_pos: span.start,
                 last_pos: span.end,
             });
@@ -144,9 +152,9 @@ pub fn parse_expression_after_left_paren(
 
     Err(ParserError {
         file: file.to_string(),
-        help: None,
+        help: Some(String::from("expression might be empty")),
         input: input.to_string(),
-        message: String::from("failed to parse expression after left paren"),
+        message: String::from("failed to parse expression"),
         start_pos: 0,
         last_pos: 0,
     })

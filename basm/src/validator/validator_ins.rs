@@ -1,5 +1,7 @@
 use crate::*;
 use colored::*;
+use std::ops::Range;
+
 impl InstructionData {
     pub fn is_valid(&self) -> Result<(), String> {
         // Ident is for matching labels - they will be memory addresses
@@ -142,9 +144,8 @@ impl InstructionData {
         };
         if !valid_args {
             Err(format!(
-                "{}: {} requires {} LHS and\n{} RHS\n{}: found {} LHS and {} RHS\n\n{ovfm}",
+                "{}: expected {} LHS, {} RHS\n{}: found {} LHS and {} RHS\n\n{ovfm}",
                 "invalid instruction".bold(),
-                self.name.to_uppercase().magenta(),
                 LHS_DETAIL[ins_class].cyan(),
                 RHS_DETAIL[ins_class].cyan(),
                 "note".yellow(),
@@ -158,42 +159,42 @@ impl InstructionData {
 }
 
 const LHS_DETAIL: [&str; 8] = [
-    "register",
-    "memory address or register indirect",
+    "reg",
+    "mem addr or reg ind",
     "no",
-    "register",
-    "memory address or register indirect",
-    "immediate",
-    "immediate or register",
-    "memory address or register",
+    "reg",
+    "mem addr or reg ind",
+    "imm",
+    "imm or reg",
+    "mem addr or reg",
 ];
 const RHS_DETAIL: [&str; 8] = [
-    "register, register indirect, memory indirect, or immediate",
+    "reg, reg ind, mem ind, or imm",
     "no",
     "no",
-    "memory address or register",
-    "register",
+    "mem addr or reg",
+    "reg",
     "no",
     "no",
     "no",
 ];
 
 const LHS_MAXES: [&str; 8] = [
-    "reg. < 8",                      // mov
-    "mem. < 1024 or reg. ind. < 10", // bcc
-    "no",                            // ret/hlt
-    "reg. < 8",                      // ld
-    "mem. < 256 or reg. ind. < 10",  // st
-    "imm < 128 and > -128",          // int
-    "imm < 128 and > -128",          // push
-    "mem. < 2048 or reg. < 10",      // pop
+    "reg < 8",                    // mov
+    "mem < 1024 or reg ind < 10", // bcc
+    "no",                         // ret/hlt
+    "reg < 8",                    // ld
+    "mem < 256 or reg ind < 10",  // st
+    "imm < 128 and > -128",       // int
+    "imm < 128 and > -128",       // push
+    "mem < 2048 or reg < 10",     // pop
 ];
 
 const RHS_MAXES: [&str; 8] = [
-    "reg. (ind.) < 10 or imm > -128 and < 128 or mem. ind. < 128",
+    "reg (ind) < 10 or imm > -128 and < 128 or mem ind < 128",
     "no",
     "no",
-    "mem. < 512",
+    "mem < 512",
     "reg < 8",
     "no",
     "no",
