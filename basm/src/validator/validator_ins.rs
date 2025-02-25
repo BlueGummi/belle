@@ -3,6 +3,7 @@ use colored::*;
 use std::ops::Range;
 
 impl InstructionData {
+    // location         // msg
     pub fn is_valid(&self) -> Result<(), (Option<Range<usize>>, String)> {
         // Ident is for matching labels - they will be memory addresses
         // Boolean lambda bonanza begins
