@@ -210,8 +210,8 @@ fn encode_instruction(
                             help: None,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
-                            start_pos: args.get(1).unwrap().1.start,
-                            last_pos: args.get(1).unwrap().1.end,
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
                         });
                     }
                 }
@@ -260,8 +260,8 @@ fn encode_instruction(
                             help: None,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
-                            start_pos: args.get(1).unwrap().1.start,
-                            last_pos: args.get(1).unwrap().1.end,
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
                         });
                     }
                 }
@@ -332,8 +332,8 @@ fn encode_instruction(
                             help: None,
                             input: read_file(fname),
                             message: String::from("LD/LEA instruction memory appears empty"),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
+                            start_pos: args.get(1).unwrap().1.start,
+                            last_pos: args.get(1).unwrap().1.end,
                         });
                     }
                 }
@@ -375,8 +375,8 @@ fn encode_instruction(
                             help: None,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
-                            start_pos: args.get(1).unwrap().1.start,
-                            last_pos: args.get(1).unwrap().1.end,
+                            start_pos: args.first().unwrap().1.start,
+                            last_pos: args.first().unwrap().1.end,
                         });
                     }
                 }
