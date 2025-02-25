@@ -184,7 +184,7 @@ pub fn print_err_and_line(
             if let Some(s) = &help {
                 write!(
                     f,
-                    "\n{start_spaces}{}{} {}: {s}",
+                    "\n{start_spaces}{}{} {}: {s}\n",
                     "╰".bright_red(),
                     ">".yellow(),
                     "note".yellow()

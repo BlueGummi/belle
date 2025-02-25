@@ -205,9 +205,10 @@ fn encode_instruction(
                             encoded |= *value as i16;
                         }
                     } else {
+                        std::mem::drop(l_map);
                         return Err(CodeGenError {
                             file: fname.to_string(),
-                            help: None,
+                            help: find_similar_entries(i).0,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
                             start_pos: args.first().unwrap().1.start,
@@ -312,9 +313,10 @@ fn encode_instruction(
                             encoded |= *value as i16;
                         }
                     } else {
+                        std::mem::drop(l_map);
                         return Err(CodeGenError {
                             file: fname.to_string(),
-                            help: None,
+                            help: find_similar_entries(i).0,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
                             start_pos: args.get(1).unwrap().1.start,
@@ -370,9 +372,10 @@ fn encode_instruction(
                             encoded |= (*value as i16) << 3;
                         }
                     } else {
+                        std::mem::drop(l_map);
                         return Err(CodeGenError {
                             file: fname.to_string(),
-                            help: None,
+                            help: find_similar_entries(i).0,
                             input: read_file(fname),
                             message: format!("cannot find label \"{i}\""),
                             start_pos: args.first().unwrap().1.start,
