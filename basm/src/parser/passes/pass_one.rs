@@ -13,6 +13,7 @@ impl<'a> Parser<'a> {
         let mut const_names = Vec::new();
         let mut prev_was_const = false;
         let mut saw_amp = false;
+        let mut cspan = 0..0;
         while let Some((token, span)) = lexer.next() {
             match token {
                 Ok(TokenKind::Amp) => saw_amp = true,
@@ -45,6 +46,7 @@ impl<'a> Parser<'a> {
                     saw_amp = false;
                     const_names.push(name);
                     prev_was_const = true;
+                    cspan = span.clone();
                     if let Some((Ok(TokenKind::Equal), _)) = lexer.peek() {
                         lexer.next();
                     } else {
@@ -75,7 +77,7 @@ impl<'a> Parser<'a> {
                     if prev_was_const {
                         if let Some(n) = const_names.pop() {
                             let mut vmap = V_MAP.lock().unwrap();
-                            vmap.insert(n, (file.to_string(), span, v));
+                            vmap.insert(n, (file.to_string(), cspan.clone(), v));
                             std::mem::drop(vmap);
                         } else {
                             errors.push(ParserError {
@@ -147,7 +149,7 @@ impl<'a> Parser<'a> {
                             if prev_was_const {
                                 if let Some(n) = const_names.pop() {
                                     let mut vmap = V_MAP.lock().unwrap();
-                                    vmap.insert(n, (file.to_string(), new_span, value));
+                                    vmap.insert(n, (file.to_string(), cspan.clone(), value));
                                     std::mem::drop(vmap);
                                 } else {
                                     errors.push(ParserError {
