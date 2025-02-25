@@ -37,7 +37,11 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     if !similar_v.is_empty() {
         messages.push(format!(
             "similar constants were found: {}",
-            similar_v.join(", ").magenta()
+            similar_v
+                .iter()
+                .map(|s| s.magenta().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
         for key in similar_v {
             if let Some((file, place, _)) = v_map.get(&key) {
@@ -54,7 +58,11 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     if !similar_labels.is_empty() {
         messages.push(format!(
             "similar labels were found: {}",
-            similar_labels.join(", ").magenta()
+            similar_labels
+                .iter()
+                .map(|s| s.magenta().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
         for key in similar_labels {
             if let Some((file, place, _)) = label_map.get(&key) {
@@ -71,11 +79,15 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     if !similar_macros.is_empty() {
         messages.push(format!(
             "similar macros were found: {}",
-            similar_macros.join(", ").magenta()
+            similar_macros
+                .iter()
+                .map(|s| s.magenta().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
         for key in similar_macros {
             if let Some((_, mac)) = macro_map.get(&key) {
-                results.push((mac.name.0.to_string(), mac.name.1.clone()));
+                results.push((mac.file.to_string(), mac.name.1.clone()));
             }
         }
     }
@@ -83,6 +95,6 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     if messages.is_empty() {
         (None, results)
     } else {
-        (Some(messages.join("\n")), results)
+        (Some(messages.join(",")), results)
     }
 }

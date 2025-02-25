@@ -138,5 +138,34 @@ pub fn handle_core_error(
         last_pos: loc.end,
     };
     *error_count += 1;
-    println!("{problem}\n");
+    println!("{problem}");
+}
+
+use std::ops::Range;
+pub fn highlight_range_in_file(file_path: &str, range: &Range<usize>) -> (usize, String) {
+    let contents = read_file(file_path);
+    let mut line_number = 0;
+    let mut current_index = 0;
+
+    for line in contents.lines() {
+        let line_length = line.len();
+        if current_index + line_length >= range.start {
+            line_number += 1;
+            let colored_line: String = line
+                .chars()
+                .enumerate()
+                .map(|(i, c)| {
+                    if range.contains(&(current_index + i)) {
+                        c.to_string().red().underline().to_string()
+                    } else {
+                        c.to_string()
+                    }
+                })
+                .collect();
+            return (line_number, colored_line);
+        }
+        current_index += line_length + 1;
+        line_number += 1;
+    }
+    panic!("Failed to highlight_range_in_file");
 }
