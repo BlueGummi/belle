@@ -60,7 +60,6 @@ dependencies = [
  "colored",
  "logos",
  "once_cell",
- "serde",
  "serde_json",
  "term_size",
 ]

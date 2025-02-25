@@ -1,7 +1,6 @@
 use crate::*;
-use serde::Serialize;
 use std::ops::Range;
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MemAddr {
     pub indirect: bool,
     pub data: Vec<(TokenKind, Range<usize>)>,
@@ -13,7 +12,7 @@ impl MemAddr {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct MacroContent {
     pub full_data: String,
     pub file: String,
@@ -22,13 +21,13 @@ pub struct MacroContent {
     pub body: Vec<(TokenKind, Range<usize>)>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FullArgument {
     pub name: String,
     pub arg_type: ArgumentType,
 }
 
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ArgumentType {
     // for macros
     Mem,
@@ -39,7 +38,7 @@ pub enum ArgumentType {
     Label,
 }
 
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum InstructionArgument {
     Mem(MemAddr),
     Reg(u8),
@@ -49,7 +48,7 @@ pub enum InstructionArgument {
     MacroIdent(String),
 }
 
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct InstructionData {
     pub expanded: bool,
     pub name: String,
