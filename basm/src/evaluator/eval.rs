@@ -3,8 +3,8 @@ use std::iter::Peekable;
 type Evalex<'a> = Peekable<logos::SpannedIter<'a, tokens::TokenKind>>;
 
 pub fn parse_expression(
-    file: String,
-    input: String,
+    file: &String,
+    input: &String,
     token_iter: &mut Evalex,
 ) -> Result<Expr, ParserError> {
     /*if let Ok(ref d) = v {
@@ -15,8 +15,8 @@ pub fn parse_expression(
 }
 
 pub fn parse_primary(
-    file: String,
-    input: String,
+    file: &String,
+    input: &String,
     token_iter: &mut Evalex,
 ) -> Result<Expr, ParserError> {
     let mut last_loc = 0..0;
@@ -30,7 +30,7 @@ pub fn parse_primary(
         match token {
             Ok(TokenKind::IntLit(num)) => Ok(Expr::Int(num)),
             Ok(TokenKind::LeftParen) => {
-                let expr = parse_expression(file.to_string(), input.to_string(), token_iter)?;
+                let expr = parse_expression(file, input, token_iter)?;
                 if let Some((Ok(TokenKind::RightParen), _)) = token_iter.next() {
                     Ok(expr)
                 } else {
@@ -98,10 +98,10 @@ pub fn parse_primary(
 
 pub fn evaluate_expression(
     file: &String,
-    input: String,
+    input: &String,
     token_iter: &mut Evalex,
 ) -> Result<i64, ParserError> {
-    let expr = parse_expression(file.to_string(), input, token_iter)?;
+    let expr = parse_expression(file, input, token_iter)?;
     if CONFIG.verbose {
         print_msg!("BEGINNING AST EXPRESSION EVALUATION\n\nRAW EXPR:\n{expr:?}");
         println!();
@@ -113,7 +113,7 @@ pub fn evaluate_expression(
 }
 pub fn parse_expression_after_left_paren(
     file: &str,
-    input: String,
+    input: &String,
     lexer: &mut std::iter::Peekable<logos::SpannedIter<'_, TokenKind>>,
 ) -> Result<Option<(i64, logos::Span)>, ParserError> {
     let mut peek_iter = lexer.clone();
@@ -132,7 +132,7 @@ pub fn parse_expression_after_left_paren(
     let next_token = lexer.peek().cloned();
     match next_token {
         Some((Ok(_), span)) => {
-            let value = evaluate_expression(&file.to_string(), input.to_string(), lexer)?;
+            let value = evaluate_expression(&file.to_string(), input, lexer)?;
             return Ok(Some((value, span.clone())));
         }
         Some((Err(_), span)) => {
@@ -141,7 +141,7 @@ pub fn parse_expression_after_left_paren(
                 help: Some(String::from(
                     "valid characters are math symbols and constant names",
                 )),
-                input: input.to_string(),
+                input: read_file(&file),
                 message: String::from("invalid character in expression"),
                 start_pos: span.start,
                 last_pos: span.end,
@@ -153,7 +153,7 @@ pub fn parse_expression_after_left_paren(
     Err(ParserError {
         file: file.to_string(),
         help: Some(String::from("expression might be empty")),
-        input: input.to_string(),
+        input: read_file(&file),
         message: String::from("failed to parse expression"),
         start_pos: 0,
         last_pos: 0,

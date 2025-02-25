@@ -173,12 +173,12 @@ fn parse_content(content: &str) -> i64 {
                 _ => '\\' as i64,
             }
         } else {
-            panic!("Invalid character literal: {}", content);
+            -1
         }
     } else if content.chars().all(|c| c.is_ascii_digit() || c == '-') {
         content.parse::<i64>().unwrap()
     } else {
-        panic!("Failed to parse integer literal")
+        -1
     }
 }
 fn parse_string(s: &str) -> String {

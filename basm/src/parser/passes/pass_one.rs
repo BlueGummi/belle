@@ -3,8 +3,8 @@ use std::ops::Range;
 type PassResult = Result<Vec<(Result<TokenKind, ()>, Range<usize>)>, Vec<ParserError>>;
 impl<'a> Parser<'a> {
     pub fn first_pass(
-        file: String,
-        input: String,
+        file: &String,
+        input: &String,
         lexer: logos::SpannedIter<'a, TokenKind>,
     ) -> PassResult {
         let mut tokens = Vec::new();
@@ -102,11 +102,7 @@ impl<'a> Parser<'a> {
                         match lexer.next() {
                             // let's try to do math in it
                             Some((Ok(TokenKind::LeftParen), span)) => {
-                                match parse_expression_after_left_paren(
-                                    &file,
-                                    input.to_string(),
-                                    &mut lexer,
-                                ) {
+                                match parse_expression_after_left_paren(&file, input, &mut lexer) {
                                     Ok(Some((value, new_span))) => {
                                         addr_toks.push((TokenKind::IntLit(value), new_span));
                                     }
@@ -146,7 +142,7 @@ impl<'a> Parser<'a> {
                 }
                 Ok(TokenKind::LeftParen) => 'lpn: {
                     saw_amp = false;
-                    match parse_expression_after_left_paren(&file, input.to_string(), &mut lexer) {
+                    match parse_expression_after_left_paren(&file, &input, &mut lexer) {
                         Ok(Some((value, new_span))) => {
                             if prev_was_const {
                                 if let Some(n) = const_names.pop() {

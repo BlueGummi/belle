@@ -13,11 +13,11 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(file: String, input: &'a str) -> Result<Self, Vec<ParserError>> {
+    pub fn new(file: &String, input: &'a str) -> Result<Self, Vec<ParserError>> {
         let errors = Vec::new();
         let lexer = TokenKind::lexer(input).spanned();
 
-        let first_pass_tokens = Self::first_pass(file.to_string(), input.to_string(), lexer);
+        let first_pass_tokens = Self::first_pass(file, &String::from(input), lexer);
         let toks = match first_pass_tokens {
             Err(e) => return Err(e),
             Ok(ref v) => v,
@@ -36,7 +36,7 @@ impl<'a> Parser<'a> {
             Ok(ref v) => v,
         };
         Ok(Parser {
-            file,
+            file: file.to_string(),
             lexer: toks.clone().into_iter().peekable(),
             input,
             errors,
@@ -82,7 +82,7 @@ pub fn create_parser<'a>(
     if CONFIG.verbose {
         print_msg!("PARSER CREATION");
     }
-    match Parser::new(String::from(file), input_string) {
+    match Parser::new(&String::from(file), input_string) {
         Ok(parser) => Some(parser),
         Err(errors) => {
             for error in errors {

@@ -3,7 +3,7 @@ use std::ops::Range;
 impl Parser<'_> {
     fn parse_single_macro_argument(
         &mut self,
-        arg_name: String,
+        arg_name: &String,
     ) -> Vec<(String, FullArgument, Range<usize>)> {
         let input_str = self.input.to_string();
         let (val, loc) = match self.lexer.next() {
@@ -55,7 +55,7 @@ impl Parser<'_> {
 
     fn parse_macro_arguments(
         &mut self,
-        name: (String, Range<usize>),
+        name: &(String, Range<usize>),
     ) -> Vec<(String, TokenKind, Range<usize>)> {
         let input_str = self.input.to_string();
         let mut tokens = Vec::new();
@@ -70,7 +70,7 @@ impl Parser<'_> {
                     continue;
                 }
                 Ok(TokenKind::Label(arg_name)) => {
-                    args.extend(self.parse_single_macro_argument(arg_name));
+                    args.extend(self.parse_single_macro_argument(&arg_name));
                 }
                 Ok(TokenKind::RightParen) => break,
                 _ => {
@@ -134,7 +134,7 @@ impl Parser<'_> {
                     TokenKind::Macro(MacroContent {
                         full_data: self.input.to_string(),
                         file: self.file.to_string(),
-                        name,
+                        name: name.clone(),
                         parameters: args,
                         body: macro_tokens,
                     }),
@@ -182,7 +182,7 @@ impl Parser<'_> {
         };
         match val {
             Ok(TokenKind::LeftParen) => {
-                tokens.extend(self.parse_macro_arguments(name));
+                tokens.extend(self.parse_macro_arguments(&name));
             }
             _ => {
                 self.errors.push(ParserError {

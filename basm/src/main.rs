@@ -55,7 +55,7 @@ fn main() {
     #[allow(clippy::explicit_counter_loop)]
     for (fname, tok, span) in &toks {
         // we should only have instructions at this point
-        match encode((fname, tok, span), fname, toks.get(ind + 1)) {
+        match encode((fname, tok, span), fname, &toks.get(ind + 1)) {
             Ok(value) => binary.extend(value),
             Err(e) => {
                 println!("{e}");

@@ -30,11 +30,11 @@ impl fmt::Display for ParserError {
             0,
             (
                 "error",
-                self.input.to_string(),
-                self.message.to_string(),
+                &self.input,
+                &self.message,
                 &self.help,
-                self.file.to_string(),
-                pos,
+                &self.file,
+                &pos,
             ),
             lines,
         )

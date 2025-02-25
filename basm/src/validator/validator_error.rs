@@ -42,11 +42,11 @@ impl fmt::Display for MacroValidatorError {
             0,
             (
                 "error",
-                self.orig_input.to_string(),
-                self.err_message.to_string(),
+                &self.orig_input,
+                &self.err_message,
                 &Some(String::from("")),
-                self.err_file.to_string(),
-                self.orig_pos.clone(),
+                &self.err_file,
+                &self.orig_pos,
             ),
             lines,
         )?;
@@ -55,12 +55,12 @@ impl fmt::Display for MacroValidatorError {
             f, // fmter
             9, // spaces
             (
-                "",                                                      // prelude msg
-                read_file(&self.mac.file),                               // error str
-                format!(" in expansion of macro `{}`", self.mac.name.0), // hint
-                &self.help,                                              // help
-                self.mac.file.to_string(),                               // filename
-                m_pos,
+                "",                                                       // prelude msg
+                &read_file(&self.mac.file),                               // error str
+                &format!(" in expansion of macro `{}`", self.mac.name.0), // hint
+                &self.help,                                               // help
+                &self.mac.file,                                           // filename
+                &m_pos,
             ),
             self.err_input.lines().collect(),
         )?;
@@ -70,7 +70,14 @@ impl fmt::Display for MacroValidatorError {
 pub fn print_err_and_line(
     f: &mut fmt::Formatter<'_>,
     indents: usize,
-    data: (&str, String, String, &Option<String>, String, Range<usize>),
+    data: (
+        &str,
+        &String,
+        &String,
+        &Option<String>,
+        &String,
+        &Range<usize>,
+    ),
     lines: Vec<&str>,
 ) -> fmt::Result {
     let (title, text, msg, help, file, pos) = data;

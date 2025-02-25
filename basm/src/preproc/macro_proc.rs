@@ -53,7 +53,7 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
         if let RightParen = element {
             in_call = false;
             if let Some((_, m)) = curr_mac {
-                match m.is_valid(fname.to_string(), read_file(fname), mac_call_data.clone()) {
+                match m.is_valid(&fname, &read_file(fname), &mac_call_data) {
                     Ok(v) => {
                         expanded_loc_map.insert(counter, v.clone());
                         expanded_indices.push(counter);

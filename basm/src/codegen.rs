@@ -34,7 +34,7 @@ use std::ops::Range;
 pub fn encode(
     ins: (&String, &TokenKind, &Range<usize>),
     fname: &String,
-    next_ins: Option<&(String, TokenKind, Range<usize>)>,
+    next_ins: &Option<&(String, TokenKind, Range<usize>)>,
 ) -> Result<Vec<i16>, CodeGenError> {
     let mut encoded_tokens = Vec::new();
     match &ins.1 {
