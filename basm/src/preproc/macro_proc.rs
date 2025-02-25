@@ -45,7 +45,13 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
                 } else {
                     None
                 };
-                handle_core_error(fname, span, error_count, "cannot find macro", info);
+                handle_core_error(
+                    fname,
+                    span,
+                    error_count,
+                    &format!("cannot find macro \"{}\"", call.magenta()),
+                    info,
+                );
                 let size = similars.1.len() - 1;
                 let max_filename_length = similars
                     .1

@@ -95,6 +95,6 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     if messages.is_empty() {
         (None, results)
     } else {
-        (Some(messages.join(",")), results)
+        (Some(messages.join(", ")), results)
     }
 }
