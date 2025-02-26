@@ -141,7 +141,7 @@ pub fn parse_expression_after_left_paren(
                 help: Some(String::from(
                     "valid characters are math symbols and constant names",
                 )),
-                input: read_file(&file),
+                input: read_file(file),
                 message: String::from("invalid character in expression"),
                 start_pos: span.start,
                 last_pos: span.end,
@@ -153,7 +153,7 @@ pub fn parse_expression_after_left_paren(
     Err(ParserError {
         file: file.to_string(),
         help: Some(String::from("expression might be empty")),
-        input: read_file(&file),
+        input: read_file(file),
         message: String::from("failed to parse expression"),
         start_pos: 0,
         last_pos: 0,

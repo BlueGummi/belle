@@ -59,7 +59,7 @@ fn main() {
             Ok(value) => binary.extend(value),
             Err((m, similars)) => {
                 println!("{m}");
-                if similars.len() > 0 {
+                if !similars.is_empty() {
                     let size = similars.len() - 1;
                     let max_filename_length = similars
                         .iter()

@@ -9,7 +9,7 @@ impl MacroContent {
         &self,
         err_file: &String,
         orig_data: &String,
-        toks: &Vec<(TokenKind, Range<usize>)>, // incoming macro args
+        toks: &[(TokenKind, Range<usize>)], // incoming macro args
     ) -> Result<Vec<(TokenKind, Range<usize>)>, Vec<MacroValidatorError>> {
         // okay... here, I need to check first if the token types of the input
         // match the tokens inside of the macro.

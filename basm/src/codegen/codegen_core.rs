@@ -30,12 +30,12 @@ pub const ST_TYPE: u8 = 5;
 pub const MOV_TYPE_ONE: u8 = 6;
 type CodeGenError = ParserError;
 use std::ops::Range;
-
+type CodeGenResult = Result<Vec<i16>, (Box<CodeGenError>, Vec<(String, Range<usize>)>)>;
 pub fn encode(
     ins: (&String, &TokenKind, &Range<usize>),
     fname: &String,
     next_ins: &Option<&(String, TokenKind, Range<usize>)>,
-) -> Result<Vec<i16>, (CodeGenError, Vec<(String, Range<usize>)>)> {
+) -> CodeGenResult {
     let mut encoded_tokens = Vec::new();
     match &ins.1 {
         TokenKind::Instruction(ins) => {
@@ -96,7 +96,7 @@ pub fn encode(
                     }
                 } else {
                     return Err((
-                        CodeGenError {
+                        Box::new(CodeGenError {
                             file: fname.to_string(),
                             help: Some(format!("found {} argument", stri.magenta())),
                             input: read_file(fname),
@@ -105,7 +105,7 @@ pub fn encode(
                             ),
                             start_pos: ins.2.start,
                             last_pos: ins.2.end,
-                        },
+                        }),
                         vec![],
                     ));
                 }
@@ -116,12 +116,10 @@ pub fn encode(
                     None => "no".to_string(),
                 };
                 if let Some((_, TokenKind::IntLit(num), _)) = next_ins {
-                    for _ in 0..=(*num) {
-                        encoded_tokens.push(0);
-                    }
+                    encoded_tokens.extend(vec![0; *num as usize]);
                 } else {
                     return Err((
-                        CodeGenError {
+                        Box::new(CodeGenError {
                             file: fname.to_string(),
                             help: Some(format!("found {} argument", stri.magenta())),
                             input: read_file(fname),
@@ -130,7 +128,7 @@ pub fn encode(
                             ),
                             start_pos: ins.2.start,
                             last_pos: ins.2.end,
-                        },
+                        }),
                         vec![],
                     ));
                 }

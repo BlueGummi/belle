@@ -59,7 +59,7 @@ impl InstructionArgument {
     pub fn get_imm(&self) -> i16 {
         if let InstructionArgument::Imm(v) = self {
             if *v < 0 {
-                (1 << 7) | (v.abs() as u16 as i16)
+                (1 << 7) | (v.unsigned_abs() as u16 as i16)
             } else {
                 *v as i16
             }
