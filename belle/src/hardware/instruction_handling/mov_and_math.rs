@@ -11,10 +11,15 @@ impl CPU {
                     return Err(self.generate_invalid_register());
                 }
                 _ => {
+                    let v = if let Argument::Literal(_) = arg2 {
+                        value as i16 as u16
+                    } else {
+                        value as u16
+                    };
                     self.oflag = self.int_reg[*n as usize]
                         .checked_add(value as u16)
                         .is_none();
-                    self.int_reg[*n as usize].wrapping_add(value as i16 as u16) as f32
+                    self.int_reg[*n as usize].wrapping_add(v) as f32
                 }
             };
             self.set_register_value(arg1, new_value as f64)?;
