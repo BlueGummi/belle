@@ -35,7 +35,7 @@ pub fn encode(
     ins: (&String, &TokenKind, &Range<usize>),
     fname: &String,
     next_ins: &Option<&(String, TokenKind, Range<usize>)>,
-) -> Result<Vec<i16>, CodeGenError> {
+) -> Result<Vec<i16>, (CodeGenError, Vec<(String, Range<usize>)>)> {
     let mut encoded_tokens = Vec::new();
     match &ins.1 {
         TokenKind::Instruction(ins) => {
@@ -77,10 +77,12 @@ pub fn encode(
                     ins.name.to_uppercase().magenta()
                 ),
             };
-            match encode_instruction(fname, &opcode, &ins_class, &ins.operands) {
-                Ok(v) => encoded_tokens.push(v),
-                Err(e) => return Err(e),
-            }
+            encoded_tokens.push(encode_instruction(
+                fname,
+                &opcode,
+                &ins_class,
+                &ins.operands,
+            )?);
         }
         TokenKind::Directive(name) => match name.to_lowercase().as_str() {
             "asciiz" => {
@@ -93,16 +95,19 @@ pub fn encode(
                         encoded_tokens.push(letter as i16);
                     }
                 } else {
-                    return Err(CodeGenError {
-                        file: fname.to_string(),
-                        help: Some(format!("found {} argument", stri.magenta())),
-                        input: read_file(fname),
-                        message: String::from(
-                            "ASCIIZ directive must be succeeded by string literal",
-                        ),
-                        start_pos: ins.2.start,
-                        last_pos: ins.2.end,
-                    });
+                    return Err((
+                        CodeGenError {
+                            file: fname.to_string(),
+                            help: Some(format!("found {} argument", stri.magenta())),
+                            input: read_file(fname),
+                            message: String::from(
+                                "ASCIIZ directive must be succeeded by string literal",
+                            ),
+                            start_pos: ins.2.start,
+                            last_pos: ins.2.end,
+                        },
+                        vec![],
+                    ));
                 }
             }
             "pad" => {
@@ -115,14 +120,19 @@ pub fn encode(
                         encoded_tokens.push(0);
                     }
                 } else {
-                    return Err(CodeGenError {
-                        file: fname.to_string(),
-                        help: Some(format!("found {} argument", stri.magenta())),
-                        input: read_file(fname),
-                        message: String::from("PAD directive must be succeeded by integer literal"),
-                        start_pos: ins.2.start,
-                        last_pos: ins.2.end,
-                    });
+                    return Err((
+                        CodeGenError {
+                            file: fname.to_string(),
+                            help: Some(format!("found {} argument", stri.magenta())),
+                            input: read_file(fname),
+                            message: String::from(
+                                "PAD directive must be succeeded by integer literal",
+                            ),
+                            start_pos: ins.2.start,
+                            last_pos: ins.2.end,
+                        },
+                        vec![],
+                    ));
                 }
             }
             "word" => {

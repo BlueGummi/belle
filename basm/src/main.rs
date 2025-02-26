@@ -57,8 +57,34 @@ fn main() {
         // we should only have instructions at this point
         match encode((fname, tok, span), fname, &toks.get(ind + 1)) {
             Ok(value) => binary.extend(value),
-            Err(e) => {
-                println!("{e}");
+            Err((m, similars)) => {
+                println!("{m}");
+                if similars.len() > 0 {
+                    let size = similars.len() - 1;
+                    let max_filename_length = similars
+                        .iter()
+                        .map(|(filename, _)| filename.len())
+                        .max()
+                        .unwrap_or(0);
+                    for (index, (filename, location)) in similars.into_iter().enumerate() {
+                        let (l_num, data) = highlight_range_in_file(&filename, &location);
+                        let connector = if index != size { "├" } else { "╰" };
+                        println!(
+                            "         {}{} in {:<width$} {}{} {:^6} {} {}",
+                            connector.bright_red(),
+                            ">".yellow(),
+                            filename.green(),
+                            "─".bright_red(),
+                            ">".yellow(),
+                            l_num.to_string().blue(),
+                            "│".blue(),
+                            data,
+                            width = max_filename_length,
+                        );
+                    }
+                    println!();
+                }
+
                 error_count += 1;
                 print_errc!(error_count);
             }

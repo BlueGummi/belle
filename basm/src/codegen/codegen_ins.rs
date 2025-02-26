@@ -8,7 +8,7 @@ pub fn encode_instruction(
     opcode: &i16,
     class: &u8,
     args: &[(InstructionArgument, Range<usize>)],
-) -> Result<i16, CodeGenError> {
+) -> Result<i16, (CodeGenError, Vec<(String, Range<usize>)>)> {
     let lhs = args.first();
     let rhs = args.get(1);
     let mut encoded;
@@ -32,16 +32,19 @@ pub fn encode_instruction(
                         if let Some(v) = m.data.first() {
                             encoded = encoded | (1 << 7) | (v.0.get_value() as i16);
                         } else {
-                            return Err(CodeGenError {
-                                file: fname.to_string(),
-                                help: None,
-                                input: read_file(fname),
-                                message: String::from(
-                                    "MOV type instruction appears to have empty memory",
-                                ),
-                                start_pos: f.start,
-                                last_pos: f.end,
-                            });
+                            return Err((
+                                CodeGenError {
+                                    file: fname.to_string(),
+                                    help: None,
+                                    input: read_file(fname),
+                                    message: String::from(
+                                        "MOV type instruction appears to have empty memory",
+                                    ),
+                                    start_pos: f.start,
+                                    last_pos: f.end,
+                                },
+                                vec![],
+                            ));
                         }
                     }
                     Imm(_) => encoded = encoded | (1 << 8) | arg.get_imm(),
@@ -56,43 +59,52 @@ pub fn encode_instruction(
                 Ident(i) => {
                     if let Some((name, span, value)) = l_map.get(i) {
                         if *value >= 1024 {
-                            return Err(CodeGenError {
-                                file: name.to_string(),
-                                help: None,
-                                input: read_file(name),
-                                message: format!(
-                                    "the address of label \"{i}\" cannot fit within 10 bits"
-                                ),
-                                start_pos: span.start,
-                                last_pos: span.end,
-                            });
+                            return Err((
+                                CodeGenError {
+                                    file: name.to_string(),
+                                    help: None,
+                                    input: read_file(name),
+                                    message: format!(
+                                        "the address of label \"{i}\" cannot fit within 10 bits"
+                                    ),
+                                    start_pos: span.start,
+                                    last_pos: span.end,
+                                },
+                                vec![],
+                            ));
                         } else {
                             encoded |= *value as i16;
                         }
                     } else {
                         std::mem::drop(l_map);
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: find_similar_entries(i).0,
-                            input: read_file(fname),
-                            message: format!("cannot find label \"{i}\""),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: find_similar_entries(i).0,
+                                input: read_file(fname),
+                                message: format!("cannot find label \"{i}\""),
+                                start_pos: args.first().unwrap().1.start,
+                                last_pos: args.first().unwrap().1.end,
+                            },
+                            find_similar_entries(i).1,
+                        ));
                     }
                 }
                 Mem(m) => {
                     if let Some(v) = m.data.first() {
                         encoded |= v.0.get_value() as i16; // value limits are checked earlier
                     } else {
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: None,
-                            input: read_file(fname),
-                            message: String::from("Branch instruction memory appears empty"),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: None,
+                                input: read_file(fname),
+                                message: String::from("Branch instruction memory appears empty"),
+                                start_pos: args.first().unwrap().1.start,
+                                last_pos: args.first().unwrap().1.end,
+                            },
+                            vec![],
+                        ));
                     }
                 }
                 IReg(r) => {
@@ -107,28 +119,34 @@ pub fn encode_instruction(
                 Ident(i) => {
                     if let Some((name, span, value)) = l_map.get(i) {
                         if *value >= 2048 {
-                            return Err(CodeGenError {
-                                file: name.to_string(),
-                                help: None,
-                                input: read_file(name),
-                                message: format!(
-                                    "the address of label \"{i}\" cannot fit within 11 bits"
-                                ),
-                                start_pos: span.start,
-                                last_pos: span.end,
-                            });
+                            return Err((
+                                CodeGenError {
+                                    file: name.to_string(),
+                                    help: None,
+                                    input: read_file(name),
+                                    message: format!(
+                                        "the address of label \"{i}\" cannot fit within 11 bits"
+                                    ),
+                                    start_pos: span.start,
+                                    last_pos: span.end,
+                                },
+                                vec![],
+                            ));
                         } else {
                             encoded = encoded | (1 << 11) | (*value as i16);
                         }
                     } else {
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: None,
-                            input: read_file(fname),
-                            message: format!("cannot find label \"{i}\""),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: None,
+                                input: read_file(fname),
+                                message: format!("cannot find label \"{i}\""),
+                                start_pos: args.first().unwrap().1.start,
+                                last_pos: args.first().unwrap().1.end,
+                            },
+                            vec![],
+                        ));
                     }
                 }
 
@@ -136,14 +154,17 @@ pub fn encode_instruction(
                     if let Some(v) = m.data.first() {
                         encoded = encoded | (1 << 11) | v.0.get_value() as i16;
                     } else {
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: None,
-                            input: read_file(fname),
-                            message: String::from("POP instruction memory appears empty"),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: None,
+                                input: read_file(fname),
+                                message: String::from("POP instruction memory appears empty"),
+                                start_pos: args.first().unwrap().1.start,
+                                last_pos: args.first().unwrap().1.end,
+                            },
+                            vec![],
+                        ));
                     }
                 }
 
@@ -164,29 +185,35 @@ pub fn encode_instruction(
                 Ident(i) => {
                     if let Some((name, span, value)) = l_map.get(i) {
                         if *value >= 512 {
-                            return Err(CodeGenError {
-                                file: name.to_string(),
-                                help: None,
-                                input: read_file(name),
-                                message: format!(
-                                    "the address of label \"{i}\" cannot fit within 9 bits"
-                                ),
-                                start_pos: span.start,
-                                last_pos: span.end,
-                            });
+                            return Err((
+                                CodeGenError {
+                                    file: name.to_string(),
+                                    help: None,
+                                    input: read_file(name),
+                                    message: format!(
+                                        "the address of label \"{i}\" cannot fit within 9 bits"
+                                    ),
+                                    start_pos: span.start,
+                                    last_pos: span.end,
+                                },
+                                vec![],
+                            ));
                         } else {
                             encoded |= *value as i16;
                         }
                     } else {
                         std::mem::drop(l_map);
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: find_similar_entries(i).0,
-                            input: read_file(fname),
-                            message: format!("cannot find label \"{i}\""),
-                            start_pos: args.get(1).unwrap().1.start,
-                            last_pos: args.get(1).unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: find_similar_entries(i).0,
+                                input: read_file(fname),
+                                message: format!("cannot find label \"{i}\""),
+                                start_pos: args.get(1).unwrap().1.start,
+                                last_pos: args.get(1).unwrap().1.end,
+                            },
+                            find_similar_entries(i).1,
+                        ));
                     }
                 }
 
@@ -194,14 +221,17 @@ pub fn encode_instruction(
                     if let Some(v) = m.data.first() {
                         encoded |= v.0.get_value() as i16;
                     } else {
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: None,
-                            input: read_file(fname),
-                            message: String::from("LD/LEA instruction memory appears empty"),
-                            start_pos: args.get(1).unwrap().1.start,
-                            last_pos: args.get(1).unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: None,
+                                input: read_file(fname),
+                                message: String::from("LD/LEA instruction memory appears empty"),
+                                start_pos: args.get(1).unwrap().1.start,
+                                last_pos: args.get(1).unwrap().1.end,
+                            },
+                            vec![],
+                        ));
                     }
                 }
                 _ => gen_ice!(
@@ -223,29 +253,35 @@ pub fn encode_instruction(
                 Ident(i) => {
                     if let Some((name, span, value)) = l_map.get(i) {
                         if *value >= 256 {
-                            return Err(CodeGenError {
-                                file: name.to_string(),
-                                help: None,
-                                input: read_file(name),
-                                message: format!(
-                                    "the address of label \"{i}\" cannot fit within 8 bits"
-                                ),
-                                start_pos: span.start,
-                                last_pos: span.end,
-                            });
+                            return Err((
+                                CodeGenError {
+                                    file: name.to_string(),
+                                    help: None,
+                                    input: read_file(name),
+                                    message: format!(
+                                        "the address of label \"{i}\" cannot fit within 8 bits"
+                                    ),
+                                    start_pos: span.start,
+                                    last_pos: span.end,
+                                },
+                                vec![],
+                            ));
                         } else {
                             encoded |= (*value as i16) << 3;
                         }
                     } else {
                         std::mem::drop(l_map);
-                        return Err(CodeGenError {
-                            file: fname.to_string(),
-                            help: find_similar_entries(i).0,
-                            input: read_file(fname),
-                            message: format!("cannot find label \"{i}\""),
-                            start_pos: args.first().unwrap().1.start,
-                            last_pos: args.first().unwrap().1.end,
-                        });
+                        return Err((
+                            CodeGenError {
+                                file: fname.to_string(),
+                                help: find_similar_entries(i).0,
+                                input: read_file(fname),
+                                message: format!("cannot find label \"{i}\""),
+                                start_pos: args.first().unwrap().1.start,
+                                last_pos: args.first().unwrap().1.end,
+                            },
+                            find_similar_entries(i).1,
+                        ));
                     }
                 }
 
