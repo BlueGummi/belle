@@ -1,3 +1,4 @@
+pub mod validator_core;
 pub mod validator_error;
 pub mod validator_ins;
 pub mod validator_macro;
