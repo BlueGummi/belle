@@ -77,10 +77,15 @@ pub fn encode_instruction(
                         }
                     } else {
                         std::mem::drop(l_map);
+                        let info = if let (Some(s), _) = find_similar_entries(i) {
+                            Some(format!("{} {s}", "╮".bright_red()))
+                        } else {
+                            None
+                        };
                         return Err((
                             CodeGenError {
                                 file: fname.to_string(),
-                                help: find_similar_entries(i).0,
+                                help: info,
                                 input: read_file(fname),
                                 message: format!("cannot find label \"{i}\""),
                                 start_pos: args.first().unwrap().1.start,
@@ -203,10 +208,15 @@ pub fn encode_instruction(
                         }
                     } else {
                         std::mem::drop(l_map);
+                        let info = if let (Some(s), _) = find_similar_entries(i) {
+                            Some(format!("{} {s}", "╮".bright_red()))
+                        } else {
+                            None
+                        };
                         return Err((
                             CodeGenError {
                                 file: fname.to_string(),
-                                help: find_similar_entries(i).0,
+                                help: info,
                                 input: read_file(fname),
                                 message: format!("cannot find label \"{i}\""),
                                 start_pos: args.get(1).unwrap().1.start,
@@ -271,10 +281,15 @@ pub fn encode_instruction(
                         }
                     } else {
                         std::mem::drop(l_map);
+                        let info = if let (Some(s), _) = find_similar_entries(i) {
+                            Some(format!("{} {s}", "╮".bright_red()))
+                        } else {
+                            None
+                        };
                         return Err((
                             CodeGenError {
                                 file: fname.to_string(),
-                                help: find_similar_entries(i).0,
+                                help: info,
                                 input: read_file(fname),
                                 message: format!("cannot find label \"{i}\""),
                                 start_pos: args.first().unwrap().1.start,
