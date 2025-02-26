@@ -1,4 +1,6 @@
 use crate::*;
+use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
+use prettytable::{format, row, Table};
 use std::fmt;
 
 impl fmt::Display for TokenKind {
@@ -62,38 +64,38 @@ impl fmt::Display for TokenKind {
 
 impl fmt::Display for MemAddr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "├── Indirect: {}", self.indirect)?;
-        for (i, (arg, _)) in self.data.iter().enumerate() {
-            if i != self.data.len() - 1 {
-                writeln!(f, "    │   ├── {}", arg)?;
-            } else {
-                write!(f, "    │   └── {}", arg)?;
-            }
+        let mut table = Table::new();
+        table.set_format(get_custom_format());
+
+        table.add_row(row!["Indirect", self.indirect]);
+        for (arg, _) in &self.data {
+            table.add_row(row!["Data", arg]);
         }
-        Ok(())
+        write!(f, "{}", table)
     }
 }
 
 impl fmt::Display for MacroContent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Macro: {}", self.name.0)?;
-        writeln!(f, "├── Args:")?;
-        for (i, (_, arg, _)) in self.parameters.iter().enumerate() {
-            if i != self.parameters.len() - 1 {
-                writeln!(f, "│   ├── {}", arg)?;
-            } else {
-                writeln!(f, "│   └── {}", arg)?;
+        let mut table = Table::new();
+        table.set_format(get_custom_format());
+
+        table.add_row(row![format!("Macro Name: {}", self.name.0)]);
+        if !self.parameters.is_empty() {
+            table.add_row(row![]);
+            table.add_row(row!["Macro Args"]);
+            for (_, arg, _) in &self.parameters {
+                table.add_row(row![arg]);
             }
         }
-        writeln!(f, "└── Tokens:")?;
-        for (i, (token, _)) in self.body.iter().enumerate() {
-            if i != self.body.len() - 1 {
-                writeln!(f, "    ├── {}", token)?;
-            } else {
-                write!(f, "    └── {}", token)?;
+        if !self.body.is_empty() {
+            table.add_row(row![]);
+            table.add_row(row!["Body Tokens"]);
+            for (token, _) in &self.body {
+                table.add_row(row![token]);
             }
         }
-        Ok(())
+        write!(f, "{}", table)
     }
 }
 
@@ -115,6 +117,7 @@ impl fmt::Display for ArgumentType {
         }
     }
 }
+
 impl InstructionArgument {
     pub fn get_raw(&self) -> String {
         match self {
@@ -127,6 +130,7 @@ impl InstructionArgument {
         }
     }
 }
+
 impl fmt::Display for InstructionArgument {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -142,19 +146,26 @@ impl fmt::Display for InstructionArgument {
 
 impl fmt::Display for InstructionData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
-            f,
-            "Instruction: {}, Expanded from macro {}",
-            self.name, self.expanded
-        )?;
-        writeln!(f, "    └─┐ Args:")?;
-        for (i, (arg, _)) in self.operands.iter().enumerate() {
-            if i != self.operands.len() - 1 {
-                writeln!(f, "      ├── {}", arg)?;
-            } else {
-                write!(f, "    ┌─┴── {}", arg)?;
-            }
+        let mut table = Table::new();
+        table.set_format(get_custom_format());
+
+        table.add_row(row!["Instruction Name", self.name]);
+        table.add_row(row!["Was expanded", self.expanded]);
+        for (i, (arg, _)) in self.operands.clone().into_iter().enumerate() {
+            table.add_row(row![format!("Operand {}", i + 1), arg]);
         }
-        Ok(())
+        write!(f, "{}", table)
     }
+}
+
+fn get_custom_format() -> format::TableFormat {
+    FormatBuilder::new()
+        .column_separator('│')
+        .borders('│')
+        .separator(LinePosition::Top, LineSeparator::new('─', '┬', '╭', '╮'))
+        .separator(LinePosition::Title, LineSeparator::new('─', '┼', '├', '┤'))
+        .separator(LinePosition::Bottom, LineSeparator::new('─', '┴', '╰', '╯'))
+        .separator(LinePosition::Intern, LineSeparator::new('─', '┼', '├', '┤'))
+        .padding(1, 1)
+        .build()
 }
