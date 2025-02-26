@@ -139,7 +139,7 @@ default_build() {
                 if ! [ "$loud" ]; then
                         cargo build --release --quiet &
                 else
-                        cargo build --release &
+                        cargo build --release -v &
                 fi
                 pid=$!
                 if [ -z "$no_spin" ]; then
