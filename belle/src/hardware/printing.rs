@@ -15,8 +15,8 @@ impl fmt::Display for CPU {
             let r1 = self.int_reg[1].to_string().magenta();
             let r2 = self.int_reg[2].to_string().magenta();
             let r3 = self.int_reg[3].to_string().magenta();
-            let r4 = self.uint_reg[0].to_string().magenta();
-            let r5 = self.uint_reg[1].to_string().magenta();
+            let r4 = self.int_reg[4].to_string().magenta();
+            let r5 = self.int_reg[5].to_string().magenta();
             let r6 = self.float_reg[0].to_string().magenta();
             let r7 = self.float_reg[1].to_string().magenta();
             let z = if self.zflag { "z".green() } else { "z".red() };
@@ -94,14 +94,6 @@ impl fmt::Display for CPU {
             register_lines.push(format!(
                 "{}: {:^6} │",
                 format!("r{}", i).bold().green(),
-                val.to_string().bold().magenta()
-            ));
-        }
-
-        for (i, &val) in self.uint_reg.iter().enumerate() {
-            register_lines.push(format!(
-                "{}: {:^6} │",
-                format!("r{}", i + 4).bold().green(),
                 val.to_string().bold().magenta()
             ));
         }

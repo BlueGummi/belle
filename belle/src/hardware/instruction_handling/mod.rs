@@ -93,22 +93,22 @@ fn add_with_mptr_fail() {
 fn add_with_negative_register() {
     let mut bcpu = CPU::new();
 
-    bcpu.int_reg[0] = -42;
+    bcpu.int_reg[0] = 65493;
 
-    bcpu.uint_reg[1] = 42;
+    bcpu.int_reg[5] = 42;
 
     test_instruction!(bcpu, add, "r5", "r0");
-    assert_eq!(bcpu.uint_reg[1], 0);
+    assert_eq!(bcpu.int_reg[5], 65535);
 }
 
 #[test]
 fn add_with_negative_register_underflow() {
     let mut bcpu = CPU::new();
 
-    bcpu.int_reg[0] = -42;
+    bcpu.int_reg[0] = 65494;
 
     test_instruction!(bcpu, add, "r5", "r0");
-    assert_eq!(bcpu.uint_reg[1], 65494);
+    assert_eq!(bcpu.int_reg[5], 65494);
 }
 
 #[test]
@@ -131,7 +131,7 @@ fn bo_jump() {
     test_instruction!(bcpu, bo, "$300");
     assert_eq!(bcpu.pc, 300);
 
-    bcpu.uint_reg[0] = 444;
+    bcpu.int_reg[4] = 444;
     test_instruction!(bcpu, bo, "&r4");
     assert_eq!(bcpu.pc, 444);
 }
@@ -154,7 +154,7 @@ fn bno_no_jump() {
     test_instruction!(bcpu, bno, "$300");
     assert_eq!(bcpu.pc, 2);
 
-    bcpu.uint_reg[0] = 444;
+    bcpu.int_reg[4] = 444;
     test_instruction!(bcpu, bno, "&r4");
     assert_eq!(bcpu.pc, 3);
 }
@@ -177,7 +177,7 @@ fn bnz_no_jump() {
     test_instruction!(bcpu, bnz, "$300");
     assert_eq!(bcpu.pc, 2);
 
-    bcpu.uint_reg[0] = 444;
+    bcpu.int_reg[4] = 444;
     test_instruction!(bcpu, bnz, "&r4");
     assert_eq!(bcpu.pc, 3);
 }
@@ -200,7 +200,7 @@ fn bz_jump() {
     test_instruction!(bcpu, bz, "$300");
     assert_eq!(bcpu.pc, 300);
 
-    bcpu.uint_reg[0] = 444;
+    bcpu.int_reg[4] = 444;
     test_instruction!(bcpu, bz, "&r4");
     assert_eq!(bcpu.pc, 444);
 }
@@ -219,7 +219,7 @@ fn jmp_jump() {
 
     test_instruction!(bcpu, jmp, "$320");
     assert_eq!(bcpu.pc, 320);
-    bcpu.uint_reg[0] = 444;
+    bcpu.int_reg[4] = 444;
     test_instruction!(bcpu, jmp, "&r4");
     assert_eq!(bcpu.pc, 444);
 }
@@ -373,7 +373,7 @@ fn div_success() {
 fn mov_fail() {
     let mut bcpu = CPU::new();
 
-    bcpu.int_reg[1] = -32;
+    bcpu.int_reg[1] = 65503;
 
     test_instruction!(bcpu, mov, "r0", "&r1");
 }
@@ -383,7 +383,7 @@ fn mov_fail() {
 fn mov_fail_2() {
     let mut bcpu = CPU::new();
 
-    bcpu.uint_reg[0] = 333;
+    bcpu.int_reg[4] = 333;
 
     test_instruction!(bcpu, mov, "r2", "&r4");
 }
@@ -392,7 +392,7 @@ fn mov_fail_2() {
 fn mov_success() {
     let mut bcpu = CPU::new();
 
-    bcpu.uint_reg[0] = 33;
+    bcpu.int_reg[4] = 33;
 
     test_instruction!(bcpu, mov, "r0", "r4");
 
@@ -491,12 +491,12 @@ fn int_success() {
     test_instruction!(bcpu, int, "43");
     assert_eq!(bcpu.sflag, true);
 
-    bcpu.uint_reg[0] = 555;
+    bcpu.int_reg[4] = 555;
     // SP
     test_instruction!(bcpu, int, "60");
     assert_eq!(bcpu.sp, 555);
 
-    bcpu.uint_reg[0] = 6154;
+    bcpu.int_reg[4] = 6154;
     // BP
     test_instruction!(bcpu, int, "61");
     assert_eq!(bcpu.bp, 6154);

@@ -19,11 +19,7 @@ pub fn write_crash(cpu: &CPU) {
             };
 
             write_to_file("------ CRASH DUMP ------");
-            write_to_file(&format!(
-                "\n\n  Signed Integer Registers : {:?}",
-                cpu.int_reg
-            ));
-            write_to_file(&format!("  Uint registers           : {:?}", cpu.uint_reg));
+            write_to_file(&format!("\n\n  Integer Registers : {:?}", cpu.int_reg));
             write_to_file(&format!("  Float Registers          : {:?}", cpu.float_reg));
             write_to_file(&format!("  Program Counter          : {}", cpu.pc));
             write_to_file(&format!("  Instruction Register     : {:016b}", cpu.ir));

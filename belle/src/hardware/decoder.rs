@@ -98,13 +98,11 @@ impl CPU {
     pub fn get_value(&mut self, arg: &Argument) -> Result<f32, UnrecoverableError> {
         match arg {
             Register(n) => match n {
-                4 => Ok(self.uint_reg[0] as f32),
-                5 => Ok(self.uint_reg[1] as f32),
                 6 => Ok(self.float_reg[0]),
                 7 => Ok(self.float_reg[1]),
                 8 => Ok(self.pc as f32),
                 9 => Ok(self.sp as f32),
-                n if *n > 3 || *n < 0 => Err(self.generate_invalid_register()),
+                n if *n > 5 || *n < 0 => Err(self.generate_invalid_register()),
 
                 _ => Ok(self.int_reg[*n as usize] as f32),
             },
@@ -133,13 +131,11 @@ impl CPU {
             }
             RegPtr(n) => {
                 let tmp = match n {
-                    4 => self.uint_reg[0] as f32,
-                    5 => self.uint_reg[1] as f32,
                     6 => self.float_reg[0],
                     7 => self.float_reg[1],
                     8 => self.pc as f32,
                     9 => self.sp as f32,
-                    n if *n > 3 || *n < 0 => {
+                    n if *n > 5 || *n < 0 => {
                         return Err(self.generate_invalid_register());
                     }
                     _ => self.int_reg[*n as usize] as f32,

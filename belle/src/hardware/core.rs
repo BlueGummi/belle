@@ -20,8 +20,7 @@ use std::sync::mpsc;
 
 #[derive(Debug, Clone)]
 pub struct CPU {
-    pub int_reg: [i16; 4], // r0 thru r5
-    pub uint_reg: [u16; 2],
+    pub int_reg: [u16; 6],   // r0 thru r5
     pub float_reg: [f32; 2], // r6 and r7
     pub memory: Box<[Option<u16>; MEMORY_SIZE]>,
     pub pc: u16, // program counter
@@ -56,8 +55,7 @@ impl CPU {
     #[must_use]
     pub fn new() -> CPU {
         CPU {
-            int_reg: [0; 4],
-            uint_reg: [0; 2],
+            int_reg: [0; 6],
             float_reg: [0.0; 2],
             memory: Box::new([None; MEMORY_SIZE]),
             pc: 0,
@@ -204,7 +202,7 @@ impl CPU {
                 Ok(())
             })
         };
-        
+
         #[cfg(target_os = "linux")]
         configure_wayland();
 
@@ -309,14 +307,12 @@ impl CPU {
                 return Ok(());
             }
             match *n {
-                4 => self.uint_reg[0] = value as u16,
-                5 => self.uint_reg[1] = value as u16,
                 6 => self.float_reg[0] = value as f32,
                 7 => self.float_reg[1] = value as f32,
                 8 => self.pc = value as u16,
                 9 => self.sp = value as u16,
-                n if !(0..=3).contains(&n) => return Err(self.generate_invalid_register()),
-                _ => self.int_reg[*n as usize] = value as i16,
+                n if !(0..=5).contains(&n) => return Err(self.generate_invalid_register()),
+                _ => self.int_reg[*n as usize] = value as u16,
             }
             if let Err(e) = self.check_overflow(value as i64, *n as u16) {
                 eprint!("{e}");
