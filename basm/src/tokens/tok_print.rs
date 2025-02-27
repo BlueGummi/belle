@@ -49,6 +49,7 @@ impl fmt::Display for TokenKind {
             TokenKind::MacroIdent(value) => write!(f, "macro identifier({})", value),
             TokenKind::MacroLabel(value) => write!(f, "macro label({})", value),
             TokenKind::Comment => write!(f, "comment"),
+            TokenKind::MultiLineComment => write!(f, "comment"),
             TokenKind::Macro(content) => write!(f, "{}", content),
             TokenKind::Instruction(data) => write!(f, "{}", data),
             TokenKind::Label(value) => write!(f, "label({})", value),

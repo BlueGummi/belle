@@ -72,3 +72,8 @@ macro_rules! pe() {
     int 8
     hlt
 }
+
+/* they not like us
+   they not like us
+   they not like us
+*/

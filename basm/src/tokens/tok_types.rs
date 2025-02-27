@@ -135,6 +135,9 @@ pub enum TokenKind {
     #[regex(";.*", logos::skip)]
     Comment,
 
+    #[regex(r"/\*([^*]|\*[^/])*\*/", logos::skip)]
+    MultiLineComment,
+
     Macro(MacroContent),
 
     Instruction(InstructionData),
