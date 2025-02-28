@@ -1,5 +1,6 @@
 pub mod codegen;
 pub mod config;
+pub mod err_misc;
 pub mod evaluator;
 pub mod misc;
 pub mod parser;
@@ -9,6 +10,7 @@ pub mod tokens;
 pub mod validator;
 pub use codegen::*;
 pub use config::*;
+pub use err_misc::*;
 pub use evaluator::*;
 pub use misc::*;
 pub use parser::*;

@@ -3,6 +3,7 @@ use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct ParserError {
+    // This is a fairly generic error structure,  used a lot across different parts of the compiler
     pub input: String,
     pub message: String,
     pub help: Option<String>,

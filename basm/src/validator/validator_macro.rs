@@ -156,6 +156,7 @@ impl MacroContent {
                             ins_args.push((v.to_tok_kind(), span.clone()));
                             continue;
                         } else {
+                            // we could make this a variable earlier and just send it
                             errs.push(MacroValidatorError {
                                 err_file: self.file.to_string(),
                                 err_input: read_file(&self.file.to_string()),

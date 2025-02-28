@@ -6,7 +6,56 @@ impl InstructionData {
     // location         // msg
     pub fn is_valid(&self) -> Result<(), (Option<Range<usize>>, String)> {
         // Ident is for matching labels - they will be memory addresses
-        // Boolean lambda bonanza begins
+        // registers are blue, addresses magenta, 'indirect' is underlined
+        // 'imm' is green
+        let reg = "reg".blue().to_string();
+        let mem = "mem".magenta().to_string();
+        let ind = "i".underline().to_string();
+        let imm = "imm".green().to_string();
+        let no = String::from("no");
+        let lhs_detail: [&String; 8] = [
+            &reg,
+            &format!("{reg} or {mem} {ind}"),
+            &no,
+            &reg,
+            &format!("{reg} {ind} or {mem}"),
+            &imm,
+            &format!("{imm} or {reg}"),
+            &format!("{mem} or {reg}"),
+        ];
+        let rhs_detail: [&String; 8] = [
+            &format!("{reg}, {reg} {ind}, {mem} {ind}, or {imm}"),
+            &no,
+            &no,
+            &format!("{mem} or {reg}"),
+            &reg,
+            &no,
+            &no,
+            &no,
+        ];
+
+        let lhs_maxes: [&str; 8] = [
+            "3 bit reg",                // mov
+            "10 bit addr or 4 bit reg", // bcc
+            "no",                       // ret/hlt
+            "3 bit reg",                // ld
+            "7 bit addr or 4 bit reg",  // st
+            "8 bit imm",                // int
+            "8 bit imm",                // push
+            "11 bit addr or 4 bit reg", // pop
+        ];
+
+        let rhs_maxes: [&str; 8] = [
+            "4 bit reg 8 bit imm or 7 bit mem",
+            "no",
+            "no",
+            "9 bit mem",
+            "3 bit reg",
+            "no",
+            "no",
+            "no",
+        ];
+
         let lhs_val = match self.operands.first() {
             Some(v) => v.0.get_value().to_string(),
             None => String::from("none"),
@@ -45,14 +94,14 @@ impl InstructionData {
                 "{}: max LHS for {} is {}, max RHS is {}\n{}: found LHS and RHS values are {} and {}\n ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
-                LHS_MAXES[ins_class], RHS_MAXES[ins_class], "note".yellow(), lhs_val, rhs_val
+                lhs_maxes[ins_class], rhs_maxes[ins_class], "note".yellow(), lhs_val, rhs_val
             )
         } else if !ok_lhs && valid_args {
             format!(
                 "{}: max LHS for {} is {}\n{}: found LHS is {}\n ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
-                LHS_MAXES[ins_class],
+                lhs_maxes[ins_class],
                 "note".yellow(),
                 lhs_val
             )
@@ -61,7 +110,7 @@ impl InstructionData {
                 "{}: max RHS for {} is {}\n{}: found RHS is {}\n ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
-                RHS_MAXES[ins_class],
+                rhs_maxes[ins_class],
                 "note".yellow(),
                 rhs_val
             )
@@ -74,8 +123,8 @@ impl InstructionData {
                 format!(
                     "{}: expected {} LHS, {} RHS\n{}: found {} LHS and {} RHS\n\n{ovfm}",
                     "invalid operands".bold(),
-                    LHS_DETAIL[ins_class],
-                    RHS_DETAIL[ins_class],
+                    lhs_detail[ins_class],
+                    rhs_detail[ins_class],
                     "note".yellow(),
                     lhs,
                     rhs,
@@ -87,7 +136,7 @@ impl InstructionData {
                 format!(
                     "{}: expected {} on RHS\n{}: found {} \n\n{ovfm}",
                     "invalid operands".bold(),
-                    RHS_DETAIL[ins_class],
+                    rhs_detail[ins_class],
                     "note".yellow(),
                     rhs,
                 ),
@@ -98,7 +147,7 @@ impl InstructionData {
                 format!(
                     "{}: expected {} on LHS\n{}: found {}\n\n{ovfm}",
                     "invalid operands".bold(),
-                    LHS_DETAIL[ins_class],
+                    lhs_detail[ins_class],
                     "note".yellow(),
                     lhs,
                 ),
@@ -108,46 +157,3 @@ impl InstructionData {
         }
     }
 }
-
-const LHS_DETAIL: [&str; 8] = [
-    "reg",
-    "mem addr or reg i.",
-    "no",
-    "reg",
-    "mem addr or reg i.",
-    "imm",
-    "imm or reg",
-    "mem addr or reg",
-];
-const RHS_DETAIL: [&str; 8] = [
-    "reg, reg i., mem i., or imm",
-    "no",
-    "no",
-    "mem addr or reg",
-    "reg",
-    "no",
-    "no",
-    "no",
-];
-
-const LHS_MAXES: [&str; 8] = [
-    "reg < 8",                   // mov
-    "mem < 1024 or reg i. < 10", // bcc
-    "no",                        // ret/hlt
-    "reg < 8",                   // ld
-    "mem < 256 or reg i. < 10",  // st
-    "imm < 128 and > -128",      // int
-    "imm < 128 and > -128",      // push
-    "mem < 2048 or reg < 10",    // pop
-];
-
-const RHS_MAXES: [&str; 8] = [
-    "reg (i.) < 10 or imm > -128 and < 128 or mem i. < 128",
-    "no",
-    "no",
-    "mem < 512",
-    "reg < 8",
-    "no",
-    "no",
-    "no",
-];

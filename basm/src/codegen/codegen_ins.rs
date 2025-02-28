@@ -103,9 +103,11 @@ pub fn encode_instruction(
                         return Err((
                             Box::new(CodeGenError {
                                 file: fname.to_string(),
-                                help: None,
+                                help: Some(String::from(
+                                    "branch instructions expect memory or register indirects",
+                                )),
                                 input: read_file(fname),
-                                message: String::from("Branch instruction memory appears empty"),
+                                message: String::from("branch instruction memory appears empty"),
                                 start_pos: args.first().unwrap().1.start,
                                 last_pos: args.first().unwrap().1.end,
                             }),
@@ -314,7 +316,7 @@ pub fn encode_instruction(
             }
             match &rhs.unwrap().0 {
                 Reg(r) => encoded |= *r as i16,
-                _ => panic!(),
+                _ => gen_ice!("Right hand side of ST is not a register"),
             }
         }
         _ => gen_ice!("INVALID INSTRUCTION TYPE IN CODEGEN"),
