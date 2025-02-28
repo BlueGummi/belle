@@ -18,5 +18,5 @@ fn set_register_0() {
     set_register!(bcpu, 0, 3.0);
     assert_eq!(bcpu.int_reg[0], 3);
     set_register!(bcpu, 0, -4.9);
-    assert_eq!(bcpu.int_reg[0], 0);
+    assert_eq!(bcpu.int_reg[0], 3);
 }

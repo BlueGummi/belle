@@ -138,7 +138,7 @@ impl CPU {
     }
     pub fn check_overflow(&mut self, new_value: i64, register: u16) -> PossibleWarn {
         let overflowed = match register {
-            0..=5 => new_value > i64::from(u16::MAX) || new_value < i64::from(u16::MIN),
+            0..=5 | 8 | 9 => new_value > i64::from(u16::MAX) || new_value < i64::from(u16::MIN),
             6..=7 => new_value > f32::MAX as i64 || new_value < f32::MIN as i64,
             _ => true,
         };

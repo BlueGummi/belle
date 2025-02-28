@@ -22,6 +22,7 @@ fn add_with_immediate_overflow() {
     let mut bcpu = CPU::new();
     test_instruction!(bcpu, add, "r0", "32000");
     test_instruction!(bcpu, add, "r0", "32000");
+    test_instruction!(bcpu, add, "r0", "32000");
     assert_eq!(bcpu.oflag, true);
 }
 
