@@ -92,7 +92,7 @@ fn main() {
         ind += 1;
     }
     print_errc!(error_count);
-    match &CONFIG.binary {
+    match &CONFIG.output {
         Some(path) => {
             let mut bytes: Vec<u8> = Vec::new();
             for value in &binary {
@@ -100,10 +100,12 @@ fn main() {
             }
 
             let start_bin = *START_LOCATION.lock().unwrap();
-            bytes.insert(0, (start_bin & 0xff) as u8);
-            bytes.insert(0, ((start_bin & 0xff00) >> 8) as u8);
-            bytes.insert(0, 0x02);
-            bytes.insert(0, 0x01);
+            if !CONFIG.thin {
+                bytes.insert(0, (start_bin & 0xff) as u8);
+                bytes.insert(0, ((start_bin & 0xff00) >> 8) as u8);
+                bytes.insert(0, 0x02);
+                bytes.insert(0, 0x01);
+            }
             match write_bytes_to_file(path, &bytes) {
                 Ok(()) => (),
                 Err(e) => {

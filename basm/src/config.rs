@@ -10,9 +10,9 @@ pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
 #[command(author = "gummi")]
 #[command(about = "The assembler for BELLE", long_about = None)]
 pub struct Args {
-    /// Binary name
+    /// Output binary name
     #[clap(short = 'o', long)]
-    pub binary: Option<String>,
+    pub output: Option<String>,
 
     /// Source code
     #[clap(required = true)]
@@ -21,16 +21,22 @@ pub struct Args {
     /// Verbose output
     #[clap(short = 'v', long, default_value_t = false)]
     pub verbose: bool,
+
+    /// Disable version and start information in binary
+    /// (may cause unexpected behavior in emulator and disassembler)
+    #[clap(short = 't', long, default_value_t = false)]
+    pub thin: bool,
 }
 
 pub fn declare_config() -> Args {
     let cli = Args::parse();
 
-    let binary = cli.binary.unwrap_or_else(|| "a.out".to_string());
+    let output = cli.output.unwrap_or_else(|| "a.out".to_string());
 
     Args {
         source: cli.source,
-        binary: Some(binary),
+        output: Some(output),
         verbose: cli.verbose,
+        thin: cli.thin,
     }
 }
