@@ -24,7 +24,7 @@ pub struct Args {
 
     /// Disable version and start information in binary
     /// (may cause unexpected behavior in emulator and disassembler)
-    #[clap(short = 't', long, default_value_t = false)]
+    #[clap(short = 't', long, default_value_t = false, verbatim_doc_comment)]
     pub thin: bool,
 }
 
