@@ -77,7 +77,6 @@ impl MacroContent {
                 orig_pos: f.clone().clone(),
                 mac: self.clone(),
             });
-            return Err(errs);
         }
         for (index, (_, arg, _)) in self.parameters.iter().enumerate() {
             if let Some((d, _)) = parsed_toks.get(index) {
@@ -105,7 +104,6 @@ impl MacroContent {
                     orig_pos: f.clone(),
                     mac: self.clone(),
                 });
-                return Err(errs);
             }
         } // we need a hashmap of type ident names, TokenKind to record arguments
         if !errs.is_empty() {

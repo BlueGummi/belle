@@ -19,13 +19,11 @@ fn main() {
         Some(parser) => parser,
         None => std::process::exit(1),
     };
-    print_errc!(error_count);
 
     let mut toks = match parse_tokens(&mut parser, &input_string, &mut error_count) {
         Some(tokens) => tokens,
         None => std::process::exit(1),
     };
-    print_errc!(error_count);
 
     process_includes(&mut toks, &mut error_count);
 
@@ -39,10 +37,8 @@ fn main() {
             println!("{f}");
         }
     }
-    print_errc!(error_count);
     let l_map = LABEL_MAP.lock().unwrap();
     std::mem::drop(l_map);
-    print_errc!(error_count);
     let toks: Vec<(String, TokenKind, Range<usize>)> = toks
         .clone()
         .into_iter()
@@ -86,7 +82,6 @@ fn main() {
                 }
 
                 error_count += 1;
-                print_errc!(error_count);
             }
         }
         ind += 1;
