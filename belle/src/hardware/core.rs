@@ -83,7 +83,6 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
-
         #[cfg(feature = "window")]
         let mut can_make_window = true;
         #[cfg(feature = "window")]
@@ -128,7 +127,10 @@ impl CPU {
             let delay = CONFIG.time_delay.unwrap_or_default();
             let delay = delay as u64;
             thread::spawn(move || {
+                let mut cycles = 0;
+                let starting = std::time::Instant::now();
                 while self_clone.running {
+                    cycles += 1;
                     if delay != 0 {
                         thread::sleep(Duration::from_millis(delay));
                     }
@@ -172,7 +174,7 @@ impl CPU {
                         println!("{}", self_clone);
                     }
 
-                    if !CONFIG.no_display {
+                    if !CONFIG.no_display && can_make_window {
                         let mut stringy = String::with_capacity(5000);
                         for index in 0xFF..0x9C9 {
                             if let Some(value) =
@@ -194,7 +196,13 @@ impl CPU {
                             let _ = tx.send(None).ok();
                         }
                     }
+                    cycles += 1;
                 }
+                /*println!(
+                    "We took {:?} to execute {} instructions",
+                    starting.elapsed(),
+                    cycles
+                );*/
                 if CONFIG.pretty {
                     self_clone.pmem = !CONFIG.no_print_memory;
                     println!("{self_clone}");
