@@ -30,7 +30,7 @@ impl CPU {
     pub fn handle_div(&mut self, arg1: &Argument, arg2: &Argument) -> PossibleCrash {
         let divisor = match self.get_value(arg2) {
             Ok(v) => {
-                if v == 0.0 || v as i32 == 0 {
+                if v == 0.0 || v as u16 == 0 {
                     self.generate_divbyz();
                     return Err(UnrecoverableError::DivideByZero(self.ir, self.pc, None));
                 }
