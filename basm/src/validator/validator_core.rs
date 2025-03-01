@@ -27,7 +27,7 @@ impl InstructionData {
             &format!("{reg}, {reg} {ind}, {mem} {ind}, or {imm}"),
             &no,
             &no,
-            &format!("{mem} or {reg}"),
+            &format!("{mem}"),
             &reg,
             &no,
             &no,
