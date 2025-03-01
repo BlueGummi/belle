@@ -200,11 +200,11 @@ impl CPU {
                     }
                     cycles += 1;
                 }
-                /*println!(
+                println!(
                     "We took {:?} to execute {} instructions",
                     starting.elapsed(),
                     cycles
-                );*/
+                );
                 if CONFIG.pretty {
                     self_clone.pmem = !CONFIG.no_print_memory;
                     println!("{self_clone}");
