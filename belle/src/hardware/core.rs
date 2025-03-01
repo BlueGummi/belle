@@ -83,7 +83,6 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
-        #[cfg(feature = "window")]
         let mut can_make_window = true;
         #[cfg(feature = "window")]
         let mut window_attempt = None;
