@@ -83,7 +83,7 @@ impl CPU {
         if self.do_not_run {
             return Ok(());
         }
-        let mut can_make_window = true;
+        let mut can_make_window = false;
         #[cfg(feature = "window")]
         let mut window_attempt = None;
         #[cfg(feature = "window")]
@@ -105,7 +105,10 @@ impl CPU {
         #[cfg(feature = "window")]
         if !CONFIG.no_display {
             window = match window_attempt {
-                Some(Ok(w)) => Some(w),
+                Some(Ok(w)) => {
+                    can_make_window = true;
+                    Some(w)
+                }
                 Some(Err(e)) => {
                     if !CONFIG.no_display {
                         eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
