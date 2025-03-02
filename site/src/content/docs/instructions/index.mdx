@@ -191,9 +191,6 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
         ```go
-        if memory[sp] = NULL
-            throw underflow_err
-
         dest := memory[sp]
         memory[sp] := NULL
 
@@ -276,9 +273,6 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
         ```go
-        if memory[sp] = NULL
-            throw underflow_err
-
         pc := memory[sp]
         memory[sp] := NULL
 
@@ -314,9 +308,6 @@ Please refer to the [encoding](../encoding) document for more information about 
 
     #### Pseudocode representation
     ```go
-    if memory[rhs] = NULL
-        throw segfault_err
-
     lhs := memory[rhs]
     ```
 
