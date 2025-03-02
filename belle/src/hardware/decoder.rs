@@ -95,6 +95,7 @@ impl Argument {
 }
 
 impl CPU {
+    #[inline(always)]
     pub fn get_value(&mut self, arg: &Argument) -> Result<f32, UnrecoverableError> {
         match arg {
             Register(n) => match n {
