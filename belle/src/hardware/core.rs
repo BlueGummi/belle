@@ -180,11 +180,28 @@ impl CPU {
                     }
                 }
                 if CONFIG.benchmark {
+                    let cycles_str = cycles.to_string();
+                    let formatted_cycles = cycles_str
+                        .chars()
+                        .rev()
+                        .enumerate()
+                        .map(|(i, c)| {
+                            if i > 0 && i % 3 == 0 {
+                                format!("{},{}", c, "")
+                            } else {
+                                c.to_string()
+                            }
+                        })
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect::<String>();
+
                     println!(
                         "[{}]: took {:?} to execute {} instructions",
                         "EMULATOR INFO".yellow(),
                         starting.elapsed(),
-                        cycles
+                        formatted_cycles
                     );
                 }
                 if CONFIG.pretty {
