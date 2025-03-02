@@ -143,75 +143,67 @@ impl CPU {
     }
 
     pub fn decode_instruction(&self) -> Instruction {
-        let opcode = (self.ir >> 12) & 0b1111u16 as i16;
-        let mut ins_type = if ((self.ir >> 8) & 1) == 1 {
+        let ir = self.ir;
+        let opcode = (ir >> 12) & 0b1111;
+        let mut ins_type = if ((ir >> 8) & 1) == 1 {
             1
-        } else if ((self.ir >> 7) & 1) == 1 {
+        } else if ((ir >> 7) & 1) == 1 {
             2
-        } else if ((self.ir >> 6) & 1) == 1 {
+        } else if ((ir >> 6) & 1) == 1 {
             3
         } else {
             0
         };
         let it_is_bouncy =
             opcode == BZ_OP || opcode == BO_OP || opcode == JMP_OP || opcode == RET_OP;
-        let indirect_bounce = (self.ir & 0b0000_0100_0000_0000) >> 10 == 1;
-        let tmp = self.ir & 0b111_1111;
 
         let source = match ins_type {
             1 => {
                 if it_is_bouncy {
-                    if indirect_bounce {
+                    if (ir & 0b0000_0100_0000_0000) >> 10 == 1 {
                         ins_type = 4;
-                        self.ir & 0b1111
+                        ir & 0b1111
                     } else {
-                        self.ir & 0b11_1111_1111
+                        ir & 0b11_1111_1111
                     }
-                } else if (self.ir & 0b10000000) >> 7 == 1 {
-                    -tmp
+                } else if (ir & 0b10000000) >> 7 == 1 {
+                    -(ir & 0b111_1111)
                 } else {
-                    tmp
+                    ir & 0b111_1111
                 }
             }
             _ => {
                 if it_is_bouncy {
-                    if indirect_bounce {
+                    if (ir & 0b0000_0100_0000_0000) >> 10 == 1 {
                         ins_type = 4;
-                        self.ir & 0b1111
+                        ir & 0b1111
                     } else {
-                        self.ir & 0b11_1111_1111
+                        ir & 0b11_1111_1111
                     }
                 } else {
-                    self.ir & 0b111_1111
+                    ir & 0b111_1111
                 }
             }
         };
-        let destination = (self.ir & 0b1110_0000_0000) >> 9;
-        let mut part = match ins_type {
-            0 => Register(source),
+        let destination = (ir & 0b1110_0000_0000) >> 9;
+        let part = match ins_type {
+            0 => Register(source & 0b111),
             1 => Literal(source),
-            2 => MemPtr(source),
+            2 => MemPtr(source & 0b111_1111),
             _ => RegPtr(source),
         };
 
-        if let RegPtr(value) = part {
-            part = RegPtr(value & 0b1111);
-        }
+        let invert = ((ir & 0b1000_0000_0000) >> 11) == 1;
 
-        if let MemPtr(value) = part {
-            part = MemPtr(value & 0b111_1111);
-        }
-        let invert = ((self.ir & 0b1000_0000_0000) >> 11) == 1;
-        // println!("{:04b}", opcode);
-        let j_dest = if ins_type == 4 {
-            RegPtr(source)
-        } else {
-            MemAddr(source)
-        };
         match opcode {
             HLT_OP => HLT,
             ADD_OP => ADD(Register(destination), part),
             BO_OP => {
+                let j_dest = if ins_type == 4 {
+                    RegPtr(source)
+                } else {
+                    MemAddr(source)
+                };
                 if invert {
                     BNO(j_dest)
                 } else {
@@ -219,15 +211,20 @@ impl CPU {
                 }
             }
             POP_OP => {
-                if self.ir & 2048 == 0 {
+                if ir & 2048 == 0 {
                     POP(Register(source))
                 } else {
-                    POP(MemAddr(self.ir & 2047))
+                    POP(MemAddr(ir & 2047))
                 }
             }
             DIV_OP => DIV(Register(destination), part),
             RET_OP => {
-                if self.ir & 4095 == 0 {
+                let j_dest = if ins_type == 4 {
+                    RegPtr(source)
+                } else {
+                    MemAddr(source)
+                };
+                if ir & 4095 == 0 {
                     RET
                 } else if invert {
                     BG(j_dest)
@@ -236,20 +233,32 @@ impl CPU {
                 }
             }
             LD_OP => {
-                let part = self.ir & 0b0001_1111_1111;
+                let part = ir & 0b0001_1111_1111;
                 LD(Register(destination), MemAddr(part))
             }
             ST_OP => {
-                if (self.ir & 0b1000_0000_0000) >> 11 == 1 {
-                    let part = (self.ir & 0b1110000000) >> 7;
-                    ST(RegPtr(part), Register(self.ir & 0b111))
+                if (ir & 0b1000_0000_0000) >> 11 == 1 {
+                    let part = (ir & 0b1110000000) >> 7;
+                    ST(RegPtr(part), Register(ir & 0b111))
                 } else {
-                    let part = (self.ir & 0b111111111000) >> 3;
-                    ST(MemAddr(part), Register(self.ir & 0b111))
+                    let part = (ir & 0b111111111000) >> 3;
+                    ST(MemAddr(part), Register(ir & 0b111))
                 }
             }
-            JMP_OP => JMP(j_dest),
+            JMP_OP => {
+                let j_dest = if ins_type == 4 {
+                    RegPtr(source)
+                } else {
+                    MemAddr(source)
+                };
+                JMP(j_dest)
+            }
             BZ_OP => {
+                let j_dest = if ins_type == 4 {
+                    RegPtr(source)
+                } else {
+                    MemAddr(source)
+                };
                 if invert {
                     BNZ(j_dest)
                 } else {
@@ -262,17 +271,12 @@ impl CPU {
             INT_OP => INT(Literal(source)),
             MOV_OP => MOV(Register(destination), part),
             LEA_OP => {
-                let part = self.ir & 0b111111111;
+                let part = ir & 0b111111111;
                 LEA(Register(destination), MemAddr(part))
             }
-            _ => {
-                eprintln!(
-                    "Cannot parse this. Code should be unreachable. {} line {}",
-                    file!(),
-                    line!()
-                );
-                MOV(Register(0), Register(0))
-            }
+            _ => unsafe {
+                std::hint::unreachable_unchecked();
+            },
         }
     }
 }
