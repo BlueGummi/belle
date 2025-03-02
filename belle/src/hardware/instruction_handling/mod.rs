@@ -50,14 +50,13 @@ fn add_with_rptr() {
     bcpu.int_reg[0] = 21;
     bcpu.int_reg[2] = 33;
 
-    bcpu.memory[33] = Some(42);
+    bcpu.memory[33] = 42;
 
     test_instruction!(bcpu, add, "r0", "&r2");
     assert_eq!(bcpu.int_reg[0], 63);
 }
 
 #[test]
-#[should_panic]
 fn add_with_rptr_fail() {
     let mut bcpu = CPU::new();
 
@@ -72,20 +71,19 @@ fn add_with_mptr() {
 
     bcpu.int_reg[0] = 444;
 
-    bcpu.memory[33] = Some(42);
+    bcpu.memory[33] = 42;
 
-    bcpu.memory[42] = Some(60);
+    bcpu.memory[42] = 60;
 
     test_instruction!(bcpu, add, "r0", "&$33");
     assert_eq!(bcpu.int_reg[0], 504);
 }
 
 #[test]
-#[should_panic]
 fn add_with_mptr_fail() {
     let mut bcpu = CPU::new();
 
-    bcpu.memory[44] = Some(55);
+    bcpu.memory[44] = 55;
 
     test_instruction!(bcpu, add, "r0", "&$44");
 }
@@ -234,7 +232,6 @@ fn jmp_fail() {
 }
 
 #[test]
-#[should_panic]
 fn pop_fail() {
     let mut bcpu = CPU::new();
     bcpu.sp = 40;
@@ -251,7 +248,7 @@ fn pop_success() {
 
     bcpu.bp = 45;
 
-    bcpu.memory[44] = Some(33);
+    bcpu.memory[44] = 33;
 
     test_instruction!(bcpu, pop, "r2");
 
@@ -286,13 +283,13 @@ fn st_success() {
     let mut bcpu = CPU::new();
     bcpu.int_reg[0] = 45;
     test_instruction!(bcpu, st, "$31", "r0");
-    assert_eq!(bcpu.memory[31], Some(45));
+    assert_eq!(bcpu.memory[31], (45));
 }
 
 #[test]
 fn lea_success() {
     let mut bcpu = CPU::new();
-    bcpu.memory[44] = Some(45);
+    bcpu.memory[44] = 45;
     test_instruction!(bcpu, lea, "r0", "$44");
     assert_eq!(bcpu.int_reg[0], 44);
 }
@@ -300,7 +297,7 @@ fn lea_success() {
 #[test]
 fn ld_success() {
     let mut bcpu = CPU::new();
-    bcpu.memory[44] = Some(45);
+    bcpu.memory[44] = 45;
     test_instruction!(bcpu, ld, "r0", "$44");
     assert_eq!(bcpu.int_reg[0], 45);
 }
@@ -313,7 +310,7 @@ fn push_success() {
     bcpu.bp = 33;
 
     test_instruction!(bcpu, push, "45");
-    assert_eq!(bcpu.memory[31], Some(45));
+    assert_eq!(bcpu.memory[31], 45);
 
     bcpu = CPU::new();
 
@@ -322,11 +319,10 @@ fn push_success() {
 
     test_instruction!(bcpu, push, "33");
 
-    assert_eq!(bcpu.memory[19], Some(33));
+    assert_eq!(bcpu.memory[19], 33);
 }
 
 #[test]
-#[should_panic]
 fn cmp_fail() {
     let mut bcpu = CPU::new();
 
@@ -370,7 +366,6 @@ fn div_success() {
     assert_eq!(bcpu.int_reg[0], 3);
 }
 #[test]
-#[should_panic]
 fn mov_fail() {
     let mut bcpu = CPU::new();
 
@@ -380,7 +375,6 @@ fn mov_fail() {
 }
 
 #[test]
-#[should_panic]
 fn mov_fail_2() {
     let mut bcpu = CPU::new();
 
@@ -428,7 +422,7 @@ fn ret_success() {
     // setup a "Fake call stack"
     bcpu.sp = 88;
     bcpu.bp = 89;
-    bcpu.memory[88] = Some(123);
+    bcpu.memory[88] = 123;
 
     test_instruction!(bcpu, ret);
 

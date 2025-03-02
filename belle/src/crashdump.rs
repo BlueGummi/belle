@@ -37,17 +37,17 @@ pub fn write_crash(cpu: &CPU) {
 
             write_to_file("\n------ MEMORY ------\n");
             for (index, value) in cpu.memory.iter().enumerate() {
-                if cpu.memory[index].is_some() {
+                if cpu.memory[index] != 0 {
                     if index == cpu.pc as usize {
                         write_to_file(&format!(
-                            "Address {index:^6}: {:016b}: {} <---- CRASH OCCURRED HERE",
-                            value.unwrap(),
+                            "Address {index:4X}: {:016b}: {} <---- CRASH OCCURRED HERE",
+                            value,
                             cpu.decode_instruction()
                         ));
                     } else {
                         write_to_file(&format!(
-                            "Address {index:^6}: {:016b}: {}",
-                            value.unwrap(),
+                            "Address {index:4X}: {:016b}: {}",
+                            value,
                             cpu.decode_instruction()
                         ));
                     }

@@ -66,19 +66,14 @@ impl BDB {
     }
 
     pub fn handle_run(&mut self) {
-        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+        if self.dbgcpu.memory.iter().all(|&x| x == 0) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
         }
 
         self.dbgcpu.running = true;
         while !self.breakpoints.contains(&self.dbgcpu.pc) && self.dbgcpu.running {
-            self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-                value as i16
-            } else {
-                eprintln!("Nothing at PC {}", self.dbgcpu.pc);
-                break;
-            };
+            self.dbgcpu.ir = self.dbgcpu.memory[self.dbgcpu.pc as usize] as i16;
             let parsed_ins = self.dbgcpu.decode_instruction();
             if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
                 eprintln!("{e}");
@@ -90,7 +85,7 @@ impl BDB {
     }
 
     pub fn handle_set_pc(&mut self, arg: &str) {
-        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+        if self.dbgcpu.memory.iter().all(|&x| x == 0) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
             return;
         }
@@ -104,22 +99,19 @@ impl BDB {
 
     pub fn handle_print_memory(&mut self, arg: &str) {
         if let Ok(n) = parse_number::<usize>(arg.trim()) {
-            if let Some(memvalue) = self.dbgcpu.memory[n] {
-                println!("Value in memory: {memvalue:016b} ({memvalue})");
-                let oldvalue = self.dbgcpu.ir;
-                self.dbgcpu.ir = memvalue as i16;
-                println!("Dumped instruction: {}", self.dbgcpu.decode_instruction());
-                self.dbgcpu.ir = oldvalue;
-            } else {
-                println!("{}", "Nothing in memory here.".yellow());
-            }
+            let memvalue = self.dbgcpu.memory[n];
+            println!("Value in memory: {memvalue:016b} ({memvalue})");
+            let oldvalue = self.dbgcpu.ir;
+            self.dbgcpu.ir = memvalue as i16;
+            println!("Dumped instruction: {}", self.dbgcpu.decode_instruction());
+            self.dbgcpu.ir = oldvalue;
         } else {
             eprintln!("'p' requires a numeric argument.");
         }
     }
 
     pub fn handle_where_begins(&self) {
-        if self.dbgcpu.memory.iter().all(|&x| x.is_none()) {
+        if self.dbgcpu.memory.iter().all(|&x| x == 0) {
             eprintln!("{}", "CPU memory is empty. Load the program first.".red());
         } else {
             println!(
@@ -130,12 +122,7 @@ impl BDB {
     }
 
     pub fn handle_execute(&mut self) {
-        self.dbgcpu.ir = if let Some(value) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-            value as i16
-        } else {
-            eprintln!("Nothing at PC {}", self.dbgcpu.pc);
-            return;
-        };
+        self.dbgcpu.ir = self.dbgcpu.memory[self.dbgcpu.pc as usize] as i16;
 
         let parsed_ins = self.dbgcpu.decode_instruction();
         if let Err(e) = self.dbgcpu.execute_instruction(&parsed_ins) {
@@ -160,10 +147,8 @@ impl BDB {
     pub fn print_cpu_state(&mut self) {
         println!("{}", self.dbgcpu);
 
-        if let Some(n) = self.dbgcpu.memory[self.dbgcpu.pc as usize] {
-            self.dbgcpu.ir = n as i16;
-            println!("Next instruction: {}", self.dbgcpu.decode_instruction());
-        }
+        self.dbgcpu.ir = self.dbgcpu.memory[self.dbgcpu.pc as usize] as i16;
+        println!("Next instruction: {}", self.dbgcpu.decode_instruction());
     }
 
     pub fn handle_print_all_breakpoints(&self) {
@@ -175,15 +160,12 @@ impl BDB {
 
     pub fn handle_poke(&mut self, arg: &str) {
         if let Ok(n) = parse_number::<usize>(arg) {
-            if let Some(memvalue) = self.dbgcpu.memory[n] {
-                println!("Value in memory: {memvalue:016b} ({memvalue})");
-                let oldvalue = self.dbgcpu.ir;
-                self.dbgcpu.ir = memvalue as i16;
-                println!("{}", self.dbgcpu.decode_instruction());
-                self.dbgcpu.ir = oldvalue;
-            } else {
-                println!("This memory address is empty.\n");
-            }
+            let memvalue = self.dbgcpu.memory[n];
+            println!("Value in memory: {memvalue:016b} ({memvalue})");
+            let oldvalue = self.dbgcpu.ir;
+            self.dbgcpu.ir = memvalue as i16;
+            println!("{}", self.dbgcpu.decode_instruction());
+            self.dbgcpu.ir = oldvalue;
             println!("Enter a new value, binary or decimal");
             let mut buffer = String::new();
             io::stdout().flush().unwrap();
@@ -196,7 +178,7 @@ impl BDB {
                 return;
             }
             match parse_number::<u16>(&buffer) {
-                Ok(v) => self.dbgcpu.memory[n] = Some(v),
+                Ok(v) => self.dbgcpu.memory[n] = v,
                 Err(e) => eprintln!("{e}"),
             }
         } else {

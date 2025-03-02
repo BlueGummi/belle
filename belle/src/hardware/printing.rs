@@ -194,7 +194,8 @@ impl fmt::Display for CPU {
                 line, line, line, line
             )?;
             for (index, element) in self.memory.iter().enumerate() {
-                if let Some(value) = element {
+                let value = element;
+                if *value != 0 {
                     let mut temp = CPU::new();
                     temp.ir = *value as i16;
                     let displayed = format!(
@@ -342,7 +343,8 @@ impl CPU {
             line, line, line, line
         );
         for (index, element) in self.memory.iter().enumerate() {
-            if let Some(value) = element {
+            let value = element;
+            if *element != 0 {
                 let mut temp = CPU::new();
                 temp.ir = *value as i16;
                 let displayed = format!(

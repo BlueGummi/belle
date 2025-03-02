@@ -11,7 +11,7 @@ impl CPU {
                     Some("segmentation fault whilst storing to an address. OOB".to_string()),
                 ));
             }
-            self.memory[index] = Some(source as u16);
+            self.memory[index] = source as u16;
         } else if let RegPtr(n) = arg1 {
             let addr = match self.get_value(&Register(*n)) {
                 Ok(a) => a as usize,
@@ -23,7 +23,7 @@ impl CPU {
                     self.ir, self.pc, None,
                 ));
             }
-            self.memory[addr] = Some(source as u16);
+            self.memory[addr] = source as u16;
         }
 
         self.pc += 1;

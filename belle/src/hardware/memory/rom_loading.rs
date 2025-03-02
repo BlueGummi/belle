@@ -38,7 +38,7 @@ impl CPU {
             if counter + self.starts_at as usize >= MEMORY_SIZE {
                 return Err(EmuError::MemoryOverflow());
             }
-            self.memory[counter + self.starts_at as usize] = Some(*element as u16);
+            self.memory[counter + self.starts_at as usize] = *element as u16;
 
             counter += 1;
         }
@@ -69,34 +69,6 @@ impl CPU {
                 println!("=====NO METADATA====");
             }
         }
-        self.shift_memory()?;
-        self.pc = self.starts_at;
-        Ok(())
-    }
-
-    fn shift_memory(&mut self) -> Result<(), EmuError> {
-        if let Some(first_val) = self.memory.iter().position(|&e| e.is_some()) {
-            if self.pc == first_val as u16 {
-                return Ok(());
-            }
-        }
-        let some_count = self.memory.iter().filter(|&&e| e.is_some()).count();
-
-        if some_count as u32 + u32::from(self.starts_at) > MEMORY_SIZE.try_into().unwrap() {
-            return Err(EmuError::MemoryOverflow());
-        }
-
-        let mut new_memory = Box::new([None; MEMORY_SIZE]);
-
-        let first_some_index = self.memory.iter().position(|&e| e.is_some()).unwrap_or(0);
-        for (i, value) in self.memory.iter().enumerate() {
-            if let Some(val) = value {
-                let new_index = (self.starts_at + (i - first_some_index) as u16) as usize;
-                new_memory[new_index] = Some(*val);
-            }
-        }
-
-        std::mem::swap(&mut self.memory, &mut new_memory);
         self.pc = self.starts_at;
         Ok(())
     }

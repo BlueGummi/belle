@@ -22,7 +22,7 @@ use std::sync::mpsc;
 pub struct CPU {
     pub int_reg: [u16; 6],   // r0 thru r5
     pub float_reg: [f32; 2], // r6 and r7
-    pub memory: Box<[Option<u16>; MEMORY_SIZE]>,
+    pub memory: Box<[u16; MEMORY_SIZE]>,
     pub pc: u16, // program counter
     pub ir: i16, // this doesn't actually impact much, rust just likes to scream
     // about different types, especially with decoder.rs
@@ -57,7 +57,7 @@ impl CPU {
         CPU {
             int_reg: [0; 6],
             float_reg: [0.0; 2],
-            memory: Box::new([None; MEMORY_SIZE]),
+            memory: Box::new([0; MEMORY_SIZE]),
             pc: 0,
             ir: 0,
             starts_at: 100,
@@ -136,26 +136,7 @@ impl CPU {
                     if delay != 0 {
                         thread::sleep(Duration::from_millis(delay));
                     }
-                    match self_clone.memory[self_clone.pc as usize] {
-                        Some(instruction) => self_clone.ir = instruction as i16,
-                        _ => {
-                            self_clone.err = true;
-                            let error_msg = UnrecoverableError::SegmentationFault(
-                                self_clone.ir,
-                                self_clone.pc,
-                                Some(
-                                    "Segmentation fault while finding next instruction".to_string(),
-                                ),
-                            );
-                            self_clone.errmsg = error_msg.only_err().to_string();
-                            self_clone.running = false;
-                            #[cfg(feature = "window")]
-                            if can_make_window {
-                                let _ = tx.send(None);
-                            }
-                            return Err(error_msg);
-                        }
-                    }
+                    self_clone.ir = self_clone.memory[self_clone.pc as usize] as i16;
 
                     let parsed_ins = self_clone.decode_instruction();
                     if let Err(e) = self_clone.execute_instruction(&parsed_ins) {
@@ -179,9 +160,8 @@ impl CPU {
                     if !CONFIG.no_display && can_make_window {
                         let mut stringy = String::with_capacity(5000);
                         for index in 0xFF..0x9C9 {
-                            if let Some(value) =
-                                self_clone.memory.get(index as usize).and_then(|&x| x)
-                            {
+                            let value = self_clone.memory[index as usize];
+                            if value != 0 {
                                 if (index - 0xFF) % 76 == 0 {
                                     stringy.push('\n');
                                 }

@@ -15,7 +15,7 @@ impl CPU {
                 ));
             }
 
-            self.memory[self.sp as usize] = Some(val as u16);
+            self.memory[self.sp as usize] = val as u16;
             self.backward_stack = self.sp >= self.bp;
         } else {
             if self.sp == 0 {
@@ -28,7 +28,7 @@ impl CPU {
                 ));
             }
             self.sp -= 1;
-            self.memory[self.sp as usize] = Some(val as u16);
+            self.memory[self.sp as usize] = val as u16;
         }
         self.pc += 1;
         Ok(())
@@ -36,24 +36,7 @@ impl CPU {
 
     pub fn handle_pop(&mut self, arg: &Argument) -> PossibleCrash {
         let temp: i32 = self.sp.into();
-        if let Some(v) = self.memory[temp as usize] {
-            if let Register(_) = arg {
-                self.set_register_value(arg, v as f64)?;
-            } else if let MemAddr(val) = arg {
-                self.memory[*val as usize] = Some(v);
-            }
-            if self.sp > self.bp {
-                self.memory[self.sp as usize] = None;
-                if self.sp != self.bp {
-                    self.sp -= 1;
-                }
-            } else {
-                self.memory[self.sp as usize] = None;
-                if self.sp != self.bp {
-                    self.sp += 1;
-                }
-            }
-        } else {
+        if temp <= 0 {
             self.err = true;
             self.running = false;
             return Err(UnrecoverableError::StackUnderflow(
@@ -61,6 +44,23 @@ impl CPU {
                 self.pc,
                 Some("segmentation fault while executing pop".to_string()),
             ));
+        }
+        let v = self.memory[temp as usize];
+        if let Register(_) = arg {
+            self.set_register_value(arg, v as f64)?;
+        } else if let MemAddr(val) = arg {
+            self.memory[*val as usize] = v;
+        }
+        if self.sp > self.bp {
+            self.memory[self.sp as usize] = 0;
+            if self.sp != self.bp {
+                self.sp -= 1;
+            }
+        } else {
+            self.memory[self.sp as usize] = 0;
+            if self.sp != self.bp {
+                self.sp += 1;
+            }
         }
         self.pc += 1;
         Ok(())

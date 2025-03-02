@@ -108,12 +108,7 @@ impl CPU {
             },
             Literal(n) => Ok((*n) as f32),
             MemPtr(n) => {
-                if self.memory[*n as usize].is_none() {
-                    return Err(self.generate_segfault(
-                        "Segmentation fault while dereferencing pointer.\nThe pointer's location is empty.",
-                    ));
-                }
-                let tmp = self.memory[*n as usize].unwrap() as usize;
+                let tmp = self.memory[*n as usize] as usize;
                 if tmp > MEMORY_SIZE {
                     self.err = true;
                     return Err(UnrecoverableError::IllegalInstruction(
@@ -122,12 +117,7 @@ impl CPU {
                         Some("Segmentation fault whilst processing pointer.\nMemory address invalid (too large).".to_string()),
                     ));
                 }
-                if self.memory[tmp].is_none() {
-                    return Err(self.generate_segfault(
-                        "Segmentation fault while dereferencing pointer.\nThe address the pointer references is empty.",
-                    ));
-                }
-                Ok(self.memory[tmp].unwrap() as f32)
+                Ok(self.memory[tmp] as f32)
             }
             RegPtr(n) => {
                 let tmp = match n {
@@ -146,23 +136,9 @@ impl CPU {
                     return Err(self
                         .generate_segfault("Segmentation fault handling pointer.\nAddress OOB."));
                 }
-                if self.memory[memloc].is_none() {
-                    self.running = false;
-                    return Err(self.generate_segfault(
-                        "Segmentation fault while dereferencing pointer.\nThe address the pointer references is empty.",
-                    ));
-                }
-                Ok(self.memory[memloc].unwrap() as f32)
+                Ok(self.memory[memloc] as f32)
             }
-            MemAddr(n) => {
-                if self.memory[*n as usize].is_none() {
-                    self.running = false;
-                    return Err(self.generate_segfault(
-                        "Segmentation fault while loading from memory.\nMemory address is empty.",
-                    ));
-                }
-                Ok(self.memory[*n as usize].unwrap() as f32)
-            }
+            MemAddr(n) => Ok(self.memory[*n as usize] as f32),
         }
     }
 

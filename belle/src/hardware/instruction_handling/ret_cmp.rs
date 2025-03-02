@@ -2,21 +2,21 @@ use crate::{Argument::*, *};
 impl CPU {
     pub fn handle_ret(&mut self) -> PossibleCrash {
         let temp: i32 = self.sp as i32;
-        if let Some(v) = self.memory[temp as usize] {
-            self.pc = v + 1;
-            if self.sp > self.bp {
-                self.memory[self.sp as usize] = None;
-                if self.sp != self.bp {
-                    self.sp -= 1;
-                }
-            } else {
-                self.memory[self.sp as usize] = None;
-                if self.sp != self.bp {
-                    self.sp += 1;
-                }
+        let v = self.memory[temp as usize];
+        if v <= 0 {
+            return Err(UnrecoverableError::StackUnderflow(self.ir, self.pc, None));
+        }
+        self.pc = v + 1;
+        if self.sp > self.bp {
+            self.memory[self.sp as usize] = 0;
+            if self.sp != self.bp {
+                self.sp -= 1;
             }
         } else {
-            return Err(UnrecoverableError::StackUnderflow(self.ir, self.pc, None));
+            self.memory[self.sp as usize] = 0;
+            if self.sp != self.bp {
+                self.sp += 1;
+            }
         }
         Ok(())
     }

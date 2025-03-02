@@ -97,8 +97,8 @@ impl CPU {
                             "Segmentation fault. Memory index out of bounds on interrupt call 8.",
                         ));
                     }
-
-                    if let Some(value) = memory[index as usize] {
+                    let value = self.memory[index as usize];
+                    if value != 0 {
                         if CONFIG.verbose || CONFIG.debug {
                             stringy = format!("{}{}", stringy, value as u8 as char);
                         } else {
