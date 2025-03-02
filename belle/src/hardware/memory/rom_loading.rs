@@ -27,21 +27,29 @@ impl CPU {
         if let Some(val) = binary.get(1) {
             self.starts_at = *val as u16;
         }
-        let mut start_ind = 2;
+        let start_ind = if let Some(val) = binary.get(2) {
+            ((val / 2) + 3) as usize
+        } else {
+            3
+        };
         for (index, element) in binary.iter().enumerate() {
-            if index == 0 || index == 1 {
+            if index < 3 {
                 continue;
             }
-            if (element >> 8) == 1 && index != 0 {
+            if index < start_ind {
+                rom_metadata = format!(
+                    "{}{}",
+                    rom_metadata,
+                    char::from(((element & 0x7F00) >> 8) as u8)
+                );
                 rom_metadata = format!("{}{}", rom_metadata, char::from((element & 0x7F) as u8));
                 continue;
             } else {
-                start_ind = index;
                 break;
             }
         }
         for (index, element) in binary.iter().enumerate() {
-            if index == 0 || index == 1 || index < start_ind {
+            if index < start_ind {
                 continue;
             }
             if counter + self.starts_at as usize >= MEMORY_SIZE {

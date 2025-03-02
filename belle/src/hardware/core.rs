@@ -111,7 +111,7 @@ impl CPU {
                 }
                 Some(Err(e)) => {
                     if !CONFIG.no_display {
-                        eprintln!("{}: {e}", "Emulator cannot create window".bright_red());
+                        eprintln!("[{}]: {e}", "EMULATOR ERROR".red());
                     }
                     can_make_window = false;
                     None

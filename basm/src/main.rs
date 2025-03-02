@@ -97,10 +97,19 @@ fn main() {
             let start_bin = *START_LOCATION.lock().unwrap();
             if !CONFIG.thin {
                 let glob_str = METADATA_STR.lock().unwrap();
+                if glob_str.len() % 2 != 0 {
+                    bytes.insert(0, 0);
+                }
                 for character in glob_str.chars().rev() {
                     bytes.insert(0, character as u8);
-                    bytes.insert(0, 1);
                 }
+                let strlen = if glob_str.len() % 2 == 0 {
+                    glob_str.len()
+                } else {
+                    glob_str.len() + 1
+                };
+                bytes.insert(0, (strlen & 0xff) as u8);
+                bytes.insert(0, ((strlen & 0xff00) >> 8) as u8);
                 bytes.insert(0, (start_bin & 0xff) as u8);
                 bytes.insert(0, ((start_bin & 0xff00) >> 8) as u8);
                 bytes.insert(0, 0x02);

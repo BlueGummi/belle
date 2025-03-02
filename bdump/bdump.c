@@ -24,16 +24,14 @@ void *process_instructions(void *arg, char *filename) {
     bin_version = data->buffer[1];
     current_addr = (data->buffer[2] << 8) | (data->buffer[3]);
     jump_map_global = jump_map_create();
-    size_t start_ind = 4;
-    for (size_t i = 4; i < data->bytes_read; i += 2) {
+    size_t start_ind = ((data->buffer[4] << 8) | (data->buffer[5])) + 6;
+    for (size_t i = 6; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
-            uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
-            if (i > 0 && instruction >> 8 == 1) {
-                char inschar = (char) instruction & 0xFF;
-                strncat(metadata, &inschar, 1);
-            } else {
-                start_ind = i;
-            }
+            if (i + 1 > start_ind) break;
+            char inschar_1 = (char) (data->buffer[i]);
+            strncat(metadata, &inschar_1, 1);
+            char inschar = (char) (data->buffer[i +1]);
+            strncat(metadata, &inschar, 1);
         }
     }
     int counter = 0;
@@ -69,7 +67,7 @@ void *process_instructions(void *arg, char *filename) {
 
     print_header(metadata, filename);
     current_addr = current_addr_tmp;
-    for (size_t i = 4; i < data->bytes_read; i += 2) { // start at 2 to ignore version
+    for (size_t i = start_ind; i < data->bytes_read; i += 2) { // start at 2 to ignore version
         if (i + 1 < data->bytes_read) {                // third loop adjusts columns and prints
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if (i > 0 && instruction >> 8 == 1) {
