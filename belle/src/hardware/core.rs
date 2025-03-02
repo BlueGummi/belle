@@ -201,7 +201,8 @@ impl CPU {
                 }
                 if CONFIG.benchmark {
                     println!(
-                        "We took {:?} to execute {} instructions",
+                        "[{}]: took {:?} to execute {} instructions",
+                        "EMULATOR INFO".yellow(),
                         starting.elapsed(),
                         cycles
                     );

@@ -8,7 +8,7 @@ begin:
     bl begin
     bg end
 goober:
-    .word 0xffff
+    .word 0xfff4
 end:
     add r2, 1
     mov r0, 0
@@ -18,4 +18,4 @@ end:
 stop:
     hlt
 goobertwo:
-    .word 0x9ff
+    .word 5087
