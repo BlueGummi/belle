@@ -142,6 +142,22 @@ fn process_directives(
                         break;
                     }
                 }
+                "data" => {
+                    if let Some((_, TokenKind::StringLit(val), _)) = toks_iter.peek() {
+                        let mut glob_str = METADATA_STR.lock().unwrap();
+                        *glob_str = format!("{}{}", glob_str, val);
+                        toks_iter.next();
+                    } else {
+                        handle_core_error(
+                            &fname,
+                            &span,
+                            error_count,
+                            &format!("{} must be succeeded by string", data.trim()),
+                            None,
+                        );
+                        break;
+                    }
+                }
                 _ => {
                     handle_core_error(
                         &fname,

@@ -24,18 +24,21 @@ void *process_instructions(void *arg, char *filename) {
     bin_version = data->buffer[1];
     current_addr = (data->buffer[2] << 8) | (data->buffer[3]);
     jump_map_global = jump_map_create();
+    size_t start_ind = 4;
     for (size_t i = 4; i < data->bytes_read; i += 2) {
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             if (i > 0 && instruction >> 8 == 1) {
                 char inschar = (char) instruction & 0xFF;
                 strncat(metadata, &inschar, 1);
+            } else {
+                start_ind = i;
             }
         }
     }
     int counter = 0;
     size_t current_addr_tmp = current_addr;
-    for (size_t i = 4; i < data->bytes_read; i += 2) { // second loop finds jumps
+    for (size_t i = start_ind; i < data->bytes_read; i += 2) { // second loop finds jumps
         if (i + 1 < data->bytes_read) {
             uint16_t instruction = (data->buffer[i] << 8) | data->buffer[i + 1];
             switch (instruction >> 12) {
