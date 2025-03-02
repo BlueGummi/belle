@@ -292,6 +292,8 @@ impl CPU {
         }
         Ok(())
     }
+
+    #[inline(always)]
     pub fn set_register_value(&mut self, arg: &Argument, value: f64) -> PossibleCrash {
         if let Register(n) = arg {
             if let Err(e) = self.check_overflow(value as i64, *n as u16) {

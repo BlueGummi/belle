@@ -104,7 +104,6 @@ impl CPU {
                 8 => Ok(self.pc as f32),
                 9 => Ok(self.sp as f32),
                 n if *n > 5 || *n < 0 => Err(self.generate_invalid_register()),
-
                 _ => Ok(self.int_reg[*n as usize] as f32),
             },
             Literal(n) => Ok((*n) as f32),
@@ -113,7 +112,7 @@ impl CPU {
                 if tmp > MEMORY_SIZE {
                     self.err = true;
                     return Err(UnrecoverableError::IllegalInstruction(
-            self.ir,
+                        self.ir,
                         self.pc,
                         Some("Segmentation fault whilst processing pointer.\nMemory address invalid (too large).".to_string()),
                     ));
@@ -132,7 +131,8 @@ impl CPU {
                     _ => self.int_reg[*n as usize] as f32,
                 };
                 let memloc = tmp as usize;
-                if memloc >= self.memory.len() || tmp < 0.0 {
+                if memloc >= self.memory.len() {
+                    self.err = true;
                     self.running = false;
                     return Err(self
                         .generate_segfault("Segmentation fault handling pointer.\nAddress OOB."));
