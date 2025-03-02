@@ -180,28 +180,11 @@ impl CPU {
                     }
                 }
                 if CONFIG.benchmark {
-                    let cycles_str = cycles.to_string();
-                    let formatted_cycles = cycles_str
-                        .chars()
-                        .rev()
-                        .enumerate()
-                        .map(|(i, c)| {
-                            if i > 0 && i % 3 == 0 {
-                                format!("{},{}", c, "")
-                            } else {
-                                c.to_string()
-                            }
-                        })
-                        .collect::<String>()
-                        .chars()
-                        .rev()
-                        .collect::<String>();
-
                     println!(
                         "[{}]: took {:?} to execute {} instructions",
                         "EMULATOR INFO".yellow(),
                         starting.elapsed(),
-                        formatted_cycles
+                        format_with_commas(cycles)
                     );
                 }
                 if CONFIG.pretty {
@@ -335,4 +318,16 @@ impl CPU {
 #[cfg(target_os = "linux")]
 fn configure_wayland() {
     std::env::set_var("WAYLAND_DISPLAY", "wayland-0");
+}
+fn format_with_commas(n: usize) -> String {
+    let mut s = n.to_string();
+    let len = s.len();
+
+    for i in (1..len).rev() {
+        if (len - i) % 3 == 0 {
+            s.insert(i, ',');
+        }
+    }
+
+    s
 }
