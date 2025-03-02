@@ -46,6 +46,10 @@ pub struct Cli {
     /// No display
     #[clap(short = 'N', long, default_value_t = false)]
     pub no_display: bool,
+
+    /// Print execution time and cycles
+    #[clap(short = 'b', long, default_value_t = false)]
+    pub benchmark: bool,
 }
 #[allow(unreachable_code)]
 pub fn declare_config() -> Cli {
@@ -61,6 +65,7 @@ pub fn declare_config() -> Cli {
             no_print_memory: false,
             compact_print: false,
             no_display: true,
+            benchmark: false,
         };
     }
     #[cfg(fuzzing)]
@@ -75,6 +80,7 @@ pub fn declare_config() -> Cli {
             no_print_memory: true,
             compact_print: false,
             no_display: true,
+            benchmark: false,
         };
     }
     Cli::parse()
