@@ -136,7 +136,7 @@ pub fn encode(
             "word" => {
                 encoded_tokens.push(next_ins.unwrap().1.get_value() as i16);
             }
-            "start" => (),
+            "start" | "data" => (),
             _ => gen_ice!("DIRECTIVE MATCH FAILED: {name} NOT RECOGNIZED"),
         },
         _ => {}

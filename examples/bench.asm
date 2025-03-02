@@ -1,3 +1,5 @@
+.data "This is my text\n"
+.data "Metadata\n"
 .start [0x0]
     ld r1, goober
     ld r4, goobertwo

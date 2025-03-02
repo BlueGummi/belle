@@ -96,6 +96,11 @@ fn main() {
 
             let start_bin = *START_LOCATION.lock().unwrap();
             if !CONFIG.thin {
+                let glob_str = METADATA_STR.lock().unwrap();
+                for character in glob_str.chars().rev() {
+                    bytes.insert(0, character as u8);
+                    bytes.insert(0, 1);
+                }
                 bytes.insert(0, (start_bin & 0xff) as u8);
                 bytes.insert(0, ((start_bin & 0xff00) >> 8) as u8);
                 bytes.insert(0, 0x02);

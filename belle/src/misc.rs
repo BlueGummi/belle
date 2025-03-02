@@ -187,8 +187,8 @@ impl fmt::Display for EmuError {
                 } else {
                     write!(
                         f,
-                        "{} {}",
-                        "Emulator Error:".red(),
+                        "[{}]: {}",
+                        "EMULATOR ERROR".red(),
                         "No ROM provided".bold()
                     )
                 }
@@ -196,35 +196,35 @@ impl fmt::Display for EmuError {
             EmuError::MemoryOverflow() => {
                 write!(
                     f,
-                    "{} {}",
-                    "Emulator Error:".red(),
+                    "[{}]: {}",
+                    "EMULATOR ERROR".red(),
                     "Memory will overflow".red()
                 )
             }
             EmuError::Duplicate(s) => {
-                write!(f, "{} Duplicate: {}", "Emulator Error:".red(), s.red(),)
+                write!(f, "[{}]: Duplicate: {}", "EMULATOR ERROR".red(), s.red(),)
             }
             EmuError::ReadFail(s) => {
                 write!(
                     f,
-                    "{} Failed to read from stdin and parse to i16: {}",
-                    "Emulator Error:".red(),
+                    "[{}]: Failed to read from stdin and parse to i16: {}",
+                    "EMULATOR ERROR".red(),
                     s,
                 )
             }
             EmuError::Impossible(s) => {
                 write!(
                     f,
-                    "{} Configuration combination not possible: {}",
-                    "Emulator Error:".red(),
+                    "[{}]: Configuration combination not possible: {}",
+                    "EMULATOR ERROR".red(),
                     s,
                 )
             }
             EmuError::IsDirectory() => {
                 write!(
                     f,
-                    "{} {} is a directory",
-                    "Emulator Error:".red(),
+                    "[{}]: {} is a directory",
+                    "EMULATOR ERROR".red(),
                     CONFIG.rom.to_string().green(),
                 )
             }
