@@ -49,10 +49,15 @@ fn main() {
     let mut binary = Vec::new();
     let mut ind = 0;
     #[allow(clippy::explicit_counter_loop)]
+    if toks.is_empty() {
+        println!("{}: source appears empty", "warning".yellow().underline());
+    }
     for (fname, tok, span) in &toks {
         // we should only have instructions at this point
         match encode((fname, tok, span), fname, &toks.get(ind + 1)) {
-            Ok(value) => binary.extend(value),
+            Ok(value) => {
+                binary.extend(value);
+            }
             Err((m, similars)) => {
                 println!("{m}");
                 if !similars.is_empty() {
@@ -70,7 +75,7 @@ fn main() {
                             connector.bright_red(),
                             ">".yellow(),
                             filename.green(),
-                            "─".bright_red(),
+                            "-".bright_red(),
                             ">".yellow(),
                             l_num.to_string().blue(),
                             "│".blue(),
@@ -125,7 +130,7 @@ fn main() {
             }
         }
         _ => {
-            gen_ice!("BINARY APPEARS EMPTY - SHOULD BE SET TO `a.out` BY DEFAULT");
+            gen_ice!("BINARY NAME APPEARS EMPTY - SHOULD BE SET TO `a.out` BY DEFAULT");
         }
     }
 }

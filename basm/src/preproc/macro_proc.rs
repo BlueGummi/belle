@@ -67,7 +67,7 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
                         connector.bright_red(),
                         ">".yellow(),
                         filename.green(),
-                        "─".bright_red(),
+                        "-".bright_red(),
                         ">".yellow(),
                         l_num.to_string().blue(),
                         "│".blue(),

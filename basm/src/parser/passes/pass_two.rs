@@ -1,6 +1,6 @@
 use crate::*;
 use std::ops::Range;
-type PassResult = Result<Vec<(Result<TokenKind, ()>, Range<usize>)>, Vec<ParserError>>;
+type PassResult = Result<Vec<(Result<TokenKind, ()>, Range<usize>)>, Vec<(ParserError, bool)>>;
 impl Parser<'_> {
     pub fn second_pass(
         &mut self,
@@ -91,14 +91,17 @@ impl Parser<'_> {
                                 Some(ref v) => v.end,
                                 None => span.end,
                             };
-                            errors.push(ParserError {
-                                file: self.file.to_string(),
-                                help: None,
-                                input: self.input.to_string(),
-                                message: f.1.to_string(),
-                                start_pos: start,
-                                last_pos: end,
-                            });
+                            errors.push((
+                                ParserError {
+                                    file: self.file.to_string(),
+                                    help: None,
+                                    input: self.input.to_string(),
+                                    message: f.1.to_string(),
+                                    start_pos: start,
+                                    last_pos: end,
+                                },
+                                false,
+                            ));
                         }
                         new_tokens.push((
                             Ok(TokenKind::Instruction(InstructionData {
