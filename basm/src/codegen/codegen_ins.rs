@@ -61,10 +61,14 @@ pub fn encode_instruction(
                     if let Some((name, _, value)) = l_map.get(i) {
                         if *value >= 1024 {
                             let size = format!("{:b}", value).len();
+                            let howbig = format!("0x{value:X}").red();
                             return Err((
                                 Box::new(CodeGenError {
                                     file: name.to_string(),
-                                    help: Some(format!("\"{i}\" has an address of 0x{value:X}, which is {} bits wide", size.to_string().magenta())),
+                                    help: Some(format!(
+                                        "\"{i}\" has an address of {howbig}, which is {} bits wide",
+                                        size.to_string().magenta()
+                                    )),
                                     input: read_file(name),
                                     message: format!(
                                         "the address of label \"{i}\" cannot fit within 10 bits"
@@ -129,10 +133,14 @@ pub fn encode_instruction(
                     if let Some((name, _, value)) = l_map.get(i) {
                         if *value >= 2048 {
                             let size = format!("{:b}", value).len();
+                            let howbig = format!("0x{value:X}").red();
                             return Err((
                                 Box::new(CodeGenError {
                                     file: name.to_string(),
-                                    help: Some(format!("\"{i}\" has an address of 0x{value:X}, which is {} bits wide", size.to_string().magenta())),
+                                    help: Some(format!(
+                                        "\"{i}\" has an address of {howbig}, which is {} bits wide",
+                                        size.to_string().magenta()
+                                    )),
                                     input: read_file(name),
                                     message: format!(
                                         "the address of label \"{i}\" cannot fit within 11 bits"
@@ -196,10 +204,14 @@ pub fn encode_instruction(
                     if let Some((name, _, value)) = l_map.get(i) {
                         if *value >= 512 {
                             let size = format!("{:b}", value).len();
+                            let howbig = format!("0x{value:X}").red();
                             return Err((
                                 Box::new(CodeGenError {
                                     file: name.to_string(),
-                                    help: Some(format!("\"{i}\" has an address of 0x{value:X}, which is {} bits wide", size.to_string().magenta())),
+                                    help: Some(format!(
+                                        "\"{i}\" has an address of {howbig}, which is {} bits wide",
+                                        size.to_string().magenta()
+                                    )),
                                     input: read_file(name),
                                     message: format!(
                                         "the address of label \"{i}\" cannot fit within 9 bits"
@@ -270,10 +282,14 @@ pub fn encode_instruction(
                     if let Some((name, _, value)) = l_map.get(i) {
                         if *value >= 256 {
                             let size = format!("{:b}", value).len();
+                            let howbig = format!("0x{value:X}").red();
                             return Err((
                                 Box::new(CodeGenError {
                                     file: name.to_string(),
-                                    help: Some(format!("\"{i}\" has an address of 0x{value:X}, which is {} bits wide", size.to_string().magenta())),
+                                    help: Some(format!(
+                                        "\"{i}\" has an address of {howbig}, which is {} bits wide",
+                                        size.to_string().magenta()
+                                    )),
                                     input: read_file(name),
                                     message: format!(
                                         "the address of label \"{i}\" cannot fit within 8 bits"
