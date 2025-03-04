@@ -188,10 +188,10 @@ impl CPU {
         };
         let destination = (ir & 0b1110_0000_0000) >> 9;
         let part = match ins_type {
-            0 => Register(source & 0b111),
+            0 => Register(source & 0b1111),
             1 => Literal(source),
             2 => MemPtr(source & 0b111_1111),
-            _ => RegPtr(source),
+            _ => RegPtr(source & 0b1111),
         };
 
         let invert = ((ir & 0b1000_0000_0000) >> 11) == 1;
