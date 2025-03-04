@@ -230,7 +230,7 @@ fn check_vmap(
             ParserError {
                 file: f.to_string(),
                 help: None,
-                input: read_file(&f),
+                input: read_file(f),
                 message: String::new(),
                 start_pos: s.start,
                 last_pos: s.end,

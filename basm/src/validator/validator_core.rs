@@ -27,7 +27,7 @@ impl InstructionData {
             &format!("{reg}, {reg} {ind}, {mem} {ind}, or {imm}"),
             &no,
             &no,
-            &format!("{mem}"),
+            &mem.to_string(),
             &reg,
             &no,
             &no,

@@ -11,7 +11,6 @@ pub fn process_includes(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error
         let mut has_include = false;
 
         use crate::TokenKind::*;
-        #[allow(clippy::explicit_counter_loop)]
         for (fname, element, loc) in toks.iter() {
             if let IncludeFile(file_path) = element {
                 has_include = true;

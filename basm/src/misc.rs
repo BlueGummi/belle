@@ -79,7 +79,6 @@ macro_rules! print_msg {
     };
 }
 use std::cmp::min;
-#[allow(clippy::needless_range_loop)]
 pub fn levenshtein(a: &str, b: &str) -> usize {
     let a_len = a.len();
     let b_len = b.len();

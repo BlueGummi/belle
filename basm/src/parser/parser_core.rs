@@ -6,7 +6,7 @@ use std::ops::Range;
 use std::vec::IntoIter;
 
 type ParsingLexer = Peekable<IntoIter<(Result<TokenKind, ()>, Range<usize>)>>;
-type ParserResult<'a> = Result<Vec<(String, TokenKind, Range<usize>)>, &'a Vec<ParserError>>;
+type ParserResult<'a> = Result<Vec<(String, TokenKind, Range<usize>)>, &'a [ParserError]>;
 pub struct Parser<'a> {
     pub file: String,
     pub lexer: ParsingLexer,
