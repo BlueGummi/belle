@@ -15,6 +15,9 @@ pub enum TokenKind {
     #[token("\t", logos::skip)]
     Tab,
 
+    #[token("\r", logos::skip)]
+    CarriageReturn,
+
     #[token("(")]
     LeftParen,
 

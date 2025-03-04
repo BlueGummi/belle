@@ -65,6 +65,7 @@ impl<'a> Parser<'a> {
                         start_pos: span.start,
                         last_pos: span.end,
                     });
+                    println!("Token stream {:?}", self.lexer);
                 }
             }
         }

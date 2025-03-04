@@ -59,6 +59,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Imm(value) => write!(f, "immediate value `{}`", value),
             TokenKind::Expr(value) => write!(f, "expression value `{}`", value),
             TokenKind::MacroCall(name) => write!(f, "macro call `{name}`"),
+            TokenKind::CarriageReturn => write!(f, "carriage return"),
         }
     }
 }
