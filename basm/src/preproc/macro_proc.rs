@@ -5,9 +5,33 @@ use std::ops::Range;
 
 pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_count: &mut i32) {
     let mut mac_locs = Vec::new();
-    for (index, (_fname, element, _)) in toks.iter().enumerate() {
+    for (index, (fname, element, span)) in toks.iter().enumerate() {
         if let Macro(data) = element {
             let mut mac_map = MACRO_MAP.lock().unwrap();
+            if let Some((found_name, found_data)) = mac_map.get(&data.name.0) {
+                handle_core_error(
+                    fname,
+                    span,
+                    error_count,
+                    &format!("duplicate declaration of macro {}", found_name.magenta()),
+                    Some(format!("{}", "╮".bright_red())),
+                );
+                let (num, data) = highlight_range_in_file(
+                    &found_data.file,
+                    &(found_data.name.1.start..found_data.name.1.end),
+                );
+                println!(
+                    "         {}{} in {} {}{} {:^6} {} {}\n",
+                    "╰".bright_red(),
+                    ">".yellow(),
+                    found_data.file.green(),
+                    "-".bright_red(),
+                    ">".yellow(),
+                    num.to_string().blue(),
+                    "│".blue(),
+                    data
+                );
+            }
             mac_map.insert(
                 data.name.0.to_string(),
                 (data.file.to_string(), data.clone()),

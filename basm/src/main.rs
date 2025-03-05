@@ -50,7 +50,11 @@ fn main() {
     let mut ind = 0;
     #[allow(clippy::explicit_counter_loop)]
     if toks.is_empty() {
-        println!("{}: source appears empty", "warning".yellow().underline());
+        println!(
+            "{}: {} appears empty",
+            "warning".yellow().underline(),
+            CONFIG.source.green()
+        );
     }
     for (fname, tok, span) in &toks {
         // we should only have instructions at this point
