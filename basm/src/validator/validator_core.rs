@@ -65,7 +65,7 @@ impl InstructionData {
             None => String::from("none"),
         };
 
-        let (ins_class, ok_lhs, ok_rhs, valid_lhs, valid_rhs) = self.valid_args()?;
+        let (ins_class, ok_lhs, ok_rhs, valid_lhs, valid_rhs, exp_argc) = self.valid_args()?;
         let ok_val = ok_lhs && ok_rhs;
         let valid_args = valid_lhs && valid_rhs;
         let lhs = if let Some((v, _)) = self.operands.first() {
@@ -89,6 +89,18 @@ impl InstructionData {
         } else {
             None
         };
+        if self.operands.len() != exp_argc {
+            return Err((
+                span,
+                format!(
+                    "{}: {} expected {} operands, found {} operands",
+                    "invalid operands".bold(),
+                    self.name.to_uppercase().magenta(),
+                    exp_argc.to_string().bold(),
+                    self.operands.len().to_string().bold()
+                ),
+            ));
+        }
         let ovfm = if !ok_lhs && !ok_rhs && valid_args {
             format!(
                 "{}: max LHS for {} is {}, max RHS is {}\n{}: found LHS and RHS values are {} and {}\n ",
