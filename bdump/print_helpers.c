@@ -151,7 +151,7 @@ void print_header(const char *metadata, char *filename) {
                 if (*p == '\n') {
                     PRINTF("│ %*s │\n", max_length, " ");
                 } else {
-                    char *start = p; // Start of the line
+                    char *start = p;
                     while (*p != '\n' && *p != '\0') {
                         p++;
                     }

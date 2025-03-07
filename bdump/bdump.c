@@ -4,12 +4,14 @@
  *
  * This code is licensed under the BSD 3-Clause License.
  */
+
 #include "cli.c"
 #include "colors.c"
 #include "structures.c"
 #include "io.c"
 #include "print_helpers.c"
 #include "instruction_print.c"
+
 void *process_instructions(void *arg, char *filename) {
     char metadata[1024] = "\0";
 #ifdef _WIN32

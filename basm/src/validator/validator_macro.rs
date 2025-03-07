@@ -3,7 +3,6 @@ use colored::*;
 use std::collections::HashMap;
 use std::ops::Range;
 
-#[allow(suspicious_double_ref_op)]
 impl MacroContent {
     pub fn is_valid(
         &self,
@@ -74,7 +73,7 @@ impl MacroContent {
                 ),
                 help: None,
                 orig_input: orig_data.to_string(),
-                orig_pos: f.clone().clone(),
+                orig_pos: f.clone(),
                 mac: self.clone(),
             });
         }
@@ -112,13 +111,13 @@ impl MacroContent {
           //
           //
           // macro expandation
-        let mut arg_map: HashMap<&String, &crate::TokenKind> = HashMap::new();
+        let mut arg_map: HashMap<String, crate::TokenKind> = HashMap::new();
         let mut count = 0;
         for element in argument_indices {
             // we no longer need to keep track of argument locations
             if let Some((v, _)) = toks.get(element) {
                 if let Some((_, l, _)) = self.parameters.get(count) {
-                    arg_map.insert(&l.name, v);
+                    arg_map.insert(l.name.to_string(), v.clone());
                     count += 1;
                 }
             }
@@ -129,8 +128,8 @@ impl MacroContent {
         let mut new_elems = Vec::new();
         for (element, span) in &self.body {
             if let TokenKind::MacroIdent(name) = element {
-                if let Some(v) = arg_map.get(&name) {
-                    new_elems.push((v.clone().clone(), span.clone()));
+                if let Some(v) = arg_map.get(name) {
+                    new_elems.push((v.clone(), span.clone()));
                     continue;
                 } else {
                     errs.push(MacroValidatorError {
@@ -150,7 +149,7 @@ impl MacroContent {
                 let mut ins_args = Vec::new();
                 for (thing, place) in &contents.operands {
                     if let InstructionArgument::MacroIdent(name) = thing {
-                        if let Some(v) = arg_map.get(&name) {
+                        if let Some(v) = arg_map.get(name) {
                             ins_args.push((v.to_tok_kind(), span.clone()));
                             continue;
                         } else {

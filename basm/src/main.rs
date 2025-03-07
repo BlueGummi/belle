@@ -47,8 +47,6 @@ fn main() {
     // Code should be valid when this point is reached
     // we can insert panics (maybe?) to reduce code
     let mut binary = Vec::new();
-    let mut ind = 0;
-    #[allow(clippy::explicit_counter_loop)]
     if toks.is_empty() {
         println!(
             "{}: {} appears empty",
@@ -56,7 +54,8 @@ fn main() {
             CONFIG.source.green()
         );
     }
-    for (fname, tok, span) in &toks {
+    let vecref = &toks;
+    for (ind, (fname, tok, span)) in vecref.iter().enumerate() {
         // we should only have instructions at this point
         match encode((fname, tok, span), fname, &toks.get(ind + 1)) {
             Ok(value) => {
@@ -93,7 +92,6 @@ fn main() {
                 error_count += 1;
             }
         }
-        ind += 1;
     }
     print_errc!(error_count);
     match &CONFIG.output {

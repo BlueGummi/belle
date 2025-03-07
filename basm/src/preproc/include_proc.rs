@@ -7,11 +7,10 @@ use std::ops::Range;
 pub fn process_includes(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_count: &mut i32) {
     loop {
         let mut included_toks = Vec::new();
-        let mut index = 0;
         let mut has_include = false;
 
         use crate::TokenKind::*;
-        for (fname, element, loc) in toks.iter() {
+        for (index, (fname, element, loc)) in toks.iter().enumerate() {
             if let IncludeFile(file_path) = element {
                 has_include = true;
                 if *file_path == *fname {
@@ -62,7 +61,6 @@ pub fn process_includes(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error
             } else {
                 included_toks.push((fname.to_string(), element.clone(), loc.clone()));
             }
-            index += 1;
         }
 
         *toks = included_toks;
