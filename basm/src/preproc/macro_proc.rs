@@ -8,13 +8,16 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
     for (index, (fname, element, span)) in toks.iter().enumerate() {
         if let Macro(data) = element {
             let mut mac_map = MACRO_MAP.lock().unwrap();
-            if let Some((found_name, found_data)) = mac_map.get(&data.name.0) {
+            if let Some((_, found_data)) = mac_map.get(&data.name.0) {
                 handle_core_error(
                     fname,
                     span,
                     error_count,
-                    &format!("duplicate declaration of macro {}", found_name.magenta()),
-                    Some(format!("{}", "╮".bright_red())),
+                    &format!(
+                        "duplicate declaration of macro {}",
+                        found_data.name.0.magenta()
+                    ),
+                    Some(format!("{} previous declaration here", "╮".bright_red())),
                 );
                 let (num, data) = highlight_range_in_file(
                     &found_data.file,
