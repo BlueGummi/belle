@@ -17,12 +17,18 @@ fn main() {
 
     let mut parser = match create_parser(file, &input_string, &mut error_count) {
         Some(parser) => parser,
-        None => std::process::exit(1),
+        None => {
+            print_errc!(error_count);
+            std::process::exit(1);
+        }
     };
 
     let mut toks = match parse_tokens(&mut parser, &input_string, &mut error_count) {
         Some(tokens) => tokens,
-        None => std::process::exit(1),
+        None => {
+            print_errc!(error_count);
+            std::process::exit(1);
+        }
     };
 
     process_includes(&mut toks, &mut error_count);
