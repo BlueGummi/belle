@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use std::ops::Range;
 
 impl MacroContent {
-    pub fn is_valid(
+    pub fn expand(
         &self,
+        default_span: &Range<usize>,
         err_file: &String,
         orig_data: &String,
         toks: &[(TokenKind, Range<usize>)], // incoming macro args
@@ -53,9 +54,9 @@ impl MacroContent {
             current_args.push((arg.arg_type.clone(), e));
         }
         let f = if let Some((_, s)) = toks.first() {
-            s.clone()
+            s
         } else {
-            0..0
+            default_span
         };
         if parsed_toks.len() != self.parameters.len() {
             let word = if self.parameters.len() == 1 {
