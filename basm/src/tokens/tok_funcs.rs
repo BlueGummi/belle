@@ -8,7 +8,7 @@ impl ArgumentType {
             "ireg" => Some(ArgumentType::Ireg),
             "imm" => Some(ArgumentType::Imm),
             "reg" => Some(ArgumentType::Reg),
-            "label" => Some(ArgumentType::Label),
+            "ident" | "label" => Some(ArgumentType::Label),
             _ => None,
         }
     }

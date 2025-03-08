@@ -160,7 +160,7 @@ impl fmt::Display for InstructionData {
     }
 }
 
-fn get_custom_format() -> format::TableFormat {
+pub fn get_custom_format() -> format::TableFormat {
     FormatBuilder::new()
         .column_separator('│')
         .borders('│')

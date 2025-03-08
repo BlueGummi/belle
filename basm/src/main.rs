@@ -100,6 +100,10 @@ fn main() {
         }
     }
     print_errc!(error_count);
+    if CONFIG.verbose {
+        print_msg!("SYMBOL TABLES");
+        print_symbol_tables();
+    }
     match &CONFIG.output {
         Some(path) => {
             let mut bytes: Vec<u8> = Vec::new();

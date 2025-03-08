@@ -2,7 +2,7 @@ use crate::*;
 use colored::*;
 use std::collections::HashMap;
 use std::ops::Range;
-
+type ExpandResult = Result<Vec<(String, TokenKind, Range<usize>)>, Vec<MacroValidatorError>>;
 impl MacroContent {
     pub fn expand(
         &self,
@@ -10,7 +10,7 @@ impl MacroContent {
         err_file: &String,
         orig_data: &String,
         toks: &[(TokenKind, Range<usize>)], // incoming macro args
-    ) -> Result<Vec<(TokenKind, Range<usize>)>, Vec<MacroValidatorError>> {
+    ) -> ExpandResult {
         // okay... here, I need to check first if the token types of the input
         // match the tokens inside of the macro.
         // what I can do, is I can iterate through the input tokens, and iterate through the arguments
@@ -111,7 +111,7 @@ impl MacroContent {
         } // don't try to expand it if we have problems
           //
           //
-          // macro expandation
+          // macro expandation   name       value
         let mut arg_map: HashMap<String, crate::TokenKind> = HashMap::new();
         let mut count = 0;
         for element in argument_indices {
@@ -130,7 +130,7 @@ impl MacroContent {
         for (element, span) in &self.body {
             if let TokenKind::MacroIdent(name) = element {
                 if let Some(v) = arg_map.get(name) {
-                    new_elems.push((v.clone(), span.clone()));
+                    new_elems.push((self.file.to_string(), v.clone(), span.clone()));
                     continue;
                 } else {
                     errs.push(MacroValidatorError {
@@ -188,10 +188,36 @@ impl MacroContent {
                         mac: self.clone(),
                     });
                 }
-                new_elems.push((TokenKind::Instruction(reconstruct), span.clone()));
+                new_elems.push((
+                    self.file.to_string(),
+                    TokenKind::Instruction(reconstruct),
+                    span.clone(),
+                ));
                 continue;
+            } else if let TokenKind::MacroLabel(label_name) = element {
+                if let Some(TokenKind::Ident(v)) = arg_map.get(label_name) {
+                    new_elems.push((
+                        self.file.to_string(),
+                        TokenKind::Label(v.to_string()),
+                        span.clone(),
+                    ));
+                    continue;
+                } else {
+                    errs.push(MacroValidatorError {
+                        err_file: self.file.to_string(),
+                        err_input: read_file(&self.file.to_string()),
+                        err_message: format!(
+                            "`{}` must be an identifier specified in macro arguments",
+                            label_name.magenta()
+                        ),
+                        help: None, // borrow checker is yappin
+                        orig_input: read_file(&self.file.to_string()),
+                        orig_pos: span.clone(),
+                        mac: self.clone(),
+                    });
+                }
             }
-            new_elems.push((element.clone(), span.clone()));
+            new_elems.push((self.file.to_string(), element.clone(), span.clone()));
         }
         if !errs.is_empty() {
             return Err(errs);

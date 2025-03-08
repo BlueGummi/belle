@@ -7,14 +7,16 @@ use std::ops::Range;
 use std::sync::Mutex;
 
 //                                 name    data
-type Table<T> = Lazy<Mutex<HashMap<String, T>>>;
+type SymbolTable<T> = Lazy<Mutex<HashMap<String, T>>>;
 // file      place     value
-pub static V_MAP: Table<(String, Range<usize>, i64)> = Lazy::new(|| Mutex::new(HashMap::new()));
+pub static V_MAP: SymbolTable<(String, Range<usize>, i64)> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 // file    place        value
-pub static LABEL_MAP: Table<(String, Range<usize>, usize)> =
+pub static LABEL_MAP: SymbolTable<(String, Range<usize>, usize)> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub static MACRO_MAP: Table<(String, MacroContent)> = Lazy::new(|| Mutex::new(HashMap::new()));
+pub static MACRO_MAP: SymbolTable<(String, MacroContent)> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static START_LOCATION: Lazy<Mutex<i64>> = Lazy::new(|| Mutex::new(100));
 
@@ -99,4 +101,69 @@ pub fn find_similar_entries(input: &str) -> (Option<String>, Vec<(String, Range<
     } else {
         (Some(messages.join(", ")), results)
     }
+}
+use prettytable::{row, Table};
+pub fn print_symbol_tables() {
+    let v_map = V_MAP.lock().unwrap();
+    let l_map = LABEL_MAP.lock().unwrap();
+    let m_map = MACRO_MAP.lock().unwrap();
+    print_hashmap("Constant map", &v_map);
+    print_hashmap("Label map", &l_map);
+    print_hashmap("Macro map", &m_map);
+}
+use crate::tok_print::get_custom_format;
+fn print_hashmap<K, V>(name: &str, map: &HashMap<K, V>)
+where
+    K: std::fmt::Debug,
+    V: std::fmt::Debug,
+{
+    let mut table = Table::new();
+    println!("Contents of {}:", name);
+    table.set_format(get_custom_format());
+    table.add_row(row!["Key", "Value"]);
+
+    for (key, value) in map {
+        let key_str = format!("{:?}", key);
+        let value_str = format!("{:?}", value);
+
+        let wrapped_key = wrap_text(&key_str, 80);
+        let wrapped_value = wrap_text(&value_str, 80);
+
+        let key_lines: Vec<&str> = wrapped_key.lines().collect();
+        let value_lines: Vec<&str> = wrapped_value.lines().collect();
+
+        let max_lines = key_lines.len().max(value_lines.len());
+
+        for i in 0..max_lines {
+            let k_line = key_lines.get(i).unwrap_or(&"");
+            let v_line = value_lines.get(i).unwrap_or(&"");
+            table.add_row(row![k_line, v_line]);
+        }
+    }
+
+    table.printstd();
+}
+
+fn wrap_text(text: &str, max_width: usize) -> String {
+    let mut wrapped = String::new();
+    let mut current_line = String::new();
+
+    for word in text.split_whitespace() {
+        if current_line.len() + word.len() + 1 > max_width {
+            wrapped.push_str(&current_line);
+            wrapped.push('\n');
+            current_line.clear();
+        }
+
+        if !current_line.is_empty() {
+            current_line.push(' ');
+        }
+        current_line.push_str(word);
+    }
+
+    if !current_line.is_empty() {
+        wrapped.push_str(&current_line);
+    }
+
+    wrapped
 }

@@ -51,7 +51,8 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
     let mut in_call = false;
     let mut curr_mac = None;
 
-    let mut expanded_loc_map: HashMap<usize, Vec<(TokenKind, Range<usize>)>> = HashMap::new();
+    let mut expanded_loc_map: HashMap<usize, Vec<(String, TokenKind, Range<usize>)>> =
+        HashMap::new();
     let mut expanded_indices = Vec::new();
 
     let mac_map = MACRO_MAP.lock().unwrap();
@@ -135,15 +136,8 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
         if expanded_indices.contains(&i) {
             let expanded = expanded_loc_map.get(&i).unwrap();
             for element in expanded.iter().rev() {
-                let (x, y) = element;
-                toks.insert(
-                    i,
-                    (
-                        String::from("NULL: EXPANDED FROM MACRO"),
-                        x.clone(),
-                        y.clone(),
-                    ),
-                );
+                let (z, x, y) = element;
+                toks.insert(i, (z.to_string(), x.clone(), y.clone()));
             }
         }
     }
