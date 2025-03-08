@@ -52,5 +52,6 @@ pub enum InstructionArgument {
 pub struct InstructionData {
     pub expanded: bool,
     pub name: String,
+    pub location: Range<usize>,
     pub operands: Vec<(InstructionArgument, Range<usize>)>,
 }

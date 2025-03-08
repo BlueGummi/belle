@@ -151,7 +151,7 @@ impl MacroContent {
                 for (thing, place) in &contents.operands {
                     if let InstructionArgument::MacroIdent(name) = thing {
                         if let Some(v) = arg_map.get(name) {
-                            ins_args.push((v.to_tok_kind(), span.clone()));
+                            ins_args.push((v.to_tok_kind(), place.clone()));
                             continue;
                         } else {
                             // we could make this a variable earlier and just send it
@@ -175,6 +175,7 @@ impl MacroContent {
                     expanded: true,
                     name: contents.name.to_string(),
                     operands: ins_args,
+                    location: span.clone(),
                 };
                 if let Err(e) = reconstruct.is_valid() {
                     errs.push(MacroValidatorError {

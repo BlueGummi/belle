@@ -81,6 +81,7 @@ impl Parser<'_> {
                             expanded: false,
                             name: name.to_string(),
                             operands: args.clone(),
+                            location: span.clone(),
                         };
                         if let Err(f) = ins.is_valid() {
                             let start = match f.0 {
@@ -108,6 +109,7 @@ impl Parser<'_> {
                                 expanded: false,
                                 name,
                                 operands: args,
+                                location: span.clone(),
                             })),
                             span,
                         ));
