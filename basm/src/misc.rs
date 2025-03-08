@@ -161,7 +161,7 @@ pub fn highlight_range_in_file(file_path: &str, range: &Range<usize>) -> (usize,
                     }
                 })
                 .collect();
-            return (line_number, colored_line);
+            return (line_number, colored_line.trim().to_string());
         }
         current_index += line_length + 1;
         line_number += 1;
