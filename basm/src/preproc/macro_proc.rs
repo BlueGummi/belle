@@ -13,10 +13,7 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
                     fname,
                     span,
                     error_count,
-                    &format!(
-                        "duplicate declaration of macro {}",
-                        found_data.name.0.magenta()
-                    ),
+                    &format!("macro `{}` was declared twice", found_data.name.0.magenta()),
                     Some(format!("{} previous declaration here", "╮".bright_red())),
                 );
                 let (num, data) = highlight_range_in_file(

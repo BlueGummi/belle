@@ -43,8 +43,6 @@ fn main() {
             println!("{f}");
         }
     }
-    let l_map = LABEL_MAP.lock().unwrap();
-    std::mem::drop(l_map);
     let toks: Vec<(String, TokenKind, Range<usize>)> = toks
         .clone()
         .into_iter()

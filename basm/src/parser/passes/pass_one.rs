@@ -220,7 +220,7 @@ fn check_vmap(
                 file: file.to_string(),
                 help: Some(format!("{} previous declaration here", "╮".bright_red())),
                 input: input.to_string(),
-                message: format!("constant {n} was declared twice"),
+                message: format!("constant `{}` was declared twice", n.magenta()),
                 start_pos: span.start,
                 last_pos: span.end,
             },
