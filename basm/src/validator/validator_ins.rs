@@ -1,8 +1,10 @@
 use crate::*;
 use colored::*;
 use std::ops::Range;
+
 type InsValidatorResult =
-    Result<(usize, bool, bool, bool, bool, usize), (Option<Range<usize>>, String)>;
+    Result<(usize, bool, bool, bool, bool, usize), (Option<Range<usize>>, String, Option<String>)>;
+
 impl InstructionData {
     pub fn valid_args(&self) -> InsValidatorResult {
         match self.name.to_lowercase().as_str() {
@@ -126,6 +128,7 @@ impl InstructionData {
                     "instruction {} does not exist",
                     self.name.to_uppercase().magenta()
                 ),
+                None,
             )),
         }
     }

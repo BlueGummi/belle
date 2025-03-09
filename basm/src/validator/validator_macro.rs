@@ -182,7 +182,7 @@ impl MacroContent {
                         err_file: self.file.to_string(),
                         err_input: read_file(&self.file.to_string()), // these are dup'd as it is
                         err_message: e.1,
-                        help: None,
+                        help: e.2,
                         orig_input: read_file(&self.file.to_string()), // these are dup'd as it is
                         // something in the macro
                         orig_pos: e.0.unwrap_or_else(|| span.clone()),

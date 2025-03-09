@@ -4,7 +4,7 @@ use std::ops::Range;
 
 impl InstructionData {
     // location         // msg
-    pub fn is_valid(&self) -> Result<(), (Option<Range<usize>>, String)> {
+    pub fn is_valid(&self) -> Result<(), (Option<Range<usize>>, String, Option<String>)> {
         // Ident is for matching labels - they will be memory addresses
         // registers are blue, addresses magenta, 'indirect' is underlined
         // 'imm' is green
@@ -89,83 +89,105 @@ impl InstructionData {
         } else {
             None
         };
+
+        let mut found_msgs = Vec::new();
+        if self.operands.len() != exp_argc {
+            found_msgs.push(format!(
+                "found {} operands",
+                self.operands.len().to_string().bold()
+            ));
+        }
+        if !ok_lhs && valid_lhs {
+            found_msgs.push(format!("LHS is {}", lhs_val));
+        }
+        if !ok_rhs && valid_rhs {
+            found_msgs.push(format!("RHS is {}", rhs_val));
+        }
+        if !valid_lhs {
+            found_msgs.push(format!("LHS is {}", lhs));
+        }
+        if !valid_rhs {
+            found_msgs.push(format!("RHS is {}", rhs));
+        }
+
+        let found_msg = if !found_msgs.is_empty() {
+            Some(found_msgs.join(", "))
+        } else {
+            None
+        };
+
         if self.operands.len() != exp_argc {
             return Err((
                 span,
                 format!(
-                    "{}: {} expected {} operands, found {} operands",
+                    "{}: {} expected {} operands",
                     "invalid operands".bold(),
                     self.name.to_uppercase().magenta(),
                     exp_argc.to_string().bold(),
-                    self.operands.len().to_string().bold()
                 ),
+                found_msg,
             ));
         }
+
         let ovfm = if !ok_lhs && !ok_rhs && valid_args {
             format!(
-                "{}: max LHS for {} is {}, max RHS is {}\n{}: found LHS and RHS values are {} and {} ",
-                "value overflow".bold(),
-                self.name.to_uppercase().magenta(),
-                lhs_maxes[ins_class], rhs_maxes[ins_class], "note".yellow(), lhs_val, rhs_val
-            )
-        } else if !ok_lhs && valid_args {
-            format!(
-                "{}: max LHS for {} is {}\n{}: found LHS is {} ",
+                "{}: max LHS for {} is {}, max RHS is {}",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
                 lhs_maxes[ins_class],
-                "note".yellow(),
-                lhs_val
+                rhs_maxes[ins_class]
+            )
+        } else if !ok_lhs && valid_args {
+            format!(
+                "{}: max LHS for {} is {}",
+                "value overflow".bold(),
+                self.name.to_uppercase().magenta(),
+                lhs_maxes[ins_class]
             )
         } else if !ok_rhs && valid_args {
             format!(
-                "{}: max RHS for {} is {}\n{}: found RHS is {} ",
+                "{}: max RHS for {} is {}",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
-                rhs_maxes[ins_class],
-                "note".yellow(),
-                rhs_val
+                rhs_maxes[ins_class]
             )
         } else {
             String::from("")
         };
+
         if !valid_lhs && !valid_rhs {
             Err((
                 span,
                 format!(
-                    "{}: expected {} LHS, {} RHS\n{}: found {} LHS and {} RHS\n\n{ovfm}",
+                    "{}: expected {} LHS, {} RHS",
                     "invalid operands".bold(),
                     lhs_detail[ins_class],
                     rhs_detail[ins_class],
-                    "note".yellow(),
-                    lhs,
-                    rhs,
                 ),
+                found_msg,
             ))
         } else if !valid_rhs {
             Err((
                 span,
                 format!(
-                    "{}: expected {} on RHS\n{}: found {} \n\n{ovfm}",
+                    "{}: expected {} on RHS",
                     "invalid operands".bold(),
                     rhs_detail[ins_class],
-                    "note".yellow(),
-                    rhs,
                 ),
+                found_msg,
             ))
         } else if !valid_lhs {
             Err((
                 span,
                 format!(
-                    "{}: expected {} on LHS\n{}: found {}\n\n{ovfm}",
+                    "{}: expected {} on LHS",
                     "invalid operands".bold(),
                     lhs_detail[ins_class],
-                    "note".yellow(),
-                    lhs,
                 ),
+                found_msg,
             ))
         } else {
-            Err((span, ovfm))
+            Err((span, ovfm, found_msg))
         }
     }
 }

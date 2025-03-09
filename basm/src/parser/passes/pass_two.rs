@@ -95,7 +95,7 @@ impl Parser<'_> {
                             errors.push((
                                 ParserError {
                                     file: self.file.to_string(),
-                                    help: None,
+                                    help: f.2,
                                     input: self.input.to_string(),
                                     message: f.1.to_string(),
                                     start_pos: start,
