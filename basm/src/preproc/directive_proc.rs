@@ -192,7 +192,7 @@ fn process_directives(
                 }
             },
             Instruction(_) => loc_counter += 1,
-            Newline => (),
+            Newline | LeftBrace | RightBrace => (),
             _ => {
                 handle_core_error(
                     &fname,

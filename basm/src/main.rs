@@ -47,7 +47,7 @@ fn main() {
                 block.push_str(&input_string);
 
                 loop {
-                    print!("... ");
+                    print!(".... ");
                     io::stdout().flush().unwrap();
 
                     input_string.clear();
