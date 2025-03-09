@@ -36,8 +36,9 @@ impl Parser<'_> {
 
                 Ok(TokenKind::Ident(name)) => {
                     let mut has_colon = false;
-                    let mut peek_iter = token_iter.clone();
-                    while let Some((peek_token, _)) = peek_iter.peek() {
+                    let peek_iter: Vec<_> = token_iter.by_ref().collect();
+                    let mut ind = 0;
+                    while let Some((peek_token, _)) = peek_iter.get(ind) {
                         match peek_token {
                             Ok(TokenKind::Newline) => break,
                             Ok(TokenKind::Label(_)) => {
@@ -49,10 +50,11 @@ impl Parser<'_> {
                                 break;
                             }
                             _ => {
-                                peek_iter.next();
+                                ind += 1;
                             }
                         }
                     }
+                    token_iter = peek_iter.into_iter().peekable();
 
                     if has_colon {
                         new_tokens.push((Ok(TokenKind::Ident(name)), span));
