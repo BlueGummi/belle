@@ -67,7 +67,6 @@ pub fn process_start(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_co
         }
     }
     *toks = new_toks;
-    print_errc!(*error_count);
 }
 
 fn process_directives(
@@ -206,5 +205,4 @@ fn process_directives(
             }
         }
     }
-    print_errc!(*error_count);
 }

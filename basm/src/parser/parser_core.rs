@@ -140,7 +140,7 @@ pub fn parse_tokens(
         Err(errors) => {
             for error in errors {
                 *error_count += 1;
-                println!("{error}\n");
+                println!("{error}");
             }
             None
         }

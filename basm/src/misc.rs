@@ -168,3 +168,27 @@ pub fn highlight_range_in_file(file_path: &str, range: &Range<usize>) -> (usize,
     }
     panic!("Failed to highlight_range_in_file");
 }
+
+use std::fs::{self, File};
+use std::io;
+use std::path::PathBuf;
+
+pub struct TempFile {
+    pub path: PathBuf,
+}
+
+impl TempFile {
+    pub fn new() -> io::Result<Self> {
+        let path = PathBuf::from("stdin");
+        let _ = File::create(&path)?;
+        Ok(TempFile { path })
+    }
+}
+
+impl Drop for TempFile {
+    fn drop(&mut self) {
+        if let Err(e) = fs::remove_file(&self.path) {
+            eprintln!("Failed to delete temporary file: {}", e);
+        }
+    }
+}

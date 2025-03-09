@@ -1,5 +1,5 @@
 use clap::Parser;
-pub use once_cell::sync::Lazy;
+use once_cell::sync::Lazy;
 
 pub static CONFIG: Lazy<Args> = Lazy::new(declare_config);
 
@@ -14,9 +14,9 @@ pub struct Args {
     #[clap(short = 'o', long)]
     pub output: Option<String>,
 
-    /// Source code
-    #[clap(required = true)]
-    pub source: String,
+    /// Source code (required unless in REPL mode)
+    #[clap(required_unless_present = "repl")]
+    pub source: Option<String>,
 
     /// Verbose output
     #[clap(short = 'v', long, default_value_t = false)]
@@ -26,6 +26,10 @@ pub struct Args {
     /// (may cause unexpected behavior in emulator and disassembler)
     #[clap(short = 't', long, default_value_t = false, verbatim_doc_comment)]
     pub thin: bool,
+
+    /// REPL mode
+    #[clap(short = 'r', long, default_value_t = false, verbatim_doc_comment)]
+    pub repl: bool,
 }
 
 pub fn declare_config() -> Args {
@@ -38,5 +42,6 @@ pub fn declare_config() -> Args {
         output: Some(output),
         verbose: cli.verbose,
         thin: cli.thin,
+        repl: cli.repl,
     }
 }

@@ -103,14 +103,14 @@ impl InstructionData {
         }
         let ovfm = if !ok_lhs && !ok_rhs && valid_args {
             format!(
-                "{}: max LHS for {} is {}, max RHS is {}\n{}: found LHS and RHS values are {} and {}\n ",
+                "{}: max LHS for {} is {}, max RHS is {}\n{}: found LHS and RHS values are {} and {} ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
                 lhs_maxes[ins_class], rhs_maxes[ins_class], "note".yellow(), lhs_val, rhs_val
             )
         } else if !ok_lhs && valid_args {
             format!(
-                "{}: max LHS for {} is {}\n{}: found LHS is {}\n ",
+                "{}: max LHS for {} is {}\n{}: found LHS is {} ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
                 lhs_maxes[ins_class],
@@ -119,7 +119,7 @@ impl InstructionData {
             )
         } else if !ok_rhs && valid_args {
             format!(
-                "{}: max RHS for {} is {}\n{}: found RHS is {}\n ",
+                "{}: max RHS for {} is {}\n{}: found RHS is {} ",
                 "value overflow".bold(),
                 self.name.to_uppercase().magenta(),
                 rhs_maxes[ins_class],

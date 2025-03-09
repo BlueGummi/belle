@@ -68,7 +68,6 @@ pub fn process_includes(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error
             break;
         }
     }
-    print_errc!(*error_count);
 }
 
 pub fn read_file(file_path: &str) -> String {

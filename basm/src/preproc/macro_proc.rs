@@ -115,7 +115,7 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
                     }
                     Err(errors) => {
                         for e in errors {
-                            println!("{e}\n");
+                            println!("{e}");
                             *error_count += 1;
                         }
                     }
@@ -154,6 +154,5 @@ pub fn process_macros(toks: &mut Vec<(String, TokenKind, Range<usize>)>, error_c
             _ => new_tokens.push((f, v, s)),
         }
     }
-    print_errc!(*error_count);
     *toks = new_tokens;
 }
