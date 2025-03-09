@@ -13,6 +13,7 @@ fn main() {
         println!("Welcome to the basm-REPL!");
         let prompt = "repl> ".green();
         let mut input_string = String::new();
+        let mut fullstr = String::new();
 
         let temp_file = Arc::new(Mutex::new(Some(
             TempFile::new().expect("Failed to create temporary file"),
@@ -72,8 +73,9 @@ fn main() {
                 }
             };
 
+            fullstr.extend(input_string.chars());
             let mut file = File::create(&temp_path).expect("Failed to open temporary file");
-            file.write_all(input_string.as_bytes())
+            file.write_all(fullstr.as_bytes())
                 .expect("Failed to write to temporary file");
 
             let mut error_count = 0;
