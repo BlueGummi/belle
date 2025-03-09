@@ -3,6 +3,7 @@ use colored::*;
 use std::fs::File;
 use std::io::{self, Write};
 use std::ops::Range;
+use std::sync::{Arc, Mutex};
 
 fn main() {
     let file = &CONFIG.source.clone().unwrap_or_else(|| "stdin".to_string());
@@ -13,7 +14,21 @@ fn main() {
         let prompt = "repl> ".green();
         let mut input_string = String::new();
 
-        let temp_file = TempFile::new().expect("Failed to create temporary file");
+        let temp_file = Arc::new(Mutex::new(Some(
+            TempFile::new().expect("Failed to create temporary file"),
+        )));
+
+        {
+            let temp_file = Arc::clone(&temp_file);
+            ctrlc::set_handler(move || {
+                if let Some(temp) = temp_file.lock().unwrap().take() {
+                    drop(temp);
+                }
+                println!("\nExiting...");
+                std::process::exit(0);
+            })
+            .expect("Error setting Ctrl-C handler");
+        }
 
         loop {
             print!("{prompt}");
@@ -27,30 +42,37 @@ fn main() {
                 continue;
             }
 
-            // Check if the line ends with '{'
             if command.ends_with('{') {
                 let mut block = String::new();
-                block.push_str(&input_string); // Add the initial line
+                block.push_str(&input_string);
 
-                // Enter a nested loop to read until '}' is found
                 loop {
-                    print!("... "); // Different prompt for continuation
+                    print!("... ");
                     io::stdout().flush().unwrap();
 
                     input_string.clear();
                     io::stdin().read_line(&mut input_string).unwrap();
-                    block.push_str(&input_string); // Append the new line
+                    block.push_str(&input_string);
 
                     if input_string.trim().ends_with('}') {
-                        break; // Exit the nested loop when '}' is found
+                        break;
                     }
                 }
 
-                // Use the collected block as the input
                 input_string = block;
             }
 
-            let mut file = File::create(&temp_file.path).expect("Failed to open temporary file");
+            let temp_path = {
+                let temp_file_guard = temp_file.lock().unwrap();
+                if let Some(ref temp) = *temp_file_guard {
+                    temp.path.to_owned()
+                } else {
+                    eprintln!("Error: Temporary file has been deleted.");
+                    break;
+                }
+            };
+
+            let mut file = File::create(&temp_path).expect("Failed to open temporary file");
             file.write_all(input_string.as_bytes())
                 .expect("Failed to write to temporary file");
 
@@ -132,6 +154,7 @@ fn main() {
             }
         }
     }
+
     let input_string = read_file(&CONFIG.source.clone().unwrap_or_else(|| "stdin".to_string()));
 
     let mut error_count = 0;

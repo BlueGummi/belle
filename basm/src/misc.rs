@@ -183,6 +183,10 @@ impl TempFile {
         let _ = File::create(&path)?;
         Ok(TempFile { path })
     }
+
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
+    }
 }
 
 impl Drop for TempFile {
