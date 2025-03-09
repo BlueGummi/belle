@@ -11,10 +11,10 @@ fn main() {
 
     if CONFIG.repl {
         println!("Welcome to the basm-REPL!");
-        let prompt = "repl> ".green();
+        let prompt = "repl".green();
         let mut input_string = String::new();
         let mut fullstr = String::new();
-
+        let mut indicator = ">".green();
         let temp_file = Arc::new(Mutex::new(Some(
             TempFile::new().expect("Failed to create temporary file"),
         )));
@@ -32,7 +32,7 @@ fn main() {
         }
 
         loop {
-            print!("{prompt}");
+            print!("{prompt}{} ", indicator);
             io::stdout().flush().unwrap();
 
             input_string.clear();
@@ -40,6 +40,7 @@ fn main() {
             let command = input_string.trim();
 
             if command.is_empty() {
+                indicator = ">".green();
                 continue;
             }
 
@@ -86,6 +87,7 @@ fn main() {
             let mut parser = match create_parser(fname, &input_string, &mut error_count) {
                 Some(parser) => parser,
                 None => {
+                    indicator = "x".red();
                     continue;
                 }
             };
@@ -93,6 +95,7 @@ fn main() {
             let mut toks = match parse_tokens(&mut parser, &input_string, &mut error_count) {
                 Some(tokens) => tokens,
                 None => {
+                    indicator = "x".red();
                     continue;
                 }
             };
@@ -102,6 +105,7 @@ fn main() {
             process_start(&mut toks, &mut error_count);
 
             if error_count > 0 {
+                indicator = "x".red();
                 continue;
             }
 
@@ -151,12 +155,14 @@ fn main() {
             }
 
             if error_count > 0 {
+                indicator = "x".red();
                 continue;
             }
 
             for byte in &binary {
                 println!("{:016b}", byte);
             }
+            indicator = ">".green();
         }
     }
 
