@@ -103,6 +103,23 @@ impl Parser<'_> {
                                 },
                                 false,
                             ));
+                            return Err(errors);
+                        }
+                        if args.len() > 3 {
+                            errors.push((
+                                ParserError {
+                                    file: self.file.to_string(),
+                                    help: None,
+                                    input: self.input.to_string(),
+                                    message: format!(
+                                        "instructions cannot have {} arguments",
+                                        args.len()
+                                    ),
+                                    start_pos: span.start,
+                                    last_pos: span.end,
+                                },
+                                false,
+                            ));
                         }
                         new_tokens.push((
                             Ok(TokenKind::Instruction(InstructionData {

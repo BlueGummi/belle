@@ -85,7 +85,7 @@ pub fn read_file(file_path: &str) -> String {
 
     let mut contents = String::new();
     match file_data.read_to_string(&mut contents) {
-        Ok(_) => contents,
+        Ok(_) => return contents,
         Err(e) => {
             println!(
                 "{}: cannot read file \"{}\": {e}",

@@ -126,6 +126,7 @@ pub fn print_err_and_line(
                     "note".yellow()
                 )?;
             }
+            break;
         }
     }
     Ok(())
