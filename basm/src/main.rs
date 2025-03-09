@@ -77,7 +77,7 @@ fn main() {
                 print_symbol_tables();
                 continue;
             }
-            fullstr.extend(input_string.chars());
+            fullstr.push_str(&input_string);
             let mut file = File::create(&temp_path).expect("Failed to open temporary file");
             file.write_all(fullstr.as_bytes())
                 .expect("Failed to write to temporary file");

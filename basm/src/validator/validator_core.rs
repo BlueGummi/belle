@@ -1,10 +1,10 @@
 use crate::*;
 use colored::*;
 use std::ops::Range;
-
+type ValidatorResult = Result<(), (Option<Range<usize>>, String, Option<String>)>;
 impl InstructionData {
     // location         // msg
-    pub fn is_valid(&self) -> Result<(), (Option<Range<usize>>, String, Option<String>)> {
+    pub fn is_valid(&self) -> ValidatorResult {
         // Ident is for matching labels - they will be memory addresses
         // registers are blue, addresses magenta, 'indirect' is underlined
         // 'imm' is green
