@@ -20,6 +20,8 @@ start:
     push r4 ; push initial Fibonacci values onto call stack
     lea r0, msg_end
     lea r1, start
+    int 8
+    int 40
     mov r0, 23
     cmp r0, 1
     bz early_exit

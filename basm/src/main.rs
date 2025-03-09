@@ -72,7 +72,10 @@ fn main() {
                     break;
                 }
             };
-
+            if input_string.trim() == ":st" {
+                print_symbol_tables();
+                continue;
+            }
             fullstr.extend(input_string.chars());
             let mut file = File::create(&temp_path).expect("Failed to open temporary file");
             file.write_all(fullstr.as_bytes())
