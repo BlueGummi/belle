@@ -7,9 +7,11 @@ impl Parser<'_> {
         tokens: Vec<(Result<TokenKind, ()>, Range<usize>)>,
     ) -> PassResult {
         let mut new_tokens = Vec::new();
-        let mut token_iter = tokens.into_iter().peekable();
+        let mut token_iter = tokens.clone().into_iter().peekable();
         let mut errors = Vec::new();
+        let mut iter_count = 0;
         while let Some((token, span)) = token_iter.next() {
+            iter_count += 1;
             match token {
                 Ok(TokenKind::MacroCall(m)) => {
                     // macro calls are not instructions
@@ -23,6 +25,7 @@ impl Parser<'_> {
                             Some((Ok(TokenKind::Ident(ident)), span)) => {
                                 if let Some((Ok(TokenKind::Colon), _)) = token_iter.peek() {
                                     let (_, _) = token_iter.next().unwrap();
+                                    iter_count += 1;
                                     new_tokens.push((Ok(TokenKind::Label(ident)), span));
                                 } else {
                                     new_tokens.push((Ok(TokenKind::Ident(ident)), span));
@@ -31,14 +34,14 @@ impl Parser<'_> {
                             Some(v) => new_tokens.push(v),
                             _ => break 'mdl,
                         }
+                        iter_count += 1;
                     }
                 }
 
                 Ok(TokenKind::Ident(name)) => {
                     let mut has_colon = false;
-                    let peek_iter: Vec<_> = token_iter.by_ref().collect();
-                    let mut ind = 0;
-                    while let Some((peek_token, _)) = peek_iter.get(ind) {
+                    let mut ind = iter_count;
+                    while let Some((peek_token, _)) = tokens.get(ind) {
                         match peek_token {
                             Ok(TokenKind::Newline) => break,
                             Ok(TokenKind::Label(_)) => {
@@ -54,7 +57,6 @@ impl Parser<'_> {
                             }
                         }
                     }
-                    token_iter = peek_iter.into_iter().peekable();
 
                     if has_colon {
                         new_tokens.push((Ok(TokenKind::Ident(name)), span));
@@ -64,6 +66,7 @@ impl Parser<'_> {
                             match token {
                                 Ok(TokenKind::Comma) => {
                                     token_iter.next();
+                                    iter_count += 1;
                                 }
                                 Ok(TokenKind::Newline) => {
                                     break;
@@ -73,9 +76,11 @@ impl Parser<'_> {
                                         args.push((v, loc.clone()));
                                     }
                                     token_iter.next();
+                                    iter_count += 1;
                                 }
                                 _ => {
                                     token_iter.next();
+                                    iter_count += 1;
                                 }
                             }
                         }
