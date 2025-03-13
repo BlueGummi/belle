@@ -48,8 +48,6 @@ void *process_instructions(void *arg, char *filename) {
             case RET_OP:
                 if (instruction >> 12 == RET_OP && (instruction & 0xfff) == 0)
                     break;
-                if (((instruction >> 11) & 1) == 1)
-                    break;
                 Jump jump_data;
                 jump_data.source = current_addr;
                 jump_data.destination = instruction & 0x7ff;
