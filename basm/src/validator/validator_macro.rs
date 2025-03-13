@@ -34,7 +34,7 @@ impl MacroContent {
                 _ => {
                     errs.push(MacroValidatorError {
                         err_file: err_file.to_string(),
-                        err_input: self.full_data.to_string(),
+                        err_input: read_file(err_file),
                         err_message: format!("a {token} is not a valid macro argument"),
                         help: None,
                         orig_input: orig_data.to_string(),
@@ -66,7 +66,7 @@ impl MacroContent {
             };
             errs.push(MacroValidatorError {
                 err_file: err_file.to_string(),
-                err_input: self.full_data.to_string(),
+                err_input: read_file(err_file),
                 err_message: format!(
                     "expected {} {word}, found {}",
                     self.parameters.len(),
@@ -85,7 +85,7 @@ impl MacroContent {
                 } else {
                     errs.push(MacroValidatorError {
                         err_file: err_file.to_string(),
-                        err_input: self.full_data.to_string(),
+                        err_input: read_file(err_file),
                         err_message: format!("expected {}, found {d}", arg.arg_type),
                         help: None,
                         orig_input: orig_data.to_string(), // this shouldn't panic
@@ -97,7 +97,7 @@ impl MacroContent {
             } else {
                 errs.push(MacroValidatorError {
                     err_file: err_file.to_string(),
-                    err_input: self.full_data.to_string(),
+                    err_input: read_file(err_file),
                     err_message: String::from("an incorrect number of arguments were supplied"),
                     help: None, // borrow checker is yappin
                     orig_input: orig_data.to_string(),
