@@ -55,7 +55,7 @@ pub fn parse_primary(
                         file: file.to_string(),
                         help: None,
                         input: input.to_string(),
-                        message: format!("constant with name {val} not found"),
+                        message: format!("constant with name `{val}` not found"),
                         start_pos: last_loc.start,
                         last_pos: last_loc.end,
                     })
