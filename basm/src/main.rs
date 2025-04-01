@@ -11,7 +11,7 @@ fn main() {
 
     if CONFIG.repl {
         println!("Welcome to the basm-REPL!");
-        let prompt = "repl".green();
+        let prompt = "in".green();
         let mut input_string = String::new();
         let mut fullstr = String::new();
         let mut indicator = ">".green();
@@ -159,8 +159,14 @@ fn main() {
                 continue;
             }
 
+            if binary.is_empty() {
+                println!(
+                    "{}: input was valid but no binary was created",
+                    "note".bright_yellow()
+                );
+            }
             for byte in &binary {
-                println!("{:016b}", byte);
+                println!("{}: {:016b}", "out".bright_green(), byte);
             }
             indicator = ">".green();
         }

@@ -17,6 +17,7 @@ impl Parser<'_> {
                     // macro calls are not instructions
                     new_tokens.push((Ok(TokenKind::MacroCall(m)), span));
                     'mdl: loop {
+                        iter_count += 1;
                         match token_iter.next() {
                             Some((Ok(TokenKind::Newline), l)) => {
                                 new_tokens.push((Ok(TokenKind::Newline), l));
@@ -34,13 +35,15 @@ impl Parser<'_> {
                             Some(v) => new_tokens.push(v),
                             _ => break 'mdl,
                         }
-                        iter_count += 1;
                     }
                 }
 
                 Ok(TokenKind::Ident(name)) => {
                     let mut has_colon = false;
                     let mut ind = iter_count;
+                    if let Some((Ok(TokenKind::MacroDef(_)), _)) = tokens.get(ind - 1) {
+                        has_colon = true;
+                    }
                     while let Some((peek_token, _)) = tokens.get(ind) {
                         match peek_token {
                             Ok(TokenKind::Newline) => break,
@@ -112,22 +115,7 @@ impl Parser<'_> {
                             ));
                             return Err(errors);
                         }
-                        if args.len() > 3 {
-                            errors.push((
-                                ParserError {
-                                    file: self.file.to_string(),
-                                    help: None,
-                                    input: self.input.to_string(),
-                                    message: format!(
-                                        "instructions cannot have {} arguments",
-                                        args.len()
-                                    ),
-                                    start_pos: span.start,
-                                    last_pos: span.end,
-                                },
-                                false,
-                            ));
-                        }
+
                         new_tokens.push((
                             Ok(TokenKind::Instruction(InstructionData {
                                 expanded: false,

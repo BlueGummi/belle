@@ -1,4 +1,5 @@
 use crate::*;
+use colored::*;
 use prettytable::format::{FormatBuilder, LinePosition, LineSeparator};
 use prettytable::{format, row, Table};
 use std::fmt;
@@ -39,26 +40,26 @@ impl fmt::Display for TokenKind {
             TokenKind::PipePipe => write!(f, "double pipe"),
             TokenKind::Xor => write!(f, "caret"),
             TokenKind::Colon => write!(f, "colon"),
-            TokenKind::Register(value) => write!(f, "register {} ", value),
-            TokenKind::StringLit(value) => write!(f, "string literal `\"{}\"`", value),
-            TokenKind::IntLit(value) => write!(f, "integer literal `{}`", value),
-            TokenKind::MacroDef(value) => write!(f, "macro definition `{}`", value),
-            TokenKind::Constant(value) => write!(f, "constant `{}`", value),
-            TokenKind::Ident(value) => write!(f, "identifier `{}`", value),
-            TokenKind::Directive(value) => write!(f, "directive `{}`", value),
-            TokenKind::MacroIdent(value) => write!(f, "macro identifier `{}`", value),
-            TokenKind::MacroLabel(value) => write!(f, "macro label `{}`", value),
+            TokenKind::Register(value) => write!(f, "register `{}` ", value.to_string().bold()),
+            TokenKind::StringLit(value) => write!(f, "string literal `\"{}\"`", value.bold()),
+            TokenKind::IntLit(value) => write!(f, "integer literal `{}`", value.to_string().bold()),
+            TokenKind::MacroDef(value) => write!(f, "macro definition `{}`", value.bold()),
+            TokenKind::Constant(value) => write!(f, "constant `{}`", value.bold()),
+            TokenKind::Ident(value) => write!(f, "identifier `{}`", value.bold()),
+            TokenKind::Directive(value) => write!(f, "directive `{}`", value.bold()),
+            TokenKind::MacroIdent(value) => write!(f, "macro identifier `{}`", value.bold()),
+            TokenKind::MacroLabel(value) => write!(f, "macro label `{}`", value.bold()),
             TokenKind::Comment => write!(f, "comment"),
             TokenKind::MultiLineComment => write!(f, "comment"),
             TokenKind::Macro(content) => write!(f, "{}", content),
             TokenKind::Instruction(data) => write!(f, "{}", data),
-            TokenKind::Label(value) => write!(f, "label `{}`", value),
-            TokenKind::Mem(token) => write!(f, "memory address\n{}", token),
-            TokenKind::IIdent(value) => write!(f, "indirect identifier `{}`", value),
-            TokenKind::IReg(value) => write!(f, "indirect register `{}`", value),
-            TokenKind::Imm(value) => write!(f, "immediate value `{}`", value),
-            TokenKind::Expr(value) => write!(f, "expression value `{}`", value),
-            TokenKind::MacroCall(name) => write!(f, "macro call `{name}`"),
+            TokenKind::Label(value) => write!(f, "label `{}`", value.bold()),
+            TokenKind::Mem(token) => write!(f, "memory address\n{}", token.to_string().bold()),
+            TokenKind::IIdent(value) => write!(f, "indirect identifier `{}`", value.bold()),
+            TokenKind::IReg(value) => write!(f, "indirect register `{}`", value.to_string().bold()),
+            TokenKind::Imm(value) => write!(f, "immediate value `{}`", value.to_string().bold()),
+            TokenKind::Expr(value) => write!(f, "expression value `{}`", value.to_string().bold()),
+            TokenKind::MacroCall(name) => write!(f, "call to macro `{}`", name.bold()),
             TokenKind::CarriageReturn => write!(f, "carriage return"),
         }
     }
