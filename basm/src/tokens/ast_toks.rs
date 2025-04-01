@@ -14,7 +14,6 @@ impl MemAddr {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct MacroContent {
-    pub full_data: String,
     pub file: String,
     pub name: (String, Range<usize>),
     pub parameters: Vec<(String, FullArgument, Range<usize>)>,
