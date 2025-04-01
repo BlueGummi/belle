@@ -132,7 +132,6 @@ impl Parser<'_> {
                 tokens.push((
                     self.file.to_string(),
                     TokenKind::Macro(MacroContent {
-                        full_data: self.input.to_string(),
                         file: self.file.to_string(),
                         name: name.clone(),
                         parameters: args,
